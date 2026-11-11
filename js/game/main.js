@@ -772,7 +772,13 @@ class Game {
     const from = this.maya.root.getWorldPosition(new THREE.Vector3());
     const exit = this.car.exitPoint ? this.car.root.localToWorld(this.car.exitPoint.clone()) : from.clone().add(new THREE.Vector3(1, 0, 0));
     exit.y = 0;
+    // attach() keeps her world pose, but for headings past 90 degrees three.js stores it as
+    // Euler (PI, PI - h, PI); turning rotation.y from there mirrors her, so she walks backwards.
+    // Re-store it as a plain yaw.
+    const yaw = this.mayaHeading();
     this.world.scene.attach(this.maya.root);
+    this.maya.root.rotation.set(0, yaw, 0);
+    this.maya.root.position.copy(from);
     const T = this.maya.hopTiming || { takeoff: 0.2, land: 0.7 };
     const done = call(this.maya, 'emote', 'hopOut'); // switches her to 'stand' on landing
     call(this.audio, 'play', 'pop');
