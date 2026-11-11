@@ -227,7 +227,7 @@ function shade(hex, k) {
   return s;
 }
 const LAVENDER = '#B9A3D6';
-const PADAUK = ['#F2C14E', '#E8A93A', '#F7D774'];
+const PADAUK = ['#7DAA62', '#5E8F4C', '#8DB86E']; // canopy greens (the gold blossoms read as stray orange pixels)
 
 function benchBuilder() {
   const b = new VoxelBuilder();
@@ -351,7 +351,6 @@ function padaukBuilder() {
   b.box(0.1, 2.05, 0, 1.7, 0.5, 1.6, PALETTE.leaf);
   const g = [[0, 2.42, 0, 1.3, 0.42, 1.2, 0], [0.62, 2.22, 0.5, 0.6, 0.4, 0.6, 1], [-0.7, 2.18, 0.35, 0.62, 0.4, 0.56, 2], [-0.45, 2.3, -0.55, 0.6, 0.4, 0.6, 1], [0.55, 2.3, -0.5, 0.56, 0.38, 0.56, 0], [0.15, 2.74, 0.1, 0.74, 0.3, 0.7, 2], [-0.95, 1.86, 0.55, 0.4, 0.34, 0.4, 0], [0.98, 1.84, -0.1, 0.4, 0.34, 0.4, 2], [0.2, 1.9, 0.9, 0.46, 0.36, 0.34, 1]];
   for (const [x, y, z, w, h, d, c] of g) b.box(x, y, z, w, h, d, PADAUK[c]);
-  for (const [x, z] of [[0.7, 0.9], [-0.9, -0.6], [1.1, -0.7], [-0.4, 1.1], [0.2, -1.0]]) b.box(x, 0.012, z, 0.14, 0.02, 0.14, PADAUK[(x * 10) & 1 ? 0 : 2]);
   return b;
 }
 /** Slim cypress: stacked dark columns with lighter sunny faces. */
