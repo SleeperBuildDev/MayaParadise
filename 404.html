@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="my">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Maya's Creations</title>
+<script>
+  // Works both on www.writermaya.com and on <name>.github.io/<repo>/ (before the domain moves).
+  var BASE = /\.github\.io$/.test(location.hostname) ? '/' + location.pathname.split('/')[1] + '/' : '/';
+  // Old Google Sites addresses -> the matching place on the new site.
+  (function () {
+    var p = location.pathname.replace(/\/+$/, '');
+    var map = { 'products-and-services': 'templates', 'content-copy-writing-service': 'content', 'script-writing-service': 'scripts', 'contact': 'contact', 'mayas-creations': 'about' };
+    var last = p.split('/').pop();
+    if (/mayas-creations/.test(p) && map[last]) location.replace(BASE + '#' + map[last]);
+  })();
+  document.write('<link rel="icon" href="' + BASE + 'img/favicon-48.png" type="image/png">' +
+    '<style>@font-face{font-family:"Noto Sans Myanmar";src:url("' + BASE + 'fonts/noto-sans-myanmar-700.woff2") format("woff2");font-weight:700;font-display:swap}</style>');
+</script>
+<style>
+  body { margin: 0; min-height: 100svh; display: grid; place-items: center; background: #EDE6D3; color: #2A2118; font: 700 18px/1.8 "Noto Sans Myanmar", system-ui, sans-serif; text-align: center; padding: 20px; box-sizing: border-box; }
+  a { display: inline-block; margin-top: 12px; padding: 12px 22px; border-radius: 999px; background: #6E1F2A; color: #fff; text-decoration: none; }
+</style>
+</head>
+<body>
+  <div>
+    <p>ဒီစာမျက်နှာကို မတွေ့ပါဘူးရှင့်။<br><small>Page not found.</small></p>
+    <a id="home" href="/">မာရာ့ ကမ္ဘာကို ပြန်သွားမယ် · Home</a>
+  </div>
+  <script>document.getElementById('home').href = BASE;</script>
+</body>
+</html>

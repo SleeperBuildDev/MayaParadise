@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="my">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>interior viewer</title>
+<link rel="stylesheet" href="dev.css">
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="stats"></div>
+<script type="module">
+// Usage: dev/interior.html?id=templates[&t=2][&fit=1][&tilt=52][&maya=x,z]
+// Loads js/game/interiors/<id>.js and calls its buildInterior(). id=demo builds a kit demo room.
+import * as THREE from '../js/game/three.js';
+import { fontsReady, PALETTE, toon, addOutline, blobShadow } from '../js/game/toon.js';
+import { VoxelBuilder } from '../js/game/voxel.js';
+import * as kit from '../js/game/interiors/kit.js';
+import { startDevView } from './devview.js';
+
+await fontsReady();
+const params = new URLSearchParams(location.search);
+const id = params.get('id') || 'demo';
+let interior;
+if (id === 'demo') {
+  const room = kit.createRoom({ width: 7, depth: 8, windows: [{ x: -1.6, y: 1.8 }, { x: 1.6, y: 1.8 }] });
+  room.place(kit.shelf({ w: 1.8 }), -2.2, -3.6);
+  room.place(kit.desk(), 1.8, -3.3);
+  room.place(kit.chair(), 1.6, -2.6, Math.PI);
+  room.place(kit.plant(), 3.0, -3.5);
+  room.place(kit.pedestal(), -1.6, 0.2);
+  room.place(kit.counter({ w: 2.0 }), 1.6, 0.6);
+  room.place(kit.rug({ w: 2.6, d: 1.8 }), 0, -1.2, 0, { solid: false });
+  room.place(kit.lamp(), -3.0, -2.2);
+  room.place(kit.flowers(), 2.2, 0.6 + 0.0).position.y = 1.0;
+  room.mount(kit.poster([{ text: 'Template ဆိုင်', size: 110 }, { text: 'Script Writing Templates', size: 64, font: '"Cormorant Garamond", serif', weight: 600, color: PALETTE.goldDeep }], { w: 2.4, h: 0.9 }), 'back', 0, 2.3);
+  room.addStation({ id: 'tpl-short', x: -1.6, z: 1.1, look: { x: -1.6, z: 0.2 } });
+  room.addStation({ id: 'tpl-creator', x: 1.6, z: 1.5, look: { x: 1.6, z: 0.6 } });
+  room.bake();
+  interior = { ...room, id: 'demo' };
+} else {
+  const mod = await import(`../js/game/interiors/${id}.js`);
+  interior = await mod.buildInterior({});
+}
+
+// Stand-in Maya (the real character comes from js/game/actors/maya.js).
+const v = new VoxelBuilder();
+v.box(-0.09, 0.22, 0, 0.13, 0.44, 0.14, PALETTE.trousers); v.box(0.09, 0.22, 0, 0.13, 0.44, 0.14, PALETTE.trousers);
+v.box(0, 0.64, 0, 0.36, 0.42, 0.2, PALETTE.blouse); v.box(0, 1.02, 0, 0.42, 0.42, 0.42, PALETTE.skin);
+v.box(0, 1.2, -0.03, 0.46, 0.14, 0.46, PALETTE.hair); v.box(0, 0.9, -0.2, 0.46, 0.5, 0.1, PALETTE.hair);
+const stand = v.mesh(); const shadow = blobShadow(0.35);
+const [mx, mz] = (params.get('maya') || `${interior.spawn.x},${interior.spawn.z}`).split(',').map(Number);
+stand.position.set(mx, 0, mz); shadow.position.set(mx, 0.01, mz);
+interior.scene.add(stand, shadow);
+
+// Fit camera: portrait shows about the room width.
+const aspect = innerWidth / innerHeight;
+const vfov = 45, tilt = parseFloat(params.get('tilt') || 52);
+const hfov = 2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(vfov / 2)) * aspect);
+const widthToShow = (interior.width || 7) + 0.6;
+const dist = Math.max(10, widthToShow / 2 / Math.tan(hfov / 2));
+startDevView({ scene: interior.scene, target: new THREE.Vector3(0, 0.6, 0.4), distance: params.has('dist') ? undefined : dist, tilt, fov: vfov,
+  update: (dt, t) => interior.update?.(dt, t, { near: interior.stations?.[0]?.id, visited: new Set() }) });
+</script>
+</body>
+</html>

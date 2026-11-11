@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="my">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>car + fx viewer</title>
+<link rel="stylesheet" href="dev.css">
+<style>
+  #labels { position: fixed; inset: 0; pointer-events: none; }
+  .lab { position: absolute; transform: translate(-50%, 0); text-align: center; white-space: nowrap;
+         font: 700 13px/1.7 "Noto Sans Myanmar", sans-serif; color: #2A2118; }
+  .lab small { display: block; font: 11px/1.2 monospace; color: #8C6A28; }
+  #log { position: fixed; left: 8px; top: 8px; right: 8px; margin: 0; padding: 8px 10px; max-height: 70vh; overflow: auto;
+         font: 12px/1.45 monospace; color: #2A2118; background: rgba(255, 253, 248, 0.92); border: 2px solid #A47A2C;
+         border-radius: 10px; display: none; white-space: pre-wrap; }
+</style>
+<script>
+  // Surface any error in the title (headless screenshots show it) and on the page.
+  window.__errors = [];
+  function __fail(msg) {
+    window.__errors.push(msg);
+    document.title = 'ERR ' + msg;
+    var el = document.getElementById('log');
+    if (el) { el.style.display = 'block'; el.textContent += 'ERROR ' + msg + '\n'; }
+  }
+  window.onerror = function (m, src, line, col) { __fail(m + ' @' + (src || '').split('/').pop() + ':' + line + ':' + col); };
+  window.addEventListener('unhandledrejection', function (e) { __fail('promise: ' + (e.reason && (e.reason.stack || e.reason.message) || e.reason)); });
+</script>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="labels"></div>
+<div id="stats"></div>
+<pre id="log"></pre>
+<script type="module">
+// Usage: dev/car.html
+//   ?view=34|game|close|side|front|rear|top   camera (3/4 view by default; game = the 52° play camera)
+//   ?speed=6&steer=0.8      treadmill: wheels spin, front wheels steer, body leans
+//   ?demo=1                 loop: idle, pull away, cruise round a bend, brake, honk
+//   ?honk=0.1               honk at that time        ?heading=90   car heading in degrees
+//   ?maya=1 | ?maya=box     seat the real Maya (if js/game/actors/maya.js loads) or a box stand-in
+//   ?fx=1                   grid of labelled bursts (with ?t=0.4 frozen mid-flight); ?car=0 ?ground=0
+//   ?burst=sparkle,heart    those bursts over the driver's head (any view)
+//   ?audiotest=1            exercises every sound (no speakers needed): one log line per sound
+//   ?selftest=1             deterministic checks of the car motion and the fx pool
+//   ?t=<s>                  simulate exactly t seconds, then freeze (deterministic screenshots)
+//   ?vw=412                 render exactly 412 px wide (headless Edge keeps a 492 px minimum viewport)
+//   ?ground=0               hide the disc so the title shows the car's own draw calls / triangles
+import * as THREE from '../js/game/three.js';
+import { PALETTE, toon, addStandardLights, fontsReady, setOutlineResolution } from '../js/game/toon.js';
+import { VoxelBuilder } from '../js/game/voxel.js';
+import { createCar } from '../js/game/actors/car.js';
+import { createFX } from '../js/game/fx.js';
+import { createAudio, SOUNDS } from '../js/game/audio.js';
+import { startDevView } from './devview.js';
+
+const logEl = document.getElementById('log');
+function log(line) {
+  console.log(line);
+  logEl.style.display = 'block';
+  logEl.textContent += line + '\n';
+}
+
+await fontsReady();
+const q = new URLSearchParams(location.search);
+const view = q.get('view') || '34';
+const fxMode = q.get('fx') === '1';
+const demo = q.get('demo') === '1';
+const showCar = q.get('car') !== '0' && !(fxMode && q.get('car') !== '1');
+const showGround = q.get('ground') !== '0';
+const speedQ = parseFloat(q.get('speed') || '0');
+const steerQ = parseFloat(q.get('steer') || (speedQ ? '0.7' : '0'));
+const headingQ = THREE.MathUtils.degToRad(parseFloat(q.get('heading') || '0'));
+const honkAt = q.has('honk') ? parseFloat(q.get('honk') || '0') : null;
+const frozenT = q.has('t') ? parseFloat(q.get('t')) : null;
+const aspect = (q.has('vw') ? Math.min(innerWidth, parseFloat(q.get('vw'))) : innerWidth) / innerHeight;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(fxMode ? PALETTE.cream : PALETTE.skyHorizon);
+addStandardLights(scene);
+
+if (showGround && !fxMode) {
+  const disc = new THREE.Mesh(new THREE.CircleGeometry(3.4, 64), toon(PALETTE.cream));
+  disc.rotation.x = -Math.PI / 2;
+  scene.add(disc);
+}
+
+// ---------------- car ----------------
+let car = null;
+let maya = null;
+if (showCar) {
+  car = createCar();
+  car.root.rotation.y = headingQ;
+  scene.add(car.root);
+  window.__car = car;
+  const mayaQ = q.get('maya');
+  if (mayaQ === '1') {
+    try {
+      const mod = await import('../js/game/actors/maya.js');
+      maya = mod.createMaya({});
+      maya.setMode('drive', true);
+      if (maya.wheel && car.wheelGrip) {
+        maya.wheel.copy(car.wheelGrip.position);
+        maya.wheelRadius = car.wheelGrip.radius;
+        maya.wheelTilt = car.wheelGrip.tilt;
+      }
+      car.seat.add(maya.root);
+    } catch (e) {
+      log('maya.js not usable yet (' + e.message + '), using a box stand-in');
+      car.seat.add(standIn());
+    }
+  } else if (mayaQ === 'box') {
+    car.seat.add(standIn());
+  }
+}
+
+/** Seated box stand-in (the real character comes from js/game/actors/maya.js). */
+function standIn() {
+  const v = new VoxelBuilder();
+  v.box(0, 0.2, -0.02, 0.34, 0.4, 0.2, PALETTE.blouse);
+  v.box(0, 0.62, 0, 0.42, 0.42, 0.42, PALETTE.skin);
+  v.box(0, 0.8, -0.03, 0.46, 0.12, 0.46, PALETTE.hair);
+  v.box(0, 0.55, -0.22, 0.46, 0.5, 0.1, PALETTE.hair);
+  for (const s of [-1, 1]) v.box(s * 0.13, 0.28, 0.17, 0.09, 0.09, 0.36, PALETTE.blazer);
+  v.box(0, 0.05, 0.16, 0.3, 0.1, 0.3, PALETTE.trousers);
+  return v.mesh();
+}
+
+// ---------------- fx ----------------
+const fx = createFX();
+fx.attach(scene);
+window.__fx = fx;
+const GLOSS = {
+  sparkle: 'တောက်ပ', heart: 'အသည်းလေး', puff: 'တိမ်လုံးလေး', note: 'တေးသံ', star: 'ကြယ်ပွင့်',
+  confetti: 'ရောင်စုံစက္ကူ', plane: 'စက္ကူလေယာဉ်', ink: 'မင်စက်', dust: 'ဖုန်မှုန့်', bulb: 'မီးသီး',
+  zzz: 'အိပ်ချင်ပြီ', question: 'မေးခွန်း', exclaim: 'အံ့ဩ', bits: 'ရွှေတုံးလေး',
+};
+const ORDER = ['sparkle', 'star', 'heart', 'note', 'confetti', 'plane', 'puff', 'dust', 'ink', 'bits', 'bulb', 'question', 'exclaim', 'zzz'];
+const cols = aspect < 1 ? 3 : 7;
+const rows = Math.ceil(ORDER.length / cols);
+const cellW = aspect < 1 ? 1.45 : 1.6;
+const cellH = aspect < 1 ? 1.75 : 1.9;
+const spots = ORDER.map((kind, i) => {
+  const c = i % cols;
+  const r = Math.floor(i / cols);
+  return { kind, pos: new THREE.Vector3((c - (cols - 1) / 2) * cellW, (rows - 1 - r) * cellH + 0.35, 0) };
+});
+function spawnGrid() {
+  for (const s of spots) fx.burst(s.kind, s.pos);
+}
+
+// ---------------- camera (refits on resize: headless windows start at another size) ----------------
+const vfov = 45;
+function camFor(asp) {
+  const hfov = 2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(vfov / 2)) * asp);
+  const fitDist = (radius) => radius / Math.sin(Math.min(hfov, THREE.MathUtils.degToRad(vfov)) / 2);
+  const gameDist = (asp < 1 ? 12 : 22) / 2 / Math.tan(hfov / 2);
+  if (fxMode) {
+    const gw = cols * cellW + 0.4;
+    const gh = rows * cellH + 0.7;
+    const d = Math.max(gw / 2 / Math.tan(hfov / 2), gh / 2 / Math.tan(THREE.MathUtils.degToRad(vfov / 2)));
+    return { yaw: 0, tilt: 6, dist: d, target: new THREE.Vector3(0, (rows * cellH) / 2 - 0.1, 0) };
+  }
+  const views = {
+    34: { yaw: 38, tilt: 24, dist: fitDist(1.6), target: new THREE.Vector3(0, 0.5, 0) },
+    game: { yaw: 0, tilt: 52, dist: gameDist, target: new THREE.Vector3(0, 0.4, 0) },
+    close: { yaw: 0, tilt: 40, dist: gameDist * 0.45, target: new THREE.Vector3(0, 0.6, 0) },
+    side: { yaw: 90, tilt: 8, dist: fitDist(1.5), target: new THREE.Vector3(0, 0.5, 0) },
+    front: { yaw: 0, tilt: 14, dist: fitDist(1.4), target: new THREE.Vector3(0, 0.5, 0) },
+    rear: { yaw: 180, tilt: 22, dist: fitDist(1.5), target: new THREE.Vector3(0, 0.5, 0) },
+    top: { yaw: 0, tilt: 88, dist: fitDist(1.5), target: new THREE.Vector3(0, 0.3, 0) },
+  };
+  const c = views[view] || views[34];
+  if (q.has('yaw')) c.yaw = parseFloat(q.get('yaw'));
+  if (q.has('tilt')) c.tilt = parseFloat(q.get('tilt'));
+  if (q.has('dist')) c.dist = parseFloat(q.get('dist'));
+  return c;
+}
+const cam = camFor(aspect);
+
+// ---------------- simulation ----------------
+const input = { speed: 0, steer: 0 };
+let time = 0;
+let spawned = false;
+let lastSpawn = -10;
+let honked = false;
+function demoInput(t) {
+  const c = t % 7.5;
+  if (c < 1) return set(0, 0);
+  if (c < 2.4) return set(7 * THREE.MathUtils.smoothstep(c, 1, 2.2), 0);
+  if (c < 3.9) return set(7, Math.sin(((c - 2.4) / 1.5) * Math.PI) * 0.9);
+  if (c < 4.8) return set(7 * (1 - THREE.MathUtils.smoothstep(c, 3.9, 4.6)), 0);
+  if (c > 5.4 && c - 5.4 < 1 / 50 && car) car.honk();
+  return set(0, 0);
+  function set(s, st) {
+    input.speed = s;
+    input.steer = st;
+  }
+}
+const burstKinds = (q.get('burst') || '').split(',').filter(Boolean);
+let burstDone = false;
+function step(dt) {
+  time += dt;
+  if (car && burstKinds.length && (!burstDone || (frozenT === null && time - lastSpawn > 2.4))) {
+    // effects over Maya's head in the car, side by side
+    burstDone = true;
+    lastSpawn = time;
+    car.root.updateMatrixWorld(true);
+    burstKinds.forEach((k, i) => {
+      car.seat.getWorldPosition(tmp);
+      tmp.y += 0.95;
+      tmp.x += (i - (burstKinds.length - 1) / 2) * 1.1;
+      fx.burst(k, tmp);
+    });
+  }
+  if (fxMode) {
+    if (!spawned || (frozenT === null && time - lastSpawn > 2.4)) {
+      spawned = true;
+      lastSpawn = time;
+      spawnGrid();
+    }
+  } else if (car && frozenT === null && time - lastSpawn > 1.2 && (speedQ || demo)) {
+    // exhaust puffs while driving
+    lastSpawn = time;
+    car.exhaust.getWorldPosition(tmp);
+    fx.burst('puff', tmp, { count: 2, spread: 0.12, up: 0.15, size: 0.8 });
+  }
+  if (car) {
+    if (demo) demoInput(time);
+    else {
+      input.speed = speedQ;
+      input.steer = steerQ;
+    }
+    if (honkAt !== null && !honked && time >= honkAt) {
+      honked = true;
+      car.honk();
+    }
+    car.update(dt, input);
+  }
+  if (maya) maya.update(dt, { speed: input.speed, turn: input.steer, accel: 0, t: time });
+  fx.update(dt);
+}
+const tmp = new THREE.Vector3();
+let done = false;
+function update(dt) {
+  if (window.__errors.length) return;
+  if (frozenT !== null) {
+    if (done) return;
+    done = true;
+    const n = Math.round(frozenT * 60);
+    for (let i = 0; i < n; i++) step(1 / 60);
+    return;
+  }
+  step(dt);
+}
+
+const { camera, renderer } = startDevView({ scene, target: cam.target, distance: cam.dist, tilt: cam.tilt, yaw: cam.yaw, fov: vfov, update });
+
+// ?vw=412 renders into exactly that many CSS px (headless Edge on Windows keeps a 492 px minimum
+// viewport, so a 412 px screenshot would otherwise crop the right edge of the picture).
+const vwQ = q.has('vw') ? parseFloat(q.get('vw')) : 0;
+const viewW = () => (vwQ ? Math.min(innerWidth, vwQ) : innerWidth);
+function fitViewport() {
+  if (!vwQ) return;
+  renderer.setSize(viewW(), innerHeight);
+  camera.aspect = viewW() / innerHeight;
+  camera.updateProjectionMatrix();
+  const v = renderer.getDrawingBufferSize(new THREE.Vector2());
+  setOutlineResolution(v.x, v.y);
+}
+function placeCam() {
+  fitViewport();
+  const c = camFor(viewW() / innerHeight);
+  const t = THREE.MathUtils.degToRad(c.tilt);
+  const y = THREE.MathUtils.degToRad(c.yaw);
+  camera.position.set(c.target.x + Math.sin(y) * Math.cos(t) * c.dist, c.target.y + Math.sin(t) * c.dist, c.target.z + Math.cos(y) * Math.cos(t) * c.dist);
+  camera.lookAt(c.target);
+  placeLabels();
+}
+
+// ---------------- labels (fx grid) ----------------
+const labelsEl = document.getElementById('labels');
+function placeLabels() {
+  labelsEl.textContent = '';
+  if (!fxMode) return;
+  camera.updateMatrixWorld();
+  const v = new THREE.Vector3();
+  for (const s of spots) {
+    v.copy(s.pos);
+    v.y -= 0.12;
+    v.project(camera);
+    const el = document.createElement('div');
+    el.className = 'lab';
+    el.style.left = ((v.x + 1) / 2) * viewW() + 'px';
+    el.style.top = ((1 - v.y) / 2) * innerHeight + 'px';
+    el.innerHTML = `${GLOSS[s.kind]}<small>${s.kind}</small>`;
+    labelsEl.appendChild(el);
+  }
+}
+placeCam();
+addEventListener('resize', () => requestAnimationFrame(placeCam));
+
+// ---------------- self test (?selftest=1): deterministic checks, one log line each ----------------
+if (q.get('selftest') === '1') {
+  let pass = 0;
+  let fail = 0;
+  const check = (name, ok, info = '') => {
+    ok ? pass++ : fail++;
+    log(`${ok ? '✓' : '✗'} ${name} ${info}`);
+  };
+  const tc = createCar({ plate: false });
+  const f = (x) => x.toFixed(3);
+  // 1. Drive a counter-clockwise circle (heading increasing = turning left) at 7 m/s, radius 4 m.
+  let heading = 0;
+  for (let i = 0; i < 120; i++) {
+    heading += (7 / 4) / 60;
+    tc.root.rotation.y = heading;
+    tc.update(1 / 60, { speed: 7 });
+  }
+  check('turning left: yaw rate ≈ +1.75 rad/s', Math.abs(tc.state.yawRate - 1.75) < 0.1, f(tc.state.yawRate));
+  check('turning left: body leans out (roll > 0)', tc.state.roll > 0.05, f(tc.state.roll));
+  check('turning left: front wheels steer left', tc.state.steer > 0.05, f(tc.state.steer));
+  // 2. Same with the root oriented by lookAt instead of rotation.y.
+  const tl = createCar({ plate: false });
+  const p = new THREE.Vector3();
+  let ang = 0;
+  for (let i = 0; i < 120; i++) {
+    ang += (7 / 4) / 60; // heading = atan2(cos, sin) falls as ang grows: turning right
+    p.set(Math.cos(ang + 1.3), 0, Math.sin(ang + 1.3));
+    tl.root.lookAt(p);
+    tl.update(1 / 60, { speed: 7 });
+  }
+  check('lookAt-driven right turn: roll < 0', tl.state.roll < -0.05, f(tl.state.roll));
+  // 3. Teleport (big heading jump) must not kick the body.
+  tc.root.rotation.y += 2.5;
+  tc.update(1 / 60, { speed: 0 });
+  for (let i = 0; i < 90; i++) tc.update(1 / 60, { speed: 0 });
+  check('teleport: no roll spike after settling', Math.abs(tc.state.roll) < 0.02, f(tc.state.roll));
+  // 4. Pulling away stretches, braking squashes.
+  const ta = createCar({ plate: false });
+  for (let i = 0; i < 12; i++) ta.update(1 / 60, { speed: i * 0.12, accel: 6 });
+  check('pull away: stretch > 0, nose up (pitch < 0)', ta.state.stretch > 0.02 && ta.state.pitch < -0.01, `${f(ta.state.stretch)} ${f(ta.state.pitch)}`);
+  for (let i = 0; i < 12; i++) ta.update(1 / 60, { speed: 6, accel: -8 });
+  check('brake: squash (stretch < 0), nose dips (pitch > 0)', ta.state.stretch < -0.02 && ta.state.pitch > 0.01, `${f(ta.state.stretch)} ${f(ta.state.pitch)}`);
+  // 5. Honk: hops, then lands and finishes.
+  const th = createCar({ plate: false });
+  th.honk();
+  for (let i = 0; i < 12; i++) th.update(1 / 60, {});
+  check('honk: airborne at 0.2 s', th.state.hop > 0.03, f(th.state.hop));
+  for (let i = 0; i < 72; i++) th.update(1 / 60, {});
+  check('honk: landed and done by 1.4 s', th.state.hop === 0 && !th.state.honking, `${f(th.state.hop)} ${th.state.honking}`);
+  for (const c of [tc, tl, ta, th]) c.dispose();
+  // 6. FX pool: every kind spawns, everything expires, unknown kinds are ignored.
+  const tf = createFX();
+  const scA = new THREE.Scene();
+  const scB = new THREE.Scene();
+  tf.attach(scA);
+  let spawnedN = 0;
+  for (const k of tf.kinds) spawnedN += tf.burst(k, new THREE.Vector3(0, 1, 0));
+  tf.update(1 / 60);
+  check('fx: all kinds spawn', spawnedN > 60 && tf.live > 40, `${spawnedN} spawned, ${tf.live} live`);
+  check('fx: unknown kind ignored', tf.burst('nope', p) === 0);
+  for (let i = 0; i < 300; i++) tf.update(1 / 60);
+  check('fx: everything expires', tf.live === 0, `${tf.live} live`);
+  for (let i = 0; i < 40; i++) tf.burst('confetti', p);
+  tf.update(1 / 60);
+  check('fx: pool caps (recycles oldest)', tf.live <= 220 + 160, `${tf.live} live`);
+  tf.attach(scB);
+  check('fx: attach moves to the new scene and clears', tf.group.parent === scB && tf.live === 0);
+  tf.dispose();
+  log(`selftest: ${pass} passed, ${fail} failed`);
+}
+
+// ---------------- audio test ----------------
+if (q.get('audiotest') === '1') {
+  // Headless has no user gesture, so the real context stays suspended; allowSuspended lets play()
+  // still build every node graph on it, and renderOffline() synthesizes each sound to measure it.
+  const audio = createAudio({ allowSuspended: true });
+  log(`audio: supported=${audio.supported} muted=${audio.muted} state=${audio.state}`);
+  const unlocked = await Promise.race([audio.unlock(), new Promise((r) => setTimeout(() => r('pending'), 300))]);
+  log(`unlock() -> ${unlocked}, state=${audio.state}`);
+  const played = {};
+  for (const name of SOUNDS) {
+    try {
+      played[name] = audio.play(name);
+    } catch (e) {
+      played[name] = 'THREW ' + e.message;
+    }
+  }
+  audio.engine(0.6);
+  audio.engine(0.2);
+  audio.engine(0);
+  const results = await Promise.all([...SOUNDS, 'engine'].map((n) => audio.renderOffline(n, n === 'engine' ? 1 : 1.6)));
+  for (const r of results) {
+    const name = r ? r.name : '?';
+    const p = name === 'engine' ? 'engine(0.6/0.2/0) ok' : `play=${played[name]}`;
+    log(`${r ? '✓' : '✗'} ${name.padEnd(8)} ${p.padEnd(22)} ` + (r ? `${r.seconds.toFixed(2)}s  peak ${r.peak.toFixed(3)}  rms ${r.rms.toFixed(4)}` : 'offline render unavailable'));
+  }
+  const before = audio.muted;
+  audio.muted = !before;
+  let stored = null;
+  try { stored = localStorage.getItem('mw-muted'); } catch { stored = 'n/a'; }
+  audio.muted = before;
+  log(`muted toggle ok, localStorage mw-muted was '${stored}', restored to ${audio.muted}`);
+  log(`play('nope') -> ${audio.play('nope')} (unknown names are ignored)`);
+  audio.dispose();
+  log(`dispose() ok, errors: ${window.__errors.length}`);
+  document.title = 'audiotest done, errors ' + window.__errors.length;
+}
+</script>
+</body>
+</html>

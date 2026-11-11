@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="my">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>og</title>
+<!-- Social preview composer (1200x630): a game screenshot (?img=) with Maya's logo and title on the left.
+     Capture: node tools/phone.mjs "dev/og.html?img=_og-bg.png" out 1200x630 --dsf=1 -->
+<style>
+  @font-face { font-family: "Noto Sans Myanmar"; src: url("../fonts/noto-sans-myanmar-700.woff2") format("woff2"); font-weight: 700; font-display: block; }
+  @font-face { font-family: "Cormorant Garamond"; src: url("../fonts/cormorant-garamond-700.woff2") format("woff2"); font-weight: 700; font-display: block; }
+  html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; background: #EDE6D3; }
+  .bg { position: absolute; inset: 0; background: center / cover no-repeat; }
+  .shade { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(237, 230, 211, .97) 0 33%, rgba(237, 230, 211, .82) 41%, rgba(237, 230, 211, 0) 60%); }
+  .text { position: absolute; left: 64px; top: 0; bottom: 0; width: 470px; display: flex; flex-direction: column; justify-content: center; gap: 6px; }
+  .brand { display: flex; align-items: center; gap: 18px; font: 700 40px/1.2 "Cormorant Garamond", Georgia, serif; color: #2A2118; }
+  .brand img { width: 92px; height: 92px; border-radius: 50%; box-shadow: 0 0 0 3px rgba(201, 162, 74, .9), 0 8px 20px rgba(110, 31, 42, .3); }
+  h1 { margin: 6px 0 0; font: 700 104px/1.55 "Noto Sans Myanmar", sans-serif; color: #6E1F2A; }
+  .motto { font: 700 23px/1.8 "Noto Sans Myanmar", sans-serif; color: #4A141C; white-space: nowrap; }
+  .play { align-self: flex-start; margin-top: 18px; padding: 10px 28px 12px; border-radius: 999px; background: #6E1F2A; color: #fff; font: 700 25px/1.7 "Noto Sans Myanmar", sans-serif; box-shadow: 0 6px 18px rgba(74, 20, 28, .25); }
+  .rule { width: 120px; height: 4px; border-radius: 2px; background: #C9A24A; margin: 4px 0 6px; }
+</style>
+</head>
+<body>
+  <div class="bg"></div>
+  <div class="shade"></div>
+  <div class="text">
+    <div class="brand"><img src="../img/logo.webp" alt="">Maya's Creations</div>
+    <h1>မာရာ</h1>
+    <div class="rule"></div>
+    <div class="motto">ဖန်တီးသူ ငြိမ်းချမ်းမှ၊ ဖန်တီးမှု တောက်ပမည်</div>
+    <div class="play">ကားလေးစီးပြီး လည်ကြမယ်</div>
+  </div>
+  <script>
+    const q = new URLSearchParams(location.search);
+    if (q.get('img')) document.querySelector('.bg').style.backgroundImage = `url("${q.get('img')}")`;
+    const logo = document.querySelector('.brand img');
+    Promise.all([document.fonts.ready, logo.decode().catch(() => {}), new Promise((r) => setTimeout(r, 400))]).then(() => { document.title = 'calls ready'; });
+  </script>
+</body>
+</html>

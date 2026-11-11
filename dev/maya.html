@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="my">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>maya</title>
+<link rel="stylesheet" href="dev.css">
+<style>
+  #sheet { position: fixed; inset: 0; overflow: auto; background: #EDE6D3; display: none; padding: 14px 10px 40px; box-sizing: border-box; }
+  #sheet .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 12px 8px; max-width: 980px; margin: 0 auto; }
+  #sheet figure { margin: 0; text-align: center; }
+  #sheet canvas { width: 112px; height: 112px; background: #F6F0E2; border: 3px solid #A47A2C; border-radius: 22px; display: block; margin: 0 auto 4px; }
+  #sheet figcaption { font: 700 15px/1.7 "Noto Sans Myanmar", sans-serif; color: #2A2118; }
+  #sheet figcaption small { display: block; font: 12px/1.3 monospace; color: #8C6A28; }
+  #ui { position: fixed; left: 0; right: 0; bottom: 30px; display: none; flex-wrap: wrap; gap: 4px; justify-content: center; padding: 0 8px; }
+  #ui button { font: 12px/1 monospace; padding: 6px 7px; border-radius: 8px; border: 1px solid #A47A2C; background: #F6F0E2; color: #2A2118; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="sheet"><div class="grid"></div></div>
+<div id="ui"></div>
+<div id="stats"></div>
+<script type="module">
+// Dev page for js/game/actors/maya.js
+// ?pose=stand|walk|drive  ?emote=<name>  ?face=<name>  ?outfit=writer|author  ?t=<seconds> (freeze)
+// ?sheet=faces (3D grid of every expression)  ?sheet=portraits (faceCanvas() output)
+// ?speed=<m/s> (walk)  ?move=circle (walk around a circle)  ?ui=1 (emote buttons)  + devview's ?yaw ?tilt ?dist ?orbit
+window.addEventListener('error', (e) => { document.title = `ERR ${e.message} @${e.lineno}`; window.__err = document.title; });
+window.addEventListener('unhandledrejection', (e) => { document.title = `ERR ${e.reason?.message || e.reason}`; });
+
+import * as THREE from '../js/game/three.js';
+import { PALETTE, toon, basic, addStandardLights, fontsReady, signTexture, signMesh, FONT_SANS } from '../js/game/toon.js';
+import { VoxelBuilder } from '../js/game/voxel.js';
+import { createMaya, FACES, EMOTES } from '../js/game/actors/maya.js';
+import { startDevView } from './devview.js';
+
+const params = new URLSearchParams(location.search);
+const pose = params.get('pose') || 'stand';
+const emoteName = params.get('emote');
+const faceName = params.get('face');
+const outfit = params.get('outfit') || 'writer';
+const sheet = params.get('sheet');
+const frozen = params.has('t') ? parseFloat(params.get('t')) : null;
+const walkSpeed = parseFloat(params.get('speed') ?? '2.2');
+const move = params.get('move');
+
+// Burmese names for the expression sheet (drafts for Maya to proofread).
+const FACE_MY = {
+  smile: 'ပြုံး', happy: 'ပျော်', laugh: 'ရယ်', star: 'ကြယ်ပွင့်မျက်လုံး', heart: 'အချစ်မျက်လုံး',
+  wink: 'မျက်စိမှိတ်', kiss: 'အနမ်းပို့', surprised: 'အံ့ဩ', think: 'စဉ်းစား', focus: 'အာရုံစိုက်',
+  shy: 'ရှက်', dizzy: 'မူးဝေ', sleepy: 'အိပ်ငိုက်', talk: 'စကားပြော',
+};
+
+await fontsReady();
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(PALETTE.skyHorizon);
+scene.fog = new THREE.Fog(PALETTE.skyHorizon, 14, 40);
+addStandardLights(scene);
+
+// parchment stage with a gold ring
+const floor = new THREE.Mesh(new THREE.CircleGeometry(3.2, 48), toon(PALETTE.paper));
+floor.rotation.x = -Math.PI / 2;
+scene.add(floor);
+const ring = new THREE.Mesh(new THREE.RingGeometry(1.15, 1.2, 64), basic(PALETTE.gold));
+ring.rotation.x = -Math.PI / 2;
+ring.position.y = 0.004;
+scene.add(ring);
+
+// ?bare=1 hides the stage so the title shows Maya's own draw calls and triangles
+if (params.get('bare') === '1') { floor.visible = false; ring.visible = false; }
+const mayas = [];
+let maya = null;
+// where Maya lands beside the stand-in car, in seat-local coordinates (the game does this for real)
+const EXIT = new THREE.Vector3(0.72, -0.42, 0.42);
+const ZERO = new THREE.Vector3();
+let camTarget = new THREE.Vector3(0, 0.66, 0);
+let distance = 3.5;
+let tilt = 10;
+let fov = 36;
+
+if (sheet === 'faces') {
+  // ---------- 3D expression sheet ----------
+  const aspect = innerWidth / innerHeight;
+  const cols = aspect < 0.8 ? 3 : 5;
+  const rows = Math.ceil(15 / cols);
+  const cw = 0.62;
+  const rh = 0.78;
+  const items = [...FACES.map((f) => ({ face: f, outfit })), { face: 'smile', outfit: outfit === 'writer' ? 'author' : 'writer' }];
+  items.forEach((it, i) => {
+    const c = i % cols;
+    const r = Math.floor(i / cols);
+    const m = createMaya({ outfit: it.outfit, face: it.face, blink: false, fidget: false, shadow: false, seed: 3 + i });
+    m.root.position.set((c - (cols - 1) / 2) * cw, -r * rh, r * 0.5);
+    scene.add(m.root);
+    mayas.push(m);
+    const label = signMesh(signTexture([
+      { text: FACE_MY[it.face] || it.face, size: 50 },
+      { text: it.face === 'smile' && i === 14 ? `${it.outfit}` : it.face, size: 30, weight: 600, font: FONT_SANS, color: PALETTE.goldDeep },
+    ], { width: 384, height: 168, radius: 30, borderWidth: 8 }), 0.5, 0.22);
+    label.position.set(m.root.position.x, m.root.position.y + 0.6, m.root.position.z + 0.36);
+    scene.add(label);
+  });
+  floor.visible = false;
+  ring.visible = false;
+  const top = 1.26;
+  const bottom = 0.6 - (rows - 1) * rh - 0.2;
+  camTarget = new THREE.Vector3(0, (top + bottom) / 2, (rows - 1) * 0.25);
+  fov = 14;
+  const visH = top - bottom + 0.06;
+  const visW = cols * cw + 0.1;
+  const half = THREE.MathUtils.degToRad(fov / 2);
+  distance = Math.max(visH / 2 / Math.tan(half), visW / 2 / (Math.tan(half) * aspect)) + 0.4;
+  tilt = 0;
+} else {
+  maya = createMaya({ outfit, face: faceName || 'smile', blink: frozen === null || params.get('blink') === '1', fidget: !emoteName && params.get('fidget') !== '0', seed: 11 });
+  window.maya = maya;
+  mayas.push(maya);
+  if (pose === 'drive' || emoteName === 'hopOut' || emoteName === 'hopIn') {
+    // dev stand-in for the car: seat, floor, dash and a steering wheel where Maya expects it
+    const rig = new THREE.Group();
+    const v = new VoxelBuilder();
+    v.boxMin(-0.42, 0.12, -0.42, 0.42, 0.26, 0.92, PALETTE.cream);
+    v.boxMin(-0.3, 0.2, -0.26, 0.3, 0.42, 0.24, PALETTE.maroon);
+    v.boxMin(-0.3, 0.2, -0.36, 0.3, 0.98, -0.24, PALETTE.maroon);
+    v.boxMin(-0.42, 0.2, 0.72, 0.42, 0.62, 0.92, PALETTE.cream);
+    rig.add(v.mesh());
+    const seat = new THREE.Object3D();
+    seat.position.set(0, 0.42, 0);
+    rig.add(seat);
+    const wheel = new THREE.Mesh(new THREE.TorusGeometry(maya.wheelRadius, 0.018, 8, 28), toon(PALETTE.gold));
+    wheel.position.copy(maya.wheel).add(seat.position);
+    wheel.rotation.x = -maya.wheelTilt;
+    rig.add(wheel);
+    const column = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.36, 8), toon(PALETTE.woodDark));
+    column.position.copy(wheel.position).add(new THREE.Vector3(0, -0.07, 0.16));
+    column.rotation.x = Math.PI / 2 - maya.wheelTilt;
+    rig.add(column);
+    rig.position.set(0, 0, -0.1);
+    scene.add(rig);
+    seat.add(maya.root);
+    camTarget = new THREE.Vector3(0.2, 0.75, 0.1);
+    distance = 3.4;
+    tilt = 14;
+    if (emoteName === 'hopIn') {
+      maya.root.position.copy(EXIT);
+      maya.setMode('stand', true);
+    } else maya.setMode('drive', true);
+    maya.devSeat = seat;
+    maya.devWheel = wheel;
+  } else {
+    scene.add(maya.root);
+  }
+  if (pose === 'walk') maya.setMode('walk');
+  if (emoteName === 'cheer' || emoteName === 'jump' || emoteName === 'hopIn' || emoteName === 'dance') { camTarget.y = 0.8; distance = 3.9; }
+}
+
+// ---------- portraits sheet (faceCanvas output, as the dialogue box will use it) ----------
+if (sheet === 'portraits') {
+  const el = document.getElementById('sheet');
+  el.style.display = 'block';
+  const grid = el.querySelector('.grid');
+  for (const o of ['writer', 'author']) {
+    const m = o === outfit ? maya : createMaya({ outfit: o, blink: false, fidget: false });
+    const list = o === outfit ? FACES : ['smile', 'happy', 'star'];
+    for (const f of list) {
+      const fig = document.createElement('figure');
+      const cv = m.faceCanvas(f);
+      fig.appendChild(cv);
+      const cap = document.createElement('figcaption');
+      cap.innerHTML = `${FACE_MY[f]}<small>${f}${o !== outfit ? ' · ' + o : ''}</small>`;
+      fig.appendChild(cap);
+      grid.appendChild(fig);
+    }
+  }
+}
+
+// ---------- optional buttons ----------
+if (params.get('ui') === '1' && maya) {
+  const ui = document.getElementById('ui');
+  ui.style.display = 'flex';
+  for (const e of EMOTES) {
+    const b = document.createElement('button');
+    b.textContent = e;
+    b.onclick = () => {
+      if (e === 'hopIn') maya.setMode('stand', true);
+      maya.emote(e);
+    };
+    ui.appendChild(b);
+  }
+  for (const f of FACES) {
+    const b = document.createElement('button');
+    b.textContent = `:${f}`;
+    b.onclick = () => (f === 'talk' ? maya.talk(2.5) : maya.setFace(f, 2.5));
+    ui.appendChild(b);
+  }
+}
+
+// ---------- simulation ----------
+const input = { speed: 0, turn: 0, accel: 0, t: 0 };
+let simT = 0;
+let loopT = 0;
+let circleA = 0;
+function step(dt) {
+  simT += dt;
+  input.t = simT;
+  input.speed = 0;
+  input.turn = 0;
+  input.accel = 0;
+  if (!maya) {
+    for (const m of mayas) m.update(dt, input);
+    return;
+  }
+  if (pose === 'walk') {
+    input.speed = walkSpeed;
+    if (move === 'circle') {
+      const R = 1.6;
+      circleA += (walkSpeed / R) * dt;
+      maya.root.position.set(Math.sin(circleA) * R, 0, Math.cos(circleA) * R - R);
+      maya.root.rotation.y = circleA + Math.PI / 2;
+      input.turn = walkSpeed / R;
+    }
+  }
+  if (pose === 'drive' && !emoteName) {
+    input.speed = 8;
+    input.turn = Math.sin(simT * 0.9) * 0.6;
+  }
+  if (emoteName === 'hopOut' || emoteName === 'hopIn') {
+    // the game moves her between the seat and the ground during the airborne part of the hop
+    const { takeoff, land } = maya.hopTiming;
+    const f = THREE.MathUtils.smoothstep(simT - emoteStart, takeoff, land);
+    const a = emoteName === 'hopOut' ? ZERO : EXIT;
+    const b = emoteName === 'hopOut' ? EXIT : ZERO;
+    maya.root.position.lerpVectors(a, b, f);
+  }
+  maya.update(dt, input);
+}
+
+let started = false;
+let emoteStart = 0;
+function startEmote() {
+  if (!emoteName || !maya) return;
+  if (emoteName === 'hopOut') maya.setMode('drive', true);
+  if (emoteName === 'hopIn') maya.setMode('stand', true);
+  emoteStart = simT;
+  maya.emote(emoteName);
+}
+
+const view = startDevView({
+  scene, target: camTarget, distance, tilt, fov,
+  update(dt, t, { camera }) {
+    if (frozen !== null) {
+      if (!started) {
+        started = true;
+        const h = 1 / 60;
+        // settle springs and idle first, then run the emote up to the requested time
+        for (let i = 0; i < 36; i++) step(h);
+        startEmote();
+        const n = Math.round((emoteName ? frozen : Math.max(0, frozen - 0.6)) / h);
+        for (let i = 0; i < n; i++) step(h);
+      }
+      for (const m of mayas) m.update(0, input);
+      return;
+    }
+    step(dt);
+    if (emoteName && maya) {
+      loopT -= dt;
+      if (loopT <= 0) {
+        startEmote();
+        loopT = maya.emoteDuration(emoteName) + 1.0;
+      }
+    }
+  },
+});
+window.__view = view;
+// ?selftest=1 : run every emote in every mode plus the whole API, check for NaN and errors
+if (params.has('selftest') && maya) {
+  const out = document.createElement('div');
+  out.style.cssText = 'position:fixed;left:6px;top:6px;right:6px;font:14px/1.4 monospace;background:#fff;padding:4px 8px;white-space:pre-wrap';
+  document.body.appendChild(out);
+  const report = [];
+  const t0 = performance.now();
+  let steps = 0;
+  const bad = (m) => {
+    const F = m.F;
+    for (let i = 0; i < F.length; i++) if (!Number.isFinite(F[i])) return `pose channel ${i}`;
+    let found = null;
+    m.root.updateMatrixWorld(true);
+    m.root.traverse((o) => { if (!found && o.matrixWorld.elements.some((v) => !Number.isFinite(v))) found = o.name || o.type; });
+    return found;
+  };
+  try {
+    const run = (secs, inp) => { for (let i = 0; i < secs * 60; i++) { maya.update(1 / 60, inp); steps++; } };
+    for (const mode of ['stand', 'walk', 'drive']) {
+      maya.setMode(mode, true);
+      const inp = { speed: mode === 'walk' ? 2.2 : mode === 'drive' ? 8 : 0, turn: 0.4, accel: 1.5, t: 0 };
+      for (const e of [...EMOTES, 'adjustGlasses']) {
+        if (e === 'hopIn') maya.setMode('stand', true);
+        if (e === 'hopOut') maya.setMode('drive', true);
+        let done = false;
+        maya.emote(e).then(() => { done = true; });
+        run(maya.emoteDuration(e) + 0.1, inp);
+        await Promise.resolve();
+        const b = bad(maya);
+        if (b) report.push(`NaN after ${e} in ${mode}: ${b}`);
+        if (!done) report.push(`promise for ${e} in ${mode} did not resolve`);
+        maya.setMode(mode, true);
+      }
+    }
+    // interruptions, faces, talking, look-at, outfits, portraits
+    maya.setMode('stand', true);
+    maya.emote('cheer'); run(0.3, input); maya.emote('wave'); run(0.2, input); maya.stopEmote(); run(0.5, input);
+    for (const f of FACES) { maya.setFace(f, 0.2); run(0.25, input); }
+    maya.talk(1); run(1.2, input);
+    maya.lookAt(new THREE.Vector3(3, 1, 2)); run(1, input); maya.lookAt(null); run(0.5, input);
+    maya.setOutfit('author'); run(0.3, input); maya.setOutfit('writer'); run(0.3, input);
+    const top = maya.getHeadTop(new THREE.Vector3());
+    if (!(top.y > 1.15 && top.y < 1.4)) report.push(`getHeadTop y=${top.y.toFixed(3)}`);
+    for (const f of FACES) { const c = maya.faceCanvas(f); if (c.width !== 128) report.push('faceCanvas size'); }
+    const b = bad(maya);
+    if (b) report.push(`NaN at end: ${b}`);
+    const extra = createMaya({ outfit: 'author' });
+    extra.update(1 / 60, input);
+    extra.dispose();
+  } catch (err) {
+    report.push(`EXCEPTION ${err.message}\n${err.stack}`);
+  }
+  const ms = performance.now() - t0;
+  out.textContent = (report.length ? `SELFTEST FAIL\n${report.join('\n')}` : 'SELFTEST OK') + `\n${steps} updates in ${ms.toFixed(0)} ms (${(ms / steps * 1000).toFixed(1)} µs/update)`;
+}
+if (params.has('dbg')) {
+  const d = document.createElement('div');
+  d.style.cssText = 'position:fixed;left:6px;top:6px;font:14px monospace;background:#fff;padding:2px 6px';
+  document.body.appendChild(d);
+  const show = () => {
+    const c = view.renderer.domElement;
+    d.textContent = `inner ${innerWidth}x${innerHeight} dpr ${devicePixelRatio} client ${document.documentElement.clientWidth} canvas ${c.width}x${c.height} css ${c.style.width} ${window.__err || ''}`;
+  };
+  show();
+  setInterval(show, 500);
+}
+</script>
+</body>
+</html>

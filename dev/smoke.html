@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="my">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>smoke test</title>
+<link rel="stylesheet" href="dev.css">
+</head>
+<body>
+<canvas id="c"></canvas>
+<script type="module">
+import * as THREE from '../js/game/three.js';
+import { PALETTE, toon, addOutline, addStandardLights, blobShadow, roundedBox, signTexture, signMesh, fontsReady, setOutlineResolution } from '../js/game/toon.js';
+import { startDevView } from './devview.js';
+
+await fontsReady();
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(PALETTE.skyHorizon);
+addStandardLights(scene);
+const floor = new THREE.Mesh(new THREE.CircleGeometry(6, 48), toon(PALETTE.cream));
+floor.rotation.x = -Math.PI / 2;
+scene.add(floor);
+const ball = new THREE.Mesh(new THREE.SphereGeometry(0.5, 32, 16), toon(PALETTE.maroon));
+ball.position.set(-1.4, 0.5, 0); addOutline(ball); scene.add(ball);
+const blob = blobShadow(0.55); blob.position.set(-1.4, 0.01, 0); scene.add(blob);
+const box = new THREE.Mesh(roundedBox(1, 1.2, 0.8, 0.08), toon(PALETTE.boxBlue));
+box.position.set(0.2, 0.6, 0); addOutline(box); scene.add(box);
+const gold = new THREE.Mesh(new THREE.TorusKnotGeometry(0.35, 0.12, 96, 12), toon(PALETTE.gold));
+gold.position.set(1.6, 0.6, 0.3); addOutline(gold); scene.add(gold);
+const sign = signMesh(signTexture([{ text: 'မင်္ဂလာပါရှင့်', size: 64 }, { text: "Maya's Creations", size: 44, font: '"Cormorant Garamond", serif', weight: 600, color: PALETTE.goldDeep }], { width: 640, height: 300 }), 2.4, 1.125);
+sign.position.set(0, 2.2, -1.2); scene.add(sign);
+startDevView({ scene, target: new THREE.Vector3(0, 0.8, 0), distance: 7, tilt: 40, update: (dt, t) => { gold.rotation.y = t * 0.5; } });
+</script>
+</body>
+</html>
