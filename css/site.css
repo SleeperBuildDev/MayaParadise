@@ -62,6 +62,10 @@ html[data-lang="en"] #cover h1 { font: 700 48px/1.15 var(--font-serif); }
 .lang-switch button { border: 0; background: transparent; padding: 6px 16px; min-height: 40px; color: var(--gold-text); font-weight: 700; cursor: pointer; }
 .lang-switch button[aria-pressed="true"] { background: var(--gold-deep); color: #fff; }
 .hint-3d { margin-top: 12px; color: var(--muted); font-size: 14px; }
+.quality { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; margin-top: 12px; }
+.quality-label { color: var(--muted); font-size: 14px; font-weight: 700; }
+.quality .lang-switch { margin-top: 0; }
+.quality .lang-switch button { padding: 6px 12px; font-size: 14px; }
 
 /* ---------- classic page ---------- */
 #classic { max-width: 760px; margin: 0 auto; padding: 0 14px calc(24px + var(--safe-b)); }

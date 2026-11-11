@@ -27,11 +27,29 @@ function pickTier(info) {
   const mobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
   if (/SwiftShader|llvmpipe|Software/i.test(r)) return 'low';
   if (/Mali-4|Mali-T[67]|Mali-G(31|51|52)|PowerVR (Rogue )?GE8|Adreno \(TM\) (3\d\d|50\d)|Adreno (3\d\d|50\d)/i.test(r) || mem <= 2 || cores <= 4) return mobile ? 'low' : 'mid';
+  // Flagship phone GPUs (Snapdragon 865 and newer, recent Mali/Immortalis, Samsung Xclipse) get the
+  // best quality too; the game still lowers its pixel ratio by itself if a phone struggles.
+  if (mobile && /Adreno \(TM\) (6[5-9]\d|[7-9]\d\d)|Mali-G(7[1-9]|7\d\d|9\d\d)|Immortalis|Xclipse/i.test(r) && mem >= 4 && cores >= 8) return 'high';
   return mobile ? 'mid' : 'high';
 }
 
+// Graphics choice on the cover (Auto / Lite / Best). Stored as mw-tier; Auto clears it.
+function showQuality() {
+  const cur = safeGet('mw-tier');
+  document.querySelectorAll('[data-quality]').forEach((b) => {
+    const q = b.dataset.quality;
+    b.setAttribute('aria-pressed', String(q === 'auto' ? !['low', 'high'].includes(cur) : q === cur));
+  });
+}
+document.querySelectorAll('[data-quality]').forEach((b) => b.addEventListener('click', () => {
+  if (b.dataset.quality === 'auto') safeDel('mw-tier'); else safeSet('mw-tier', b.dataset.quality);
+  showQuality();
+}));
+
 function safeGet(k) { try { return localStorage.getItem(k); } catch { return null; } }
 function safeSet(k, v) { try { localStorage.setItem(k, v); } catch { /* ignore */ } }
+function safeDel(k) { try { localStorage.removeItem(k); } catch { /* ignore */ } }
+showQuality();
 
 const info = webgl2Info();
 const crashed = sessionStorage.getItem('mw-running') === '1';
