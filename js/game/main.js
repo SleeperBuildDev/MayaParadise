@@ -338,7 +338,7 @@ class Game {
     const speed = this.walker.update(dt, stick, SCALE.walkSpeed);
     if (this.faceTarget) this.walker.turnToward(this.faceTarget.x, this.faceTarget.z, dt);
     this.maya.root.position.set(this.walker.pos.x, 0, this.walker.pos.y);
-    this.maya.root.rotation.y = this.walker.heading;
+    this.maya.root.rotation.set(0, this.walker.heading, 0); // plain yaw only: x/z left at PI would mirror her
     let dh = this.walker.heading - (this.prevHeading ?? this.walker.heading);
     dh = Math.atan2(Math.sin(dh), Math.cos(dh));
     this.prevHeading = this.walker.heading;
@@ -709,7 +709,7 @@ class Game {
     this.world.scene.add(this.maya.root);
     this.maya.setMode('walk');
     this.maya.root.position.copy(wp.door);
-    this.maya.root.rotation.y = 0;
+    this.maya.root.rotation.set(0, 0, 0);
     this.rig.setTarget(wp.door);
     this.rig.snap();
     await this.ui.irisOpen();
@@ -833,7 +833,7 @@ class Game {
     if (w.heading !== undefined) {
       let d = w.heading - this.maya.root.rotation.y;
       d = Math.atan2(Math.sin(d), Math.cos(d));
-      this.maya.root.rotation.y += d * (1 - Math.exp(-dt * 12));
+      this.maya.root.rotation.set(0, this.maya.root.rotation.y + d * (1 - Math.exp(-dt * 12)), 0);
     }
     const walking = w.kind === 'walk' && w.t < 1;
     this.maya.update(dt, { speed: walking ? SCALE.walkSpeed : 0, turn: 0, accel: 0, t: this.t || 0 });
