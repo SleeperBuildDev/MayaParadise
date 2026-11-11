@@ -20,6 +20,49 @@ const params = new URLSearchParams(location.search);
 const store = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
 const call = (o, fn, ...a) => (o && typeof o[fn] === 'function' ? o[fn](...a) : undefined);
 
+// The car's footprint in its own space (x = width, z = length), grown by Maya's radius, and the
+// corner points she walks through to get around it instead of through it.
+const CAR_BLOCK = { hx: 0.8, hz: 1.35 };
+const CAR_ROUND = { hx: 0.98, hz: 1.52 };
+
+/** Does the segment a-b cross the box |x| <= hx, |z| <= hz? (slab test) */
+function segHitsBox(a, b, hx, hz) {
+  let t0 = 0, t1 = 1;
+  for (const [p, d, h] of [[a.x, b.x - a.x, hx], [a.z, b.z - a.z, hz]]) {
+    if (Math.abs(d) < 1e-9) { if (p < -h || p > h) return false; continue; }
+    let u0 = (-h - p) / d, u1 = (h - p) / d;
+    if (u0 > u1) [u0, u1] = [u1, u0];
+    t0 = Math.max(t0, u0);
+    t1 = Math.min(t1, u1);
+    if (t0 > t1) return false;
+  }
+  return true;
+}
+
+/** Shortest list of corner waypoints (car-local {x, z}) from s to t that never crosses the car. */
+function carDetour(s, t) {
+  const B = CAR_BLOCK, C = CAR_ROUND;
+  if (!segHitsBox(s, t, B.hx, B.hz)) return [];
+  const nodes = [s, t, { x: C.hx, z: C.hz }, { x: -C.hx, z: C.hz }, { x: -C.hx, z: -C.hz }, { x: C.hx, z: -C.hz }];
+  const n = nodes.length;
+  const dist = Array(n).fill(Infinity), prev = Array(n).fill(-1), done = Array(n).fill(false);
+  dist[0] = 0;
+  for (;;) {
+    let u = -1;
+    for (let i = 0; i < n; i++) if (!done[i] && dist[i] < Infinity && (u < 0 || dist[i] < dist[u])) u = i;
+    if (u < 0 || u === 1) break;
+    done[u] = true;
+    for (let v = 0; v < n; v++) {
+      if (done[v] || segHitsBox(nodes[u], nodes[v], B.hx, B.hz)) continue;
+      const d = dist[u] + Math.hypot(nodes[v].x - nodes[u].x, nodes[v].z - nodes[u].z);
+      if (d < dist[v]) { dist[v] = d; prev[v] = u; }
+    }
+  }
+  const path = [];
+  for (let i = prev[1]; i > 0; i = prev[i]) path.unshift(nodes[i]);
+  return path;
+}
+
 export async function startGame(opts) {
   const g = new Game(opts);
   await g.init();
@@ -657,7 +700,7 @@ class Game {
       mid.y = 0;
       this.rig.orbitShot(mid, { dist: 6.2, height: 3.7, azimuth: 28, lookHeight: 0.8, dur: 0.9 });
       await this.hopOut();
-      await this.walkWorld(wp.door);
+      await this.walkAroundCar(wp.door);
       call(this.audio, 'play', 'door');
     }
     const roomPromise = this.getRoom(id);
@@ -790,7 +833,7 @@ class Game {
   async hopIn() {
     const exit = this.car.exitPoint ? this.car.root.localToWorld(this.car.exitPoint.clone()) : this.car.root.position.clone();
     exit.y = 0;
-    await this.walkWorld(exit);
+    await this.walkAroundCar(exit);
     this.maya.setMode('stand');
     const seatW = this.car.seat.getWorldPosition(new THREE.Vector3());
     const T = this.maya.hopTiming || { takeoff: 0.2, land: 0.7 };
@@ -810,6 +853,18 @@ class Game {
     return new Promise((resolve) => {
       this.worldWalk = { kind: 'tween', from: from.clone(), to: to.clone(), t: -delay / dur, dur, heading, resolve };
     });
+  }
+
+  /** Walk to a ground point, going around the parked car instead of through it. */
+  async walkAroundCar(target) {
+    const car = this.car.root;
+    car.updateMatrixWorld(true);
+    const inv = car.matrixWorld.clone().invert();
+    const local = (v) => { const p = v.clone().applyMatrix4(inv); return { x: p.x, z: p.z }; };
+    for (const p of carDetour(local(this.maya.root.position), local(target))) {
+      await this.walkWorld(car.localToWorld(new THREE.Vector3(p.x, 0, p.z)));
+    }
+    await this.walkWorld(target);
   }
 
   walkWorld(target) {
