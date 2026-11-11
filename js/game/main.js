@@ -949,7 +949,12 @@ class Game {
       this.ui.cinema(false);
       this.busy = false;
     } else {
+      // later visits: the same glance at the thing, then she turns to you (no dialogue)
       this.faceTarget = s.look || null;
+      const a = THREE.MathUtils.degToRad(az);
+      const toCam = { x: mp.x + Math.sin(a) * 6, z: mp.z + Math.cos(a) * 6 };
+      setTimeout(() => { if (this.activeStation === s.id) this.faceTarget = toCam; }, quick ? 0 : 420);
+      call(this.maya, 'talk', 1.0);
       call(this.maya, 'setFace', face, 2.4);
       call(this.maya, 'emote', s.emote || 'point');
       if (fc) this.ui.showBubble(fc, 1800);
