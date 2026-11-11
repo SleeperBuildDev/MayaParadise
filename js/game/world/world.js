@@ -315,7 +315,7 @@ function bedBuilder(w, d, seed) {
   }
   return b;
 }
-/** Round broadleaf tree: root flare, forked trunk, three-tone leaf clusters, a few pink blossoms. */
+/** Round broadleaf tree: root flare, forked trunk, three-tone leaf clusters, a few blossoms. */
 function oakBuilder() {
   const b = new VoxelBuilder();
   b.box(0, 0.07, 0, 0.56, 0.14, 0.56, shade(PALETTE.woodDark, 0.8));
@@ -335,6 +335,8 @@ function oakBuilder() {
   b.box(-0.58, 2.62, 0.38, 0.46, 0.4, 0.46, shade(PALETTE.leaf, 1.12));
   b.box(0.32, 2.98, 0.4, 0.36, 0.3, 0.36, shade(PALETTE.leaf, 1.05));
   b.box(0.45, 2.45, 0.62, 0.17, 0.17, 0.17, PALETTE.rose);
+  b.box(-0.55, 2.62, 0.62, 0.15, 0.15, 0.15, PALETTE.gold);
+  b.box(0.2, 3.22, 0.25, 0.15, 0.15, 0.15, PALETTE.lily);
   b.box(0.82, 2.0, 0.66, 0.13, 0.13, 0.13, PALETTE.rose);
   return b;
 }
