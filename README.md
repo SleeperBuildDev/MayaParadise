@@ -20,7 +20,7 @@ on a plain page for people (and search engines) who skip the game.
 ### Use the writermaya.com domain (when ready)
 Whoever controls the domain's DNS:
 1. A day before: lower the DNS TTL to 300 seconds.
-2. In GitHub **Settings → Pages → Custom domain**: enter `www.writermaya.com` and save
+2. In GitHub **Settings → Pages → Custom domain**: enter `writermaya.com` and save
    (GitHub adds a `CNAME` file to the repository).
 3. At the DNS provider: remove the old Google Sites `www` record (`ghs.googlehosted.com`), then add:
    - `CNAME` record: `www` → `<you>.github.io`

@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /dev/
 Disallow: /tools/
-Sitemap: https://www.writermaya.com/sitemap.xml
+Sitemap: https://writermaya.com/sitemap.xml
