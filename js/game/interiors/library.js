@@ -543,8 +543,8 @@ function drawLaunch(g, w, h) {
       [
         { text: 'စာအုပ်မိတ်ဆက်ပွဲ', size: 56, color: P.maroon },
         { text: '၁၀ – ၁၂ အောက်တိုဘာ ၂၀၂၆', size: 40, color: P.ink },
-        { text: 'အုပ်ရေ ၁၀၀ သာ', size: 40, color: P.ink },
-        { text: 'ရောင်းရငွေ ၁၀၀% လှူဒါန်းခဲ့ပါတယ်', size: 36, color: P.goldDeep },
+        { text: 'အုပ်ရေ ၁၀၀၀ ထုတ်ဝေ', size: 40, color: P.ink },
+        { text: 'ပထမ ၁၀၀ အုပ် ရောင်းရငွေ ၁၀၀% လှူဒါန်း', size: 31, color: P.goldDeep },
       ],
       w, h,
     ),
