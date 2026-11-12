@@ -1662,10 +1662,18 @@ export async function buildInterior(ctx = {}) {
       bk.cloud.move(0, Math.sin(t * 1.25 + i * 2.1) * 0.018, 0);
       bk.book.rot(0, 0, Math.sin(t * 0.9 + i * 1.7) * 0.006).size(1, 1 + Math.min(0, k) * 0.12 + Math.sin(t * 1.6 + i) * 0.004, 1);
       bk.cover.rot(0, -bk.b.open * open, 0);
-      const p0 = stepSpring(bk.pageSprings[0], open * 0.62, dt);
-      const p1 = stepSpring(bk.pageSprings[1], open * 0.34, dt);
-      bk.pages[0].rot(0, -bk.b.open * Math.max(0, p0) - Math.sin(t * 9 + i) * 0.03 * open, 0);
-      bk.pages[1].rot(0, -bk.b.open * Math.max(0, p1), 0);
+      // The loose pages lag behind the cover, but never past it: when the book closes, the cover
+      // pushes them shut ahead of it (otherwise it would swing through them and leave white pages
+      // standing outside the closed cover until their springs caught up).
+      const ps = bk.pageSprings;
+      const p0 = stepSpring(ps[0], open * 0.62, dt);
+      const p1 = stepSpring(ps[1], open * 0.34, dt);
+      const limit0 = Math.max(0, open - 0.025), limit1 = Math.max(0, limit0 - 0.02);
+      if (ps[0].x > limit0) { ps[0].x = limit0; ps[0].v = Math.min(ps[0].v, bk.spring.v); }
+      if (ps[1].x > limit1) { ps[1].x = limit1; ps[1].v = Math.min(ps[1].v, bk.spring.v); }
+      const a0 = Math.min(limit0, Math.max(0, Math.min(p0, limit0) + Math.sin(t * 9 + i) * 0.03 * open / bk.b.open));
+      bk.pages[0].rot(0, -bk.b.open * a0, 0);
+      bk.pages[1].rot(0, -bk.b.open * Math.max(0, Math.min(p1, limit1)), 0);
       for (let j = 0; j < bk.sparks.length; j++) {
         const p = frac(t * 0.45 + j / bk.sparks.length);
         const sc = clamp01(open * 1.6) * Math.sin(p * Math.PI);
