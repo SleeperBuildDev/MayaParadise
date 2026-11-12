@@ -16,6 +16,7 @@ import * as dayKit from './daytime.js';
 // (namespace import: a browser still holding the previous daytime.js for a few minutes keeps working)
 const { createDaytime, buildHeadlightBeams } = dayKit;
 import { createMusic } from './music.js';
+import { createRoadBirds } from './world/birds.js';
 import { preloadArt } from './art.js';
 
 const PHOTOS = { about: 'img/maya-about.webp', library: 'img/maya-book.webp' };
@@ -168,6 +169,17 @@ class Game {
     this.gradeEl.id = 'grade';
     canvas.insertAdjacentElement('afterend', this.gradeEl);
     this.applyDayLook();
+    // little birds on the roads: they fly off with a flutter as the car comes by
+    this.birds = createRoadBirds(this.world, { low: this.tier === 'low' });
+    this.birdWho = { x: 0, z: 0, speed: 0, heading: 0 };
+    this.birds.onScatter = (f, x = f.x, y = f.y, z = f.z) => {
+      this.fx.burst('feather', this.tmp.set(x, y + 0.4, z), { count: 6, spread: 0.6, up: 0.6 });
+      call(this.audio, 'play', 'flutter');
+      setTimeout(() => this.mode === 'world' && call(this.audio, 'play', 'chirp'), 120);
+      document.dispatchEvent(new CustomEvent('mw:birds', { detail: { kind: 'scatter' } }));
+    };
+    this.birds.onNear = () => document.dispatchEvent(new CustomEvent('mw:birds', { detail: { kind: 'ahead' } }));
+    this.birds.onChirp = () => { if (this.mode === 'world' && !this.ui?.dialogOpen) call(this.audio, 'play', 'chirp'); };
     this.world.scene.add(this.car.root);
     this.car.seat.add(this.maya.root);
     this.maya.root.position.set(0, 0, 0);
@@ -366,6 +378,13 @@ class Game {
     }
     this.world.update(dt, t);
     const st = drive.state;
+    if (this.birds) {
+      // the birds watch the car, or Maya when she walks to a door
+      const w = this.birdWho;
+      if (this.worldWalk) { const p = this.maya.root.getWorldPosition(this.tmp2); w.x = p.x; w.z = p.z; w.speed = 1.5; w.heading = undefined; }
+      else { w.x = st.position.x; w.z = st.position.z; w.speed = this.busy && !drive.isAuto ? 0 : st.speed; w.heading = st.heading; }
+      this.birds.update(dt, t, w);
+    }
     this.lead.set(Math.sin(st.heading), 0, Math.cos(st.heading)).multiplyScalar(Math.min(4, Math.abs(st.speed) * 0.4));
     this.rig.setTarget(this.worldWalk ? this.maya.root.getWorldPosition(this.tmp) : this.car.root.position, this.lead);
     call(this.audio, 'engine', this.busy ? 0 : Math.min(1, Math.abs(st.speed) / 10));

@@ -240,6 +240,24 @@ Sunset ride (evening) and Cozy night jazz (night). Each loops a seeded 16-bar tu
 notes 0.35 s ahead, cross-fades over 2.5 s when the period changes, and stops scheduling while
 muted or before the first tap. `?music=0` turns it off.
 
+### `js/game/world/birds.js` — birds on the roads
+
+```
+createRoadBirds(world, { low }) -> birds   // main.js, right after the world is built
+birds.update(dt, t, { x, z, speed, heading })   // every world frame: the car, or Maya on foot
+birds.onScatter(f, x, y, z) / onNear / onChirp   // main.js: feathers + flutter + chirp, and 'mw:birds'
+birds.scare(i)                             // debug: send flock i (or all) up
+```
+
+Four to six little flocks (pigeons, sparrows, mynas, white doves; 3-5 birds each) sit at random
+spots on the roads - different every visit - clear of the stops (4 m), of each other (6 m) and of
+the car, and hop, peck and turn. When the car comes within about 4 m (more at speed) the flock
+bursts up with a flutter and a chirp, circles overhead, and once the car is 9 m away settles on
+another random stretch of road nearby (within 22 m when possible). A quiet flock far from the car
+also moves to a new spot by itself every 30-80 s. `birds.wander(i)` forces a move (debug). One instanced unit box, 8 parts per bird,
+same toon material and outline as the doves in the sky. barks.js listens for `mw:birds`
+(`ahead` -> birdsAhead, `scatter` -> birdsScatter).
+
 ## Checking your work
 - Local server: `http://127.0.0.1:8123/` serves this folder (`python -m http.server 8123`).
 - Phone screenshots (exact viewport, DevTools emulation): `node tools/phone.mjs "<path?query>" <out-prefix> 412x915`

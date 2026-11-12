@@ -50,6 +50,9 @@ Whoever controls the domain's DNS:
   replaced with a place name from `BARK_PLACES` just above it. Keep each line short (about 45
   Burmese letters) so it fits the bubble on a phone. When she says them, and how often, is in
   `js/game/barks.js` (the table at the top). Add `?barks=0` to the address to switch them off.
+- **Birds on the roads** (random spots every visit; they fly off with a flutter when the car comes by, and Maya reacts) are
+  in `js/game/world/birds.js`; what she says about them is `birdsAhead` and `birdsScatter` in
+  `BARKS`.
 - After editing, run `node tools/check.mjs` — it confirms every price, order link and station
   is still present. GitHub Pages updates within a few minutes.
 

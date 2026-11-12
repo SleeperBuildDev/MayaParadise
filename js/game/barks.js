@@ -1,6 +1,6 @@
 // Maya's reactions ("barks"): short, non-blocking remarks when something happens - standing still,
 // driving for ages, spinning until she is dizzy, braking hard, passing a place, finishing a room,
-// switching language or sound, late at night... She says them in a small bubble above her head
+// switching language or sound, late at night, scaring the birds off the road... She says them in a small bubble above her head
 // (ui.bark) with a matching emote, face, particles and sound; the game never stops for them.
 //
 // The words live in strings.js (BARKS, BARK_PLACES). This file only decides when, and how she acts.
@@ -67,6 +67,8 @@ const SPEC = {
   longSession: { emote: 'bow', face: 'heart', fx: [['heart', 4, 0.6]], sound: 'sparkle', cd: 0, max: 1 },
   breakTime: { emote: 'nod', face: 'smile', fx: [['bulb', 1, 0.3]], sound: 'chime', cd: 0, max: 1 },
   tabBack: { event: true, emote: 'wave', face: 'happy', fx: [['sparkle', 6, 0.3]], sound: 'chime', cd: 60, max: 3 },
+  birdsAhead: { event: true, emote: 'point', face: 'happy', fx: [['note', 2, 0.3, 0.4, 0.5]], sound: 'chirp', cd: 90, max: 2 },
+  birdsScatter: { urgent: true, face: 'surprised', hold: 1.4, emoteAt: 1.0, emote: 'laugh', fx: [['exclaim', 1, 0]], cd: 30, max: 4 },
   landscape: { event: true, emote: 'thumbsUp', face: 'star', fx: [['sparkle', 6, 0.3]], sound: 'sparkle', cd: 0, max: 1 },
 };
 
@@ -222,7 +224,10 @@ export function createBarks(game) {
     const w = window.innerWidth, h = window.innerHeight;
     if (!landscapeAsked && T > 5 && w > h && Math.min(w, h) < 520) { landscapeAsked = true; queue('landscape', 1.5, 10); }
   };
+  // the road birds (world/birds.js): 'ahead' as the car comes up to a flock, 'scatter' when it takes off
+  const onBirds = (e) => (e.detail?.kind === 'ahead' ? queue('birdsAhead', 0.25, 2.5) : queue('birdsScatter', 0.25, 4.5));
   document.addEventListener('mw:lang', onLang);
+  document.addEventListener('mw:birds', onBirds);
   document.addEventListener('mw:order', onOrder);
   document.addEventListener('visibilitychange', onVis);
   window.addEventListener('resize', onResize);
@@ -474,6 +479,7 @@ export function createBarks(game) {
     },
     dispose() {
       document.removeEventListener('mw:lang', onLang);
+      document.removeEventListener('mw:birds', onBirds);
       document.removeEventListener('mw:order', onOrder);
       document.removeEventListener('visibilitychange', onVis);
       window.removeEventListener('resize', onResize);

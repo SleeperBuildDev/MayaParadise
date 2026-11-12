@@ -439,6 +439,7 @@ const KINDS = {
   puff: { r: CUBE, mode: M_PUFF, count: 6, colors: [P.cloud, P.white, P.paper], size: [0.12, 0.26], life: [0.55, 0.9], spread: 0.34, up: 0.3, drag: 3.5, spin: 1.5 },
   dust: { r: CUBE, mode: M_DEBRIS, count: 8, colors: [P.parchment, '#CDBF9F', P.wood], size: [0.05, 0.1], life: [0.45, 0.75], spread: 0.6, up: 0.3, gravity: 5, drag: 3, spin: 6 },
   ink: { r: CUBE, mode: M_DEBRIS, count: 8, colors: [P.ink, '#2B3550', P.maroonDeep], size: [0.045, 0.085], life: [0.55, 0.85], spread: 0.45, up: 0.7, gravity: 7, drag: 1.2, spin: 8 },
+  feather: { r: CUBE, mode: M_DEBRIS, count: 6, colors: ['#FFFDF8', '#E9DCC4', '#B7B3C8'], size: [0.05, 0.08], life: [0.9, 1.4], spread: 0.55, up: 0.7, gravity: 1.1, drag: 3.6, spin: 4 },
   bits: { r: CUBE, mode: M_DEBRIS, count: 6, colors: [SPARKLE_GOLD, GOLD_LIGHT], size: [0.05, 0.085], life: [0.5, 0.8], spread: 0.65, up: 0.6, gravity: 2.2, drag: 2.2, spin: 7 },
 };
 

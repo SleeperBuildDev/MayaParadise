@@ -259,4 +259,16 @@ export const BARKS = {
   landscape: [
     { my: 'ဖန်သားပြင် ကျယ်ကျယ်နဲ့ဆို ပိုလှတယ်ရှင့်!', en: 'The wide view looks so pretty!' },
   ],
+  // the little birds on the road
+  birdsAhead: [
+    { my: 'ရှေ့မှာ ငှက်ကလေးတွေ! ဖြည်းဖြည်း မောင်းနော်', en: 'Little birds ahead! Go easy!' },
+    { my: 'ကြည့်… ငှက်လေးတွေ အစာစားနေကြတယ်', en: 'Look… the birds are having a snack!' },
+    { my: 'ရှူး… ငှက်ကလေးတွေ မလန့်ပါစေနဲ့နော်', en: "Shh… let's not scare the birds!" },
+  ],
+  birdsScatter: [
+    { my: 'အိုး… ငှက်ကလေးတွေ လန့်ပြီး ပျံကုန်ပြီ! ဆောရီးနော်', en: 'Oops… sorry, little birds!' },
+    { my: 'ဝိုး… ငှက်လေးတွေ ပျံတက်သွားတာ လှလိုက်တာ!', en: 'Wow, look at them all fly up!' },
+    { my: 'ပြန်ဆင်းလာကြနော် ငှက်ကလေးတို့ရေ', en: 'Come back down, little birds!' },
+    { my: 'ဖြည်းဖြည်း မောင်းရင် ငှက်လေးတွေ မလန့်ဘူးလေ ဟီး', en: "If we go slow, they won't get scared, hehe!" },
+  ],
 };

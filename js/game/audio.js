@@ -8,15 +8,15 @@
 //   audio.play('honk');
 //   audio.engine(0.6);   // continuous soft hum, 0 = silent (call every frame if you like)
 //   audio.muted = true;  // remembered in localStorage 'mw-muted'
-export const SOUNDS = ['honk', 'bell', 'page', 'step', 'pop', 'door', 'click', 'type', 'whoosh', 'chime', 'sparkle', 'kiss', 'cheer'];
+export const SOUNDS = ['honk', 'bell', 'page', 'step', 'pop', 'door', 'click', 'type', 'whoosh', 'chime', 'sparkle', 'kiss', 'cheer', 'flutter', 'chirp'];
 
 const STORE_KEY = 'mw-muted';
 const MASTER = 0.8;
 const MAX_VOICES = 18;
 // minimum spacing between two plays of the same sound (s), so per-letter ticks never pile up
-const SPACING = { type: 0.03, step: 0.08, click: 0.04, pop: 0.03, sparkle: 0.06, default: 0.035 };
+const SPACING = { chirp: 0.25, flutter: 0.3, type: 0.03, step: 0.08, click: 0.04, pop: 0.03, sparkle: 0.06, default: 0.035 };
 // Per-sound loudness trim (measured with renderOffline): events sit around 0.1 peak, UI ticks well below.
-const LEVEL = { honk: 0.7, bell: 0.8, chime: 0.72, cheer: 0.87, page: 2.2, door: 1.4, whoosh: 1.2, kiss: 1.1, pop: 1.2, sparkle: 1.35, step: 1.75, click: 1.3, type: 1.45 };
+const LEVEL = { honk: 0.7, bell: 0.8, chime: 0.72, cheer: 0.87, page: 2.2, door: 1.4, whoosh: 1.2, kiss: 1.1, pop: 1.2, sparkle: 1.35, step: 1.75, click: 1.3, type: 1.45, flutter: 1.5, chirp: 0.75 };
 // C major pentatonic, octaves 5-7
 const PENTA = [523.25, 587.33, 659.25, 783.99, 880.0, 1046.5, 1174.66, 1318.51, 1567.98, 1760.0, 2093.0, 2349.32, 2637.02, 3135.96, 3520.0];
 
@@ -205,6 +205,31 @@ const SYNTH = {
     tone(ac, out, { f: 620, f1: 1320, t: t + 0.01, a: 0.012, d: 0.12, g: 0.09 });
     tone(ac, out, { f: 1760, t: t + 0.13, a: 0.003, d: 0.22, g: 0.025 });
     return t + 0.4;
+  },
+  // Flutter: a flock taking off - a quick run of soft wing claps that thins out, over a breathy swoosh.
+  flutter(ac, out, t, nb) {
+    let t0 = t;
+    for (let i = 0; i < 11; i++) {
+      const k = vary(0.12);
+      hiss(ac, out, nb, { t: t0, a: 0.003, d: 0.03 + i * 0.002, g: 0.085 * (1 - i / 14), type: 'lowpass', f: 1300 * k, q: 0.8 });
+      hiss(ac, out, nb, { t: t0, a: 0.002, d: 0.014, g: 0.02, f: 2600 * k, q: 1.4 });
+      t0 += (0.038 + i * 0.006) * vary(0.2);
+    }
+    hiss(ac, out, nb, { t, a: 0.05, d: 0.45, g: 0.03, f: 700, f1: 1800, q: 0.9 });
+    return t0 + 0.08;
+  },
+  // Chirp: two or three quick little bird tweets, a different tune every time.
+  chirp(ac, out, t) {
+    const n = 2 + ((Math.random() * 2) | 0);
+    let t0 = t;
+    for (let i = 0; i < n; i++) {
+      const f = (2900 + Math.random() * 900) * (i === n - 1 ? 1.12 : 1);
+      const up = Math.random() < 0.6;
+      tone(ac, out, { f, f1: up ? f * 1.35 : f * 0.78, t: t0, a: 0.004, d: 0.055, g: 0.05 });
+      tone(ac, out, { type: 'triangle', f: f / 2, f1: up ? f * 0.66 : f * 0.4, t: t0, a: 0.004, d: 0.045, g: 0.012 });
+      t0 += 0.07 + Math.random() * 0.05;
+    }
+    return t0 + 0.06;
   },
   // Cheer: rising arpeggio (C E G C E) with a bright last note.
   cheer(ac, out, t) {
