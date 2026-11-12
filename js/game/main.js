@@ -12,7 +12,9 @@ import * as shadowKit from './shadows.js';
 // (namespace import: a browser still holding the previous shadows.js for a few minutes keeps working)
 const { enableShadows, setupSceneShadows } = shadowKit;
 const markShadows = shadowKit.markShadows || shadowKit.markCasters;
-import { createDaytime, buildHeadlightBeams, buildHeadlamp } from './daytime.js';
+import * as dayKit from './daytime.js';
+// (namespace import: a browser still holding the previous daytime.js for a few minutes keeps working)
+const { createDaytime, buildHeadlightBeams } = dayKit;
 import { createMusic } from './music.js';
 import { preloadArt } from './art.js';
 
@@ -157,8 +159,8 @@ class Game {
     this.headlights = buildHeadlightBeams();
     this.headlights.position.set(0, 0, 1.12);
     this.car.root.add(this.headlights);
-    this.headlamp = buildHeadlamp(); // a real spot light: walls light up as the car comes closer
-    this.car.root.add(this.headlamp);
+    this.headlamp = dayKit.buildHeadlamp?.() || null; // a real spot light: walls light up as the car comes closer
+    if (this.headlamp) this.car.root.add(this.headlamp);
     this.gradeEl = document.createElement('div');
     this.gradeEl.id = 'grade';
     canvas.insertAdjacentElement('afterend', this.gradeEl);
