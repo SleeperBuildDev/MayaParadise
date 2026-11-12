@@ -522,7 +522,7 @@ const STATIONS = [
     line: { my: '၃ မိနစ်ကနေ ၅ မိနစ်၊ အနေတော်လေးပါရှင့်', en: 'Three to five minutes: just the right length.' },
   },
   {
-    id: 'scr-long', x: 1.98, z: -1.55, look: { x: 2.1, z: BOOK_FRONT }, emote: 'hugBook', face: 'star', labelY: 2.45,
+    id: 'scr-long', x: 1.98, z: -1.55, look: { x: 2.1, z: BOOK_FRONT }, emote: 'thumbsUp', face: 'star', labelY: 2.45,
     line: { my: '၆ မိနစ်နဲ့အထက် Long Form တွေလည်း ရေးပေးတယ်နော်', en: 'I write Long Form scripts of six minutes and more, too!' },
   },
   {

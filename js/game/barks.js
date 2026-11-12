@@ -50,7 +50,7 @@ const SPEC = {
   leftEmpty: { event: true, emote: 'lookAround', face: 'shy', fx: [['question', 1, 0.3]], sound: 'pop', cd: 60, max: 2 },
   roomComplete: { emote: 'cheer', face: 'star', fx: [['confetti', 16, 0.2], ['sparkle', 8, 0.5]], sound: 'cheer', urgent: true, cd: 5, max: 6 },
   allPlaces: { event: true, emote: 'dance', face: 'heart', fx: [['confetti', 18, 0.2], ['heart', 5, 0.8]], sound: 'cheer', cd: 0, max: 1 },
-  roomLong: { emote: 'hugBook', face: 'happy', fx: [['heart', 3, 0.4]], sound: 'pop', cd: 0, max: 1 },
+  roomLong: { emote: 'cheer', face: 'happy', fx: [['heart', 3, 0.4]], sound: 'pop', cd: 0, max: 1 },
   wall: { face: 'surprised', hold: 1.3, emoteAt: 0.9, emote: 'laugh', fx: [['star', 3, 0, 0.3, 0.4]], sound: 'pop', urgent: true, cd: 40, max: 2 },
   sheetPrice: { emote: 'phone', face: 'wink', sheet: true, subtle: true, cd: 120, max: 2 },
   sheetLong: { emote: 'nod', face: 'smile', sheet: true, subtle: true, cd: 120, max: 2 },
