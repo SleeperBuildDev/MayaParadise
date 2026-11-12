@@ -82,7 +82,7 @@ async function start({ autoplay = false } = {}) {
   const creep = setInterval(() => setP(p + (0.85 - p) * 0.06), 120);
   try {
     sessionStorage.setItem('mw-running', '1');
-    const { startGame } = await import('./game/main.js?v=4');
+    const { startGame } = await import('./game/main.js?v=5');
     const game = await startGame({ tier: pickTier(info), onProgress: setP, audioCtx: window.__mwAudioCtx || null, startHash: location.hash.slice(1), autoplay });
     clearInterval(creep);
     setP(1);

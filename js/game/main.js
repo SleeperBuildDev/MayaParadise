@@ -16,7 +16,7 @@ import * as dayKit from './daytime.js';
 // (namespace import: a browser still holding the previous daytime.js for a few minutes keeps working)
 const { createDaytime, buildHeadlightBeams } = dayKit;
 import { createMusic } from './music.js';
-import { createRoadBirds } from './world/birds.js';
+import { createRoadBirds } from './world/birds.js?v=5'; // ?v= forces phones to drop an old cached copy
 import { preloadArt } from './art.js';
 
 const PHOTOS = { about: 'img/maya-about.webp', library: 'img/maya-book.webp' };
