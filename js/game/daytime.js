@@ -402,6 +402,30 @@ function updateWindowViews(scene, room, s) {
 }
 
 /**
+ * A warm "hero" light that follows the player at night (main.js moves it onto the car or Maya):
+ * a soft point light above them and a gentle glow on the ground. Always present (off by day).
+ */
+export function buildHeroLight() {
+  const g = new THREE.Group();
+  g.name = 'heroLight';
+  // warm light just above the player: Maya and the car stay readable after dark
+  const lamp = new THREE.PointLight('#FFD7A0', 0, 6, 1.5);
+  lamp.position.set(0.4, 2.4, 1.2); // a little in front (toward the camera) so faces catch it
+  lamp.castShadow = false;
+  // soft glow on the ground around them
+  const tex = discTexture('rgba(255,214,150,0.75)', 'rgba(255,190,120,0.22)', 0.4);
+  const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false, fog: false });
+  const glow = new THREE.Mesh(new THREE.PlaneGeometry(3.4, 3.4).rotateX(-Math.PI / 2), mat);
+  glow.position.y = 0.04;
+  glow.renderOrder = 2;
+  glow.raycast = () => {};
+  glow.userData.shadow = 'none';
+  g.add(lamp, glow);
+  g.userData = { light: lamp, glow: mat };
+  return g;
+}
+
+/**
  * The car's real headlights: one spot light at the front that lights up whatever it points at
  * (walls get brighter and the pool of light tightens as the car gets closer, like real life).
  * Always present (intensity 0 by day) so turning it on never recompiles shaders.

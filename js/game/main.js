@@ -25,6 +25,7 @@ const deg = THREE.MathUtils.radToDeg;
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const params = new URLSearchParams(location.search);
 const HEADLAMP = 26; // car headlight strength at full night
+const HERO_LIGHT = 9; // the warm light that follows Maya and the car at night
 const store = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
 const call = (o, fn, ...a) => (o && typeof o[fn] === 'function' ? o[fn](...a) : undefined);
 
@@ -161,6 +162,8 @@ class Game {
     this.car.root.add(this.headlights);
     this.headlamp = dayKit.buildHeadlamp?.() || null; // a real spot light: walls light up as the car comes closer
     if (this.headlamp) this.car.root.add(this.headlamp);
+    this.heroLight = dayKit.buildHeroLight?.() || null; // keeps Maya and the car easy to see at night
+    if (this.heroLight) this.world.scene.add(this.heroLight);
     this.gradeEl = document.createElement('div');
     this.gradeEl.id = 'grade';
     canvas.insertAdjacentElement('afterend', this.gradeEl);
@@ -322,6 +325,10 @@ class Game {
     this.rig.update(dt);
     // world: the sun's shadow covers exactly what the camera sees (texel-snapped); rooms: fitted once
     if (this.mode === 'world') this.worldShadow?.fitCamera?.(this.camera);
+    if (this.heroLight && this.mode === 'world') {
+      const p = this.worldWalk ? this.maya.root.getWorldPosition(this.tmp2) : this.car.root.position;
+      this.heroLight.position.set(p.x, this.car.root.position.y, p.z);
+    }
     if (this.day.update(dt)) this.applyDayLook();
     const cine = !!this.rig.cinematic;
     if (cine !== this.cineGrade) { this.cineGrade = cine; this.day.grade(this.gradeEl, { indoor: this.mode === 'room', cinematic: cine ? 1 : 0 }); }
@@ -456,6 +463,12 @@ class Game {
     const beams = this.headlights?.userData.mat;
     if (beams) { beams.opacity = d.headlights * 0.5; this.headlights.visible = d.headlights > 0.02; }
     if (this.headlamp) this.headlamp.userData.light.intensity = d.headlights * HEADLAMP;
+    if (this.heroLight) {
+      const k = d.lamps; // 0 by day, ~0.7 at dusk, 1 at night
+      this.heroLight.userData.light.intensity = k * HERO_LIGHT;
+      this.heroLight.userData.glow.opacity = k * 0.55;
+      this.heroLight.visible = true; // keep the light in the scene so shaders never recompile
+    }
     d.grade(this.gradeEl, { indoor: this.mode === 'room', cinematic: this.rig?.cinematic ? 1 : 0 });
   }
 
