@@ -223,6 +223,24 @@ body.playing #cover, body.playing #classic { display: none; }
 #bubble.show { transform: translate(-50%, -100%) scale(1); }
 #bubble canvas, #bubble img { width: 100%; height: 100%; display: block; }
 
+/* Maya's short reactions (barks): a speech bubble above her head; never blocks taps */
+#bark { position: absolute; left: 0; top: 0; z-index: 5 !important; max-width: min(336px, calc(100% - 32px)); pointer-events: none; opacity: 0; visibility: hidden;
+  transform: translate3d(-9999px, 0, 0); transition: opacity .35s ease, visibility 0s linear .35s; will-change: transform; --tx: 50%; }
+#bark.show { opacity: 1; visibility: visible; transition: opacity .18s ease; }
+#bark .bark-in { position: relative; display: flex; align-items: center; gap: 8px; padding: 5px 13px 5px 5px; border-radius: 18px; background: rgba(255, 252, 244, .97);
+  border: 2px solid var(--gold); box-shadow: 0 6px 18px rgba(74, 20, 28, .2), 0 1px 3px rgba(42, 33, 24, .14); transform-origin: var(--tx) 100%; }
+#bark.show .bark-in { animation: barkPop .32s cubic-bezier(.3, 1.5, .5, 1); }
+#bark .bark-in::after { content: ""; position: absolute; left: var(--tx); bottom: -8px; width: 13px; height: 13px; margin-left: -7px; background: rgba(255, 252, 244, .97);
+  border-right: 2px solid var(--gold); border-bottom: 2px solid var(--gold); transform: rotate(45deg); border-radius: 0 0 3px 0; }
+#bark .bark-face { flex: none; width: 38px; height: 38px; border-radius: 12px; background: var(--cream); border: 1.5px solid rgba(164, 122, 44, .5); }
+#bark .bark-face[hidden] { display: none; }
+#bark .bark-text { margin: 0; min-width: 0; color: var(--ink); font-weight: 700; font-size: 15px; line-height: 1.75; word-break: keep-all; overflow-wrap: anywhere; }
+html[data-lang="en"] #bark .bark-text { line-height: 1.4; }
+#bark.subtle .bark-in { padding: 3px 11px 3px 4px; background: rgba(255, 252, 244, .9); }
+#bark.subtle .bark-face { width: 30px; height: 30px; border-radius: 10px; }
+#bark.subtle .bark-text { font-size: 14px; }
+@keyframes barkPop { from { transform: scale(.4) translateY(10px); opacity: 0; } }
+
 #joystick { position: absolute; width: 112px; height: 112px; margin: -56px 0 0 -56px; border-radius: 50%; background: rgba(246, 240, 226, .35); border: 2px solid rgba(255, 255, 255, .8);
   box-shadow: 0 2px 12px rgba(42, 33, 24, .2); opacity: 0; transition: opacity .12s; pointer-events: none; }
 #joystick.on { opacity: 1; }
@@ -260,3 +278,13 @@ body.playing #cover, body.playing #classic { display: none; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
+
+/* Time-of-day colour grade + vignette over the 3D (js/game/daytime.js sets the variables). */
+#grade {
+  position: absolute; inset: 0; pointer-events: none; mix-blend-mode: multiply;
+  background:
+    radial-gradient(ellipse at 50% 46%, rgba(0, 0, 0, 0) 52%, rgba(20, 10, 30, var(--vig, 0)) 100%),
+    color-mix(in srgb, var(--grade, #fff) calc(var(--grade-k, 0) * 100%), transparent);
+  transition: background .8s ease;
+}
+#game > #grade { z-index: 1; }

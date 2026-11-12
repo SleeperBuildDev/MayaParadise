@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="my">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>daytime viewer</title>
+<link rel="stylesheet" href="dev.css">
+<script>
+// Surface errors and three.js warnings in the page (headless screenshots can't show the console).
+window.__log = [];
+const showLog = () => {
+  let el = document.getElementById('log');
+  if (!el) { el = document.createElement('pre'); el.id = 'log'; el.style.cssText = 'position:fixed;right:6px;top:6px;max-width:60vw;margin:0;font:11px/1.4 monospace;background:#fff3f0;color:#8a1020;padding:6px;white-space:pre-wrap;z-index:9'; (document.body || document.documentElement).appendChild(el); }
+  el.textContent = window.__log.slice(-6).join('\n');
+};
+for (const k of ['warn', 'error']) { const orig = console[k].bind(console); console[k] = (...a) => { window.__log.push(k.toUpperCase() + ': ' + a.map(String).join(' ').slice(0, 220)); showLog(); orig(...a); }; }
+window.onerror = (m, s, l) => { window.__log.push('ERR ' + m + ' @' + (s || '').split('/').pop() + ':' + l); showLog(); };
+</script>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="grade" style="position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 46%, rgba(0,0,0,0) 52%, rgba(20,10,30,var(--vig,0)) 100%), color-mix(in srgb, var(--grade,#fff) calc(var(--grade-k,0) * 100%), transparent);mix-blend-mode:multiply"></div>
+<div id="stats"></div>
+<script type="module">
+// Usage: dev/world.html?view=overview | ?view=follow | ?place=<id>
+//   &t=<seconds>  freeze time; the stand-in car's autopilot tour is simulated up to t (deterministic)
+//   &car=0        hide the stand-in car (world-only renderer stats)
+//   &tilt=<deg>   override the camera tilt; &detail=low for the low tier
+//   &tier=low|mid|high  materials, environment and shadow map of that tier (default high);
+//   &flat=1       the old look: no game lighting staging (no shadows, no environment map)
+//   &cam=x,y,z&look=x,y,z  a fixed camera (same numbers as the game's rig.shot(), for before/after shots)
+import * as THREE from '../js/game/three.js';
+import { fontsReady, PALETTE, setMaterialQuality } from '../js/game/toon.js';
+import { VoxelBuilder } from '../js/game/voxel.js';
+import { stageScene } from '../js/game/shadows.js';
+import { createWorld } from '../js/game/world/world.js';
+import { startDevView } from './devview.js';
+import { createDaytime } from '../js/game/daytime.js';
+
+window.addEventListener('unhandledrejection', (e) => { document.title = 'ERR ' + (e.reason?.message || e.reason); });
+const params = new URLSearchParams(location.search);
+// &vw=412&vh=915: render at an exact phone viewport (headless Chrome's window has a minimum width).
+if (params.has('vw')) {
+  const vw = parseInt(params.get('vw'), 10), vh = parseInt(params.get('vh') || '915', 10);
+  Object.defineProperty(window, 'innerWidth', { get: () => vw, configurable: true });
+  Object.defineProperty(window, 'innerHeight', { get: () => vh, configurable: true });
+}
+await fontsReady();
+const tier = ['low', 'mid', 'high'].includes(params.get('tier')) ? params.get('tier') : 'high';
+setMaterialQuality(tier); // before anything builds a material
+const placeId = params.get('place');
+const view = params.has('cam') ? 'cam' : placeId ? 'place' : params.get('view') || 'overview';
+const frozen = params.has('t') ? parseFloat(params.get('t')) : null;
+const buildStart = performance.now();
+const world = createWorld({ detail: params.get('detail') || 'high' });
+const buildMs = performance.now() - buildStart;
+await world.ready;
+const { scene, drive } = world;
+window.__world = world;
+
+// Stand-in car: a simple maroon block with a cream seat and dark wheels.
+const v = new VoxelBuilder();
+v.box(0, 0.45, 0, 1.3, 0.48, 2.2, PALETTE.maroon);
+v.box(0, 0.76, -0.2, 1.1, 0.22, 0.8, PALETTE.cream);
+v.box(0, 0.74, 0.62, 1.12, 0.2, 0.5, PALETTE.maroonDeep);
+v.box(0, 0.5, 1.11, 1.0, 0.14, 0.04, PALETTE.gold);
+for (const sx of [-1, 1]) for (const sz of [-1, 1]) v.box(sx * 0.62, 0.24, sz * 0.66, 0.2, 0.44, 0.44, PALETTE.ink);
+const car = v.mesh({ outline: true });
+car.visible = params.get('car') !== '0';
+scene.add(car);
+
+// Autopilot tour round the ring, in order, pausing on each pad.
+const order = ['about', 'library', 'templates', 'scripts', 'content', 'contact'];
+let idx = 0, wait = 0.6;
+drive.teleport('about');
+function tourStep(dt) {
+  if (wait > 0) {
+    wait -= dt;
+    if (wait <= 0) {
+      idx = (idx + 1) % order.length;
+      drive.goTo(order[idx]);
+      world.setRoute(drive.route(order[idx]));
+    }
+  }
+  const r = drive.update(dt);
+  if (r.arrived) { wait = 1.0; world.setRoute(null); }
+  car.position.copy(drive.state.position);
+  car.rotation.y = drive.state.heading;
+}
+if (frozen !== null) for (let s = 0; s < frozen; s += 1 / 60) tourStep(1 / 60);
+else tourStep(0);
+
+// Cameras (re-framed on resize: headless Chrome resizes the page just before capturing).
+const camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.1, 1200);
+const tmpV = new THREE.Vector3();
+function fitDistance(target, tiltDeg, pts, margin = 0.92) {
+  const tilt = THREE.MathUtils.degToRad(tiltDeg);
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  let lo = 2, hi = 800;
+  for (let it = 0; it < 40; it++) {
+    const d = (lo + hi) / 2;
+    camera.position.set(target.x, target.y + Math.sin(tilt) * d, target.z + Math.cos(tilt) * d);
+    camera.lookAt(target);
+    camera.updateMatrixWorld();
+    let ok = true;
+    for (const p of pts) {
+      tmpV.copy(p).project(camera);
+      if (Math.abs(tmpV.x) > margin || Math.abs(tmpV.y) > margin) { ok = false; break; }
+    }
+    if (ok) hi = d; else lo = d;
+  }
+  return hi;
+}
+function boxPoints(b) {
+  const pts = [];
+  for (const x of [b.min.x, b.max.x]) for (const y of [b.min.y, b.max.y]) for (const z of [b.min.z, b.max.z]) pts.push(new THREE.Vector3(x, y, z));
+  return pts;
+}
+function place(target, tilt, d) {
+  const t = THREE.MathUtils.degToRad(tilt);
+  camera.position.set(target.x, target.y + Math.sin(t) * d, target.z + Math.cos(t) * d);
+  camera.lookAt(target);
+}
+
+let followCam = null;
+const placeTarget = world.places.find((q) => q.id === placeId) || world.places[0];
+const ORIG_BOX = {
+  about: [-2.6, 0, 3.22, 2.6, 5.7, 9.54], templates: [-17.4, 0, -11.2, -10.6, 5.41, -5.04], scripts: [-4, 0, -15.65, 4.75, 7.4, -9.85],
+  content: [10.45, 0, -12.55, 18.85, 4.83, -5.65], library: [-22.15, 0, -1.7, -14.8, 6.65, 3.08], contact: [14.87, 0, -1.9, 23.61, 11.85, 3.71],
+};
+if (view === 'place') {
+  // Close-up of one landmark: hide the others so nothing stands in front of it (&others=1 keeps them).
+  if (params.get('others') !== '1') for (const q of world.places) if (q !== placeTarget) q.group.visible = false;
+  if (!params.has('car')) car.visible = false;
+}
+function frame() {
+  const aspect = innerWidth / innerHeight;
+  if (view === 'cam') {
+    camera.aspect = aspect;
+    camera.updateProjectionMatrix();
+    const [cx, cy, cz] = params.get('cam').split(',').map(Number), [lx, ly, lz] = (params.get('look') || '0,0,0').split(',').map(Number);
+    camera.position.set(cx, cy, cz);
+    camera.lookAt(lx, ly, lz);
+    world.fitFog(camera.position.length());
+  } else if (view === 'overview') {
+    const tilt = parseFloat(params.get('tilt') || (aspect < 1 ? 64 : 56));
+    const target = new THREE.Vector3(0, 0, 1);
+    const d = fitDistance(target, tilt, boxPoints(new THREE.Box3(new THREE.Vector3(-28.5, -2.5, -20), new THREE.Vector3(28.5, 12.8, 20.5))), 0.96);
+    place(target, tilt, d);
+    world.fitFog(d);
+  } else if (view === 'place') {
+    const tilt = parseFloat(params.get('tilt') || 36);
+    scene.updateMatrixWorld(true);
+    // &frame=orig frames the landmark's original (pre-detail-pass) body box, so before/after shots match.
+    const ob = params.get('frame') === 'orig' && ORIG_BOX[placeTarget.id];
+    const box = ob ? new THREE.Box3(new THREE.Vector3(ob[0], ob[1], ob[2]), new THREE.Vector3(ob[3], ob[4], ob[5])) : new THREE.Box3().setFromObject(placeTarget.group.children[0]);
+    box.expandByScalar(0.6);
+    const target = new THREE.Vector3((box.min.x + box.max.x) / 2, box.max.y * 0.38, (box.min.z + box.max.z) / 2 + 0.6);
+    const d = fitDistance(target, tilt, boxPoints(box), 0.86);
+    place(target, tilt, d);
+    world.fitFog(d);
+  } else {
+    followCam ||= { tilt: parseFloat(params.get('tilt') || 52), dist: 30, target: new THREE.Vector3(), init: false };
+  }
+}
+frame();
+addEventListener('resize', frame);
+
+function updateFollow(dt) {
+  if (!followCam) return;
+  // Game camera: looks north, tilted 52 deg, ~12 m of world width in portrait (22 m landscape).
+  const aspect = innerWidth / innerHeight;
+  const hfov = 2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(22.5)) * aspect);
+  followCam.dist = (aspect < 1 ? 12 : 22) / 2 / Math.tan(hfov / 2);
+  const s = drive.state;
+  const look = Math.min(4, s.speed * 0.4);
+  // Car at ~58% of screen height: aim a little north of it, plus look-ahead.
+  tmpV.set(s.position.x + Math.sin(s.heading) * look, 0, s.position.z + Math.cos(s.heading) * look - followCam.dist * 0.084);
+  if (!followCam.init || frozen !== null) { followCam.target.copy(tmpV); followCam.init = true; }
+  else followCam.target.lerp(tmpV, 1 - Math.exp(-dt / 0.25));
+  place(followCam.target, followCam.tilt, followCam.dist);
+}
+updateFollow(0);
+
+// &dump=1: print world.places (pads, headings, doors, label anchors) over the canvas.
+if (params.get('dump') === '1') {
+  const f = (v) => `${v.x.toFixed(2)},${v.y.toFixed(2)},${v.z.toFixed(2)}`;
+  const pre = document.body.appendChild(document.createElement('pre'));
+  pre.style.cssText = 'position:fixed;left:6px;top:6px;margin:0;font:12px/1.5 monospace;background:rgba(255,255,255,.85);padding:6px;color:#2A2118';
+  pre.textContent = world.places.map((p) => `${p.id.padEnd(9)} pad ${f(p.pad)} h ${(p.padHeading * 180 / Math.PI).toFixed(0)}° door ${f(p.door)} label ${f(p.labelAnchor)} tap ${p.tapRadius}`).join('\n') + `\ncreateWorld ${buildMs.toFixed(0)} ms ` + (window.__T ? window.__T.map((x, i, a) => (i ? `${x[0]} ${(x[1] - a[i - 1][1]).toFixed(0)}` : '')).join(' ') : '');
+}
+
+// The game's look: tone mapping, lighting preset + sky environment, sun shadows fitted to the view.
+let staged = null;
+startDevView({
+  scene,
+  camera,
+  update: (dt, t, { renderer }) => {
+    if (!staged && params.get('flat') !== '1') {
+      staged = stageScene(renderer, scene, { preset: 'outdoor', tier });
+      window.__day = createDaytime({ renderer, tier, params });
+      window.__day.applyWorld(world, { shadow: staged });
+      window.__day.grade(document.getElementById('grade'));
+      document.title = 'daytime ' + window.__day.period;
+    }
+    if (frozen === null) tourStep(dt);
+    // &reveal=<s>: preview the intro pop-up at s seconds (&reveal=loop replays it every 3 s).
+    if (params.has('reveal')) world.reveal(params.get('reveal') === 'loop' ? t % 3 : parseFloat(params.get('reveal')));
+    world.update(dt, t);
+    updateFollow(dt);
+    staged?.fitCamera(camera);
+  },
+});
+</script>
+</body>
+</html>

@@ -8,7 +8,11 @@ import { createUI, tr, lang } from './ui.js';
 import * as pages from './pages.js';
 import { createWalker } from './nav.js';
 import { LINES, TIPS, STATION_LABELS, ARRIVE_EMOTE } from './strings.js';
-import { enableShadows, setupSceneShadows, markCasters } from './shadows.js';
+import * as shadowKit from './shadows.js';
+// (namespace import: a browser still holding the previous shadows.js for a few minutes keeps working)
+const { enableShadows, setupSceneShadows } = shadowKit;
+const markShadows = shadowKit.markShadows || shadowKit.markCasters;
+import { createDaytime, buildHeadlightBeams } from './daytime.js';
 import { preloadArt } from './art.js';
 
 const PHOTOS = { about: 'img/maya-about.webp', library: 'img/maya-book.webp' };
@@ -135,12 +139,24 @@ class Game {
     this.revealT = null;
     onProgress?.(0.62);
 
+    // Sun shadows from everything solid (buildings, trees, lamps, the car and Maya)
     this.shadowsOn = enableShadows(this.renderer, this.tier);
     if (this.shadowsOn) {
-      markCasters(this.car.root);
-      markCasters(this.maya.root);
-      this.worldShadow = setupSceneShadows(this.world.scene, { tier: this.tier, extent: 7 });
+      markShadows(this.car.root);
+      markShadows(this.maya.root);
+      // the shadow never needs to cover more than the open book (plus a little cloud under its edge)
+      const bounds = new THREE.Box3(new THREE.Vector3(-30, -2, -22), new THREE.Vector3(30, 13, 22));
+      this.worldShadow = setupSceneShadows(this.world.scene, { tier: this.tier, bounds, heights: [0, 4.5] });
     }
+    // Morning, noon, evening or night from the player's own clock (?time=21 or ?period=night to test)
+    this.day = createDaytime({ renderer: this.renderer, tier: this.tier, params, sunScale: 0.62 });
+    this.headlights = buildHeadlightBeams();
+    this.headlights.position.set(0, 0, 1.12);
+    this.car.root.add(this.headlights);
+    this.gradeEl = document.createElement('div');
+    this.gradeEl.id = 'grade';
+    canvas.insertAdjacentElement('afterend', this.gradeEl);
+    this.applyDayLook();
     this.world.scene.add(this.car.root);
     this.car.seat.add(this.maya.root);
     this.maya.root.position.set(0, 0, 0);
@@ -172,6 +188,8 @@ class Game {
     this.input = createInput(canvas, document.getElementById('joystick'));
     this.bindInput();
     this.bindEvents();
+    // Maya's short reactions (js/game/barks.js); the game runs the same without them
+    import('./barks.js').then((b) => { if (typeof this.ui.bark === 'function') this.barks = b.createBarks(this); }).catch((e) => console.warn('barks', e));
     this.resize();
 
     // compile shaders before showing anything (avoids first-frame hitches on phones)
@@ -294,10 +312,13 @@ class Game {
     if (this.mode === 'world') this.updateWorld(dt, t); else this.updateRoom(dt, t);
     this.fx.update(dt);
     this.rig.update(dt);
-    // keep the sun's small shadow box centred on the action
-    const focus = this.mode === 'room' ? this.maya.root.position : this.car.root.position;
-    if (this.mode === 'world') this.worldShadow?.follow(focus); else this.room?.shadow?.follow(this.tmp2.set(0, 0, 0));
+    // world: the sun's shadow covers exactly what the camera sees (texel-snapped); rooms: fitted once
+    if (this.mode === 'world') this.worldShadow?.fitCamera?.(this.camera);
+    if (this.day.update(dt)) this.applyDayLook();
+    const cine = !!this.rig.cinematic;
+    if (cine !== this.cineGrade) { this.cineGrade = cine; this.day.grade(this.gradeEl, { indoor: this.mode === 'room', cinematic: cine ? 1 : 0 }); }
     this.updateOverlay();
+    this.barks?.update(dt);
     this.governor(dt);
     // While the info sheet is up, the 3D above it is a backdrop: draw every other frame to save battery.
     this.frameN = (this.frameN || 0) + 1;
@@ -416,6 +437,17 @@ class Game {
   }
 
   // ------------------------------------------------------------------ overlay (labels, bubble)
+  /** Light the current scene for the hour: world (sun, sky, lamps, windows, headlights) or room. */
+  applyDayLook() {
+    const d = this.day;
+    if (!d) return;
+    if (this.mode === 'room' && this.room) d.applyRoom(this.room.scene);
+    else d.applyWorld(this.world, { shadow: this.worldShadow });
+    const beams = this.headlights?.userData.mat;
+    if (beams) { beams.opacity = d.headlights * 0.5; this.headlights.visible = d.headlights > 0.02; }
+    d.grade(this.gradeEl, { indoor: this.mode === 'room', cinematic: this.rig?.cinematic ? 1 : 0 });
+  }
+
   updateOverlay() {
     const W = this.viewW, H = this.viewH;
     const project = (v) => this.rig.project(v, W, H);
@@ -621,7 +653,11 @@ class Game {
     const room = await mod.buildInterior({ quality: this.tier });
     room.id = room.id || id;
     if (PHOTOS[id]) this.fillPhoto(room, PHOTOS[id]);
-    if (this.shadowsOn) room.shadow = setupSceneShadows(room.scene, { tier: this.tier, extent: Math.max(room.width, room.depth) * 0.62 });
+    if (this.shadowsOn) {
+      const hw = room.width / 2 + 0.4, hd = room.depth / 2 + 0.4;
+      const box = new THREE.Box3(new THREE.Vector3(-hw, -0.4, -hd), new THREE.Vector3(hw, (room.height || 3) + 0.4, hd));
+      room.shadow = setupSceneShadows(room.scene, { tier: this.tier, box });
+    }
     try { await this.renderer.compileAsync(room.scene, this.camera); } catch { /* optional */ }
     this.rooms.set(id, room);
     // keep memory small on phones: at most 3 rooms alive
@@ -670,6 +706,8 @@ class Game {
     // book-launch look in the library, her everyday writer outfit everywhere else
     call(this.maya, 'setOutfit', room.id === 'library' ? 'author' : 'writer');
     this.prevHeading = undefined;
+    if (this.shadowsOn) markShadows(this.maya.root);
+    this.applyDayLook();
     this.fx.attach(room.scene);
     this.activeStation = null;
     this.faceTarget = null;
@@ -775,6 +813,8 @@ class Game {
     this.mode = 'world';
     this.scene = this.world.scene;
     call(this.maya, 'setOutfit', 'writer');
+    if (this.shadowsOn) markShadows(this.maya.root);
+    this.applyDayLook();
     this.fx.attach(this.world.scene);
     this.ui.showRoomUI(false);
     this.rig.setFollow({ tilt: 52, width: 12, widthLandscape: 22, minHeight: 0, height: 0.6, bounds: null, stiffness: 5 });

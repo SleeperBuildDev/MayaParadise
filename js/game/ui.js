@@ -39,6 +39,18 @@ export function createUI(cb) {
   }
   buildDock();
 
+  // Maya's short reactions (js/game/barks.js): a small speech bubble that floats above her head,
+  // never takes taps (pointer-events: none) and fades by itself. Made here so index.html stays as is.
+  els.bark = document.createElement('div');
+  els.bark.id = 'bark';
+  els.bark.setAttribute('role', 'status');
+  els.bark.innerHTML = '<div class="bark-in"><canvas class="bark-face" width="96" height="96" aria-hidden="true"></canvas><p class="bark-text"></p></div>';
+  game.insertBefore(els.bark, $('topbar'));
+  const barkIn = els.bark.firstChild;
+  const barkFace = barkIn.querySelector('.bark-face');
+  const barkText = barkIn.querySelector('.bark-text');
+  const bark = { on: false, w: 0, h: 0, timer: 0, x: -1, y: -1, tx: -1 };
+
   els.enter.addEventListener('click', () => cb.onEnter?.());
   $('btn-exit').addEventListener('click', () => cb.onExit?.());
   $('btn-all').addEventListener('click', () => cb.onSeeAll?.());
@@ -205,10 +217,60 @@ export function createUI(cb) {
       this.bubbleTimer = setTimeout(() => els.bubble.classList.remove('show'), ms);
     },
     placeBubble(p) {
+      if (bark.on) this.placeBark(p);
       if (!p) { els.bubble.style.visibility = 'hidden'; return; }
       els.bubble.style.visibility = 'visible';
       els.bubble.style.left = `${p.x}px`;
       els.bubble.style.top = `${p.y}px`;
+    },
+
+    // ---------- Maya's reaction bubble (non-blocking) ----------
+    /** text: string; opts: { face: canvas, ms, subtle } */
+    bark(text, opts = {}) {
+      barkText.textContent = text;
+      const g = barkFace.getContext('2d');
+      g.clearRect(0, 0, 96, 96);
+      if (opts.face) g.drawImage(opts.face, 0, 0, 96, 96);
+      barkFace.hidden = !opts.face;
+      els.bark.classList.toggle('subtle', !!opts.subtle);
+      els.bark.classList.remove('show');
+      void els.bark.offsetWidth; // restart the pop-in animation
+      els.bark.classList.add('show');
+      bark.on = true;
+      bark.w = els.bark.offsetWidth;
+      bark.h = els.bark.offsetHeight;
+      bark.x = bark.y = bark.tx = -1;
+      clearTimeout(bark.timer);
+      const ms = opts.ms || Math.min(5600, Math.max(3200, 2200 + graphemes(text).length * 60));
+      bark.timer = setTimeout(() => this.hideBark(), ms);
+    },
+    hideBark() {
+      clearTimeout(bark.timer);
+      if (!bark.on) return;
+      bark.on = false;
+      els.bark.classList.remove('show');
+    },
+    get barkOpen() { return bark.on; },
+    /** Keep the bubble just above Maya's head, fully on screen, clear of the top bar and the
+     * bottom controls. p = her head top on screen (or null when she is off screen). */
+    placeBark(p) {
+      const W = window.innerWidth, H = window.innerHeight;
+      const top = 62, low = Math.max(top + bark.h, H - 270); // bubble bottom stays above the dock / card / dialogue
+      let ax = W / 2, ay = top + bark.h;
+      if (p) {
+        ax = p.x;
+        // above the round face bubble when that is showing too
+        ay = p.y - (els.bubble.classList.contains('show') ? 72 : 6);
+      }
+      const half = bark.w / 2;
+      const x = Math.round(Math.min(Math.max(ax, 16 + half), W - 16 - half));
+      const y = Math.round(Math.min(Math.max(ay, top + bark.h), low));
+      const tx = Math.round(Math.min(Math.max(ax - x + half, 22), bark.w - 22));
+      if (x !== bark.x || y !== bark.y) {
+        bark.x = x; bark.y = y;
+        els.bark.style.transform = `translate3d(${x - half}px, ${y - bark.h}px, 0)`;
+      }
+      if (tx !== bark.tx) { bark.tx = tx; els.bark.style.setProperty('--tx', `${tx}px`); }
     },
 
     tipTimer: 0,

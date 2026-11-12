@@ -181,6 +181,52 @@ The full content (prices, packages, links) lives in `index.html`; the original c
 - **Deep links:** `#<place>` or `#<station>` starts there; `?room=<id>&station=<id>` too;
   `?nointro` skips the opening. The Back button closes the sheet, then leaves the room.
 
+### `js/game/barks.js` — Maya's reactions ("barks")
+```js
+export function createBarks(game) -> barks   // created by main.js init (dynamic import)
+barks.update(dt)        // main.js frame(), once per frame after updateOverlay(); no allocation
+barks.fire(id, place?)  // debug: say one now, ignoring cooldowns and gates -> text
+barks.list / barks.log  // trigger ids / [{ t, id, text }] said this visit
+barks.dispose()
+```
+Short, non-blocking remarks in a speech bubble above Maya's head (`ui.bark(text, { face, subtle })`,
+`ui.hideBark()`, placed each frame by `ui.placeBubble` → `ui.placeBark`; `#bark` in `css/site.css`,
+`pointer-events: none`, clamped between the top bar and the bottom controls). Never the modal `say()`.
+- **Words:** `strings.js` `BARKS` (`{ my, en }` per line, `{place}` → `BARK_PLACES`). **Behaviour:**
+  the `SPEC` table in `barks.js` (emote, face, fx bursts, sound, cooldown, max per visit, `urgent`,
+  `sheet`).
+- **Inputs:** read-only polling of game state (`mode`, `room`, `busy`, `worldWalk`, `arrivedAt`,
+  `activeStation`, `visitedStations`, `ui.sheetOpen/dialogOpen/cardOpen`, `world.drive.state`,
+  `walker.heading`, `input.stick()`, `audio.muted`, `lastInput`) plus `mw:lang`, `mw:order`,
+  `visibilitychange`, `resize`. It wraps `game.tapMaya` (third tap within 10 s → a bubble instead of
+  another dialogue). No other edits to the game.
+- **Rules:** 25–37 s between ordinary barks; `urgent` ones (direct answers: dizzy, brake, bump,
+  wall, taps, language, sound, room complete) only wait 3 s; per-trigger cooldown and max per visit;
+  none during busy/cinema/iris/dialogue/the first 12 s; sheet barks only while the sheet is open
+  (smaller); a showing bubble hides when any of those start. `?barks=0` disables the automatic ones.
+- **Triggers:** idle 20/45/90 s (world or room), first manual drive, driving 60 s / 3 min, spinning
+  (> 540° heading change within 4 s → dizzy), speeding 8 s, hard brake, road end, 3 U-turns in 20 s,
+  passing an unvisited place without stopping, coming back to a place, leaving a room without a
+  station, every station in a room, all six places again (returning visitor), 3 min in one room,
+  pushing into a wall, price sheet opened / read 45 s, language, sound off/on, repeated taps / honks,
+  late night / morning / lunch / evening (once), returning after 3+ days (`mw-last-visit`), 10 and
+  25 minutes of play, back to the tab after 45 s, turning the phone sideways.
+
+### `js/game/daytime.js` — time of day from the player's clock
+
+```
+createDaytime({ renderer, tier, params, sunScale }) -> day
+day.applyWorld(world, { shadow })  // sun/moon, fill, sky dome, fog, clouds, lamps, stars, window lights
+day.applyRoom(roomScene)           // window key + warm lamp fill; call right after the room is built
+day.grade(el)                      // CSS colour grade + vignette (#grade over the canvas)
+day.update(dt) -> changed          // re-reads the clock every 30 s
+day.set(hour | null)               // force an hour for testing; ?time=7.5 or ?period=night do the same
+```
+
+Morning 5–10, noon 10–16, evening 16–19, night 19–5, each blending into the next over about an
+hour. Artwork and signs stay unlit, so they keep their true colours at every hour. No real-time
+lights are added: lamp pools, window light and headlight beams are cheap additive decals.
+
 ## Checking your work
 - Local server: `http://127.0.0.1:8123/` serves this folder (`python -m http.server 8123`).
 - Phone screenshots (exact viewport, DevTools emulation): `node tools/phone.mjs "<path?query>" <out-prefix> 412x915`

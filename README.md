@@ -40,6 +40,13 @@ Whoever controls the domain's DNS:
 - **All prices, packages and order messages** live in `index.html` (search for the price).
   The game reads the same text, so you change it once.
 - **Maya's spoken lines, labels and tips** (Burmese + English) are in `js/game/strings.js`.
+- **Maya's reactions** (the little bubbles she says by herself: standing still too long, driving
+  for ages, spinning until she is dizzy, braking hard, passing a place, late at night, and so on)
+  are in `js/game/strings.js` under `BARKS`. Each situation has 1–4 lines in Burmese and English;
+  change the words, add a line, or delete one (keep at least one per situation). `{place}` is
+  replaced with a place name from `BARK_PLACES` just above it. Keep each line short (about 45
+  Burmese letters) so it fits the bubble on a phone. When she says them, and how often, is in
+  `js/game/barks.js` (the table at the top). Add `?barks=0` to the address to switch them off.
 - After editing, run `node tools/check.mjs` — it confirms every price, order link and station
   is still present. GitHub Pages updates within a few minutes.
 
