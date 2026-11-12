@@ -156,7 +156,7 @@ Budget per room after bake: ≤ 30 draw calls, ≤ 70k triangles (raised for det
 | `templates` Template Shop | boutique with 3 big product boxes on pedestals in her box colours (blue, red, black) | `tpl-intro` (3+ years experience sign), `tpl-short`, `tpl-creator`, `tpl-business` |
 | `scripts` Script Studio | film/writing studio: director's chair, clapperboard, 3 giant books (thin/medium/thick), bundle shelf, flower gazebo corner | `scr-short`, `scr-standard`, `scr-long`, `scr-bundles`, `scr-consult` |
 | `content` Content & Copywriting | café-office: 3 tables with small/medium/large "Writer" mugs, laptops, a big compare board | `cc-trial`, `cc-essentials`, `cc-master`, `cc-compare` |
-| `library` Ink & Insights Library | shelves, reading armchair, Reality Check display (orange-gold sunset cover), TikTok screen | `lib-book`, `lib-tiktok`, `lib-shelf` (her TikTok playlists as book spines) |
+| `library` Ink & Insights Library | shelves, reading armchair, Reality Check display (orange-gold sunset cover), TikTok screen, fan-letter bookcase | `lib-book`, `lib-tiktok`, `lib-shelf` (her TikTok playlists as book spines), `lib-letters` (fan-letter book: its own cut-scene, below) |
 | `contact` Post Office | counter, mail slots, phone booth, notice board, paper planes | `ct-telegram`, `ct-channel`, `ct-messenger`, `ct-viber`, `ct-tiktok` |
 
 The full content (prices, packages, links) lives in `index.html`; the original content brief is kept privately outside this repository.
@@ -236,9 +236,45 @@ music.update(duck)                   // every frame; duck = Maya is talking (mus
 ```
 
 Four original songs made in code (no audio files): Golden dawn (morning), Bright pages (noon),
-Sunset ride (evening) and Cozy night jazz (night). Each loops a seeded 16-bar tune, schedules
+Sunset ride (evening) and Cozy night jazz (night: upright bass, Rhodes and vibes over a soft
+kick and a wooden tick - no brushes or record crackle, which read as a constant hiss). Each loops a seeded 16-bar tune, schedules
 notes 0.35 s ahead, cross-fades over 2.5 s when the period changes, and stops scheduling while
 muted or before the first tap. `?music=0` turns it off.
+
+### `js/game/letters.js` — the fan-letter book
+
+```
+createLetterBook({ hi }) -> book      // interiors/library.js, standing on the right-wall bookcase
+book.setClosed() / book.setSpread(s) / book.turnCover(±1) / book.turn(±1) / book.update(dt)
+createLetterReader(game) -> reader    // main.js openLetters(), lazily; reader.update(dt) each room frame
+reader.open() / reader.close(viaUI) / reader.step(±1) / reader.toggleZoom() / reader.open (bool)
+```
+
+The `lib-letters` station does not open the info sheet: it plays a cut-scene. Maya turns to you and
+says a line, faces the bookcase (`pullBook` emote) and the book slides out into her hands; holding it
+(`readHold`, kept until `stopEmote()`, head up via `maya.readHeadUp` while she walks) she strolls
+(`game.walkSpeed` 0.75 m/s) across the room to the reading-nook armchair (`letterShelf.chair`;
+every leg of the route heads west or south-west, so she always walks toward the camera's side),
+talking on the way (`ui.say` lines that advance by themselves, `T.walk1/2`, then `T.walk3` at the
+chair). `walkCamFn` films the walk as one continuous front-side tracking shot (pinned camera with
+its own easing: 3.1 m away, 40° to her left of straight ahead, full body, kept inside the room),
+then cuts to the room's open side for her last line. She then sits (`setMode('drive')` = the seated pose; letters.js moves her root onto the cushion each frame,
+after main.js placed her from the walker) and the cover opens. Reading is first-person: the camera
+is pinned inside her head (`rig.pin(fn)` in camera.js, head-bone space) and framed with the lens
+(`camera.fov`); a horizontal clipping plane on clones of her own materials cuts away everything of
+her above hand height, so only her hands holding the book show. Turning a page only turns the
+page (no reaction cut). Her faces stay soft (`smile`/`happy`; the `focus` brows read as a frown).
+`#game.reading` hides the HUD; `#reader` (made in JS) has ‹ › buttons, the
+page count, close, swipe and tap-to-zoom on `.rd-stage`; ←/→, Escape/Back and the phone's back
+button work too. Closing: the cover shuts, she stands up and the book floats back to its shelf;
+lens, near plane and materials are restored.
+Pages: title, the 24 letters (one per page, the reader's own handwriting from `img/letters/` on
+freshly drawn ruled paper, rules matched to their writing, each starting at the top of its page),
+Maya's thank-you page. Each page is a 1024 px canvas texture (768 on low tier), drawn when needed;
+images load only when the book opens. Book: two vertex-coloured halves + outlines, two page planes,
+one turning leaf (front/back) bent on the CPU (14 segments). The letters were photographed at an
+angle: they were flattened from the notebook's printed lines, the paper removed and the ink kept,
+on this computer; the album is private.
 
 ### `js/game/world/birds.js` — birds on the roads
 

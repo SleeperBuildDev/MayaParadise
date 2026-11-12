@@ -11,6 +11,7 @@ import { fontsReady, FONT_MY, FONT_SERIF, FONT_SANS, roundRect } from '../toon.j
 import { mergeGeometries } from '../three.js';
 import { artImage, artTexture, artMaterial, drawArt, ART_SIZE } from '../art.js';
 import { stat } from '../pages.js';
+import { createLetterBook, PW as LB_W, PH as LB_H } from '../letters.js';
 
 const { THREE, PALETTE: P, VoxelBuilder, toon, basic, addOutline, signTexture } = kit;
 
@@ -1052,8 +1053,39 @@ function frontProps(room) {
   bookRow(v, -0.45, 0.47, 0.56, 0.3, -0.15, 0.15, 67, false);
   v.box(-0.2, 0.9, 0, 0.24, 0.08, 0.3, P.cream);
   v.box(-0.2, 0.945, 0, 0.26, 0.012, 0.32, P.gold);
-  room.place(prop(v, { w: 1.1, d: 0.46 }, 'bookCart'), 2.62, 2.0, -Math.PI / 2);
   room.place(prop(pottedPlant(1.0, 4), { w: 0.45, d: 0.45 }, 'plant'), 3.02, 3.2);
+}
+
+// Fan-letter bookcase on the right wall: four shelves of books with a gap on the middle shelf
+// where the fan-letter book stands (the book itself is dynamic: js/game/letters.js).
+const LC = { x: 3.2, z: 2.15, w: 1.1, h: 1.8, d: 0.36, slotX: 0.075, shelfY: 0.86 };
+function letterCase(room) {
+  const v = new VoxelBuilder();
+  const { w, h, d } = LC;
+  for (const sx of [-1, 1]) {
+    v.box(sx * (w / 2 - 0.02), h / 2, 0, 0.04, h, d, WOOD_D);
+    v.box(sx * (w / 2 - 0.02), h / 2, d / 2 + 0.002, 0.05, h, 0.01, tone(WOOD_D, 1.2));
+  }
+  v.box(0, h / 2, -d / 2 + 0.015, w - 0.04, h, 0.03, tone(WOOD_D, 0.8));
+  const shelves = [0.06, 0.46, LC.shelfY, 1.36];
+  for (const y of shelves) {
+    v.box(0, y, 0, w - 0.06, 0.035, d - 0.02, WOOD);
+    v.box(0, y, d / 2 - 0.004, w - 0.06, 0.035, 0.01, P.gold);
+  }
+  v.box(0, h + 0.03, 0.01, w + 0.08, 0.06, d + 0.05, WOOD_D);
+  v.box(0, h + 0.07, 0.02, w - 0.1, 0.03, d - 0.02, P.gold);
+  const zb = -d / 2 + 0.03;
+  const zf = d / 2 - 0.03;
+  bookRow(v, -0.5, 0.5, 0.06 + 0.0175, 0.36, zb, zf, 91, false);
+  bookRow(v, -0.5, 0.5, 0.46 + 0.0175, 0.36, zb, zf, 93, true);
+  bookRow(v, -0.5, LC.slotX - 0.06, LC.shelfY + 0.0175, 0.46, zb, zf, 95, false);
+  bookRow(v, LC.slotX + 0.035, 0.5, LC.shelfY + 0.0175, 0.46, zb, zf, 97, false);
+  bookRow(v, -0.5, 0.5, 1.36 + 0.0175, 0.4, zb, zf, 99, true);
+  // little gold hearts on the crown: this is the readers' shelf
+  for (const x of [-0.3, 0, 0.3]) {
+    v.box(x, h + 0.1, d / 2 - 0.02, 0.06, 0.06, 0.02, P.maroon, 0);
+  }
+  room.place(prop(v, { w, d }, 'letterCase'), LC.x, LC.z, -Math.PI / 2);
 }
 
 // ---------------------------------------------------------------------------------
@@ -1074,6 +1106,7 @@ export async function buildInterior(ctx = {}) {
   playlistShelf(room, B, r);
   readingNook(room, A, r);
   frontProps(room);
+  letterCase(room);
 
   room.addStation({
     id: 'lib-book', x: 0, z: 0.35, look: { x: 0, z: DZ }, emote: 'hugBook', face: 'heart', labelY: 2.6,
@@ -1087,6 +1120,13 @@ export async function buildInterior(ctx = {}) {
     id: 'lib-shelf', x: SX, z: 0.5, look: { x: SX, z: SZ }, emote: 'point', face: 'happy', labelY: 2.6,
     line: { my: 'ကြိုက်တဲ့ Playlist လေး ရွေးကြည့်နော်', en: 'Pick a playlist you like!' },
   });
+  // fan letters: the game plays its own cut-scene here (letters.js), not the info sheet
+  const caseM = mat(LC.x, 0, LC.z, 0, -Math.PI / 2, 0);
+  const standL = new THREE.Vector3(LC.slotX, 0, LC.d / 2 + 0.55).applyMatrix4(caseM);
+  room.addStation({
+    id: 'lib-letters', x: standL.x, z: standL.z, look: { x: LC.x, z: standL.z }, emote: 'hugBook', face: 'heart', labelY: 2.15,
+    line: { my: 'ပရိသတ်လေးတွေ ရေးပေးခဲ့တဲ့ စာလေးတွေပါ', en: 'Letters from my readers' },
+  });
 
   room.bake();
   const signsA = A.mesh('signsA');
@@ -1095,6 +1135,28 @@ export async function buildInterior(ctx = {}) {
   room.textures.push(signsA.userData.texture, signsB.userData.texture); // (the shared cover texture is not ours to dispose)
   room.photoFrame = photoFrame;
 
+  // the fan-letter book, standing on the bookcase's middle shelf, spine out
+  const letterBook = createLetterBook({ hi: ctx.quality !== 'low' });
+  const shelfMatrix = mul(caseM, new THREE.Matrix4().makeBasis(new THREE.Vector3(0, 0, -1), new THREE.Vector3(0, 1, 0), new THREE.Vector3(1, 0, 0))
+    .setPosition(LC.slotX, LC.shelfY + 0.0175 + LB_H / 2 + 0.008, LC.d / 2 - 0.02));
+  shelfMatrix.decompose(letterBook.group.position, letterBook.group.quaternion, letterBook.group.scale);
+  room.group.add(letterBook.group);
+  const shelfDir = new THREE.Vector3(0, 0, 1).transformDirection(caseM);
+  // ... and the armchair in the reading nook, where she sits to read it (readingNook(): NX, NZ, turned 0.45)
+  const chairM = mat(-2.55, 0, 1.95, 0, 0.45, 0);
+  const stand = new THREE.Vector3(0.75, 0, 0.55).applyMatrix4(chairM); // front-right of the chair, clear of the footstool
+  const seat = new THREE.Vector3(0, 0.52, 0.0).applyMatrix4(chairM);
+  room.letterShelf = {
+    book: letterBook, shelfMatrix, shelfDir: { x: shelfDir.x, z: shelfDir.z },
+    chair: { stand: { x: stand.x, z: stand.z }, seat: { x: seat.x, y: seat.y, z: seat.z }, heading: 0.45 },
+  };
+  const disposeRoom = room.dispose.bind(room);
+  room.dispose = () => {
+    letterBook.dispose();
+    disposeRoom();
+  };
+  void LB_W;
+
   // ambient animation: sparkles round the book, pages drifting up, hearts popping off the phone
   const dyn = makeDyn();
   const bookSpk = [0, 1, 2, 3].map(() => {
@@ -1102,7 +1164,7 @@ export async function buildInterior(ctx = {}) {
     dyn.sparkle(p, 1);
     return p;
   });
-  const otherSpk = [0, 1, 2].map(() => {
+  const otherSpk = [0, 1, 2, 3].map(() => {
     const p = dyn.part();
     dyn.sparkle(p, 1);
     return p;
@@ -1135,7 +1197,8 @@ export async function buildInterior(ctx = {}) {
     return p;
   });
   dyn.build(room.group);
-  const fixed = [[SX - 0.88, 2.25, SZ + 0.08, 0.26], [SX + 0.88, 2.3, SZ + 0.08, 0.2], [-0.62, 2.0, DZ + 0.1, 0.2]];
+  const slotW = new THREE.Vector3(LC.slotX, LC.shelfY + 0.5, LC.d / 2 + 0.05).applyMatrix4(caseM);
+  const fixed = [[SX - 0.88, 2.25, SZ + 0.08, 0.26], [SX + 0.88, 2.3, SZ + 0.08, 0.2], [-0.62, 2.0, DZ + 0.1, 0.2], [slotW.x, slotW.y, slotW.z, 0.16]];
   const BX = 0;
   const BY = 1.55;
   const BZ = DZ - 0.15;
@@ -1155,7 +1218,7 @@ export async function buildInterior(ctx = {}) {
       const sc = 0.32 * twinkle(tb * 0.8 + i * 0.29);
       dyn.set(bookSpk[i], BX + Math.cos(a) * 0.86, BY + Math.sin(tb * 1.1 + i * 1.9) * 0.55, BZ - 0.12 - Math.abs(Math.sin(a)) * 0.4, 0, Math.sin(tb + i) * 0.3, 0, sc);
     }
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < fixed.length; i++) {
       const f = fixed[i];
       const ts = i < 2 ? t + boostShelf : t;
       dyn.set(otherSpk[i], f[0], f[1] + Math.sin(ts * 1.4 + i) * 0.04, f[2], 0, Math.sin(ts * 0.9 + i * 2) * 0.35, 0, f[3] * twinkle(ts * 0.7 + i * 0.37));

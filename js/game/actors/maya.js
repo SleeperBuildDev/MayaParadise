@@ -34,7 +34,7 @@ import { VoxelBuilder } from '../voxel.js';
 import { artTexture, artMaterial, ART_SIZE } from '../art.js';
 
 export const FACES = ['smile', 'happy', 'laugh', 'star', 'heart', 'wink', 'kiss', 'surprised', 'think', 'focus', 'shy', 'dizzy', 'sleepy', 'talk'];
-export const EMOTES = ['wave', 'cheer', 'jump', 'point', 'think', 'kiss', 'hugBook', 'phone', 'laugh', 'write', 'nod', 'thumbsUp', 'bow', 'dance', 'hopOut', 'hopIn', 'lookAround'];
+export const EMOTES = ['wave', 'cheer', 'jump', 'point', 'think', 'kiss', 'hugBook', 'phone', 'laugh', 'write', 'nod', 'thumbsUp', 'bow', 'dance', 'hopOut', 'hopIn', 'lookAround', 'pullBook', 'readHold'];
 
 const TAU = Math.PI * 2;
 const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
@@ -1716,6 +1716,44 @@ const EMOTE_DEFS = {
       [0.5, 'o', { 'ikR.x': -0.13, 'ikR.y': 0.385, 'ikR.z': 0.27, 'ikR.w': 1, 'head.x': 0.3, 'glasses.py': 0 }],
       [0.66, 'l', { 'ikR.x': -0.13, 'ikR.y': 0.38, 'ikR.z': 0.26, 'ikR.w': 1, 'head.x': 0.28, 'neck.x': 0.05 }],
     ],
+  },
+};
+
+// Library fan-letter book (js/game/letters.js): the game moves the book itself; these poses only
+// put her hands where the book is. pullBook: a reach up into the shelf, a grab, both hands bring
+// the book to her chest. readHold: the open book held in both hands, head bowed over the pages
+// (game.maya.readHeadUp 0..1 lifts it while she walks), a soft smile, held until the game calls
+// stopEmote() (or plays another emote).
+const READ_POSE = {
+  'ikL.x': 0.15, 'ikL.y': 0.07, 'ikL.z': 0.27, 'ikL.w': 1, 'ikR.x': -0.15, 'ikR.y': 0.07, 'ikR.z': 0.27, 'ikR.w': 1,
+  'handL.z': -0.25, 'handR.z': 0.25, 'handL.x': -0.2, 'handR.x': -0.2, 'head.x': 0.3, 'neck.x': 0.06, 'chest.x': 0.05,
+};
+EMOTE_DEFS.pullBook = {
+  dur: 1.45, face: [[0, 'smile'], [0.62, 'happy']], cues: [[0.5, 'grab'], [0.95, 'book']],
+  poleL: [1, -0.6, -0.4], poleR: [-1, -0.6, -0.4],
+  keys: [
+    [0.16, 'b', { 'ikR.x': -0.13, 'ikR.y': 0.26, 'ikR.z': 0.2, 'ikR.w': 0.7, 'chest.x': -0.05, 'head.x': -0.1, 'hips.py': 0 }],
+    [0.42, 'io', { 'ikR.x': -0.04, 'ikR.y': 0.44, 'ikR.z': 0.4, 'ikR.w': 1, 'handR.x': -0.35, 'chest.x': 0.06, 'chest.y': 0.12, 'head.x': -0.18, 'hips.py': 0.012 }],
+    [0.6, 'l', { 'ikR.x': -0.04, 'ikR.y': 0.44, 'ikR.z': 0.42, 'ikR.w': 1, 'handR.x': -0.35, 'chest.x': 0.07, 'chest.y': 0.12, 'head.x': -0.18, 'hips.py': 0.012 }],
+    [0.95, 'io', { 'ikR.x': -0.1, 'ikR.y': 0.15, 'ikR.z': 0.24, 'ikR.w': 1, 'ikL.x': 0.11, 'ikL.y': 0.13, 'ikL.z': 0.24, 'ikL.w': 0.9, 'handR.x': 0, 'chest.x': -0.03, 'chest.y': 0, 'head.x': 0.14, 'hips.py': 0 }],
+    [1.45, 'l', { 'ikR.x': -0.1, 'ikR.y': 0.15, 'ikR.z': 0.24, 'ikR.w': 1, 'ikL.x': 0.11, 'ikL.y': 0.13, 'ikL.z': 0.24, 'ikL.w': 1, 'head.x': 0.12 }],
+  ],
+};
+EMOTE_DEFS.readHold = {
+  dur: 3600, face: [[0, 'smile']], // a soft smile ('focus' brows read as a frown)
+  poleL: [1, -0.6, -0.4], poleR: [-1, -0.6, -0.4],
+  keys: [
+    [0.4, 'io', READ_POSE],
+    [3599, 'l', READ_POSE],
+  ],
+  extra(u, P, B, m) {
+    // reading breath
+    P[CH['head.x']] += 0.02 * Math.sin(u * 1.3);
+    // carrying the book while she walks and talks: head up instead of bowed over the pages
+    if (m.readHeadUp > 0) {
+      P[CH['head.x']] -= 0.34 * m.readHeadUp;
+      P[CH['neck.x']] -= 0.06 * m.readHeadUp;
+    }
   },
 };
 

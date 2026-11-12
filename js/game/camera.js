@@ -15,6 +15,8 @@ export function createCameraRig(camera) {
   let follow = { tilt: 52, width: 12, widthLandscape: 22, height: 0.6, bounds: null, zoom: 1, stiffness: 6 };
   let shot = null; // { fromPos, fromLook, toPos, toLook, t, dur, resolve }
   let holding = false;
+  let pin = null; // fn(posOut, lookOut) called every frame while pinned (first-person views)
+  let pinStiff = 10;
 
   function distanceForWidth(width) {
     const vfov = THREE.MathUtils.degToRad(camera.fov);
@@ -55,6 +57,7 @@ export function createCameraRig(camera) {
      * Returns a promise that resolves when the move finishes.
      */
     shot(position, lookAt, dur = 1.0) {
+      pin = null;
       return new Promise((resolve) => {
         if (shot?.resolve) shot.resolve();
         shot = { fromPos: curPos.clone(), fromLook: curLook.clone(), toPos: position.clone(), toLook: lookAt.clone(), t: 0, dur: Math.max(0.001, dur), resolve };
@@ -68,10 +71,21 @@ export function createCameraRig(camera) {
       const look = new THREE.Vector3(subject.x, subject.y + lookHeight, subject.z);
       return this.shot(pos, look, dur);
     },
-    release() { holding = false; if (shot?.resolve) shot.resolve(); shot = null; },
+    release() { holding = false; pin = null; if (shot?.resolve) shot.resolve(); shot = null; },
+    /** Steer the camera every frame with fn(pos, look); eased in with `stiffness`. unpin() or shot() ends it. */
+    pin(fn, stiffness = 10) { if (shot?.resolve) shot.resolve(); shot = null; pin = fn; pinStiff = stiffness; holding = true; },
+    unpin() { pin = null; },
     get cinematic() { return holding; },
     update(dt) {
       computeFollow();
+      if (pin) {
+        pin(desiredPos, desiredLook);
+        const k = 1 - Math.exp(-dt * pinStiff);
+        curPos.lerp(desiredPos, k);
+        curLook.lerp(desiredLook, k);
+        this.apply();
+        return;
+      }
       if (shot) {
         shot.t += dt / shot.dur;
         const k = ease(Math.min(1, shot.t));

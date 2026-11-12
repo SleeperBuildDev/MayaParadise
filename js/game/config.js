@@ -40,7 +40,7 @@ export const PLACES = [
     name: { my: 'စာကြည့်တိုက်', en: 'Ink & Insights Library' },
     dock: { my: 'စာအုပ်', en: 'Library' },
     icon: 'book',
-    stations: ['lib-book', 'lib-tiktok', 'lib-shelf'],
+    stations: ['lib-book', 'lib-tiktok', 'lib-shelf', 'lib-letters'],
   },
   {
     id: 'contact',

@@ -204,6 +204,15 @@ export function createMusic(audio, { volume = VOLUME } = {}) {
       o.frequency.setValueAtTime(120, t); o.frequency.exponentialRampToValueAtTime(42, t + 0.16);
       o.connect(g); env(g, t, 0.002, v, 0.22); send(g, D, 0); o.start(t); o.stop(t + 0.3);
     },
+    // a soft wooden tick (a mallet on a wood block): pure tone, no noise, so nothing hisses
+    tick(D, t, v) {
+      const o = ac.createOscillator(), o2 = ac.createOscillator(), g = ac.createGain();
+      o.type = 'triangle'; o.frequency.setValueAtTime(1250, t); o.frequency.exponentialRampToValueAtTime(900, t + 0.05);
+      o2.frequency.value = 2480;
+      const g2 = ac.createGain(); g2.gain.value = 0.25;
+      o.connect(g); o2.connect(g2); g2.connect(g); env(g, t, 0.002, v, 0.07); send(g, D, 0.2);
+      for (const x of [o, o2]) { x.start(t); x.stop(t + 0.12); }
+    },
     bird(D, t, v) {
       const o = ac.createOscillator(), g = ac.createGain(), b = 2600 + Math.random() * 900;
       for (let k = 0; k < 3; k++) { o.frequency.setValueAtTime(b, t + k * 0.09); o.frequency.exponentialRampToValueAtTime(b * 1.45, t + k * 0.09 + 0.06); }
@@ -218,17 +227,7 @@ export function createMusic(audio, { volume = VOLUME } = {}) {
     gain.gain.setValueAtTime(0.0001, ac.currentTime);
     gain.gain.exponentialRampToValueAtTime(1, ac.currentTime + 2.5);
     gain.connect(out);
-    const st = { key, S, gain, mel: melody(S), six: 60 / S.bpm / 4, step: 0, next: ac.currentTime + 0.15, r: rng(S.seed + 3), crackle: null };
-    if (S.jazz) st.crackle = startCrackle(gain);
-    return st;
-  }
-  function startCrackle(dest) {
-    const len = ac.sampleRate * 4, b = ac.createBuffer(1, len, ac.sampleRate), d = b.getChannelData(0);
-    for (let i = 0; i < len; i++) { d[i] = (Math.random() * 2 - 1) * 0.004; if (Math.random() < 0.0006) d[i] += (Math.random() * 2 - 1) * 0.35; }
-    const s = ac.createBufferSource(), f = ac.createBiquadFilter(), g = ac.createGain();
-    s.buffer = b; s.loop = true; f.type = 'bandpass'; f.frequency.value = 2500; f.Q.value = 0.4; g.gain.value = 0.5;
-    s.connect(f); f.connect(g); g.connect(dest); s.start();
-    return s;
+    return { key, S, gain, mel: melody(S), six: 60 / S.bpm / 4, step: 0, next: ac.currentTime + 0.15, r: rng(S.seed + 3) };
   }
   function stopSong(st, fade = 2.5) {
     const t = ac.currentTime;
@@ -236,7 +235,6 @@ export function createMusic(audio, { volume = VOLUME } = {}) {
     st.gain.gain.setValueAtTime(Math.max(0.0001, st.gain.gain.value), t);
     st.gain.gain.exponentialRampToValueAtTime(0.0001, t + fade);
     st.endAt = t + fade + 2.5; // let the reverb tails ring out, then disconnect
-    try { st.crackle?.stop(t + fade); } catch { /* ignore */ }
     fading.push(st);
   }
 
@@ -253,8 +251,10 @@ export function createMusic(audio, { volume = VOLUME } = {}) {
         }
         if (s === 0) for (const n of ch) I.rhodes(D, mtof(n), t + r() * 0.02, 0.05, w, six * 15);
         if (s === 10 && r() < 0.45) for (const n of ch) I.rhodes(D, mtof(n + 12), t, 0.018, w, six * 5);
-        if (s % 4 === 0) noiseHit(D, t, { type: 'bandpass', freq: 3200, q: 0.5, v: 0.012, dec: six * 3.6, wet: 0.25, swell: true });
-        if (s === 4 || s === 12) noiseHit(D, t, { type: 'bandpass', freq: 1800, q: 0.7, v: 0.022, a: 0.01, dec: 0.28, wet: 0.3 });
+        // the beat, without brushes or record crackle (owner: no constant brushing sound at night):
+        // a soft low kick on 1 and a quiet wooden tick on 2 and 4
+        if (s === 0) I.kick(D, t, 0.07);
+        if (s === 4 || s === 12) I.tick(D, t, 0.03);
       } else {
         if (s === 0 && S.pad) I.pad(D, ch, t, six * 16, S.pad, w + 0.2);
         if (s === 0) I.bass(D, mtof(ch[0] - 12), t, S.bass, six * (S.drums === 2 ? 3.6 : 7));

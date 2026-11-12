@@ -71,6 +71,7 @@ export const STATION_LABELS = {
   'lib-book': { my: 'အမှန်မြင်ခြင်း စာအုပ်', en: 'Reality Check' },
   'lib-tiktok': { my: 'TikTok', en: 'TikTok' },
   'lib-shelf': { my: 'Playlist စင်', en: 'Playlists' },
+  'lib-letters': { my: 'ပရိသတ်ရဲ့ စာများ', en: 'Fan letters' },
   'ct-telegram': { my: 'Telegram', en: 'Telegram' },
   'ct-channel': { my: 'Channel', en: 'Channel' },
   'ct-messenger': { my: 'Messenger', en: 'Messenger' },

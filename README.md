@@ -50,6 +50,13 @@ Whoever controls the domain's DNS:
   replaced with a place name from `BARK_PLACES` just above it. Keep each line short (about 45
   Burmese letters) so it fits the bubble on a phone. When she says them, and how often, is in
   `js/game/barks.js` (the table at the top). Add `?barks=0` to the address to switch them off.
+- **Fan letters** (the library's bookcase on the right wall): the readers' handwritten letters from the
+  Reality Check launch. In the game Maya talks, pulls the book off the shelf and reads it with you page by
+  page; on the plain page they are a row you swipe through. The pages are the
+  real handwriting, cut out of the photos with the paper removed (`img/letters/letter-01.webp` …
+  `letter-24.webp`, one letter per page). To add a letter: add the next `letter-NN.webp` and one line to
+  `LETTERS` in `js/game/letters.js` (its size, ink colour and ruled-line spacing), and a `<figure>` in the
+  `lib-letters` article of `index.html`. The album photos themselves are never uploaded.
 - **Birds on the roads** (random spots every visit; they fly off with a flutter when the car comes by, and Maya reacts) are
   in `js/game/world/birds.js`; what she says about them is `birdsAhead` and `birdsScatter` in
   `BARKS`.

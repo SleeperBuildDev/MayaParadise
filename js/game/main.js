@@ -3,7 +3,7 @@ import * as THREE from './three.js';
 import { PLACES, SCALE, TIERS } from './config.js';
 import { setOutlineResolution, fontsReady } from './toon.js';
 import { createInput } from './input.js';
-import { createCameraRig } from './camera.js';
+import { createCameraRig } from './camera.js?v=6'; // ?v= makes phones fetch the new copy
 import { createUI, tr, lang } from './ui.js';
 import * as pages from './pages.js';
 import { createWalker } from './nav.js';
@@ -15,7 +15,7 @@ const markShadows = shadowKit.markShadows || shadowKit.markCasters;
 import * as dayKit from './daytime.js';
 // (namespace import: a browser still holding the previous daytime.js for a few minutes keeps working)
 const { createDaytime, buildHeadlightBeams } = dayKit;
-import { createMusic } from './music.js';
+import { createMusic } from './music.js?v=6';
 import { createRoadBirds } from './world/birds.js?v=5'; // ?v= forces phones to drop an old cached copy
 import { preloadArt } from './art.js';
 
@@ -124,7 +124,7 @@ class Game {
 
     onProgress?.(0.2);
     const [w, m, c, f, a] = await Promise.all([
-      import('./world/world.js'), import('./actors/maya.js'), import('./actors/car.js'), import('./fx.js'), import('./audio.js'),
+      import('./world/world.js'), import('./actors/maya.js?v=6'), import('./actors/car.js'), import('./fx.js'), import('./audio.js'),
     ]);
     onProgress?.(0.45);
     this.world = w.createWorld({ detail: this.tier === 'low' ? 'low' : 'high' });
@@ -263,7 +263,8 @@ class Game {
       }
     });
     inp.on('back', () => {
-      if (this.ui.sheetOpen) this.closeSheet(true);
+      if (this.letterReader?.open) this.letterReader.close(true);
+      else if (this.ui.sheetOpen) this.closeSheet(true);
       else if (this.mode === 'room' && !this.busy) this.exitRoom();
     });
     inp.on('dock', (i) => PLACES[i] && this.dock(PLACES[i].id));
@@ -292,7 +293,8 @@ class Game {
     });
     window.addEventListener('popstate', () => {
       if (this.ignorePop > 0) { this.ignorePop--; return; }
-      if (this.ui.sheetOpen) this.closeSheet(false);
+      if (this.letterReader?.open) this.letterReader.close(false);
+      else if (this.ui.sheetOpen) this.closeSheet(false);
       else if (this.mode === 'room' && !this.busy) this.exitRoom({ push: false });
     });
     const canvas = this.renderer.domElement;
@@ -434,7 +436,7 @@ class Game {
   updateRoom(dt, t) {
     const room = this.room;
     const stick = !this.busy && !this.ui.sheetOpen ? this.input.stick() : null;
-    const speed = this.walker.update(dt, stick, SCALE.walkSpeed);
+    const speed = this.walker.update(dt, stick, this.walkSpeed || SCALE.walkSpeed); // walkSpeed: a slower stroll in cut-scenes
     if (this.faceTarget) this.walker.turnToward(this.faceTarget.x, this.faceTarget.z, dt);
     this.maya.root.position.set(this.walker.pos.x, 0, this.walker.pos.y);
     this.maya.root.rotation.set(0, this.walker.heading, 0); // plain yaw only: x/z left at PI would mirror her
@@ -457,6 +459,7 @@ class Game {
     if (!this.busy && !this.ui.sheetOpen && Math.hypot(this.walker.pos.x - d.x, this.walker.pos.y - d.z) < d.r && stick && stick.y < -0.3) this.exitRoom();
 
     room.update(dt, t, { near: this.nearId, active: this.activeStation, visited: this.visitedStations, mayaPos: this.maya.root.position });
+    if (this.letterReader) this.letterReader.update(dt);
     this.rig.setTarget(this.maya.root.position);
   }
 
@@ -692,7 +695,7 @@ class Game {
 
   async getRoom(id) {
     if (this.rooms.has(id)) return this.rooms.get(id);
-    const mod = await import(`./interiors/${id}.js`);
+    const mod = await import(`./interiors/${id}.js?v=6`);
     const room = await mod.buildInterior({ quality: this.tier });
     room.id = room.id || id;
     if (PHOTOS[id]) this.fillPhoto(room, PHOTOS[id]);
@@ -1003,6 +1006,7 @@ class Game {
 
   async openStation(s, { quick = false } = {}) {
     if (this.busy || this.ui.sheetOpen) return;
+    if (s.id === 'lib-letters') return this.openLetters();
     this.activeStation = s.id;
     this.walker.stop();
     const first = !this.visitedStations.has(s.id);
@@ -1046,6 +1050,18 @@ class Game {
     // while the info sheet covers the lower half, keep Maya and the station in the top half
     if (this.mode === 'room') this.rig.orbitShot(mp, { dist: 3.9, height: 1.25, azimuth: az, lookHeight: 0.25, dur: 0.6 });
     this.openSheetFor([s.id], tr(STATION_LABELS[s.id]) || pages.stationTitle(s.id), s.id);
+  }
+
+  /** Library fan-letter book: Maya's own cut-scene and reading view (js/game/letters.js). */
+  async openLetters() {
+    if (this.busy || !this.room?.letterShelf) return;
+    this.activeStation = 'lib-letters';
+    this.walker.stop();
+    if (!this.letterReader) {
+      const { createLetterReader } = await import('./letters.js');
+      this.letterReader = createLetterReader(this);
+    }
+    this.letterReader.open();
   }
 
   openAll() {
