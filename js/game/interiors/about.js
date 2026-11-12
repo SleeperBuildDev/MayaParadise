@@ -599,6 +599,8 @@ export async function buildInterior(ctx = {}) {
     { x: WX + 0.32, y: WY + 0.12, w: 0.28 },
     { x: WX - 0.1, y: WY - 0.3, w: 0.4 },
   ];
+  // the view through the panes, repainted for the player's time of day (daytime.js applyRoom)
+  room.windowViews = [{ x: WX, y: WY, z: BACK + 0.045, w: 1.5, h: 1.0 }];
   const cloud0 = fx.cube.alloc(9, COL.cloud);
   tick.push((dt, t) => {
     for (let k = 0; k < 3; k++) {

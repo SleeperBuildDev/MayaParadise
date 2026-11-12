@@ -6,8 +6,8 @@
 //   day.state                  -> the blended look for now (colours, sun, lamps 0..1, stars 0..1, grade ...)
 //   day.applyWorld(world)      -> sun, fill, sky dome, fog, clouds, lamp glows, stars, moon, lamp pools,
 //                                 and warm light from the house windows after dark
-//   day.applyRoom(roomScene)   -> window key light + warm lamp fill for the hour (safe to call on
-//                                 every entry; the room keeps its own art)
+//   day.applyRoom(roomScene, room) -> window key light + warm lamp fill for the hour, and the view
+//                                 through room.windowViews (safe to call on every entry)
 //   day.grade(el)              -> the CSS colour grade + vignette layer over the canvas (cinematic look)
 //   day.update(dt) -> true when the look changed (re-checks the clock every 30 s), then re-apply
 //   day.set(hour|null)         -> force an hour (testing), null = back to the real clock
@@ -294,6 +294,130 @@ function buildWindowLights(root) {
   return { panes: paneMat, halos: haloMat, spills: spillMat, groups, count };
 }
 
+/**
+ * The view through a room window for the hour, painted in small blocky pixels (matches the voxel
+ * look): sky gradient, the sun (low in the east in the morning, high at noon, setting in the west
+ * in the evening) or the moon and stars at night, drifting-free blocky clouds and distant rooftops
+ * whose little windows light up after dark. ctx: a 2D context of a W x H canvas.
+ */
+export function paintWindowView(ctx, W, H, s, seed = 1) {
+  let k = seed * 9301 + 49297;
+  const rnd = () => ((k = (k * 9301 + 49297) % 233280) / 233280);
+  const sky = ctx.createLinearGradient(0, 0, 0, H);
+  sky.addColorStop(0, s.skyTop);
+  sky.addColorStop(0.62, s.skyHor);
+  sky.addColorStop(1, s.skyBand);
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, W, H);
+  // stars
+  if (s.stars > 0.02) {
+    ctx.fillStyle = `rgba(255,246,216,${(s.stars * 0.95).toFixed(3)})`;
+    for (let i = 0; i < 26; i++) {
+      const x = Math.floor(rnd() * W), y = Math.floor(rnd() * H * 0.62), z = rnd() < 0.2 ? 2 : 1;
+      ctx.fillRect(x, y, z, z);
+    }
+  }
+  // sun or moon, placed from the light direction
+  const d = s.sunDir, len = Math.hypot(d[0], d[1], d[2]) || 1;
+  const elev = d[1] / len, side = d[0] / len;
+  const R = Math.round(H * (s.moon > 0.3 ? 0.085 : elev > 0.8 ? 0.08 : 0.1));
+  const cx = Math.max(R * 3, Math.min(W - R * 3, Math.round(W * (0.5 + side * 0.42))));
+  const cy = Math.max(R * 3, Math.min(H - R * 4, Math.round(H * (0.9 - elev * 0.8))));
+  const disc = (r, color) => { // a blocky round disc
+    ctx.fillStyle = color;
+    ctx.fillRect(cx - r, cy - Math.round(r * 0.6), r * 2, Math.round(r * 1.2));
+    ctx.fillRect(cx - Math.round(r * 0.6), cy - r, Math.round(r * 1.2), r * 2);
+    ctx.fillRect(cx - Math.round(r * 0.85), cy - Math.round(r * 0.85), Math.round(r * 1.7), Math.round(r * 1.7));
+  };
+  if (s.moon > 0.3) {
+    disc(Math.round(R * 2.2), 'rgba(200,215,255,0.07)');
+    disc(Math.round(R * 1.5), 'rgba(210,222,255,0.10)');
+    disc(R, '#F3EED9');
+    ctx.fillStyle = 'rgba(190,190,170,0.55)'; // craters
+    ctx.fillRect(cx - Math.round(R * 0.4), cy - Math.round(R * 0.3), 2, 2);
+    ctx.fillRect(cx + Math.round(R * 0.2), cy + Math.round(R * 0.25), 3, 2);
+  } else {
+    disc(Math.round(R * 2.1), 'rgba(255,236,190,0.12)');
+    disc(Math.round(R * 1.5), 'rgba(255,236,190,0.18)');
+    disc(R, s.sun);
+  }
+  // blocky clouds
+  const night = s.stars;
+  ctx.fillStyle = s.cloud;
+  ctx.globalAlpha = 0.95 - night * 0.45;
+  for (let i = 0; i < 3; i++) {
+    const w = Math.round(W * (0.16 + rnd() * 0.12)), h = Math.max(3, Math.round(H * 0.06));
+    const x = Math.round(rnd() * (W - w)), y = Math.round(H * (0.12 + i * 0.16 + rnd() * 0.06));
+    ctx.fillRect(x, y, w, h);
+    ctx.fillRect(x + Math.round(w * 0.2), y - h + 1, Math.round(w * 0.45), h);
+  }
+  ctx.globalAlpha = 1;
+  // distant rooftops along the bottom
+  const roof = mixRGB(s.hemiGround, '#2A2440', 0.35 + night * 0.4);
+  let x = 0;
+  while (x < W) {
+    const w = 6 + Math.floor(rnd() * 10), h = Math.round(H * (0.1 + rnd() * 0.12));
+    ctx.fillStyle = roof;
+    ctx.fillRect(x, H - h, w, h);
+    ctx.fillRect(x + 1, H - h - 2, w - 2, 2);
+    if (s.windows > 0.05) {
+      ctx.fillStyle = `rgba(255,200,110,${(s.windows * 0.95).toFixed(3)})`;
+      for (let j = 0; j < 2; j++) if (rnd() < 0.7) ctx.fillRect(x + 2 + Math.floor(rnd() * (w - 4)), H - h + 3 + Math.floor(rnd() * Math.max(1, h - 6)), 2, 2);
+    }
+    x += w + 1;
+  }
+}
+function mixRGB(a, b, f) {
+  const A = new THREE.Color(a), B = new THREE.Color(b);
+  return '#' + A.lerp(B, f).getHexString();
+}
+
+/** Window views in a room (room.windowViews: [{ x, y, z, w, h }] on the back wall, facing +Z). */
+function updateWindowViews(scene, room, s) {
+  const views = room?.windowViews;
+  if (!views?.length) return;
+  views.forEach((v, i) => {
+    if (!v.mesh) {
+      const W = 96, H = Math.max(24, Math.round(96 * v.h / v.w));
+      const cv = document.createElement('canvas');
+      cv.width = W; cv.height = H;
+      const tex = new THREE.CanvasTexture(cv);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      tex.magFilter = THREE.NearestFilter; // crisp blocky pixels like the rest of the world
+      tex.minFilter = THREE.LinearFilter;
+      tex.generateMipmaps = false;
+      const mat = new THREE.MeshBasicMaterial({ map: tex, toneMapped: false, fog: false });
+      v.mesh = new THREE.Mesh(new THREE.PlaneGeometry(v.w, v.h), mat);
+      v.mesh.position.set(v.x, v.y, v.z);
+      v.mesh.name = 'windowView';
+      v.mesh.raycast = () => {};
+      v.mesh.userData.shadow = 'none';
+      v.ctx = cv.getContext('2d');
+      v.W = W; v.H = H;
+      scene.add(v.mesh);
+    }
+    paintWindowView(v.ctx, v.W, v.H, s, 3 + i * 7);
+    v.mesh.material.map.needsUpdate = true;
+  });
+}
+
+/**
+ * The car's real headlights: one spot light at the front that lights up whatever it points at
+ * (walls get brighter and the pool of light tightens as the car gets closer, like real life).
+ * Always present (intensity 0 by day) so turning it on never recompiles shaders.
+ */
+export function buildHeadlamp() {
+  const g = new THREE.Group();
+  g.name = 'headlamp';
+  const lamp = new THREE.SpotLight('#FFE7B5', 0, 22, 0.52, 0.7, 1.3);
+  lamp.position.set(0, 0.62, 1.0);
+  lamp.target.position.set(0, 0.15, 9);
+  lamp.castShadow = false;
+  g.add(lamp, lamp.target);
+  g.userData.light = lamp;
+  return g;
+}
+
 /** Headlight beams for the car: two soft additive cones. Attach to the car body, facing its front. */
 export function buildHeadlightBeams({ spread = 0.9, length = 5.5 } = {}) {
   const g = new THREE.Group();
@@ -468,7 +592,8 @@ export function createDaytime({ renderer, tier = 'mid', params = null, baseExpos
     },
 
     /** Indoors: the window key takes the hour's light; at night warm lamps carry the room. */
-    applyRoom(scene) {
+    applyRoom(scene, room = null) {
+      updateWindowViews(scene, room, state);
       const s = state.room;
       const L = lightsOf(scene);
       if (L.sun) { L.sun.color.set(s.key); L.sun.intensity = s.keyK * sunScale; }

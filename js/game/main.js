@@ -12,7 +12,7 @@ import * as shadowKit from './shadows.js';
 // (namespace import: a browser still holding the previous shadows.js for a few minutes keeps working)
 const { enableShadows, setupSceneShadows } = shadowKit;
 const markShadows = shadowKit.markShadows || shadowKit.markCasters;
-import { createDaytime, buildHeadlightBeams } from './daytime.js';
+import { createDaytime, buildHeadlightBeams, buildHeadlamp } from './daytime.js';
 import { createMusic } from './music.js';
 import { preloadArt } from './art.js';
 
@@ -22,6 +22,7 @@ const ROOM_LOOK_Z = 0.7; // where the room camera aims front-to-back (room centr
 const deg = THREE.MathUtils.radToDeg;
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const params = new URLSearchParams(location.search);
+const HEADLAMP = 26; // car headlight strength at full night
 const store = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
 const call = (o, fn, ...a) => (o && typeof o[fn] === 'function' ? o[fn](...a) : undefined);
 
@@ -156,6 +157,8 @@ class Game {
     this.headlights = buildHeadlightBeams();
     this.headlights.position.set(0, 0, 1.12);
     this.car.root.add(this.headlights);
+    this.headlamp = buildHeadlamp(); // a real spot light: walls light up as the car comes closer
+    this.car.root.add(this.headlamp);
     this.gradeEl = document.createElement('div');
     this.gradeEl.id = 'grade';
     canvas.insertAdjacentElement('afterend', this.gradeEl);
@@ -445,11 +448,12 @@ class Game {
   applyDayLook() {
     const d = this.day;
     if (!d) return;
-    if (this.mode === 'room' && this.room) d.applyRoom(this.room.scene);
+    if (this.mode === 'room' && this.room) d.applyRoom(this.room.scene, this.room);
     else d.applyWorld(this.world, { shadow: this.worldShadow });
     this.music?.setPeriod(d.period);
     const beams = this.headlights?.userData.mat;
     if (beams) { beams.opacity = d.headlights * 0.5; this.headlights.visible = d.headlights > 0.02; }
+    if (this.headlamp) this.headlamp.userData.light.intensity = d.headlights * HEADLAMP;
     d.grade(this.gradeEl, { indoor: this.mode === 'room', cinematic: this.rig?.cinematic ? 1 : 0 });
   }
 

@@ -895,6 +895,8 @@ function backWall(room, A, B, r) {
   const WY0 = 0.84;
   const WY1 = 1.66;
   A.quad(r.sky, 2 * WX, WY1 - WY0, mat(0, (WY0 + WY1) / 2, wz + 0.012));
+  // the view through the panes, repainted for the player's time of day (daytime.js applyRoom)
+  room.windowViews = [{ x: 0, y: (WY0 + WY1) / 2, z: wz + 0.03, w: 2 * WX, h: WY1 - WY0 }];
   v.boxMin(-WX - 0.08, WY1, wz, WX + 0.08, WY1 + 0.08, wz + 0.1, P.white);
   v.boxMin(-WX - 0.08, WY0 - 0.08, wz, WX + 0.08, WY0, wz + 0.1, P.white);
   v.boxMin(-WX - 0.08, WY0, wz, -WX, WY1, wz + 0.1, P.white);
