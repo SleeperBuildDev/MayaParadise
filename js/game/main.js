@@ -13,6 +13,7 @@ import * as shadowKit from './shadows.js';
 const { enableShadows, setupSceneShadows } = shadowKit;
 const markShadows = shadowKit.markShadows || shadowKit.markCasters;
 import { createDaytime, buildHeadlightBeams } from './daytime.js';
+import { createMusic } from './music.js';
 import { preloadArt } from './art.js';
 
 const PHOTOS = { about: 'img/maya-about.webp', library: 'img/maya-book.webp' };
@@ -127,6 +128,8 @@ class Game {
     this.fx = f.createFX({ density: this.tier === 'low' ? 0.5 : 1 });
     this.audio = a.createAudio({ ctx: this.opts.audioCtx || null });
     if (this.opts.audioCtx) call(this.audio, 'unlock');
+    // a background song for the time of day (muted with the sound button; ?music=0 turns it off)
+    this.music = params.get('music') === '0' ? null : createMusic(this.audio);
     // her hands hold the car's real steering wheel
     if (this.car.wheelGrip && this.maya.wheel) {
       this.maya.wheel.copy(this.car.wheelGrip.position);
@@ -319,6 +322,7 @@ class Game {
     if (cine !== this.cineGrade) { this.cineGrade = cine; this.day.grade(this.gradeEl, { indoor: this.mode === 'room', cinematic: cine ? 1 : 0 }); }
     this.updateOverlay();
     this.barks?.update(dt);
+    this.music?.update(!!this.ui.dialogOpen);
     this.governor(dt);
     // While the info sheet is up, the 3D above it is a backdrop: draw every other frame to save battery.
     this.frameN = (this.frameN || 0) + 1;
@@ -443,6 +447,7 @@ class Game {
     if (!d) return;
     if (this.mode === 'room' && this.room) d.applyRoom(this.room.scene);
     else d.applyWorld(this.world, { shadow: this.worldShadow });
+    this.music?.setPeriod(d.period);
     const beams = this.headlights?.userData.mat;
     if (beams) { beams.opacity = d.headlights * 0.5; this.headlights.visible = d.headlights > 0.02; }
     d.grade(this.gradeEl, { indoor: this.mode === 'room', cinematic: this.rig?.cinematic ? 1 : 0 });

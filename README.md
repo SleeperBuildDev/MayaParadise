@@ -40,6 +40,9 @@ Whoever controls the domain's DNS:
 - **All prices, packages and order messages** live in `index.html` (search for the price).
   The game reads the same text, so you change it once.
 - **Maya's spoken lines, labels and tips** (Burmese + English) are in `js/game/strings.js`.
+- **Background music** changes with the visitor's time of day: four original songs made in
+  code in `js/game/music.js` (no music files). The sound button mutes it with everything else;
+  `?music=0` turns it off. Add `?period=night` (or morning / noon / evening) to hear another one.
 - **Maya's reactions** (the little bubbles she says by herself: standing still too long, driving
   for ages, spinning until she is dizzy, braking hard, passing a place, late at night, and so on)
   are in `js/game/strings.js` under `BARKS`. Each situation has 1–4 lines in Burmese and English;

@@ -374,6 +374,15 @@ export function createAudio(opts = {}) {
       return ctx ? ctx.state : 'none';
     },
 
+    /** The AudioContext once unlocked (null before); background music shares it. */
+    get context() {
+      return ctx;
+    },
+    /** The master input (muted with the sound button); background music connects here. */
+    get output() {
+      return bus ? bus.gain : null;
+    },
+
     get muted() {
       return muted;
     },

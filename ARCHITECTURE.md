@@ -227,6 +227,19 @@ Morning 5–10, noon 10–16, evening 16–19, night 19–5, each blending into 
 hour. Artwork and signs stay unlit, so they keep their true colours at every hour. No real-time
 lights are added: lamp pools, window light and headlight beams are cheap additive decals.
 
+### `js/game/music.js` — background songs for the time of day
+
+```
+createMusic(audio) -> music          // shares audio.js's context and master bus (sound button mutes it)
+music.setPeriod('morning' | 'noon' | 'evening' | 'night')   // main.js applyDayLook()
+music.update(duck)                   // every frame; duck = Maya is talking (music goes softer)
+```
+
+Four original songs made in code (no audio files): Golden dawn (morning), Bright pages (noon),
+Sunset ride (evening) and Cozy night jazz (night). Each loops a seeded 16-bar tune, schedules
+notes 0.35 s ahead, cross-fades over 2.5 s when the period changes, and stops scheduling while
+muted or before the first tap. `?music=0` turns it off.
+
 ## Checking your work
 - Local server: `http://127.0.0.1:8123/` serves this folder (`python -m http.server 8123`).
 - Phone screenshots (exact viewport, DevTools emulation): `node tools/phone.mjs "<path?query>" <out-prefix> 412x915`
