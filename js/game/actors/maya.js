@@ -31,6 +31,7 @@ import * as THREE from '../three.js';
 import { mergeGeometries, mergeVertices } from '../three.js';
 import { PALETTE, toon, blobShadow, roundRect } from '../toon.js';
 import { VoxelBuilder } from '../voxel.js';
+import { artTexture, artMaterial, ART_SIZE } from '../art.js';
 
 export const FACES = ['smile', 'happy', 'laugh', 'star', 'heart', 'wink', 'kiss', 'surprised', 'think', 'focus', 'shy', 'dizzy', 'sleepy', 'talk'];
 export const EMOTES = ['wave', 'cheer', 'jump', 'point', 'think', 'kiss', 'hugBook', 'phone', 'laugh', 'write', 'nod', 'thumbsUp', 'bow', 'dance', 'hopOut', 'hopIn', 'lookAround'];
@@ -1541,21 +1542,23 @@ const EMOTE_DEFS = {
     ],
   },
   hugBook: {
-    dur: 1.8, face: [[0, 'smile'], [0.4, 'heart'], [1.5, 'happy']], cues: [[0.2, 'book'], [0.5, 'hug']],
+    // she holds her book to her chest by its sides, cover out (like her launch-day photos), and
+    // rocks happily: her hands never cross the cover, so the real artwork stays in view
+    dur: 2.3, face: [[0, 'smile'], [0.4, 'heart'], [2.0, 'happy']], cues: [[0.2, 'book'], [0.5, 'hug']],
     poleL: [1, -0.6, -0.4], poleR: [-1, -0.6, -0.4],
     keys: [
-      [0.2, 'b', { 'prop.book': 1.15, 'ikL.x': 0.1, 'ikL.y': 0.14, 'ikL.z': 0.15, 'ikR.x': -0.1, 'ikR.y': 0.14, 'ikR.z': 0.15, 'ikL.w': 0.6, 'ikR.w': 0.6, 'head.x': 0.1 }],
-      [0.32, 'io', { 'prop.book': 1, 'ikL.w': 1, 'ikR.w': 1, 'handL.z': -0.3, 'handR.z': 0.3 }],
-      [0.55, 'b', { 'prop.book': 1, 'ikL.x': -0.035, 'ikL.y': 0.19, 'ikL.z': 0.2, 'ikR.x': 0.04, 'ikR.y': 0.1, 'ikR.z': 0.2, 'ikL.w': 1, 'ikR.w': 1, 'body.sy': 0.96, 'shoulderL.py': 0.012, 'shoulderR.py': 0.012, 'head.x': 0.16, 'chest.x': 0.05 }],
+      [0.2, 'b', { 'prop.book': 1.2, 'ikL.x': 0.1, 'ikL.y': 0.14, 'ikL.z': 0.15, 'ikR.x': -0.1, 'ikR.y': 0.14, 'ikR.z': 0.15, 'ikL.w': 0.6, 'ikR.w': 0.6, 'head.x': 0.1 }],
+      [0.32, 'io', { 'prop.book': 1.12, 'ikL.w': 1, 'ikR.w': 1, 'handL.z': -0.3, 'handR.z': 0.3 }],
+      [0.55, 'b', { 'prop.book': 1.12, 'ikL.x': 0.09, 'ikL.y': 0.13, 'ikL.z': 0.19, 'ikR.x': -0.09, 'ikR.y': 0.11, 'ikR.z': 0.19, 'ikL.w': 1, 'ikR.w': 1, 'body.sy': 0.96, 'shoulderL.py': 0.012, 'shoulderR.py': 0.012, 'head.x': 0.05, 'chest.x': 0.03 }],
       [0.7, 'io', { 'body.sy': 1.0 }],
-      [1.35, 'l', { 'prop.book': 1, 'ikL.x': -0.035, 'ikL.y': 0.19, 'ikL.z': 0.2, 'ikR.x': 0.04, 'ikR.y': 0.1, 'ikR.z': 0.2, 'ikL.w': 1, 'ikR.w': 1, 'shoulderL.py': 0.012, 'shoulderR.py': 0.012, 'head.x': 0.12, 'chest.x': 0.04 }],
-      [1.55, 'io', { 'prop.book': 1.1, 'ikL.x': 0.1, 'ikL.y': 0.14, 'ikL.z': 0.16, 'ikR.x': -0.1, 'ikR.y': 0.14, 'ikR.z': 0.16, 'ikL.w': 0.8, 'ikR.w': 0.8 }],
-      [1.68, 'i', { 'prop.book': 0, 'ikL.w': 0.3, 'ikR.w': 0.3 }],
+      [1.85, 'l', { 'prop.book': 1.12, 'ikL.x': 0.09, 'ikL.y': 0.13, 'ikL.z': 0.19, 'ikR.x': -0.09, 'ikR.y': 0.11, 'ikR.z': 0.19, 'ikL.w': 1, 'ikR.w': 1, 'shoulderL.py': 0.012, 'shoulderR.py': 0.012, 'head.x': 0.04, 'chest.x': 0.02 }],
+      [2.05, 'io', { 'prop.book': 1.1, 'ikL.x': 0.1, 'ikL.y': 0.14, 'ikL.z': 0.16, 'ikR.x': -0.1, 'ikR.y': 0.14, 'ikR.z': 0.16, 'ikL.w': 0.8, 'ikR.w': 0.8 }],
+      [2.18, 'i', { 'prop.book': 0, 'ikL.w': 0.3, 'ikR.w': 0.3 }],
     ],
     extra(u, P) {
-      const e = win(u, 0.5, 1.45, 0.15);
+      const e = win(u, 0.5, 1.95, 0.15);
       const s = Math.sin((u - 0.5) * TAU * 1.3);
-      P[Z.chest] += 0.1 * s * e;
+      P[Z.chest] += 0.08 * s * e;
       P[Z.head] += 0.12 * Math.sin((u - 0.5) * TAU * 1.3 - 0.6) * e;
       P[CH['hips.px']] -= 0.012 * s * e;
     },
@@ -1909,6 +1912,7 @@ class Maya {
     this.outline.raycast = () => {};
     this.body.add(this.outline);
     this.outline.bind(this.skeleton, this.mesh.bindMatrix);
+    this.addBookCover();
     const resolution = this.outlineMat.userData.outlineUniforms.uResolution.value;
     this.outline.onBeforeRender = (renderer) => renderer.getDrawingBufferSize(resolution);
     // generous fixed bounds (any pose, jumps included) so culling never pops her out
@@ -2017,6 +2021,36 @@ class Maya {
     if (instant) this.driveW = this.driveTarget;
   }
 
+  /**
+   * Her real "အမှန်မြင်ခြင်း / Reality Check" cover on the front of the book she hugs (unlit, so it
+   * shows the artwork's true colours; kept to the cover's own proportions, never stretched).
+   * It rides on the propBook bone, so it pops in and out with the book.
+   */
+  addBookCover() {
+    const bone = this.bones.propBook;
+    const rest = new THREE.Vector3();
+    for (let b = bone; b && b.isBone; b = b.parent) rest.add(b.position); // bone's rest position (model space)
+    const [aw, ah] = ART_SIZE.book;
+    const h = 0.19, w = (h * aw) / ah; // the book's front face is 0.15 x 0.2 m
+    const geo = new THREE.PlaneGeometry(w, h);
+    const mat = artMaterial(null);
+    const cover = new THREE.Mesh(geo, mat);
+    cover.name = 'bookCoverArt';
+    cover.position.set(0.004 - rest.x, 0.58 - rest.y, 0.1705 - rest.z); // just in front of the front cover
+    cover.visible = false;
+    cover.castShadow = cover.receiveShadow = false;
+    cover.raycast = () => {};
+    cover.userData.shadow = 'none';
+    bone.add(cover);
+    this.bookCoverArt = cover;
+    artTexture('book').then((tex) => {
+      if (!tex || this.disposed) return;
+      mat.map = tex;
+      mat.needsUpdate = true;
+      cover.visible = true;
+    });
+  }
+
   setOutfit(name) {
     if (!OUTFITS[name] || name === this.outfit) return;
     const e = acquireGeometry(name);
@@ -2109,6 +2143,7 @@ class Maya {
     this.faceGeo.dispose();
     this.glassesMesh.traverse((m) => m.geometry?.dispose());
     this.shadow.geometry.dispose();
+    if (this.bookCoverArt) { this.bookCoverArt.geometry.dispose(); this.bookCoverArt.material.dispose(); } // the artwork texture is shared
     releaseAtlas();
     this.disposed = true;
   }
