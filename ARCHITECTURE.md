@@ -249,9 +249,9 @@ birds.onScatter(f, x, y, z) / onNear / onChirp   // main.js: feathers + flutter 
 birds.scare(i)                             // debug: send flock i (or all) up
 ```
 
-Four to six little flocks (pigeons, sparrows, mynas, white doves; 3-5 birds each) sit at random
-spots on the roads - different every visit - clear of the stops (4 m), of each other (6 m) and of
-the car, and hop, peck and turn. When the car comes within about 4 m (more at speed) the flock
+One little flock at a time (pigeons, sparrows, mynas or white doves, picked at random; 3-5 birds)
+sits at a random spot on the roads - different every visit - clear of the stops (4 m) and the car,
+and the birds hop, peck and turn (`want` in birds.js sets how many flocks). When the car comes within about 4 m (more at speed) the flock
 bursts up with a flutter and a chirp, circles overhead, and once the car is 9 m away settles on
 another random stretch of road nearby (within 22 m when possible). A quiet flock far from the car
 also moves to a new spot by itself every 30-80 s. `birds.wander(i)` forces a move (debug). One instanced unit box, 8 parts per bird,

@@ -1,5 +1,5 @@
-// Little flocks of birds on the roads: pigeons, sparrows, mynas and white doves hop about and peck
-// at the gold ink. Every visit they sit somewhere different: each flock picks a random stretch of
+// A little flock of birds on the roads (one at a time: pigeons, sparrows, mynas or white doves) hops
+// about and pecks at the gold ink. Every visit it sits somewhere different: the flock picks a random stretch of
 // road (away from the stops, from each other and from the car). When the car (or Maya on foot)
 // comes close they burst up with a flutter and a chirp, circle overhead, and once the car has gone
 // they settle on another random stretch of road nearby. Now and then a flock far from the car
@@ -95,7 +95,7 @@ export function createRoadBirds(world, { low = false } = {}) {
   }
 
   // ---- the flocks: a random mix of kinds, each on its own random spot
-  const want = low ? 4 : 6;
+  const want = 1; // one flock at a time (owner request: more felt crowded)
   const kinds = Object.keys(KINDS).sort(() => rnd() - 0.5);
   for (let fi = 0; fi < want; fi++) {
     const sp = pickSpot(null, 1e9, 1e9, 0);
@@ -251,8 +251,21 @@ export function createRoadBirds(world, { low = false } = {}) {
   }
 
   let chirpT = 3;
+  let placed = false;
   function update(dt, t, who) {
     const cx = who?.x ?? 1e9, cz = who?.z ?? 1e9, speed = who?.speed ?? 0, heading = who?.heading;
+    // the first time we know where the car starts: a flock sitting right there moves away quietly
+    // (otherwise it would fly off the moment the game begins)
+    if (!placed && who) {
+      placed = true;
+      for (const f of flocks) {
+        if (f.state !== 'ground' || Math.hypot(f.x - cx, f.z - cz) >= CAR_CLEAR) continue;
+        const sp = pickSpot(f, cx, cz, CAR_CLEAR);
+        if (!sp) continue;
+        setHome(f, sp);
+        for (const b of f.members) { b.x = b.hx; b.z = b.hz; b.y = b.gy; b.hop = 0; }
+      }
+    }
     let nearest = Infinity;
     for (const f of flocks) {
       const d = Math.hypot(f.x - cx, f.z - cz);
