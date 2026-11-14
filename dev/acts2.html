@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="my" data-lang="my">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>acts2</title>
+<link rel="stylesheet" href="dev.css">
+<style>
+  #game { position: fixed; inset: 0; overflow: hidden; background: #EDE6D3 radial-gradient(120% 90% at 50% 10%, #F6EFDF 0%, #E6DCC4 100%); }
+  .menu { position: absolute; inset: 0; overflow-y: auto; display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 16px 12px 20px; box-sizing: border-box;
+    font: 14px/1.6 "Noto Sans Myanmar", system-ui, sans-serif; color: #2A2118; text-align: center; }
+  .menu h1 { margin: 0; font: 700 17px/1.5 "Noto Sans Myanmar", system-ui, sans-serif; color: #6E1F2A; }
+  .menu h1 small, .menu h2 small { display: block; font: 500 11.5px/1.4 system-ui, sans-serif; color: #8C6A28; }
+  .menu h2 { margin: 6px 0 0; font: 700 13px/1.4 "Noto Sans Myanmar", system-ui, sans-serif; color: #8C6A28; }
+  .menu .row { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; max-width: 560px; }
+  .menu button { font: 700 13px/1.45 "Noto Sans Myanmar", system-ui, sans-serif; padding: 6px 12px; border-radius: 999px; border: 2px solid #A47A2C; background: #FFFDF8;
+    color: #6E1F2A; box-shadow: 0 3px 0 #C9A24A; cursor: pointer; }
+  .menu button small { display: block; font: 500 10.5px/1.3 system-ui, sans-serif; color: #A47A2C; }
+  .menu button.alt { border-color: #C9B48A; color: #6A5A48; box-shadow: 0 3px 0 #E2D5B8; font-size: 12px; }
+  #out { width: min(100%, 520px); max-height: 22vh; overflow: auto; margin: 0; padding: 8px 10px; text-align: left; background: #FFFDF8; border: 1px solid #E2D5B8;
+    border-radius: 12px; font: 11.5px/1.45 ui-monospace, Consolas, monospace; white-space: pre-wrap; word-break: break-all; overflow-wrap: anywhere; color: #2A2118; }
+</style>
+</head>
+<body>
+<div id="game">
+  <div class="menu">
+    <h1>Reality Check · လက်မှုခန်းများ ၂<small>Act bench 2: guide · steady · hold · simmer · holdback</small></h1>
+    <div class="row" id="acts"></div>
+    <h2>auto<small>window.__act.auto*(care): care 1 plays well, care .3 rushes · pin: seconds held</small></h2>
+    <div class="row" id="autos"></div>
+    <div class="row"><button class="alt" id="lang">EN / မြန်မာ</button></div>
+    <pre id="out">ready</pre>
+  </div>
+</div>
+<script type="module">
+// Dev page for js/story/acts/{guide,steady,hold,simmer,holdback}.js. All Burmese here is a draft for the writer.
+//   ?act=<sample id>   opens that sample at once     ?lang=en     ?auto=1 plays it well, ?auto=0.3 plays it badly
+// window.__act is the open act (its auto* hooks); window.__last is the last result.
+window.addEventListener('error', (e) => { document.title = `ERR ${e.message} @${e.lineno}`; });
+window.addEventListener('unhandledrejection', (e) => { document.title = `ERR ${e.reason?.message || e.reason}`; });
+import { fontsReady } from '../js/game/toon.js';
+
+const params = new URLSearchParams(location.search);
+if (params.get('lang') === 'en') document.documentElement.setAttribute('data-lang', 'en');
+const act = (name) => import(`../js/story/acts/${name}.js`).then((m) => m[name]);
+
+// sample data: the calls the day specs make (day3 6.4, day4 5.8/6.2/6.6, day6 5.7/6.3/6.6, day7 5.9/6.4,
+// day9 5.5, day10 5.4/6.5, day11 5.1, day12 6.2)
+export const SAMPLES = {
+  guide: { label: ['ခဲတံနဲ့ လက်ချောင်း', 'Guide (Su Nwe, D3)'], hook: 'autoGuide', run: async () => (await act('guide'))({
+    title: { my: 'စုနွယ့် ခဲတံ၊ မောင်ငယ့် လက်ချောင်း', en: "Su Nwe's pencil, Maung Nge's finger" },
+    hint: { my: 'ခဲတံကို စာလုံးအောက်မှာ ဖြည်းဖြည်း ဆွဲပါ။ သူ့လက်ချောင်းကို စောင့်ပါ', en: 'Draw the pencil slowly under the letters. Wait for his finger' },
+    labels: [
+      { word: { my: 'ကျောင်း', en: 'School' }, sylls: ['ကျောင်း'], picture: 'book' },
+      { word: { my: 'မုန့်ဆိုင်', en: 'Snack shop' }, sylls: ['မုန့်', 'ဆိုင်'], picture: 'scale' },
+      { word: { my: 'ဒေါ်အုန်း', en: 'Daw Ohn' }, sylls: ['ဒေါ်', 'အုန်း'], picture: 'jasmine' },
+    ],
+    pace: 70, lag: 0.6, alone: 2,
+    readFor: { my: 'ဖတ်ပေးလိုက်မယ်', en: 'Read it for him' },
+    react: {
+      lost: { my: 'ခဏ… ဘယ်ရောက်သွားပြီလဲ။', en: 'Wait… where did it go?' },
+      sorry: { my: 'ဆောရီး… ငါ မြန်သွားတယ်။', en: 'Sorry… I went too fast.' },
+      readFor: { my: '…အစ်မပဲ ဖတ်လိုက်ပါတော့။', en: '…You read it, then.' },
+      readForMaya: { my: '(သူ ကိုယ်တိုင် ဖတ်တော့မယ့်ဟာကို ယူလိုက်မိပြီ။ မဖတ်နိုင်ဘူးလို့ ထင်လိုက်သလိုပဲ။)', en: "(I took what he was about to read himself. As if he couldn't.)" },
+      alone: { my: 'ဒေါ်… အုန်း။ ဒေါ်အုန်း! ကျွန်တော် ဖတ်တာ! ပုံနဲ့ စာ တူတူပဲ!', en: 'Daw… Ohn. Daw Ohn! I read that! The picture and the word say the same!' },
+    },
+  }) },
+
+  pour: { label: ['ပထမဆုံးခွက်', 'Steady pour (D4)'], hook: 'autoSteady', run: async () => (await act('steady'))({
+    title: { my: 'ကိုဖြိုးရဲ့ ပထမဆုံးခွက်', en: "Ko Phyo's first cup" },
+    hint: { my: 'ကရားကို ငြိမ်ငြိမ် ကိုင်ပါ။ ဘယ်သူ ကြည့်နေလဲ မော့မကြည့်နဲ့', en: "Hold the pot steady. Don't look up at who's watching" },
+    mode: 'pour', seconds: 8, watchers: 3, rounds: 1, who: 'kophyo',
+    again: { my: 'မော့ကြည့်မိလို့ ဖိတ်သွားပြီ။ ပြန်ငှဲ့မယ်။', en: 'Looked up and spilled. Pour again.' },
+  }) },
+  kiteFlag: { label: ['အလံနဲ့ ချည်ထားတဲ့ စွန်', 'Kite on the flag (D4)'], hook: 'autoSteady', run: async () => (await act('steady'))({
+    title: { my: 'မသီရိရဲ့ စွန်', en: "Ma Thiri's kite" },
+    hint: { my: 'ဖိထားရင် ကြိုးတင်းမယ်။ လွှတ်ရင် ကြိုးလျော့မယ်', en: 'Hold to pull the line in, let go to pay it out' },
+    mode: 'kite', anchor: 'flag', seconds: 12, flagDrops: [6],
+  }) },
+  kitePost: { label: ['ကိုယ့်တိုင်နဲ့ စွန်', 'Kite on her post (D4)'], hook: 'autoSteady', run: async () => (await act('steady'))({
+    title: { my: 'ကိုယ့်တိုင်နဲ့ စွန်', en: 'The kite on her own post' },
+    hint: { my: 'ဖွဖွလေး ကိုင်ပါ။ ဆုပ်မထားနဲ့', en: "Hold it lightly. Don't grip" },
+    mode: 'kite', anchor: 'post', seconds: 12, flagDrops: [6], gusts: [3, 9], who: 'thiri',
+    again: { my: 'တင်းသွားပြန်ပြီ။ ဖွဖွလေးနော်။', en: 'Gripped again. Lightly.' },
+  }) },
+  stance: { label: ['ခေါင်းမငုံ့၊ မမော့', 'Stance on the raft (D6)'], hook: 'autoSteady', run: async () => (await act('steady'))({
+    title: { my: 'ခေါင်းမငုံ့၊ မော့လည်း မမော့', en: 'Head not bowed, not tossed up' },
+    hint: { my: 'ကောင်းတာရော မကောင်းတာရော ဖြတ်သွားပါစေ။ မြေကြီးလို ငြိမ်ငြိမ်လေး။', en: 'Let the good and the bad both pass. Still, like the ground.' },
+    kind: 'stance', length: 0, loosen: true,
+    gusts: [
+      { at: 1.0, from: 'post', kind: 'jeer', push: 0.6, text: { my: 'ဖာထေးထားတဲ့ ဖောင်အိုကြီး မိုးမကျခင် နစ်မှာပဲ။', en: "That patched-up old raft'll sink before the rains." } },
+      { at: 3.2, from: 'jetty', kind: 'praise', push: 0.6, text: { my: 'ချောင်းတစ်ခုလုံးမှာ အတော်ဆုံး ဝါးထိုးသမား! ကူးတို့ကို မင်း မောင်းသင့်တယ်!', en: 'Best pole on the whole stream! You should be running the ferry!' } },
+      { at: 5.4, from: 'post', kind: 'jeer', push: 0.8, text: { my: 'ငါ့ဆိပ်ကို အဲဒီအစုတ်နဲ့ မတိုက်နဲ့။', en: "Don't bump my jetty with that rag of a thing." } },
+      { at: 7.0, from: 'jetty', kind: 'praise', push: 0.8, text: { my: 'မင်းမရှိရင် ငါတို့ကြိမ် ဒီမှာပဲ ဆွေးကုန်မှာ!', en: 'Without you our cane would rot out here!' } },
+    ],
+    react: {
+      bowed: { my: 'ခေါင်းငုံ့ခံတာ မဟုတ်ဘူး… ပြန်ငြိမ်ပါရစေ။', en: 'Not bowing my head to it… let me settle again.' },
+      tossed: { my: 'မြှောက်ခံရလို့ ပေါ့သွားပြီ… ပြန်ငြိမ်ပါရစေ။', en: 'The praise floated me off… let me settle again.' },
+      clench: { my: 'တင်းနေပြီ။ လက်ကို လျှော့။', en: "I'm bracing. Loosen up." },
+    },
+  }) },
+  seated: { label: ['ကျောက်တုံးလို', 'Stance seated (D6)'], hook: 'autoSteady', run: async () => (await act('steady'))({
+    title: { my: 'ကျောက်တုံးလို', en: 'Like a rock' },
+    hint: { my: 'လက်ကို လျှော့ထား။ စကားတွေ ဖြတ်သွားပါစေ။', en: 'Keep your hand loose. Let the words go past.' },
+    kind: 'stance', length: 0, loosen: true, seated: true,
+    gusts: [
+      { at: 0.8, kind: 'talk', push: 0.5, up: true, text: { my: 'တံတား မနက်ဖြန် ဖွင့်မယ်တဲ့! ကောင်းလိုက်တာ!', en: 'Bridge opens tomorrow! Great!' } },
+      { at: 2.2, kind: 'talk', push: 0.6, up: false, text: { my: 'တံတားက လှုပ်တယ်တဲ့။ ကြောက်စရာ။', en: 'They say the bridge sways. Scary.' } },
+      { at: 3.6, kind: 'talk', push: 0.6, up: true, text: { my: 'ဟိုဘက်က အလုပ်တွေက အကောင်းဆုံးပဲ!', en: 'The jobs over there are the best!' } },
+      { at: 5.0, kind: 'talk', push: 0.7, up: false, text: { my: 'အသစ်ဝင်တဲ့သူတွေ တစ်ပတ်တောင် မခံဘူးတဲ့။', en: "They say new starters don't last a week." } },
+      { at: 6.4, kind: 'talk', push: 0.5, up: false, text: { my: 'မိုးကျရင် ဆိပ်ကမ်း ပိတ်မယ်တဲ့။', en: 'They say the wharf shuts when it rains.' } },
+    ],
+  }) },
+  cup: { label: ['ကိုယ့်ခွက် ကိုယ်ကိုင်', 'Steady cup (D6)'], hook: 'autoSteady', run: async () => (await act('steady'))({
+    title: { my: 'ကိုယ့်ခွက် ကိုယ်ကိုင်', en: 'Your own cup, your own hands' },
+    hint: { my: 'ကူမယ့်လက်တွေကို ယဉ်ယဉ်ကျေးကျေး ငြင်း၊ ခွက်ကို ဖြောင့်ဖြောင့်ကိုင်', en: 'Turn the helping hands down kindly; keep the cup level' },
+    kind: 'cup', length: 6, sway: 0.15, spillAt: 0.7, loosen: true,
+    gusts: [
+      { at: 0.15, from: 'left', kind: 'hand', push: 0.5, text: { my: 'ငါ သယ်ပေးမယ်!', en: "I'll carry it!" } },
+      { at: 0.35, from: 'right', kind: 'hand', push: 0.6, text: { my: 'ဘယ်ဘက်က သွား၊ ဘယ်ဘက်!', en: 'Go left, left!' } },
+      { at: 0.55, from: 'left', kind: 'hand', push: 0.6, text: { my: 'လက်နှစ်ဖက်နဲ့ ကိုင်လေ!', en: 'Use both hands!' } },
+      { at: 0.75, from: 'right', kind: 'hand', push: 0.7, maya: true, text: { my: 'ပေး၊ အစ်မ ကိုင်ပေးမယ်။', en: "Give it here, I'll hold it." } },
+    ],
+    react: { spill: { my: 'ဖိတ်သွားပြီ… ကိုဖြိုး၊ နောက်တစ်ခွက် ရမလား။', en: 'Spilled… Ko Phyo, could I have another?' } },
+  }) },
+  bowl: { label: ['ဇလုံ သယ်မယ်', 'Steady bowl (D7)'], hook: 'autoSteady', run: async () => (await act('steady'))({
+    title: { my: 'ဇလုံကို ရေမဖိတ်အောင် သယ်ပါ', en: 'Carry the bowl without spilling' },
+    hint: { my: 'ဇလုံကိုပဲ ကြည့်။ ဖိထားရင် လျှောက်၊ လွှတ်ရင် ရပ်', en: 'Watch the bowl. Hold to walk, let go to stop' },
+    kind: 'bowl', length: 6, sway: 0.15, spillAt: 0.7, clock: true,
+  }) },
+  plank: { label: ['ကြိုးတံတား', 'Steady plank (D7)'], hook: 'autoSteady', run: async () => (await act('steady'))({
+    title: { my: 'နေခြည် ကြိုးတံတားပေါ် လျှောက်မယ်', en: 'Nay Chi crosses the rope bridge' },
+    hint: { my: 'ဖိထားရင် ရှေ့တိုး၊ လွှတ်ရင် ရပ်။ လွှဲရင် ငြိမ်အောင် စောင့်', en: 'Hold to step, let go to stop. When it sways, wait for it to settle' },
+    kind: 'plank', length: 10, sway: 0.5, spillAt: 1,
+    back: { my: 'နောက်ပြန်လှည့်မယ်', en: 'Turn back' },
+    backLine: { my: 'ဟင့်အင်း… ကြောက်လို့ရတယ်။ နောက်ပြန်လှည့်တာတော့ မဟုတ်ဘူး။', en: "No… afraid is allowed. Turning back isn't." },
+    meet: { at: 0.85, who: 'child' },
+  }) },
+
+  release: { label: ['နွယ်ညွန့် လမ်းပြ', 'Hold release (D10)'], hook: 'autoHold', run: async () => (await act('hold'))({
+    mode: 'release', skin: 'tendril', rounds: 3,
+    title: { my: 'နွယ်ညွန့်ကို တိုင်ဆီ လမ်းပြမယ်', en: 'Lead the tendril to the post' },
+    hint: { my: 'ဖိထားရင် ညွန့်က တိုင်ဆီ ထိုးသွားမယ်။ တိုင်ကို ထိတာနဲ့ လွှတ်လိုက်ပါ။', en: 'Hold and the tip reaches for the post. Let go the moment it touches.' },
+    window: [0.8, 0.92], narrowing: 0.02, who: 'hpohtaw',
+    again: { my: 'ရစ်သွားပြန်ပြီ။ ငါ ဖြည်လိုက်မယ်။ နောက်တစ်ခါ။', en: "It wound round again. I'll untwine it. Once more." },
+    early: { my: 'မထိသေးဘူး… လေထဲမှာ ကျန်ခဲ့တယ်။', en: "Not touching yet… it's left hanging in the air." },
+  }) },
+  scale: { label: ['ခြောက်ခြောက် ချိန်', 'Hold scale (D10)'], hook: 'autoHold', run: async () => (await act('hold'))({
+    mode: 'scale', skin: 'scale', rounds: 2, who: 'kophyo',
+    title: { my: 'ခြောက်ခြောက် ချိန်မယ်', en: 'Weigh it dry' },
+    hint: { my: 'ချိန်ခွင်တံကို ဖိထားပြီး ညီအောင် ထိန်းပါ။ အပ်ငြိမ်သွားမှ ဖတ်ရမယ်။', en: 'Hold the beam level. Read it only when the needle is still.' },
+    band: 0.12, seconds: 2, drift: 0.6,
+    readouts: [{ my: '၁ ပိဿာ — အတိအကျ', en: '1 viss — exact' }, { my: '၉ ပိဿာ', en: '9 viss' }],
+  }) },
+  pin: { label: ['ပူနေတဲ့ ပြန်စာ', 'Hold pin (D11)'], hook: 'autoHold', autos: [[0.6, 'pin 0.6 s'], [2, 'pin 2 s (burned)'], [5, 'pin 5 s (hand opens)']], run: async () => (await act('hold'))({
+    mode: 'pin', thing: 'pin',
+    title: { my: 'ပြန်စာကို ကိုင်ကြည့်', en: 'Hold the reply' },
+    hint: { my: 'ဖိထား… ပြီးရင် ချလိုက်', en: 'Press and hold… then put it down' },
+    burnAt: 1.2, maxHold: 4, calm: 4,
+    dropped: { my: '(ချလိုက်တော့မှ လက်က အေးသွားတယ်။)', en: '(Only when I put it down does my hand cool.)' },
+    tooLong: { my: '(အား… လက်က သူ့ဘာသာ ဖြေလိုက်တယ်။)', en: '(Ow… my hand let go by itself.)' },
+  }) },
+
+  simmer: { label: ['အိုးဖုံး စခုန်တာနဲ့', 'Simmer (D12)'], hook: 'autoSimmer', run: async () => (await act('simmer'))({
+    title: { my: 'အိုးဖုံး စခုန်တာနဲ့', en: 'At the first rattle' },
+    hint: { my: 'ဖုံး စခုန်တာနဲ့ အိုးကို မီးအေးဘက် ဆွဲချပါ', en: 'When the lid first rattles, slide the pot to the cool edge' },
+    rounds: 3, gusts: ['tap', 'laugh', 'word'], window: [900, 700, 500], who: 'dawohn',
+    early: { my: 'မပွက်သေးဘူး သမီး။ ပြန်တင်လိုက်။', en: 'Not boiling yet, dear. Put it back.' },
+    late: { my: 'အိုး… လျှံသွားပြီ။ နောက်တစ်ခါ စောစော သတိထားမယ်။', en: "Oh… it boiled over. Next time I'll notice sooner." },
+  }) },
+
+  holdback: { label: ['နောက်ဗန်း', 'Holdback (D9)'], hook: 'autoHoldback', run: async () => (await act('holdback'))({
+    title: { my: 'နောက်ဗန်း', en: 'The next tray' },
+    hint: { my: 'နောက်ဆုတ်ပေးကို ဖိထား။ သင်တာ သူ့ဟာ။', en: 'Hold Step back. The teaching is hers.' },
+    who: 'khinmay', with: ['maungarkar'],
+    beats: [
+      { cue: { my: '(အာကာ ဗန်းကို စောင်းကိုင်လိုက်တယ်။ ဒေါ်ခင်မေ့ ခွက်က ငွေ့ တက်လာတယ်…)', en: "(Arkar lifts the tray crooked. Daw Khin May's cup starts to steam…)" }, steamTo: 2, ms: 2600,
+        then: { my: '…ဖြည်းဖြည်း။ ဗန်းကို နှစ်ဖက်ညီအောင် ကိုင်။', en: '…Slowly. Hold the tray level on both sides.' } },
+      { cue: { my: '(လက်ဗလာနဲ့ မီးဖိုတံခါးကို လှမ်းလိုက်တယ်။ ခွက်က ပိုပူလာတယ်…)', en: '(He reaches for the oven door bare-handed. The cup steams harder…)' }, steamTo: 3, ms: 3000,
+        then: { my: 'လက်အိတ်။ ဟိုမှာ ချိတ်ထားတယ်။', en: 'The mitt. On the hook, there.' } },
+      { cue: { my: '(မုန့်တစ်လုံး အပေါ်က ကွဲသွားတယ်။)', en: '(One loaf splits on top.)' }, steamTo: 2, ms: 2600,
+        then: { my: 'ကွဲတာ ဘာကြောင့်လို့ မင်း ထင်လဲ။', en: 'Why do you think it split?' } },
+    ],
+    early: { maya: { my: 'ကျွန်မ ပြောပြမယ်…', en: 'Let me tell him…' }, they: { my: 'ဒါဆို မင်းပဲ သင်လိုက်တော့လေ။', en: 'Then you teach him.' } },
+    end: { my: 'အပေါ်က ဓားနဲ့ မခြစ်ခဲ့လို့… နောက်ဗန်းကျ ခြစ်မယ်။', en: "I didn't score the top… next tray I will." },
+  }) },
+  // the same act reused in a plain room (place: 'room'): Day 11, Nay Chi helps Daw Nyein by herself
+  holdbackRoom: { label: ['သူ့ဘာသာ ကူညီတယ်', 'Holdback room (D11 reuse)'], hook: 'autoHoldback', run: async () => (await act('holdback'))({
+    place: 'room',
+    title: { my: 'သူ့ဘာသာ ကူညီတယ်', en: 'She helps, by herself' },
+    hint: { my: 'နောက်ဆုတ်ပေးကို ဖိထား။ ဒီတစ်လှမ်းက နေခြည့်ဟာ။', en: "Hold Step back. This step is Nay Chi's." },
+    who: 'naychi', with: ['nyein'],
+    beats: [
+      { cue: { my: '(ဒေါ်ငြိမ်း မီးအိမ်ဖန်ကို မတပ်နိုင်ဖြစ်နေတယ်။ နေခြည် မာရာ့ဘက် လှည့်ကြည့်တယ်…)', en: "(Daw Nyein can't fit the lamp glass. Nay Chi glances back at Maya…)" }, steamTo: 2, ms: 2400,
+        then: { my: 'ဒေါ်ဒေါ်၊ ကျွန်မ ကိုင်ထားပေးမယ်။ ဖြည်းဖြည်း လှည့်ကြည့်ပါ။', en: "Aunty, I'll hold it. Turn it slowly." } },
+      { cue: { my: '(ဖန်က ချော်ကျလုနီးပါး။ နေခြည် လက်က တုန်နေတယ်…)', en: "(The glass nearly slips. Nay Chi's hands shake…)" }, steamTo: 3, ms: 2800,
+        then: { my: 'ရပြီ… ကျွန်မ ဘာလုပ်ရမလဲလို့ ဘယ်သူ့ကိုမှ မမေးလိုက်ရဘူး။', en: "There… and I didn't ask anyone what to do." } },
+    ],
+    early: { maya: { my: 'ဒီလို လှည့်ရတယ်…', en: 'You turn it like this…' }, they: { my: 'အစ်မ… ကျွန်မ ကိုယ်တိုင် လုပ်ကြည့်ပါရစေ။', en: 'Sister… let me try it myself.' } },
+    end: { my: 'ကျေးဇူးပဲ သမီး။ အလင်းက ပိုကောင်းသွားတယ်။', en: 'Thank you, dear. The light is better already.' },
+  }) },
+};
+
+const out = document.getElementById('out');
+let running = false;
+async function run(id, care = null) {
+  if (running) return;
+  running = true;
+  out.textContent = `${id}…`;
+  try {
+    const p = SAMPLES[id].run();
+    if (care != null) {
+      const go = () => { const a = window.__act; if (a && a[SAMPLES[id].hook]) a[SAMPLES[id].hook](care); else setTimeout(go, 100); };
+      setTimeout(go, 500);
+    }
+    const r = await p;
+    window.__last = r;
+    out.textContent = `${id} → ${JSON.stringify(r)}`;
+  } catch (e) { out.textContent = `${id} ✕ ${e.message}`; console.error(e); }
+  running = false;
+}
+const actsRow = document.getElementById('acts');
+const autosRow = document.getElementById('autos');
+for (const [id, s] of Object.entries(SAMPLES)) {
+  const b = document.createElement('button');
+  b.innerHTML = `${s.label[0]}<small>${s.label[1]}</small>`;
+  b.addEventListener('click', () => run(id));
+  actsRow.append(b);
+  // pin's hook takes seconds to hold, the others take care (1 well, .3 rushed)
+  for (const [arg, name] of s.autos || [[1, `${id} well`], [0.3, `${id} rushed`]]) {
+    const a = document.createElement('button');
+    a.className = 'alt';
+    a.textContent = name;
+    a.addEventListener('click', () => run(id, arg));
+    autosRow.append(a);
+  }
+}
+document.getElementById('lang').addEventListener('click', () => {
+  const h = document.documentElement;
+  h.setAttribute('data-lang', h.getAttribute('data-lang') === 'en' ? 'my' : 'en');
+});
+window.__acts = { run, SAMPLES };
+await fontsReady();
+document.title = 'acts2 ready';
+const id = params.get('act');
+if (id && SAMPLES[id]) run(id, params.has('auto') ? Number(params.get('auto')) || 1 : null);
+</script>
+</body>
+</html>

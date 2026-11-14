@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="my" data-lang="my">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>acts</title>
+<link rel="stylesheet" href="dev.css">
+<style>
+  #game { position: fixed; inset: 0; overflow: hidden; background: #EDE6D3 radial-gradient(120% 90% at 50% 10%, #F6EFDF 0%, #E6DCC4 100%); }
+  .menu { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 20px;
+    font: 14px/1.6 "Noto Sans Myanmar", system-ui, sans-serif; color: #2A2118; text-align: center; }
+  .menu h1 { margin: 0; font: 700 18px/1.5 "Noto Sans Myanmar", system-ui, sans-serif; color: #6E1F2A; }
+  .menu h1 small { display: block; font: 500 12px/1.4 system-ui, sans-serif; color: #8C6A28; }
+  .menu .row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; max-width: 520px; }
+  .menu button { font: 700 14px/1.5 "Noto Sans Myanmar", system-ui, sans-serif; padding: 8px 16px; border-radius: 999px; border: 2px solid #A47A2C; background: #FFFDF8;
+    color: #6E1F2A; box-shadow: 0 3px 0 #C9A24A; cursor: pointer; }
+  .menu button small { display: block; font: 500 11px/1.3 system-ui, sans-serif; color: #A47A2C; }
+  .menu button.alt { border-color: #C9B48A; color: #6A5A48; box-shadow: 0 3px 0 #E2D5B8; }
+  #out { width: min(100%, 520px); max-height: 30vh; overflow: auto; margin: 0; padding: 10px 12px; text-align: left; background: #FFFDF8; border: 1px solid #E2D5B8;
+    border-radius: 12px; font: 12px/1.5 ui-monospace, Consolas, monospace; white-space: pre-wrap; color: #2A2118; }
+</style>
+</head>
+<body>
+<div id="game">
+  <div class="menu">
+    <h1>Reality Check · လက်မှုခန်းများ<small>Act test bench: shape · match · own words</small></h1>
+    <div class="row">
+      <button data-act="shape">အိုး လုပ်မယ်<small>Shape (Mi Cho)</small></button>
+      <button data-act="match">လမ်းနဲ့ စာမျက်နှာ<small>Match (Toe Toe)</small></button>
+      <button data-act="ownwords">ကိုယ့်စကားနဲ့<small>Own words (Toe Toe)</small></button>
+    </div>
+    <div class="row">
+      <button class="alt" data-auto="shape-good">auto shape 2, care 1</button>
+      <button class="alt" data-auto="shape-rush">auto shape 5, care .5</button>
+      <button class="alt" data-auto="match">auto match</button>
+      <button class="alt" data-auto="ownwords">auto own words</button>
+      <button class="alt" id="lang">EN / မြန်မာ</button>
+    </div>
+    <pre id="out">ready</pre>
+  </div>
+</div>
+<script type="module">
+// Dev page for js/story/acts/{shape,match,ownwords}.js. All Burmese here is a draft for the writer.
+//   ?act=shape|match|ownwords   opens that act at once     ?lang=en   ?auto=1 plays it by itself
+// window.__act is the open act (its auto* hooks); window.__last is the last result.
+window.addEventListener('error', (e) => { document.title = `ERR ${e.message} @${e.lineno}`; });
+window.addEventListener('unhandledrejection', (e) => { document.title = `ERR ${e.reason?.message || e.reason}`; });
+import { shape } from '../js/story/acts/shape.js';
+import { match } from '../js/story/acts/match.js';
+import { ownwords } from '../js/story/acts/ownwords.js';
+import { fontsReady } from '../js/game/toon.js';
+
+const params = new URLSearchParams(location.search);
+if (params.get('lang') === 'en') document.documentElement.setAttribute('data-lang', 'en');
+
+export const SAMPLES = {
+  // Ch.5 "Not yet": Daw Ohn sets five pots a day; two is what the clay allows
+  shape: () => shape({
+    title: { my: 'မိချို၏ စက်ဘီး — အိုး လုပ်မယ်', en: "Mi Cho's wheel: shape the pots" },
+    hint: { my: 'ဒီနေ့ အိုး ဘယ်နှလုံး လုပ်မလဲ။', en: 'How many pots today?' },
+    loads: [2, 3, 5], best: 2, rounds: 3,
+  }),
+  // Ch.3: Toe Toe's walk to school, every stop a page of his schoolbook
+  match: () => match({
+    title: { my: 'တိုးတိုး ကျောင်းသွားလမ်း', en: "Toe Toe's walk to school" },
+    hint: { my: 'လမ်းမှာ တွေ့ခဲ့တာကို စာအုပ်ထဲက စာမျက်နှာနဲ့ တွဲပါ', en: 'Match each stop to its schoolbook page' },
+    shuffle: true,
+    pairs: [
+      { left: { my: 'မုန့်ဆိုင်က ချိန်ခွင်', en: "The snack shop's scale", icon: 'scale' }, right: { my: 'အလေးချိန်နဲ့ ချိန်ခွင်လျှာ', en: 'Weight and balance' } },
+      { left: { my: 'ကစားကွင်းက ဆီးဆော', en: 'The playground see-saw', icon: 'seesaw' }, right: { my: 'လီဗာနဲ့ ဝင်ရိုးချက်', en: 'Levers and the pivot' } },
+      { left: { my: 'လမ်းမီးတိုင်', en: 'The street lamp', icon: 'lamp' }, right: { my: 'အလင်းနဲ့ အရိပ်', en: 'Light and shadow' } },
+      { left: { my: 'ပဲပင် စိုက်အိုး', en: 'The bean pot', icon: 'beanpot' }, right: { my: 'အပင် ကြီးထွားပုံ — ရေ၊ နေရောင်', en: 'How plants grow: water and sun' } },
+    ],
+  }),
+  // Ch.3 end: one line in his own words, not the planting rhyme
+  ownwords: () => ownwords({
+    title: { my: 'တိုးတိုး၏ လေ့ကျင့်ခန်းစာအုပ်', en: "Toe Toe's exercise book" },
+    hint: { my: 'ကဗျာ မဟုတ်ဘဲ ကိုယ်တိုင် နားလည်တာကို ရွေးပါ', en: 'Pick what he understands, not the rhyme' },
+    prompt: { my: 'ပဲပင်တွေ ဘာလို့ သေသွားတာလဲ။ ကိုယ့်စကားနဲ့ တစ်ကြောင်း ရေးပါ။', en: 'Why did the beans die? Write one line in your own words.' },
+    need: 3,
+    fragments: [
+      { my: 'ပဲပင်တွေကို အရိပ်ထဲ ထားမိလို့', en: 'I kept the beans in the shade,', good: true },
+      { my: 'နေရောင် မရဘဲ', en: 'so they got no sun', good: true },
+      { my: 'ရေ များလွန်းပြီး သေသွားတယ်', en: 'and drowned in too much water.', good: true },
+      { my: 'ပဲစေ့လေး စိုက်ပါ ရေလောင်းပါ', en: 'Plant the bean, pour the water', good: false },
+      { my: 'နေမင်းကြီး ထွက်ရင် ပဲပင် ကြီးမယ်', en: 'When the sun is out, the bean grows tall', good: false },
+      { my: 'တစ်နေ့ တစ်ခါ သီချင်းဆို', en: 'Once a day, sing a song', good: false },
+    ],
+  }),
+};
+
+const out = document.getElementById('out');
+let running = false;
+async function run(name, auto) {
+  if (running) return;
+  running = true;
+  out.textContent = `${name}…`;
+  const p = SAMPLES[name]();
+  if (auto) setTimeout(() => auto(window.__act), 700);
+  const r = await p;
+  window.__last = r;
+  out.textContent = `${name} → ${JSON.stringify(r, null, 1)}`;
+  running = false;
+}
+const AUTOS = {
+  'shape-good': ['shape', (a) => a.autoShape(2, 1)],
+  'shape-rush': ['shape', (a) => a.autoShape(5, 0.5)],
+  match: ['match', (a) => a.autoMatch()],
+  ownwords: ['ownwords', (a) => a.autoOwnwords()],
+};
+document.querySelectorAll('[data-act]').forEach((b) => b.addEventListener('click', () => run(b.dataset.act)));
+document.querySelectorAll('[data-auto]').forEach((b) => b.addEventListener('click', () => run(...AUTOS[b.dataset.auto])));
+document.getElementById('lang').addEventListener('click', () => {
+  const h = document.documentElement;
+  h.setAttribute('data-lang', h.getAttribute('data-lang') === 'en' ? 'my' : 'en');
+});
+window.__acts = { run, SAMPLES, AUTOS };
+await fontsReady();
+document.title = 'acts ready';
+const act = params.get('act');
+if (act && SAMPLES[act]) run(act, params.get('auto') === '1' ? AUTOS[act === 'shape' ? 'shape-good' : act][1] : null);
+</script>
+</body>
+</html>

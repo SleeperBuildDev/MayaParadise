@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="my" data-lang="my">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>acts3</title>
+<link rel="stylesheet" href="dev.css">
+<style>
+  #game { position: fixed; inset: 0; overflow: hidden; background: #EDE6D3 radial-gradient(120% 90% at 50% 10%, #F6EFDF 0%, #E6DCC4 100%); }
+  .menu { position: absolute; inset: 0; overflow: auto; display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 16px;
+    font: 14px/1.6 "Noto Sans Myanmar", system-ui, sans-serif; color: #2A2118; text-align: center; box-sizing: border-box; }
+  .menu h1 { margin: 0; font: 700 17px/1.5 "Noto Sans Myanmar", system-ui, sans-serif; color: #6E1F2A; }
+  .menu h1 small { display: block; font: 500 12px/1.4 system-ui, sans-serif; color: #8C6A28; }
+  .menu .row { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; max-width: 560px; }
+  .menu button { font: 700 13px/1.45 "Noto Sans Myanmar", system-ui, sans-serif; padding: 6px 12px; border-radius: 999px; border: 2px solid #A47A2C; background: #FFFDF8;
+    color: #6E1F2A; box-shadow: 0 3px 0 #C9A24A; cursor: pointer; }
+  .menu button small { display: block; font: 500 10.5px/1.3 system-ui, sans-serif; color: #A47A2C; }
+  .menu button.alt { border-color: #C9B48A; color: #6A5A48; box-shadow: 0 3px 0 #E2D5B8; font-size: 12px; }
+  #out { width: min(100%, 560px); max-height: 26vh; overflow: auto; margin: 0; padding: 10px 12px; text-align: left; background: #FFFDF8; border: 1px solid #E2D5B8;
+    border-radius: 12px; font: 12px/1.5 ui-monospace, Consolas, monospace; white-space: pre-wrap; color: #2A2118; }
+</style>
+</head>
+<body>
+<div id="game">
+  <div class="menu">
+    <h1>Reality Check · လက်မှုခန်းများ ၃<small>Act bench B: sort · pole · carve · turnblock · lockup · recall · lastline · keepsake · trace2</small></h1>
+    <div class="row" id="acts"></div>
+    <div class="row" id="autos"></div>
+    <div class="row"><button class="alt" id="lang">EN / မြန်မာ</button></div>
+    <pre id="out">ready</pre>
+  </div>
+</div>
+<script type="module">
+// Dev page for js/story/acts/{sort,pole,carve,turnblock,lockup,recall,lastline,keepsake,trace2}.js.
+// All Burmese here is a draft for the writer (copied from the day specs).
+//   ?act=<name>   opens that sample at once     ?lang=en     ?auto=1 plays it by itself
+// window.__act is the open act (its auto* hooks); window.__last is the last result.
+window.addEventListener('error', (e) => { document.title = `ERR ${e.message} @${e.lineno}`; });
+window.addEventListener('unhandledrejection', (e) => { document.title = `ERR ${e.reason?.message || e.reason}`; });
+import { fontsReady } from '../js/game/toon.js';
+
+const params = new URLSearchParams(location.search);
+if (params.get('lang') === 'en') document.documentElement.setAttribute('data-lang', 'en');
+const M = (f) => import(`../js/story/acts/${f}.js`);
+
+export const SAMPLES = {
+  // Day 5, ch 2: Ko Thiha's list (two baskets, 8 cards)
+  sort5: async () => (await M('sort')).sort({
+    title: { my: 'ကိုသီဟရဲ့ စာရင်း', en: "Ko Thiha's list" },
+    hint: { my: 'တစ်ကြောင်းချင်း သင့်တော်တဲ့ ခြင်းထဲ ထည့်ပါ', en: 'Put each line in the basket it belongs in' },
+    baskets: [{ id: 'nobody', my: 'ဘယ်သူမှ မရွေးခဲ့ဘူး', en: 'Nobody chose this' }, { id: 'mine', my: 'ကိုယ်ရွေးလို့ရတယ်', en: 'Mine to choose' }],
+    cards: [
+      { my: 'ဒီဆိပ်မှာ မွေးတာ', en: 'Being born at this jetty', basket: 'nobody' },
+      { my: 'မြစ်ရေ မြန်တာ', en: 'The stream running fast', basket: 'nobody' },
+      { my: 'ဖောင်က ဟောင်းနေတာ', en: 'The raft being old', basket: 'nobody' },
+      { my: 'အမေက ကျွန်တော့်ကို ရွေးမွေးတာ မဟုတ်၊ ကျွန်တော်လည်း အမေ့ကို မရွေးခဲ့', en: "Mum didn't pick me, and I didn't pick her", basket: 'nobody' },
+      { my: 'ကူးတို့က ပိုမြန်တာ', en: 'The ferry being faster', basket: 'nobody' },
+      { my: 'လှော်မလား မျောမလား', en: 'Whether I steer or drift', basket: 'mine' },
+      { my: 'ဘယ်ဆိပ်ကို သွားမလဲ', en: 'Which jetty I head for', basket: 'mine' },
+      { my: 'ဘယ်သူ့ကို ကူမလဲ — အမေ၊ မောင်ငယ်', en: 'Who I help: Mum, Maung Nge', basket: 'mine' },
+    ],
+    wrong: { my: 'ဟင့်အင်း… ဒါ ကိုယ်တိုင် ရွေးခဲ့တာ မဟုတ်ဘူး။', en: 'No… nobody picks that.', who: 'kohlaing' },
+  }),
+  // Day 8, ch 12: slips with speakers, 'repeat', stampAll (aliases slips / fits / label)
+  sort8: async () => (await M('sort')).sort({
+    title: { my: 'ဘာကြောင့် ယုံလဲ', en: 'Why do they believe it?' },
+    hint: { my: 'စာရွက်တစ်ရွက်ချင်း သင့်တော်တဲ့ ခြင်းထဲ ထည့်ပါ', en: 'Put each slip in the basket it belongs to' },
+    baskets: [{ id: 'told', label: { my: 'သူများ ပြောလို့', en: 'Others told me' }, icon: 'ear' }, { id: 'self', label: { my: 'ကိုယ့်ဘာသာ ယူဆလို့', en: 'I told myself' }, icon: 'eye' }],
+    slips: [
+      { id: 'heard', who: 'naychi', fits: 'told', label: { my: 'ပြောသံ ကြားလို့', en: 'I heard it said' } },
+      { id: 'old', who: 'ubathaw', fits: 'told', label: { my: 'ရှေးစကား ရှိလို့', en: 'An old saying' } },
+      { id: 'printed', who: 'kowunna', fits: 'told', label: { my: 'စာထဲမှာ ပါလို့', en: "It's printed" } },
+      { id: 'revered', who: 'hninwai', fits: 'told', label: { my: 'ရိုသေတဲ့သူ ပြောလို့ (မာရာ)', en: 'Someone I revere said it (Maya)' } },
+      { id: 'before', who: 'kophyo', fits: 'self', label: { my: 'အရင်က ဖြစ်ဖူးလို့', en: 'It happened before' } },
+      { id: 'thought', who: 'sunwe', fits: 'self', label: { my: 'ကိုယ်တိုင် တွေးမိလို့', en: 'I worked it out' } },
+      { id: 'view', who: 'dawohn', fits: 'self', label: { my: 'ကိုယ့်အမြင်နဲ့ ကိုက်လို့', en: 'It fits what I think' } },
+    ],
+    stampAll: { my: 'ဒါတစ်ခုတည်းနဲ့ မလုံလောက်သေးဘူး', en: 'Not enough on its own yet' },
+    wrong: 'repeat',
+  }),
+  // Day 13, ch 21: ordered, four trays, react excuse / order / out
+  sort13: async () => (await M('sort')).sort({
+    title: { my: 'အိမွန်ရဲ့ မေးခွန်း သုံးခု', en: "Ei Mon's three questions" },
+    hint: { my: 'ပထမ မေးခွန်းကနေ စပါ', en: 'Start with the first question' },
+    who: 'eimon', ordered: true,
+    baskets: [
+      { id: 'why', label: { my: '၁ · ဘာကြောင့် ဖြစ်တာလဲ', en: '1 · Why does it happen?' } },
+      { id: 'stop', label: { my: '၂ · မဖြစ်အောင် ဘာလုပ်မလဲ', en: '2 · How do I stop it?' } },
+      { id: 'hold', label: { my: '၃ · ဖြစ်လာရင် ဘယ်လို နှလုံးသွင်းမလဲ', en: '3 · How do I hold it?' } },
+      { id: 'out', label: { my: 'အကြောင်းပြချက် မဟုတ်ဘူး', en: 'Not a reason' }, always: true },
+    ],
+    cards: [
+      { id: 'curious', to: 'why', my: 'ဘာရက်နေလဲ သိချင်ကြတယ်', en: 'They were curious what I was weaving' },
+      { id: 'laugh', to: 'why', my: 'တစ်တန်းလုံး ရယ်တာကို သဘောကျကြတယ်', en: 'They liked having the row laugh with them' },
+      { id: 'nosaid', to: 'why', my: 'ဖုံးထားရင် မထိရဘူးလို့ ဘယ်သူမှ မပြောထားဘူး', en: 'Nobody had said a cover means ask' },
+      { id: 'tag', to: 'stop', my: 'ဖုံးတိုင်းမှာ "အရင်မေးပါ" ချိတ်ထားမယ်', en: 'Tie an "ask first" tag on every cover' },
+      { id: 'say', to: 'stop', my: 'ရုံထဲမှာ အသံထွက် ပြောမယ်: ဖုံးထားရင် မေးပြီးမှ', en: 'Say it out loud in the shed: covered means ask' },
+      { id: 'breath', to: 'hold', my: 'ပူလာရင် သူများဟာ မထိခင် အသက်ရှူမယ်', en: 'When the heat comes, breathe before I touch anything of theirs' },
+      { id: 'mine', to: 'hold', my: 'သူတို့လုပ်တာ သူတို့တာဝန်။ ကျွန်မ ပြန်တုံ့ပြန်တာ ကျွန်မတာဝန်', en: 'What they did is theirs. What I do back is mine' },
+      { id: 'joke', to: 'out', my: '"စတာပဲ" ဆိုရင် ကိစ္စမရှိဘူး', en: '"It was only a joke," so it doesn\'t count' },
+      { id: 'lock', to: 'out', my: 'ကျွန်မ သော့မခတ်ထားလို့ ကျွန်မ အပြစ်', en: "It's my fault for not locking it" },
+      { id: 'all', to: 'out', my: 'လူတိုင်း ဒီလို လုပ်တာပဲ', en: 'Everyone does it' },
+    ],
+    react: {
+      excuse: { my: 'ဒါ အကြောင်းရင်း မဟုတ်ဘူး။ ဆင်ခြေ။', en: "That isn't a cause. It's an excuse." },
+      order: { my: 'ခဏ… ဘာကြောင့်လဲ အရင်သိမှ။', en: 'Wait… first I need to know why.' },
+      out: { my: 'အဲဒါက တကယ်ဖြစ်ခဲ့တာ။ အကြောင်းရင်း မှန်တယ်။', en: "That really happened. It's a true cause." },
+    },
+  }),
+  // Day 12, ch 20: blot cards (items alias tested in sort7)
+  sort12: async () => (await M('sort')).sort({
+    title: { my: 'ကော်မတီအတွက် ဒေါ်အုန်းရဲ့ စာ', en: "Daw Ohn's report for the committee" },
+    hint: { my: 'အမှန်တွေ ထည့် · အပူတွေ တံခါးအပြင်မှာ ချန်ခဲ့', en: 'Facts go in · heat stays outside the door' },
+    who: 'dawohn',
+    baskets: [{ id: 'in', label: { my: 'စာထဲ ထည့်', en: 'Into the report' }, icon: 'page' }, { id: 'out', label: { my: 'တံခါးအပြင်မှာ ချန်ခဲ့', en: 'Leave outside the door' }, icon: 'door' }],
+    cards: [
+      { basket: 'in', my: 'ကြေးချိန်သီး အောက်ခြေကို ခြစ်ထားတယ်။', en: "The brass weight's underside is filed." },
+      { basket: 'out', blot: true, my: '██████', en: '██████' },
+      { basket: 'out', my: 'လူတိုင်း သိတယ်၊ သူ လူလိမ်။', en: "Everyone knows he's a cheat." },
+      { basket: 'in', my: 'ဒီမနက် တန်းထဲက ဝယ်သူတွေလည်း လျော့နိုင်တယ်။ ပြန်ချိန်ပေးပါ။', en: "This morning's buyers may have come short too. Please re-weigh for them." },
+    ],
+    wrong: { my: 'ဟင့်အင်း… အဲဒါ အပူ။ စာထဲ မပါစေနဲ့။', en: "No… that's heat. Keep it out of the paper." },
+  }),
+  // Day 7, ch 4: three baskets, emoji icons, `items` alias
+  sort7: async () => (await M('sort')).sort({
+    title: { my: 'ပစ္စည်းတွေကို ခွဲထားမယ်', en: 'Sort the props' },
+    hint: { my: 'ပြီးသွားပြီ၊ မရောက်သေး၊ ဒီည', en: 'Gone, not yet, tonight' },
+    baskets: [{ id: 'gone', label: { my: 'ပြီးသွားပြီ', en: 'Gone' }, icon: 'leaf' }, { id: 'notyet', label: { my: 'မရောက်သေး', en: 'Not yet' }, icon: 'sprout' }, { id: 'tonight', label: { my: 'ဒီည', en: 'Tonight' }, icon: 'lamp' }],
+    items: [
+      { id: 'ribbon', basket: 'gone', label: { my: 'မနှစ်က ဆုဖဲကြိုး', en: "Last year's prize ribbon" } },
+      { id: 'badge', basket: 'notyet', label: { my: 'အလုပ်သစ် ကတ်ပြား (ပုံစံ)', en: 'A new-job badge (pretend)' } },
+      { id: 'rope', basket: 'tonight', label: { my: 'လိုက်ကာကြိုး', en: 'The curtain rope' } },
+    ],
+    wrong: { my: 'ဟင့်အင်း… ဒါက အဲဒီအချိန်က မဟုတ်ဘူး။', en: "No… that isn't from that time.", who: 'yeyint' },
+  }),
+  pole: async () => (await M('pole')).pole({
+    title: { my: 'ကိုသီဟနဲ့ ဖောင်လှော်မယ်', en: 'Pole the raft with Ko Thiha' },
+    hint: { my: 'လှော်တက်က ကြမ်းပြင်ထိတဲ့အချိန် ထိပါ', en: 'Tap when the pole touches the bottom' },
+    route: 'raftSide',
+    stops: [{ id: 'duck', at: 0.42, label: { my: 'ဘဲဆိပ်', en: 'Duck Jetty' } }, { id: 'cane', at: 0.78, label: { my: 'ကြိမ်ဆိပ်', en: 'Cane Jetty' } }],
+    beat: 1100, window: 220, current: 0.6, ferryPasses: 0.25,
+    lines: {
+      ferry: { my: 'သွားပါစေ။ ဒီဘက်ကို သူ မလာနိုင်ဘူး။', en: "Let it go. It can't come this side.", who: 'kohlaing' },
+      drift: { my: 'မျောသွားရင် ကျော်သွားတာပဲ။ ပြန်လှည့်မယ်။', en: 'Drift, and you go right past. Round again.', who: 'kohlaing' },
+      duck: { my: 'ဖောင်လေး ရောက်လာပြီ! ကူးတို့ကို တစ်ပတ်လုံး စောင့်နေတာ။', en: "The raft's here! I've waited all week on the ferry." },
+      cane: { my: 'ကြိမ်… ဆိပ်။ ကိုယ်တိုင် ဖတ်တာ!', en: 'Cane… Jetty. I read it!', who: 'maungnge' },
+    },
+  }),
+  ride: async () => (await M('pole')).pole({
+    title: { my: 'ဖောင်စီးပြီး ဖိတ်စာ ပို့မယ်', en: 'Ride the raft with the invitations' },
+    hint: { my: 'ဆိပ်မှာ ရပ်ရင် လူကို ထိပြီး နှုတ်ဆက်ပါ', en: 'At each jetty, tap the person to greet them' },
+    passenger: true,
+    stops: [{ id: 'a', at: 0.3, who: 'kohlaing', label: { my: 'ဆိပ်ငယ်', en: 'Little Jetty' } }, { id: 'b', at: 0.66, who: 'ubathaw', label: { my: 'ကြိမ်ဆိပ်', en: 'Cane Jetty' } }],
+  }),
+  carve: async () => (await M('carve')).carve({
+    title: { my: 'ခွာညိုရဲ့ တံဆိပ်ကို အနားကွပ် ထွင်းမယ်', en: "Carve the border round Khwar Nyo's mark" },
+    hint: { my: 'အနားကြောင်းအတိုင်း ဖြည်းဖြည်း ဆွဲ။ ပူတဲ့အတွေး ဝင်လာရင် လက်ကြွ', en: 'Follow the border slowly. When a hot thought comes, lift your finger' },
+    heat: [
+      { my: 'ကံကောင်းလို့ပါ…', en: 'just luck…', cool: { my: 'လေးဆယ်တုံး ကြိုးစားခဲ့တာ။ ရထိုက်တယ်။', en: 'Forty blocks of trying. She earned it.' } },
+      { my: 'ငါ့တပည့်ပဲ…', en: 'she was mine…', cool: { my: 'သူ့လမ်း သူ သွားပါစေ။ အဆင်ပြေပါစေ။', en: 'Let her go her road. May it go well.' } },
+      { my: 'ဘယ်သူမှ မမှတ်မိဘူး…', en: 'nobody will remember…', cool: { my: 'ဘာမှ ပြန်မလိုချင်ဘူး။ သူ ဝမ်းသာရင် ရပြီ။', en: 'I want nothing back. Her gladness is enough.' } },
+    ],
+    nickStays: true,
+  }),
+  turnblock: async () => (await M('turnblock')).turnblock({
+    title: { my: 'စာလုံးတုံး တစ်တုံး၊ လူနှစ်ယောက်', en: 'One block, two people' },
+    hint: { my: 'တုံးကို တစ်ဝက်လှည့်ပြီး တစ်ဖက်လူဘက်က ကြည့်ပါ', en: 'Turn the block half round to see it from the other side' },
+    glyph: '6',
+    sides: [
+      { who: 'kowunna', reads: '6', line: { my: 'ကျွန်တော့်ဘက်က ကြည့်ရင် အကုန် ညီညီညာညာ။ ကူညီတာပဲလေ။', en: "From my side they're all straight and even. I was helping." } },
+      { who: 'ubathaw', reads: '9', line: { my: 'ငါ့ဘက်က ကြည့်ရင် တစ်တုံးမကျန် ဇောက်ထိုး။ ငါ့အံဆွဲကို လှောင်တာ။', en: 'From my side every one is upside down. He mocked my drawers.' } },
+    ],
+  }),
+  lockup: async () => (await M('lockup')).lockup({
+    title: { my: 'ဦးတင့် ခေါ်၊ ကိုဝဏ္ဏ စီ', en: 'U Tint calls, Ko Wunna sets' },
+    hint: { my: 'ခေါ်သံ ဆုံးမှ တုံးကို နှိပ်ပါ။ ဇောက်ထိုးဖြစ်နေရင် အရင်လှည့်ပါ', en: 'Wait for the call, then tap the block. Turn it first if it is upside down' },
+    caller: 'ubathaw', setter: 'kowunna',
+    lines: [['ပြင်ဆင်ချက်', '·', 'တံတားထိပ်', 'စာတိုက်ပုံး'], ['မနက်', '6:00', 'မှာ', 'ထုတ်သည်။'], null],
+    turnable: ['6:00'], quoin: { band: [0.42, 0.58] },
+    wrong: { my: 'ငါ ခေါ်တာ မဟုတ်သေးဘူး။', en: "I haven't called that one yet." },
+  }),
+  recall: async () => (await M('recall')).recall({
+    title: { my: 'အိမွန်ရဲ့ ညနေ သုံးခု', en: "Ei Mon's three evenings" },
+    hint: { my: 'ခွက် မဆူခင် ဘာဖြစ်ခဲ့လဲ။ အဲဒီကွက်ကို ထိပါ', en: 'What happened just before her cup boiled? Tap that frame' },
+    who: 'eimon',
+    evenings: [
+      { label: { my: 'မနေ့ညနေ · ရက်ကန်းရုံ', en: 'Yesterday · the shed' }, frames: [
+        { id: 'tease', my: 'စကားနည်းလို့ "အရုပ်မ" လို့ စတယ်', en: 'teased for being quiet: "doll"', cup: 0 },
+        { id: 'drip', my: 'မိုးရေ ခေါင်မိုးကနေ ကျတယ်', en: 'rain dripping through the roof', cup: 0 },
+        { id: 'lift', my: 'သူ့ ရက်ကန်းဖုံးကို လှပ်လိုက်တယ်', en: 'her loom cover lifted', cup: 1, key: true },
+        { id: 'boil1', my: '(ခွက်ဆူ)', en: '(cup boils)', cup: 3 }] },
+      { label: { my: 'လွန်ခဲ့တဲ့ သုံးရက် · အိမ်', en: 'Three days ago · home' }, frames: [
+        { id: 'spill', my: 'ညီမဝမ်းကွဲလေး လက်ဖက်ရည် ဖိတ်တယ်', en: 'her little cousin spills tea on her', cup: 0 },
+        { id: 'noise', my: 'အိမ်နီးချင်း ရေဒီယို ကျယ်ကျယ်', en: "the neighbour's loud radio", cup: 0 },
+        { id: 'parcel', my: 'ထုပ်လက်စ လက်ဆောင်ထုပ်ကို ဖြည်ကြည့်တယ်', en: 'the gift she was still wrapping, unwrapped "to see"', cup: 1, key: true },
+        { id: 'boil2', my: '(ခွက်ဆူ)', en: '(cup boils)', cup: 3 }] },
+      { label: { my: 'မုန့်လှည်း မှောက်တဲ့နေ့', en: 'The day the bread cart tipped' }, frames: [
+        { id: 'push', my: 'လူအုပ်ကြားမှာ တွန်းခံရတယ်', en: 'shoved in the crowd', cup: 0 },
+        { id: 'bread', my: 'မုန့်တွေ မြေပေါ် ပြန့်ကျတယ်', en: 'bread all over the ground', cup: 0 },
+        { id: 'bag', my: 'ကျသွားတဲ့ သူ့အိတ်ကို "ဘယ်သူ့ဟာလဲ" ဆိုပြီး ဖွင့်ကြည့်တယ်', en: 'her dropped bag opened "to see whose it was"', cup: 1, key: true },
+        { id: 'boil3', my: '(ခွက်ဆူ)', en: '(cup boils)', cup: 3 }] },
+    ],
+    wrong: { my: 'အဲဒါတုန်းက ကျွန်မ ရယ်နေသေးတယ်။', en: 'I was still laughing then.' },
+  }),
+  lastline: async () => (await M('lastline')).lastline({
+    title: { my: 'နောက်ဆုံး စာကြောင်း', en: 'The last line' },
+    prompt: { my: 'ဒီစာကြောင်းက ကိုယ့်ဟာပါ။ ကြိုက်သလို ရေးပါ။ ဗလာထားလည်း ရပါတယ်။', en: 'This line is yours. Write it any way you like, or leave it blank.' },
+    above: [
+      { my: 'မြေပုံက လမ်းကိုပဲ ပြတယ်။', en: 'A map only shows the road.' },
+      { my: 'လမ်းပျောက်မှာ စိုးရင် ကျွန်မကို မေးပါ။', en: "If you fear getting lost, ask me.", struck: true },
+      { my: 'ကိုယ့်ခြေနဲ့ လျှောက်၊ ကိုယ့်မျက်စိနဲ့ စစ်ပါ။', en: 'Walk it on your own feet; check it with your own eyes.' },
+    ],
+    starts: [{ my: 'ကျွန်မ/ကျွန်တော် ကိုယ်တိုင်', en: 'I will, myself,' }, { my: 'မနက်ဖြန်ကစပြီး', en: 'From tomorrow,' }, { my: 'မှားခဲ့ရင်တောင်', en: 'Even if I go wrong,' }, { my: 'ကိုယ်ချစ်တဲ့လမ်းပေါ်မှာ', en: 'On the road I love,' }],
+    ends: [{ my: 'သွားကြည့်မယ်။', en: 'go and see.' }, { my: 'နောက်တစ်ခါ ထပ်လုပ်မယ်။', en: 'try once more.' }, { my: 'ကိုယ့်မီးနဲ့ကိုယ် လျှောက်မယ်။', en: 'walk by my own light.' }, { my: 'ဘယ်သူ့စကားလဲ မှတ်ထားမယ်။', en: 'remember whose words I carry.' }],
+    allowType: true, maxLen: 80, allowBlank: true,
+  }),
+  keepsake: async () => (await M('keepsake')).keepsake({
+    page: {
+      title: { my: 'ပြန်စာ', en: 'The reply' },
+      lines: [
+        { my: 'ချစ်တဲ့ မြို့လေးရေ…', en: 'Dear little town…' },
+        { my: 'မြေပုံက လမ်းကိုပဲ ပြတယ်။', en: 'A map only shows the road.' },
+        { my: 'လမ်းပျောက်မှာ စိုးရင် ကျွန်မကို မေးပါ။', en: 'If you fear getting lost, ask me.', struck: true },
+        { my: 'ကိုယ့်ခြေနဲ့ လျှောက်၊ ကိုယ့်မျက်စိနဲ့ စစ်ပါ။', en: 'Walk it on your own feet; check it with your own eyes.' },
+        { my: 'နောက်တစ်ခါ ထပ်ကြိုးစားပါ။', en: 'Try once more.' },
+      ],
+      last: { my: 'မှားခဲ့ရင်တောင် သွားကြည့်မယ်။', en: 'Even if I go wrong, go and see.' },
+      stamps: [...Array.from({ length: 23 }, (_, i) => i + 1), 'reply'],
+      credits: [{ line: 4, who: { my: 'ဖိုးသား', en: 'Pho Thar' } }, { line: 3, who: { my: 'ဦးဘသော်', en: 'U Ba Thaw' } }],
+    },
+  }),
+  boat: async () => (await M('trace2')).trace({ title: { my: 'မောင်ငယ်နဲ့ လှေခေါက်မယ်', en: 'Fold a boat with Maung Nge' }, hint: { my: 'အခေါက်ရာအတိုင်း ဖြည်းဖြည်း လိုက်ဆွဲပါ', en: 'Follow each fold, slowly' }, path: 'boat', wobble: 10, tolerance: 22, round: 1, rounds: 1 }),
+  road: async () => (await M('trace2')).trace({ title: { my: 'ရဲယဉ့် နောက်ခံကား ဆေးသုတ်မယ်', en: 'Ye Yint paints the backdrop' }, hint: { my: 'လမ်းကို တံတားအထိ ဖြည်းဖြည်း ဆွဲပါ', en: 'Draw the road on to the bridge, steadily' }, path: 'road', wobble: 16, tolerance: 24, round: 1, rounds: 2 }),
+  road2: async () => (await M('trace2')).trace({ title: { my: 'ရဲယဉ့် နောက်ခံကား ဆေးသုတ်မယ်', en: 'Ye Yint paints the backdrop' }, hint: { my: 'တံတားလက်ရန်းကို ဆွဲပါ', en: "Now the bridge's top rail" }, path: 'road', wobble: 8, tolerance: 18, round: 2, rounds: 2 }),
+  row: async () => (await M('trace2')).trace({ title: { my: 'အဝေးဆုံးခင်း ပြန်စိုက်မယ်', en: 'Replant the far bed' }, hint: { my: 'တန်းအတိုင်း ဖြည်းဖြည်း ဆွဲပြီး မျိုးစေ့ ချပါ', en: 'Draw along the row slowly; the seed drops as you go' }, path: 'row', wobble: 12, tolerance: 24, round: 1, rounds: 3 }),
+  word: async () => (await M('trace2')).trace({ title: { my: 'မီးအိမ်ပေါ်မှာ စာတစ်လုံး', en: 'One word on the lantern' }, hint: { my: 'ရွှေအစက်ကနေ စပြီး စာလုံးကို လိုက်ရေးပါ', en: 'Start at the gold dot and write the word' }, path: 'word', glyph: 'စာ', wobble: 10, tolerance: 18, round: 1, rounds: 1, colors: { ink: '#C9A24A' } }),
+  // Day 15's retry loop: wobble 10 → 7.2 → 5.2 → 3.7 (× 0.72 each try, floor 3); word4 is the fourth try
+  word4: async () => (await M('trace2')).trace({ title: { my: 'မီးအိမ်ပေါ်မှာ စာတစ်လုံး', en: 'One word on the lantern' }, hint: { my: 'ရွှေအစက်ကနေ စပြီး စာလုံးကို လိုက်ရေးပါ', en: 'Start at the gold dot and write the word' }, path: 'word', glyph: 'စာ', wobble: 3.7, tolerance: 18, round: 1, rounds: 1, colors: { ink: '#C9A24A' } }),
+  fold: async () => (await M('trace2')).trace({ title: { my: 'လေတံခွန် ခေါက်မယ်', en: 'Fold the windmill' }, hint: { my: 'ထောင့်ကနေ အလယ်ကို', en: 'Corner to centre' }, path: 'fold', wobble: 8, tolerance: 22 }),
+  stitch: async () => (await M('trace2')).trace({ title: { my: 'စာအုပ်ကျော ချုပ်မယ်', en: 'Stitch the spine' }, hint: { my: 'အပ်ကြောင်းအတိုင်း ဖြည်းဖြည်း', en: 'Along the line, slowly' }, path: 'stitch', wobble: 10, tolerance: 20 }),
+};
+// NOTE sort13 is the `ordered: true` mechanic (Day 13 spec 5.5): her three baskets open one after another, in her
+// order, so baskets not yet open sit with their lid cord tied (the same look on every closed basket, whatever the
+// front slip is). A drop on a tied basket plays `react.order`; a wrong open basket plays card.why / react / `wrong`.
+
+const AUTOS = {
+  sort5: (a) => a.autoSort({ wrongFirst: true }), sort8: (a) => a.autoSort({ wrongFirst: true }), sort13: (a) => a.autoSort({ wrongFirst: true }),
+  sort12: (a) => a.autoSort(), sort7: (a) => a.autoSort(),
+  pole: (a) => a.autoPole(), ride: (a) => a.autoPole(), carve: (a) => a.autoCarve(true), turnblock: (a) => a.autoTurn(),
+  lockup: (a) => a.autoLockup(), recall: (a) => a.autoRecall(), lastline: (a) => a.autoLastline(), keepsake: (a) => a.autoKeepsake(),
+  boat: (a) => a.autoTrace(1), road: (a) => a.autoTrace(1), road2: (a) => a.autoTrace(1), row: (a) => a.autoTrace(1), word: (a) => a.autoTrace(1), word4: (a) => a.autoTrace(1), fold: (a) => a.autoTrace(1), stitch: (a) => a.autoTrace(1),
+};
+
+const out = document.getElementById('out');
+let running = false;
+async function run(name, auto) {
+  if (running) return;
+  running = true;
+  out.textContent = `${name}…`;
+  try {
+    const p = SAMPLES[name]();
+    if (auto) setTimeout(() => window.__act && auto(window.__act), 900);
+    const r = await p;
+    window.__last = r;
+    out.textContent = `${name} → ${JSON.stringify(r, null, 1)}`;
+  } catch (e) { out.textContent = `${name} ✗ ${e.stack || e}`; }
+  running = false;
+}
+for (const k of Object.keys(SAMPLES)) {
+  const b = document.createElement('button'); b.textContent = k; b.onclick = () => run(k); document.getElementById('acts').appendChild(b);
+  const a = document.createElement('button'); a.className = 'alt'; a.textContent = `auto ${k}`; a.onclick = () => run(k, AUTOS[k]); document.getElementById('autos').appendChild(a);
+}
+document.getElementById('lang').addEventListener('click', () => {
+  const h = document.documentElement;
+  h.setAttribute('data-lang', h.getAttribute('data-lang') === 'en' ? 'my' : 'en');
+});
+window.__acts = { run, SAMPLES, AUTOS };
+await fontsReady();
+document.title = 'acts ready';
+const act = params.get('act');
+if (act && SAMPLES[act]) run(act, params.get('auto') === '1' ? AUTOS[act] : null);
+</script>
+</body>
+</html>

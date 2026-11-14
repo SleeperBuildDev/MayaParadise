@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="my">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>junction rooms</title>
+<link rel="stylesheet" href="dev.css">
+<style>
+  #names { position: fixed; left: 0; right: 0; top: 8px; text-align: center; font: 600 13px/1.6 "Noto Sans Myanmar", system-ui, sans-serif; color: #2A2118; pointer-events: none; z-index: 2; }
+  #names small { display: block; font-weight: 400; font-size: 11px; opacity: .75; }
+  #tags { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 1; }
+  .tag { position: absolute; transform: translate(-50%, -100%); white-space: nowrap; font: 600 10px/1.25 "Noto Sans Myanmar", system-ui, sans-serif;
+    color: #fff; padding: 1px 5px 2px; border-radius: 6px; box-shadow: 0 1px 2px rgba(0,0,0,.25); text-align: center; }
+  .tag small { display: block; font-weight: 400; font-size: 8.5px; opacity: .9; }
+  #checks { position: fixed; left: 8px; right: 8px; bottom: 44px; font: 11px/1.35 ui-monospace, monospace; color: #2A2118; background: rgba(251,247,238,.92);
+    border-radius: 8px; padding: 6px 8px; max-height: 30vh; overflow: auto; display: none; z-index: 3; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="tags"></div>
+<div id="names"></div>
+<div id="checks"></div>
+<div id="stats"></div>
+<script type="module">
+// Dev page for js/story/rooms/junction.js (Newsprint Junction story rooms). DEV ONLY: the floating
+// name tags and the checks panel are review aids, never in the game.
+//   ?room=letterroom | junctiontea | schoolroom | press      (default letterroom)
+//   ?dressing=d14 (press: Day 14 people + frame bench + match)  ?evening=0..1  ?rain=1  ?people=0  ?maya=0
+//   ?after=1 (school: after the close; tea shop: hoard gone + correction; letter room: 1 jar left, 11 in the basket)
+//   ?jars=n ?basket=n (letter room)  ?jumbled=1 (press)  ?pull=0..1 (press bar)
+//   ?view=cam (default: the room's own framing hint, R.camFor) | wide (whole room) | phone (6 m like the game)
+//   ?names=0 hides the cast name tags   ?checks=1 shows the spot / station collision report on the page
+//   plus devview's ?tilt ?yaw ?dist ?t ?tx ?tz. Handles: window.R (room), window.PEOPLE, window.__checks,
+//   window.__disposeCheck() -> { before, after } renderer memory (stops rendering).
+window.addEventListener('error', (e) => { document.title = `ERR ${e.message} @${e.lineno}`; });
+window.addEventListener('unhandledrejection', (e) => { document.title = `ERR ${e.reason?.message || e.reason}`; });
+import * as THREE from '../js/game/three.js';
+import { fontsReady, PALETTE, blobShadow } from '../js/game/toon.js';
+import { VoxelBuilder } from '../js/game/voxel.js';
+import { createPerson } from '../js/story/people.js';
+import { CAST } from '../js/story/cast.js';
+import { ROOMS } from '../js/story/rooms/junction.js';
+import { startDevView } from './devview.js';
+
+const q = new URLSearchParams(location.search);
+const id = q.get('room') || 'letterroom';
+await fontsReady();
+const def = ROOMS[id];
+if (!def) throw new Error('no room ' + id);
+const R = (window.R = await def.build({ dressing: q.get('dressing') || undefined }));
+if (q.has('evening')) R.setEvening(parseFloat(q.get('evening')));
+if (q.get('rain') === '1') R.setRain(true);
+const after = q.get('after') === '1';
+if (after) {
+  R.setAfter?.(true);
+  R.setPots?.(true);
+  R.setHoard?.(0);
+  R.setCorrection?.(true);
+  if (R.setJars) { R.setJars(1); R.setBasket(11); }
+}
+if (q.has('jars')) R.setJars?.(parseInt(q.get('jars'), 10));
+if (q.has('basket')) R.setBasket?.(parseInt(q.get('basket'), 10));
+if (q.get('jumbled') === '1') R.setJumbled?.(true);
+if (q.has('pull')) R.pull?.(parseFloat(q.get('pull')));
+
+// Looks for the Junction cast if cast.js does not have them yet (day8-spec 13.1, drafts)
+const LOOKS = {
+  utint: { age: 'elder', build: 'slim', skin: 3, hair: 'short', hairColor: 'grey', top: 'shirt', topColor: 'grey', bottom: 'longyi', bottomColor: 'charcoal', extras: ['apron', 'glasses'] },
+  thida: { age: 'adult', build: 'slim', skin: 1, hair: 'bun', top: 'blouse', topColor: 'sky', bottom: 'htamein', bottomColor: 'navy', extras: ['thanaka'] },
+  sein: { age: 'adult', build: 'wide', skin: 3, hair: 'bun', top: 'blouse', topColor: 'mustard', bottom: 'htamein', bottomColor: 'brown', extras: ['towel'] },
+  kan: { age: 'elder', skin: 2, hair: 'bald', hairColor: 'white', top: 'eingyi', topColor: 'cream', bottom: 'longyi', bottomColor: 'olive' },
+  komin: { age: 'adult', skin: 2, hair: 'cap', top: 'tee', topColor: 'teal', bottom: 'trousers', bottomColor: 'tan' },
+  moemoe: { age: 'child', skin: 1, hair: 'braid', top: 'school', bottom: 'schoolSkirt', extras: ['satchel'] },
+  dawhla: { age: 'elder', build: 'mid', skin: 0, hair: 'bun', hairColor: 'grey', top: 'blouse', topColor: 'plum', bottom: 'htamein', bottomColor: 'teal', extras: ['glasses'] },
+  kosan: { age: 'adult', build: 'mid', skin: 4, hair: 'side', top: 'shirt', topColor: 'white', bottom: 'longyi', bottomColor: 'maroon' },
+  drinker1: { age: 'adult', build: 'mid', skin: 3, hair: 'short', top: 'shirt', topColor: 'olive', bottom: 'longyi', bottomColor: 'navy', check: true },
+  drinker2: { age: 'elder', skin: 2, hair: 'short', hairColor: 'grey', top: 'vest', topColor: 'white', bottom: 'longyi', bottomColor: 'brown', extras: ['towel'] },
+  pupil1: { age: 'child', skin: 2, hair: 'short', top: 'school', bottom: 'schoolLongyi', extras: ['satchel'], extraColor: 'brown' },
+  pupil2: { age: 'child', skin: 3, hair: 'bob', top: 'school', bottom: 'schoolSkirt' },
+  newcomer: { age: 'teen', skin: 2, hair: 'short', top: 'tee', topColor: 'coral', bottom: 'trousers', bottomColor: 'navy', extras: ['satchel'], extraColor: 'olive' },
+  teacher: { age: 'adult', skin: 1, hair: 'bun', top: 'blouse', topColor: 'white', bottom: 'htamein', bottomColor: 'schoolGreen', extras: ['glasses'] },
+  naychi: { age: 'teen', skin: 1, hair: 'ponytail', top: 'blouse', topColor: 'mustard', bottom: 'htamein', bottomColor: 'maroon' },
+};
+const castOf = (cid) => CAST.find((c) => c.id === cid);
+const lookOf = (cid) => castOf(cid)?.look || LOOKS[cid] || LOOKS.drinker1;
+const TAG_COLORS = ['#8E2F2B', '#3F6684', '#3F6B4E', '#A47A2C', '#6B3E64', '#B5643C', '#2F5D5A', '#5A4A3A'];
+
+// ---- cast at their spots (+ head turns from spot.look) ----
+const people = (window.PEOPLE = []);
+const tagged = []; // { obj, el, y }
+const tagsEl = document.getElementById('tags');
+const showNames = q.get('names') !== '0';
+function addTag(obj, title, sub, y, color) {
+  if (!showNames) return;
+  const el = document.createElement('div');
+  el.className = 'tag';
+  el.style.background = color;
+  el.innerHTML = `${title}<small>${sub}</small>`;
+  tagsEl.appendChild(el);
+  tagged.push({ obj, el, y });
+}
+const v3 = (s, y = 1.25) => new THREE.Vector3(s.x, y, s.z);
+if (q.get('people') !== '0') {
+  R.cast.forEach((c, i) => {
+    if ((c.when === 'after' && !after) || (c.when === 'before' && after)) return;
+    const s = R.spots[c.spot];
+    if (!s) { console.warn('no spot', c.spot); return; }
+    const p = createPerson({ ...lookOf(c.id), seed: c.id.length * 7 });
+    p.root.position.set(s.x, 0, s.z);
+    p.root.rotation.y = s.h;
+    if (s.look) p.lookAt(v3(s.look));
+    R.scene.add(p.root);
+    people.push(p);
+    const info = castOf(c.id);
+    addTag(p.root, info?.name?.my || c.id, `${info?.name?.en || c.id} · ${c.spot}`, 1.95, TAG_COLORS[i % TAG_COLORS.length]);
+  });
+}
+// Maya at her spot (the real one if it loads, else a stand-in)
+if (q.get('maya') !== '0') {
+  const s = R.spots.maya || R.spots.mayaStand || { x: R.spawn.x, z: R.spawn.z, h: Math.PI };
+  let maya = null;
+  try { const mod = await import('../js/game/actors/maya.js'); maya = mod.createMaya({}); } catch (err) { console.warn('maya', err); }
+  if (maya) {
+    maya.root.position.set(s.x, 0, s.z);
+    maya.root.rotation.y = q.has('mayah') ? parseFloat(q.get('mayah')) : s.h;
+    R.scene.add(maya.root);
+    people.push({ update: (dt) => maya.update(dt, { speed: 0, turn: 0, accel: 0, t: 0 }), dispose: () => maya.dispose?.() });
+    addTag(maya.root, 'မာယာ', 'Maya · maya', 2.0, '#A47A2C');
+  } else {
+    const v = new VoxelBuilder();
+    v.box(0, 0.6, 0, 0.36, 1.2, 0.24, PALETTE.blazer);
+    const m = v.mesh();
+    m.position.set(s.x, 0, s.z);
+    R.scene.add(m, Object.assign(blobShadow(0.35), { position: new THREE.Vector3(s.x, 0.01, s.z) }));
+  }
+}
+document.getElementById('names').innerHTML = `${def.name.my}<small>${def.name.en} · ${id}${q.get('dressing') ? ' · ' + q.get('dressing') : ''}</small>`;
+
+// ---- checks: every spot and every station's stand point against the room's collision footprints, so
+//      a hook cannot place a person inside furniture (seated spots are allowed inside their seat) ----
+function inside(o, x, z, pad = 0.1) {
+  if (o.type === 'circle') return Math.hypot(x - o.x, z - o.z) < o.r + pad;
+  return x > o.minX - pad && x < o.maxX + pad && z > o.minZ - pad && z < o.maxZ + pad;
+}
+const B = R.bounds;
+const checks = (window.__checks = []);
+const hits = (x, z) => R.obstacles.map((o, k) => (inside(o, x, z) ? k : -1)).filter((k) => k >= 0);
+for (const [name, s] of Object.entries(R.spots)) {
+  const h = hits(s.x, s.z);
+  const out = B && (s.x < B.minX - 0.05 || s.x > B.maxX + 0.05 || s.z < B.minZ - 0.05 || s.z > B.maxZ + 0.25);
+  checks.push({ kind: 'spot', name, x: s.x, z: s.z, obstacles: h, seat: !!s.seat, ok: (!h.length || !!s.seat) && !out, out });
+}
+for (const st of R.stations) {
+  const h = hits(st.x, st.z);
+  // the station's look point should sit on a footprint (or a wall): the thing being looked at
+  checks.push({ kind: 'station', name: st.id, x: st.x, z: st.z, r: st.r, obstacles: h, ok: !h.length });
+}
+const bad = checks.filter((c) => !c.ok);
+console.log(`[junction:${id}] ${checks.length} spots+stations checked against ${R.obstacles.length} footprints; ${bad.length} problem(s)`);
+for (const c of checks) (c.ok ? console.log : console.warn)(`  ${c.ok ? 'ok ' : 'BAD'} ${c.kind} ${c.name} (${c.x.toFixed(2)}, ${c.z.toFixed(2)})${c.obstacles.length ? ' in #' + c.obstacles.join(',#') : ''}${c.seat ? ' (seat)' : ''}${c.out ? ' OUTSIDE bounds' : ''}`);
+if (q.get('checks') === '1') {
+  const el = document.getElementById('checks');
+  el.style.display = 'block';
+  el.innerHTML = `<b>${id}</b>: ${checks.length} checked / ${R.obstacles.length} footprints / <b>${bad.length} problem(s)</b><br>` +
+    checks.map((c) => `${c.ok ? '✓' : '✗'} ${c.kind} ${c.name}${c.obstacles.length ? ' in #' + c.obstacles.join(',#') : ''}${c.seat ? ' (seat)' : ''}`).join('<br>');
+}
+
+// ---- camera: the room's own hint by default ----
+const aspect = innerWidth / innerHeight;
+const vfov = 45;
+const view = q.get('view') || 'cam';
+let tilt = 48, dist, tx = 0, ty = 0.7, tz = 0.1;
+if (view === 'cam' && R.camFor) {
+  const c = R.camFor(aspect, vfov);
+  tilt = c.tilt; dist = c.dist; tx = c.target.x; ty = c.target.y; tz = c.target.z;
+} else {
+  const hfov = 2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(vfov / 2)) * aspect);
+  const widthToShow = view === 'phone' ? 6 : R.width + 0.5;
+  dist = Math.max(view === 'phone' ? 7.5 : 8.5, widthToShow / 2 / Math.tan(hfov / 2));
+  if (view === 'phone') tz = -0.6;
+}
+if (q.has('tx')) tx = parseFloat(q.get('tx'));
+if (q.has('tz')) tz = parseFloat(q.get('tz'));
+if (q.has('tilt')) tilt = parseFloat(q.get('tilt'));
+const P = new THREE.Vector3();
+const devView = startDevView({
+  scene: R.scene, target: new THREE.Vector3(tx, ty, tz), distance: dist, tilt, fov: vfov,
+  update(dt, t, { camera }) {
+    R.update(dt, t);
+    for (const p of people) p.update(dt, { speed: 0 });
+    if (q.get('anim') === '1') R.pull?.(0.5 + 0.5 * Math.sin(t * 2));
+    for (const tg of tagged) {
+      tg.obj.getWorldPosition(P);
+      P.y += tg.y;
+      P.project(camera);
+      tg.el.style.left = `${((P.x + 1) / 2) * innerWidth}px`;
+      tg.el.style.top = `${((1 - P.y) / 2) * innerHeight}px`;
+    }
+  },
+});
+window.__disposeCheck = () => {
+  devView.renderer.setAnimationLoop(null);
+  const before = { ...devView.renderer.info.memory };
+  for (const p of people) p.dispose?.();
+  R.dispose();
+  const after2 = { ...devView.renderer.info.memory };
+  return { before, after: after2 };
+};
+window.__ready = true;
+</script>
+</body>
+</html>

@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="my">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>market rooms</title>
+<link rel="stylesheet" href="dev.css">
+<style>
+  #name { position: fixed; left: 0; right: 0; top: 10px; text-align: center; font: 700 15px/1.7 "Noto Sans Myanmar", sans-serif; color: #2A2118; pointer-events: none; }
+  #name small { display: block; font: 600 12px/1.3 Georgia, serif; color: #8C6A28; }
+  #rooms { position: fixed; left: 6px; right: 6px; bottom: 44px; display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; }
+  #rooms a { font: 600 12px/1 system-ui, sans-serif; color: #2A2118; background: #F6F0E2; border: 2px solid #A47A2C; border-radius: 9px; padding: 6px 8px; text-decoration: none; }
+  #rooms a.on { background: #6E1F2A; color: #F6F0E2; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="name"></div>
+<div id="rooms"></div>
+<div id="stats"></div>
+<script type="module">
+// Dev page for js/story/rooms/market.js
+// ?room=teashop|marketpost|postroom|riceshop|sundries|carvershop  &t=2 (freeze)  &eve=0..1  &rain=1
+// &flags=name:value,name  (value true/false/number/text; a bare name = true)  &people=0  &all=1 (every spot filled)
+// Default framing = the room's own r.view hint (what the game's room rig shows on a phone); &full=1 shows
+// the whole room from a step further back.  &tilt=48  &yaw=0
+window.addEventListener('error', (e) => { document.title = `ERR ${e.message} @${e.lineno}`; });
+window.addEventListener('unhandledrejection', (e) => { document.title = `ERR ${e.reason?.message || e.reason}`; });
+import * as THREE from '../js/game/three.js';
+import { fontsReady } from '../js/game/toon.js';
+import { createPerson } from '../js/story/people.js';
+import { CAST } from '../js/story/cast.js';
+import { ROOMS, seatPerson } from '../js/story/rooms/market.js';
+import { startDevView } from './devview.js';
+
+const params = new URLSearchParams(location.search);
+const id = params.get('room') || 'teashop';
+await fontsReady();
+const def = ROOMS[id];
+const r = def.build({});
+await r.ready;
+if (params.get('flags')) {
+  for (const kv of params.get('flags').split(',')) {
+    const [k, raw] = kv.split(':');
+    const val = raw === undefined ? true : raw === 'true' ? true : raw === 'false' ? false : isNaN(+raw) ? raw : +raw;
+    r.set(k, val);
+  }
+}
+r.setEvening(+(params.get('eve') || 0));
+r.setRain(params.get('rain') === '1');
+
+// Market people not yet in cast.js get stand-in looks here (dev only).
+const STANDIN = {
+  tintin: { age: 'adult', build: 'wide', skin: 2, hair: 'bun', top: 'blouse', topColor: 'cream', bottom: 'htamein', bottomColor: 'maroon', extras: ['thanaka', 'apron'] },
+  luaye: { age: 'elder', build: 'slim', skin: 2, hair: 'side', hairColor: 'grey', top: 'shirt', topColor: 'white', bottom: 'longyi', bottomColor: 'navy', extras: ['glasses'] },
+  thiri: { age: 'teen', skin: 1, hair: 'long', top: 'blouse', topColor: 'rose', bottom: 'htamein', bottomColor: 'teal', extras: ['thanaka', 'flower'] },
+  pwapwa: { age: 'elder', build: 'mid', skin: 3, hair: 'bun', hairColor: 'white', top: 'blouse', topColor: 'white', bottom: 'htamein', bottomColor: 'brown', extras: ['thanaka'] },
+  kolwin: { age: 'adult', build: 'mid', skin: 3, hair: 'short', top: 'tee', topColor: 'grey', bottom: 'longyi', bottomColor: 'brown', extras: ['apron', 'towel'], extraColor: 'tan' },
+  dawyi: { age: 'elder', build: 'wide', skin: 2, hair: 'bun', hairColor: 'grey', top: 'blouse', topColor: 'mustard', bottom: 'htamein', bottomColor: 'plum', extras: ['apron', 'thanaka'] },
+  yuyu: { age: 'adult', build: 'slim', skin: 1, hair: 'braid', top: 'blouse', topColor: 'leaf', bottom: 'htamein', bottomColor: 'navy', extras: ['thanaka'] },
+  naychi: null,
+  walkA: { age: 'adult', skin: 3, hair: 'short', top: 'shirt', topColor: 'sky', bottom: 'longyi', bottomColor: 'charcoal', check: true },
+  walkB: { age: 'adult', build: 'wide', skin: 4, hair: 'cap', top: 'tee', topColor: 'olive', bottom: 'longyi', bottomColor: 'brown', extras: ['towel'] },
+  walkC: { age: 'elder', skin: 2, hair: 'bun', hairColor: 'grey', top: 'blouse', topColor: 'coral', bottom: 'htamein', bottomColor: 'navy' },
+  walkD: { age: 'child', skin: 2, hair: 'short', top: 'school', bottom: 'schoolLongyi', extras: ['satchel'] },
+  walkE: { age: 'teen', skin: 1, hair: 'bob', top: 'tee', topColor: 'mustard', bottom: 'htamein', bottomColor: 'plum' },
+};
+const look = (pid) => CAST.find((c) => c.id === pid)?.look || STANDIN[pid] || STANDIN.walkA;
+
+// who stands on which spot in this preview: [spot, person, face?, mood?]. One story moment per room
+// (each person costs ~4 draw calls; Maya adds hers in the game). &all=1 adds the other days' people.
+const SCENES = {
+  teashop: [['tintin', 'tintin'], ['kophyo', 'kophyo', 'hot'], ['yaungA', 'walkA'], ['porterD', 'walkB']], // Day 4 pour
+  marketpost: [['luaye', 'luaye'], ['thiri', 'thiri', 'worried'], ['pwapwa', 'pwapwa'], ['queue1', 'walkA']], // Day 4
+  postroom: [['khwarnyo', 'khwarnyo'], ['luaye', 'luaye']], // Day 5
+  riceshop: [['dawyi', 'dawyi', 'happy'], ['schoolboy', 'walkD'], ['trishaw', 'walkA'], ['oldwoman', 'walkC']],
+  sundries: [['yuyu', 'yuyu', 'happy'], ['customer', 'walkE']],
+  carvershop: [['kolwin', 'kolwin', 'think']],
+};
+const EXTRA = {
+  teashop: [['drinkerB1', 'walkB'], ['drinkerB2', 'walkC'], ['bench', 'naychi', 'smile', 'read']],
+  marketpost: [['queue2', 'walkC'], ['queue3', 'walkD']],
+  riceshop: [['porter', 'walkB']],
+};
+if (params.get('all') === '1') for (const k of Object.keys(EXTRA)) SCENES[k] = SCENES[k].concat(EXTRA[k]);
+const people = [];
+if (params.get('people') !== '0') {
+  for (const [spotName, pid, face, mood] of SCENES[id] || []) {
+    const s = r.spots[spotName];
+    if (!s) { console.warn('no spot', spotName); continue; }
+    const p = createPerson(look(pid));
+    p.root.position.set(s.x, 0, s.z);
+    p.root.rotation.y = s.h || 0;
+    if (face) p.setFace(face);
+    if (mood) p.setMood(mood);
+    r.scene.add(p.root);
+    people.push({ p, seat: s.seat });
+  }
+}
+document.getElementById('name').innerHTML = `${def.name.my}<small>${def.name.en} · ${id}</small>`;
+document.getElementById('rooms').innerHTML = Object.keys(ROOMS).map((k) => `<a href="?room=${k}" class="${k === id ? 'on' : ''}">${k}</a>`).join('');
+
+const aspect = innerWidth / innerHeight;
+const vfov = 45;
+const full = params.get('full') === '1';
+const tilt = parseFloat(params.get('tilt') || (full ? 52 : r.view.tilt));
+const hfov = 2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(vfov / 2)) * aspect);
+const widthToShow = full ? r.width + 0.6 : r.view.width;
+const dist = Math.max(full ? 9 : 6, widthToShow / 2 / Math.tan(hfov / 2));
+startDevView({
+  scene: r.scene, target: new THREE.Vector3(0, 0.5, full ? 0.3 : r.view.lookZ), distance: dist, tilt, fov: vfov,
+  update: (dt, t) => {
+    r.update(dt, t, { visited: new Set() });
+    for (const { p, seat } of people) { p.update(dt, { speed: 0 }); if (seat) seatPerson(p, seat); }
+  },
+});
+</script>
+</body>
+</html>

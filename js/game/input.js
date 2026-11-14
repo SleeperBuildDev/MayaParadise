@@ -21,7 +21,7 @@ export function createInput(canvas, joyEl) {
     if (pid !== null) return;
     pid = e.pointerId;
     try { canvas.setPointerCapture(pid); } catch { /* ignore */ }
-    sx = e.clientX; sy = e.clientY; st = performance.now();
+    sx = e.clientX; sy = e.clientY; st = e.timeStamp; // (event times: a slow frame between down and up is still a tap)
     dragging = false;
   });
   canvas.addEventListener('pointermove', (e) => {
@@ -44,7 +44,7 @@ export function createInput(canvas, joyEl) {
   });
   const end = (e) => {
     if (e.pointerId !== pid) return;
-    if (!dragging && performance.now() - st < 320) emit('tap', e.clientX, e.clientY);
+    if (!dragging && e.timeStamp - st < 320) emit('tap', e.clientX, e.clientY);
     pid = null;
     dragging = false;
     touchStick.set(0, 0);

@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="my">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>props4</title>
+<link rel="stylesheet" href="dev.css">
+<style>
+  #names { position: fixed; left: 0; right: 0; bottom: 8px; text-align: center; font: 600 12px/1.6 system-ui, sans-serif; color: #2A2118; padding: 0 16px; }
+  #audit { position: fixed; left: 8px; top: 8px; font: 600 11px/1.45 ui-monospace, monospace; color: #2A2118; background: rgba(251,247,238,0.92); padding: 6px 8px; border-radius: 6px; white-space: pre; display: none; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="names"></div>
+<div id="audit"></div>
+<script type="module">
+// Dev page for js/story/props4.js (Ledger Wharf + Newsprint Junction outdoor props, and the printing shed's pieces).
+// ?only=<name>[,<name>]  one or a few props framed close (names in ITEMS below)
+// ?row=water|quay|fold|junction|press  one row      ?level=0..1 (well)  ?boom=0..1  ?lamps=0..1  ?lit=1 (board lamp)
+// ?door=0..1  ?anim=1  ?jumbled=1 (type case)  ?turn=0..1 (six block)  ?pull=0..1 (press bar)
+// ?gust=<seconds> plays the slate gust and jumps to that moment.  ?game=1 frames like the game camera (12 m wide, tilt 52).
+// ?ty=<m> target height. ?audit=1 shows a per-prop draw-call table (also window.__audit). plus devview's ?yaw ?tilt ?dist ?t. Handles on window.P.
+// The Fold row cuts the paving where a bridge spans: a valley floor 2.6 m down with a water strip, so the drop,
+// the span and the pier are checked against the ground (deck top y = 0 at both banks).
+window.addEventListener('error', (e) => { document.title = `ERR ${e.message} @${e.lineno}`; });
+window.addEventListener('unhandledrejection', (e) => { document.title = `ERR ${e.reason?.message || e.reason}`; });
+import * as THREE from '../js/game/three.js';
+import { PALETTE, addStandardLights, fontsReady, basic } from '../js/game/toon.js';
+import { VoxelBuilder, jitter } from '../js/game/voxel.js';
+import { createPerson } from '../js/story/people.js';
+import { CAST } from '../js/story/cast.js';
+import * as K from '../js/story/props4.js';
+import { startDevView } from './devview.js';
+
+const q = new URLSearchParams(location.search);
+const num = (k, d) => (q.has(k) ? parseFloat(q.get(k)) : d);
+await fontsReady();
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#F2E6CC');
+addStandardLights(scene);
+const DROP = 2.6;
+
+// [name, make() -> handle, width, row, y offset, x offset, gap]   gap = [x0, x1] in the prop's local X: no paving there (a valley)
+const ITEMS = [
+  ['ferry', () => K.ferry(), 9.6, 'water'],
+  ['raft', () => K.raft({ parcels: 3 }), 3.6, 'water'],
+  ['jetty', () => K.jetty({ len: 5, name: 'ဆိပ်ကြီး', en: 'Big Jetty', lamp: true, cargo: 'rice' }), 5.6, 'water', 0.6, 2.5],
+  ['jettyLow', () => K.jetty({ len: 4, low: true, name: 'ဘဲဆိပ်', en: 'Duck Jetty', frayed: true, cargo: 'duck' }), 4.6, 'water', 0.22, 2],
+  ['mistBank', () => K.mistBank({ w: 14, h: 6 }), 14, 'mist'],
+  ['weighHouse', () => K.weighHouse(), 6.6, 'quay'],
+  ['parcelPile', () => K.parcelPile(), 1.6, 'quay'],
+  ['caneRack', () => K.caneRack(), 2.8, 'quay'],
+  ['tallyBoard', () => K.tallyBoard(), 1.8, 'quay'],
+  ['oldMansPost', () => K.oldMansPost(), 0.8, 'quay'],
+  ['waterJar', () => K.waterJar(), 0.9, 'quay'],
+  ['ropeRack', () => { const g = new THREE.Group(); const w = new VoxelBuilder(); for (let i = 0; i < 9; i++) w.box(-0.9 + i * 0.2 + 0.1, 1.2, -0.06, 0.19, 2.4, 0.1, jitter('#B8936A', 0.05, i)); g.add(w.mesh()); const r = K.ropeRack(); r.root.position.set(0, 1.5, 0); g.add(r.root); return { root: g, r }; }, 1.9, 'quay'],
+  ['bambooPole', () => { const g = new THREE.Group(); const a = K.bambooPole({ wish: true }); a.root.rotation.z = 0.12; g.add(a.root); const w = K.wishNote(); w.root.position.set(0.35, 0.3, 0.2); w.root.scale.setScalar(2.5); g.add(w.root); return { root: g, a, w }; }, 0.8, 'quay'],
+  ['wishNote', () => { const g = new THREE.Group(); const w = K.wishNote(); w.root.position.set(0, 0.6, 0); w.root.scale.setScalar(4); g.add(w.root); return { root: g, w }; }, 0.6, 'solo'],
+  ['bridgeBoard', () => K.bridgeBoard({ slates: [null, null, null, null, null, null, null, null, null, 'ဆယ်'], lit: q.get('lit') === '1' }), 3.0, 'fold'],
+  ['newBridge', () => K.newBridge({ len: 10, drop: DROP }), 10.6, 'fold', 0, -5, [0, 10]],
+  ['ropeFootbridge', () => { const g = new THREE.Group(); const f = K.ropeFootbridge({ len: 6 }); g.add(f.root); const p = K.middlePier({ h: DROP }); p.root.position.x = 6 + 1.0; g.add(p.root); return { root: g, f, p, sway: f.sway }; }, 9.2, 'fold', 0, -4.2, [0, 8.3]],
+  ['gust', () => { const b = K.bridgeBoard({ slates: ['', '', '', '', '', '', '', '', '', 'ဆယ်'] }); const g = K.slateGust({ board: b, toWharf: [-8, 0, 3], north: [3, 0, -30] }); b.root.add(g.root); return { root: b.root, b, g, update(dt) { if (anim) g.update(dt); } }; }, 3.0, 'fold'],
+  ['middlePier', () => K.middlePier({ h: DROP }), 2.6, 'solo', 0, 0, [-1.6, 1.6]],
+  ['printShed', () => K.printShed(), 7.6, 'junction'],
+  ['goldInkWell', () => K.goldInkWell({ level: num('level', 0.6) }), 2.8, 'junction'],
+  ['slipBoard', () => K.slipBoard(), 3.6, 'junction'],
+  ['bridgeBox', () => K.bridgeBox(), 0.8, 'junction'],
+  ['teaCart', () => K.teaCart(), 2.4, 'junction'],
+  ['stepLadder', () => K.stepLadder(), 0.9, 'junction'],
+  ['inkJars', () => { const g = new THREE.Group(); const l = [true, true, false].map((f, i) => { const j = K.inkJar({ full: f }); j.root.position.x = (i - 1) * 0.3; g.add(j.root); return j; }); const k = K.brassKey('ဆယ်'); k.root.position.set(0.55, 0.06, 0); k.root.scale.setScalar(2); g.add(k.root); return { root: g, l, k }; }, 1.2, 'junction'],
+  ['typeCase', () => K.typeCase({ jumbled: q.get('jumbled') === '1' }), 1.5, 'press'],
+  ['handPress', () => K.handPress({ pull: num('pull', 0.3) }), 1.8, 'press'],
+  ['typeBlock', () => { const g = new THREE.Group(); const a = K.typeBlock('six'); a.setTurn(num('turn', 0)); a.root.position.set(-0.13, 0, 0.08); const b = K.typeBlock('six'); b.setTurn(1); b.root.position.set(0.13, 0, 0.08); const c = K.typeBlock('title'); c.root.position.set(0, 0, -0.2); const d = K.typeBlock('title', { faceDown: true }); d.root.position.set(0, 0, 0.36); d.root.rotation.y = 0.2; [a, b, c, d].forEach((x) => g.add(x.root)); return { root: g, a, b, c, d }; }, 1.0, 'press'],
+  ['scrapCrate', () => K.scrapCrate(), 1.0, 'press'],
+  ['letterTable', () => K.letterTable(), 1.3, 'press'],
+];
+const only = q.get('only');
+const rowOnly = q.get('row');
+const chosen = only ? ITEMS.filter(([n]) => only.split(',').includes(n)) : ITEMS.filter(([, , , r]) => r !== 'solo' && (!rowOnly || r === rowOnly));
+const ROWS = ['mist', 'water', 'quay', 'fold', 'junction', 'press', 'solo'];
+const ROWZ = { mist: -26, water: -16, quay: -8, fold: 0, junction: 8, press: 14, solo: 20 };
+const RZ = (r) => (only ? 0 : ROWZ[r]);
+
+// lay the rows out first (so the ground can leave the bridge gaps open)
+const P = (window.P = {});
+const placed = [];
+const GAP = 0.8;
+let widest = 0;
+for (const r of ROWS) {
+  const row = chosen.filter(([, , , rr]) => rr === r);
+  if (!row.length) continue;
+  const total = row.reduce((a, [, , w]) => a + w + GAP, 0);
+  widest = Math.max(widest, total);
+  let x = -total / 2 + (only ? GAP / 2 : 0); // ?only: centre the props themselves on x = 0
+  row.forEach(([name, make, w, , yo = 0, xo = 0, gap = null], i) => {
+    const h = make();
+    const px = x + w / 2 + xo;
+    h.root.position.set(px, yo, RZ(r));
+    scene.add(h.root);
+    P[name] = h;
+    placed.push({ name, h, r, x0: x, x1: x + w + GAP, gap: gap ? [px + gap[0], px + gap[1]] : null, i });
+    x += w + GAP;
+  });
+}
+
+// grounds: water (y = 0), the ledger quay, newsprint paving (with valleys under the bridges), the press floor
+const gv = new VoxelBuilder();
+const used = new Set(chosen.map(([, , , r]) => r));
+if (used.has('water') || used.has('mist')) {
+  const z0 = only ? -14 : -36, z1 = only ? 8 : -11;
+  const wv = new VoxelBuilder();
+  wv.boxMin(-30, -0.4, z0, 30, -0.02, z1, '#7FA9B8');
+  for (let i = 0; i < 70; i++) wv.box(((i * 37) % 58) - 29, -0.015, z0 + 1 + ((i * 53) % Math.round(z1 - z0 - 2)), 0.8 + (i % 4) * 0.4, 0.01, 0.06, '#A9C9D3');
+  scene.add(wv.mesh({ outline: false }));
+  if (!only) gv.boxMin(-30, -0.6, -11, 30, 0.55, -9.4, '#E9E1CC'); // the quay edge behind the jetties
+}
+const PAVE = { quay: ['#F4EEDC', 'ledger'], fold: ['#DAD6CB', 'news'], junction: ['#DAD6CB', 'news'], press: ['#5E4E40', 'boards'], solo: ['#DAD6CB', 'news'] };
+function paveStrip(r, a, b) {
+  const z = RZ(r), [col, kind] = PAVE[r];
+  if (b - a < 0.01) return;
+  gv.boxMin(a, -0.1, z - 4.5, b, 0, z + 3.5, col);
+  if (kind === 'ledger') for (let x = Math.ceil(a / 2.4) * 2.4; x < b; x += 2.4) gv.boxMin(x, 0, z - 4.5, x + 0.03, 0.003, z + 3.5, x % 4.8 < 2 ? '#D98579' : '#8EAFCF');
+  else if (kind === 'news') for (let x = Math.ceil(a / 1.2) * 1.2; x + 0.9 <= b; x += 1.2) for (let k = 0; k < 9; k++) gv.boxMin(x, 0, z - 4 + k * 0.8, x + 0.9, 0.003, z - 4 + k * 0.8 + 0.04, '#BCB7AA');
+  else for (let x = Math.ceil(a / 0.3) * 0.3; x < b; x += 0.3) gv.boxMin(x, 0, z - 4.5, x + 0.012, 0.003, z + 3.5, '#4A3C30');
+}
+function valley(r, a, b) {
+  const z = RZ(r);
+  const wv = new VoxelBuilder();
+  wv.boxMin(a, -DROP - 0.1, z - 4.5, b, -DROP, z + 3.5, '#B8AE98');                       // valley floor (paper-dust)
+  wv.boxMin(a + 0.4, -DROP + 0.02, z - 4.5, b - 0.4, -DROP + 0.06, z + 3.5, '#7FA9B8');    // the stream
+  for (let i = 0; i < 12; i++) wv.box(a + 0.6 + ((i * 1.7) % Math.max(0.5, b - a - 1.2)), -DROP + 0.065, z - 4 + ((i * 2.3) % 7), 0.5, 0.005, 0.05, '#A9C9D3');
+  for (const [x, s] of [[a, 1], [b, -1]]) {                                                 // bank faces (stone courses)
+    for (let c = 0; c < Math.ceil(DROP / 0.32); c++) wv.boxMin(Math.min(x, x + s * 0.12), -0.32 * (c + 1), z - 4.5, Math.max(x, x + s * 0.12), -0.32 * c - 0.02, z + 3.5, c % 2 ? '#CFC6B2' : '#BFB59E');
+  }
+  scene.add(wv.mesh({ outline: false }));
+}
+for (const r of ROWS) {
+  if (!used.has(r) || r === 'water' || r === 'mist') continue;
+  const items = placed.filter((p) => p.r === r);
+  const lo = only ? -30 : -30, hi = 30;
+  const gaps = items.map((p) => p.gap).filter(Boolean).sort((a, b) => a[0] - b[0]);
+  let x = lo;
+  for (const [a, b] of gaps) { paveStrip(r, x, a); valley(r, a, b); x = b; }
+  paveStrip(r, x, hi);
+}
+scene.add(gv.mesh({ outline: false }));
+
+// a few people for scale (not on water rows, never in a valley)
+const cast = ['ukyaw', 'toetoe', 'dawohn', 'micho', 'kophyo', 'hninwai', 'phothar'].map((id) => CAST.find((c) => c.id === id)).filter(Boolean);
+const people = [];
+let ci = 0;
+for (const p of placed) {
+  if (p.r === 'water' || p.r === 'mist' || p.gap || !(p.i % 2 === 0 || only) || !cast.length || q.get('people') === '0') continue;
+  const c = cast[ci++ % cast.length];
+  const pp = createPerson(c.look);
+  pp.root.position.set(p.x1 - GAP / 2, 0, RZ(p.r) + 1.2);
+  pp.root.rotation.y = -0.3;
+  scene.add(pp.root);
+  people.push(pp);
+}
+document.getElementById('names').textContent = chosen.map(([n]) => n).join(' · ');
+P.newBridge?.setBoom(num('boom', 0));
+P.newBridge?.setLamps(num('lamps', 0));
+P.weighHouse?.setDoor(num('door', 1));
+if (P.gust && q.has('gust')) { P.gust.g.play(); const T = num('gust', 1.5); for (let s = 0; s < T; s += 1 / 30) P.gust.g.update(1 / 30); }
+const anim = q.get('anim') === '1';
+
+// draw-call audit: every visible mesh under each prop is one draw (toon body, its outline, quads, glows, shadows)
+function audit() {
+  const rows = [];
+  let tot = 0;
+  for (const [name, h] of Object.entries(P)) {
+    let body = 0, outline = 0, other = 0, inst = 0;
+    h.root.traverse((o) => {
+      if (!(o.isMesh || o.isLine || o.isPoints)) return;
+      let vis = true;
+      for (let p = o; p; p = p.parent) if (!p.visible) { vis = false; break; }
+      if (!vis) return;
+      if (o.isInstancedMesh) inst++;
+      if (o.userData.isOutline) outline++;
+      else if (o.material?.isMeshToonMaterial) body++;
+      else other++;
+    });
+    const n = body + outline + other;
+    tot += n;
+    rows.push({ name, body, outline, other, inst, total: n });
+  }
+  window.__audit = { rows, total: tot };
+  const pad = (s, n) => String(s).padEnd(n);
+  const txt = ['prop            toon  outl  other  =', ...rows.map((r) => `${pad(r.name, 15)} ${pad(r.body, 5)} ${pad(r.outline, 5)} ${pad(r.other, 6)} ${r.total}`), `${pad('all props', 31)}  ${tot}`].join('\n');
+  const el = document.getElementById('audit');
+  el.textContent = txt;
+  if (q.get('audit') === '1') el.style.display = 'block';
+  return txt;
+}
+audit();
+
+const game = q.get('game') === '1';
+const span = Math.max(3, widest);
+const fov = game ? 45 : 35;
+const hfov = 2 * Math.atan(Math.tan((fov * Math.PI) / 360) * (innerWidth / innerHeight));
+const fitDist = game ? 6 / Math.tan(hfov / 2) : (span / 2) / Math.tan(hfov / 2) * 1.08;
+const tz = only ? 0 : rowOnly ? ROWZ[rowOnly] : -4;
+const dv = startDevView({
+  scene, target: new THREE.Vector3(0, num('ty', only ? 0.9 : 0.6), tz), distance: game ? fitDist : Math.max(fitDist, only ? span * 1.2 : 0), tilt: game ? 52 : only ? 24 : 40, fov,
+  update(dt, t, { renderer } = {}) {
+    for (const p of people) p.update(dt, { speed: 0 });
+    for (const h of Object.values(P)) h.update?.(dt, t);
+    P.ropeFootbridge?.sway(dt, 0.6);
+    if (anim) {
+      P.newBridge?.setBoom(0.5 + 0.5 * Math.sin(t * 0.8));
+      P.goldInkWell?.setLevel(0.5 + 0.5 * Math.sin(t * 0.4));
+      P.weighHouse?.setDoor(0.5 + 0.5 * Math.sin(t * 0.7));
+      P.middlePier?.setTurn((t * 0.3) % 1);
+      P.handPress?.pull(0.5 + 0.5 * Math.sin(t * 1.3));
+      P.typeBlock?.a.setTurn(0.5 + 0.5 * Math.sin(t * 0.6));
+    }
+  },
+});
+window.__renderer = dv.renderer;
+</script>
+</body>
+</html>

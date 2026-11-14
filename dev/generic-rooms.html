@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="my">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>generic rooms</title>
+<link rel="stylesheet" href="dev.css">
+<style>
+  #name { position: fixed; left: 0; right: 0; top: 10px; text-align: center; font: 700 15px/1.7 "Noto Sans Myanmar", sans-serif; color: #2A2118; pointer-events: none; text-shadow: 0 1px 0 #F6F0E2; }
+  #name small { display: block; font: 600 12px/1.3 Georgia, serif; color: #8C6A28; }
+  #bar { position: fixed; left: 6px; right: 6px; bottom: 34px; display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; }
+  #bar a { font: 600 11px/1 system-ui, sans-serif; color: #2A2118; background: #F6F0E2; border: 2px solid #A47A2C; border-radius: 9px; padding: 5px 7px; text-decoration: none; }
+  #bar a.on { background: #6E1F2A; color: #F6F0E2; }
+  body.shot #bar, body.shot #stats { display: none; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="name"></div>
+<div id="bar"></div>
+<div id="stats"></div>
+<script type="module">
+// Dev page for js/story/rooms/generic.js (the generic rooms PREVIEW).
+//   ?kind=home|shop|workshop|tea|baker|fisher|gardener|student|elder|blank  &trade=carver|potter|printer|weaver|netmender|carpenter
+//   &seed=3  &district=market|envelope|exercise|wharf|junction|hearth|garden|blank  &hour=18  &rain=1  &w=5&d=4.6
+//   &at=x,z   where Maya stands (default: her first step in, the room's 'maya' spot)   &maya=0 (no Maya)
+//   &people=0  &t=2 (freeze time)  &grid=1 (cycle through the kinds, 3 s each)  &shot=1 (hide the dev bars)
+// Camera: the game's close, low room camera (doors.js roomCam with onfoot.js ROOM_VIEW) on Maya, exactly.
+// window.show({ kind, seed, district, trade, hour, rain, at }) rebuilds in place (for batched screenshots);
+// window.__budget = { calls, tris } for the room alone (no Maya, no people), window.__devStats the whole frame.
+window.addEventListener('error', (e) => { document.title = `ERR ${e.message} @${e.lineno}`; });
+window.addEventListener('unhandledrejection', (e) => { document.title = `ERR ${e.reason?.message || e.reason}`; });
+import * as THREE from '../js/game/three.js';
+import { fontsReady, setOutlineResolution } from '../js/game/toon.js';
+import { createMaya } from '../js/game/actors/maya.js';
+import { ROOM_VIEW } from '../js/story/onfoot.js';
+import { buildGenericRoom, KIND_NAMES, TRADES } from '../js/story/rooms/generic.js';
+
+const params = new URLSearchParams(location.search);
+if (params.get('shot') === '1') document.body.classList.add('shot');
+await fontsReady();
+
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.toneMapping = THREE.NeutralToneMapping;
+renderer.toneMappingExposure = 1.0;
+const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 200);
+function resize() {
+  renderer.setSize(innerWidth, innerHeight);
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  const v = renderer.getDrawingBufferSize(new THREE.Vector2());
+  setOutlineResolution(v.x, v.y);
+}
+addEventListener('resize', resize);
+resize();
+
+const maya = params.get('maya') === '0' ? null : createMaya({ outfit: 'writer', seed: 11 });
+let room = null, cur = null;
+const DIST = { home: 'market', shop: 'market', workshop: 'junction', tea: 'hearth', baker: 'hearth', fisher: 'wharf', gardener: 'garden', student: 'exercise', elder: 'market', blank: 'blank' };
+
+/** doors.js roomCam, for Maya at (x, z). */
+function roomCam(R, x, z) {
+  const V = ROOM_VIEW;
+  const ta = Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2), aspect = camera.aspect;
+  const width = aspect < 1 ? V.width : V.widthLandscape;
+  const d = width / 2 / (ta * aspect);
+  const t = THREE.MathUtils.degToRad(V.tilt);
+  const W = R.width, D = R.depth, b = R.bounds;
+  const frontZ = D / 2 + 0.1;
+  const camH = V.height + d * Math.sin(t);
+  const maxZ = Math.max(b.minZ, Math.min(b.maxZ, frontZ - d * Math.cos(t) + camH / Math.tan(t + Math.atan(0.78 * ta))));
+  const slide = Math.max(0, (W - width) / 2 + 0.1);
+  const look = new THREE.Vector3(THREE.MathUtils.clamp(x, -slide, slide), V.height, THREE.MathUtils.clamp(z, b.minZ, maxZ));
+  camera.position.set(look.x, look.y + Math.sin(t) * d, look.z + Math.cos(t) * d);
+  camera.lookAt(look);
+}
+
+async function show(o = {}) {
+  const kind = o.kind || 'home';
+  const district = o.district || DIST[kind] || 'market';
+  const seed = Number.isFinite(+o.seed) ? +o.seed : 3;
+  if (room) { if (maya) maya.root.removeFromParent(); room.dispose(); }
+  const t0 = performance.now();
+  room = buildGenericRoom({ kind, district, seed, trade: o.trade || undefined, hour: o.hour != null ? +o.hour : 10, rain: !!+o.rain, w: +o.w || 5, d: +o.d || 4.6, people: o.people !== '0' && o.people !== false });
+  const buildMs = Math.round(performance.now() - t0);
+  cur = { ...o, kind, district, seed };
+  const at = o.at ? String(o.at).split(',').map(Number) : null;
+  const sp = room.spots.maya;
+  const mx = at ? at[0] : sp.x, mz = at ? at[1] : sp.z;
+  if (maya) { maya.root.position.set(mx, 0, mz); maya.root.rotation.set(0, Number.isFinite(at?.[2]) ? at[2] : Math.PI, 0); room.scene.add(maya.root); }
+  roomCam(room, mx, mz);
+  const t = room.trade ? ` · ${room.trade}` : '';
+  document.getElementById('name').innerHTML = `${room.name.my}<small>${room.name.en} · ${room.kind}${t} · ${room.district} · seed ${seed}${o.hour != null ? ' · ' + o.hour + 'h' : ''}${+o.rain ? ' · rain' : ''}</small>`;
+  document.getElementById('bar').innerHTML = KIND_NAMES.map((k) => `<a href="?kind=${k}&seed=${seed}" class="${k === kind ? 'on' : ''}">${k}</a>`).join('') + `<a href="?kind=${kind}&district=${district}&seed=${seed + 1}">seed+1</a>`;
+  // the room's own budget: one frame without Maya and the people
+  const hidden = [maya?.root, ...room.residents.map((r) => r.p.root)].filter(Boolean);
+  for (const h of hidden) h.visible = false;
+  renderer.info.reset();
+  renderer.render(room.scene, camera);
+  window.__budget = { calls: renderer.info.render.calls, tris: renderer.info.render.triangles, residents: room.residents.length, obstacles: room.obstacles.length, buildMs };
+  for (const h of hidden) h.visible = true;
+  // the whole room's triangles (not only what this frame sees): every mesh but people and Maya
+  let all = 0, meshes = 0;
+  const skip = new Set(hidden);
+  const walk = (o) => { if (skip.has(o)) return; if (o.isMesh && o.geometry?.attributes?.position) { const g = o.geometry; all += ((g.index ? g.index.count : g.attributes.position.count) / 3) * (o.isInstancedMesh ? o.count : 1); meshes++; } for (const ch of o.children) walk(ch); };
+  walk(room.scene);
+  window.__budget.allTris = Math.round(all);
+  window.__budget.meshes = meshes;
+  frames = 0;
+  window.__ready = false;
+  setTimeout(() => { window.__ready = true; }, 400);
+  return window.__budget;
+}
+window.show = show;
+window.room = () => room;
+
+const frozen = params.has('t') ? parseFloat(params.get('t')) : null;
+const timer = new THREE.Timer();
+timer.connect(document);
+let frames = 0;
+renderer.info.autoReset = true;
+renderer.setAnimationLoop((ts) => {
+  timer.update(ts);
+  const dt = frozen !== null ? 1 / 60 : Math.min(timer.getDelta(), 0.1);
+  const t = frozen !== null ? frozen : timer.getElapsed();
+  if (!room) return;
+  room.update(dt, t);
+  maya?.update(dt, { speed: 0 });
+  renderer.render(room.scene, camera);
+  if (++frames % 30 === 1) {
+    const i = renderer.info;
+    window.__devStats = { calls: i.render.calls, triangles: i.render.triangles, geometries: i.memory.geometries, textures: i.memory.textures };
+    const b = window.__budget || {};
+    document.title = `calls ${i.render.calls} | tris ${i.render.triangles} | room ${b.calls}/${b.tris}`;
+    document.getElementById('stats').textContent = `${document.title} | geo ${i.memory.geometries} tex ${i.memory.textures}`;
+  }
+});
+
+const P = Object.fromEntries(params.entries());
+if (params.get('grid') === '1') {
+  let k = 0;
+  const step = () => { show({ ...P, kind: KIND_NAMES[k % KIND_NAMES.length], district: undefined, seed: (+P.seed || 3) + Math.floor(k / KIND_NAMES.length) }); k++; };
+  step();
+  setInterval(step, 3000);
+} else await show(P);
+</script>
+</body>
+</html>

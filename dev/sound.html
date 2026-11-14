@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="my">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>calls · soundscape preview</title>
+<style>
+  @font-face { font-family: "Noto Sans Myanmar"; src: url("../fonts/noto-sans-myanmar-400.woff2") format("woff2"); font-weight: 400; }
+  :root { --paper: #F3EBD8; --ink: #2A2118; --maroon: #7A2E2A; --gold: #B8893A; --card: #FFFaF0; --soft: #E3D6B8; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--paper); color: var(--ink); font: 15px/1.35 system-ui, "Noto Sans Myanmar", sans-serif; }
+  body { padding: 12px 14px 120px; max-width: 760px; margin: 0 auto; }
+  h1 { font-size: 20px; margin: 4px 0 2px; color: var(--maroon); }
+  .sub { font-size: 13px; opacity: .75; margin-bottom: 10px; }
+  h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; margin: 16px 0 6px; color: var(--gold); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; }
+  button { font: inherit; border: 1.5px solid var(--soft); background: var(--card); color: var(--ink); border-radius: 10px; padding: 8px 9px; text-align: left; cursor: pointer; min-height: 44px; }
+  button b { display: block; font-size: 14px; }
+  button small { display: block; font-size: 11.5px; opacity: .7; }
+  button.on { border-color: var(--maroon); background: #F8E4D6; box-shadow: inset 0 0 0 1px var(--maroon); }
+  .row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .row button { min-height: 38px; padding: 6px 10px; text-align: center; }
+  #start { width: 100%; text-align: center; font-size: 17px; background: var(--maroon); color: #fff; border: 0; padding: 14px; }
+  #now { position: fixed; left: 0; right: 0; bottom: 0; background: rgba(42,33,24,.94); color: #F3EBD8; font: 12px/1.4 ui-monospace, monospace; padding: 8px 14px; }
+  #now b { color: #F1C77A; }
+  input[type=range] { width: 140px; }
+  label { font-size: 13px; }
+</style>
+</head>
+<body>
+<h1>Soundscape preview</h1>
+<div class="sub">Town ambience + songs, areas, rooms, mission cues. Everything is made in code (Web Audio). Tap a button to switch; layers cross-fade like in the game.</div>
+<button id="start">▶ Start sound</button>
+
+<h2>Time · weather · talk</h2>
+<div class="row" id="periods"></div>
+<div class="row" style="margin-top:6px">
+  <button id="rain">Rain: off</button>
+  <button id="speak">Speaking (duck): off</button>
+  <label>Tension <input id="tension" type="range" min="0" max="1" step="0.05" value="0.7"></label>
+</div>
+
+<h2>Towns (district: ambience + song)</h2><div class="grid" id="towns"></div>
+<h2>Areas (walk-in zones)</h2><div class="grid" id="areas"></div>
+<h2>Rooms</h2><div class="grid" id="rooms"></div>
+<h2>Mission cues</h2><div class="grid" id="cues"></div>
+<h2>Stings (one-shot)</h2><div class="grid" id="stings"></div>
+<h2>Demo</h2><div class="grid" id="demos"></div>
+<div id="now">tap Start</div>
+
+<script type="module">
+import { createAudio } from '../js/game/audio.js';
+import { createSoundscape, renderScape, SONGS, AMBIENCE, ZONES } from '../js/story/soundscape.js';
+import { DISTRICTS, DISTRICT_NAME } from '../js/story/sound/places.js';
+import { STINGS } from '../js/story/sound/songs.js';
+import { createMusic } from '../js/game/music.js';
+
+// ---------- the clip list (shared with the offline renders: window.CLIPS) ----------
+const ROOM_PICK = { teashop: 'teashop', bakery: 'bakery', classroom: 'classroom', workshop: 'boxshop', press: 'press', post: 'marketpost', home: 'letterroom', lodge: 'lodge', noodle: 'noodlehouse', loom: 'loomshed', library: 'library' };
+const ROOM_DISTRICT = { teashop: 'market', bakery: 'hearth', classroom: 'exercise', boxshop: 'hearth', press: 'junction', marketpost: 'market', letterroom: 'junction', lodge: 'blank', noodlehouse: 'hearth', loomshed: 'hearth', library: 'home' };
+const CLIPS = [];
+let n = 1;
+const id = (s) => String(n++).padStart(2, '0') + '-' + s;
+const TOWN_HOUR = { home: 8.5, exercise: 9, envelope: 11, market: 11, wharf: 13, junction: 12, hearth: 15, garden: 10.5, blank: 17 };
+for (const d of DISTRICTS) CLIPS.push({ id: id(`town-${d === 'exercise' ? 'quarter' : d}-day`), name: `${DISTRICT_NAME[d]} · day`, group: 'town', state: { district: d, hour: TOWN_HOUR[d] } });
+for (const d of ['market', 'wharf', 'garden', 'hearth']) CLIPS.push({ id: id(`town-${d}-night`), name: `${DISTRICT_NAME[d]} · night`, group: 'night', state: { district: d, hour: 22 } });
+for (const [z, Z] of Object.entries(ZONES)) CLIPS.push({ id: id(`area-${z}`), name: Z.name.en, group: 'area', state: { district: Z.district, zone: z, hour: z === 'lodgeporch' ? 18.5 : 11 } });
+for (const [t, room] of Object.entries(ROOM_PICK)) if (t !== 'press') CLIPS.push({ id: id(`room-${t}`), name: `Room: ${t}`, group: 'room', state: { district: ROOM_DISTRICT[room], room, hour: t === 'lodge' ? 20 : 11 } });
+CLIPS.push({ id: id('mission-talk-tense-to-calm'), name: 'Talk: tense, then calm at 10 s', group: 'cue', timeline: [[0, { district: 'market', mode: 'talk', tension: 0.9, hour: 11 }], [10, { district: 'market', mode: 'talk', tension: 0, hour: 11 }]] });
+CLIPS.push({ id: id('mission-focus-minigame'), name: 'Mini-game focus', group: 'cue', state: { district: 'junction', mode: 'act', hour: 12 } });
+CLIPS.push({ id: id('mission-stings'), name: 'Stings: lesson, stamp, page, arrive (market, wharf)', group: 'cue', state: { district: 'home', mode: 'scene', hour: 9 }, stings: [[1.5, 'lesson'], [6.5, 'stamp'], [9.5, 'page'], [13.5, 'arrive', 'market'], [17, 'arrive', 'wharf']] });
+CLIPS.push({ id: id('mission-night-page'), name: 'Night page', group: 'cue', state: { district: 'home', cue: 'nightpage', hour: 23 } });
+CLIPS.push({ id: id('mission-finale'), name: 'Finale', group: 'cue', state: { district: 'home', cue: 'finale', hour: 10 } });
+CLIPS.push({ id: id('day12-rain'), name: 'Day 12: rain on the beds', group: 'cue', state: { district: 'garden', cue: 'd12rain', rain: true, hour: 14 } });
+CLIPS.push({ id: id('day14-back-cover'), name: 'Day 14: inside the back cover', group: 'cue', state: { district: 'blank', room: 'backcover', hour: 16 } });
+CLIPS.push({ id: id('day15-last-letter'), name: 'Day 15: the last letter', group: 'cue', state: { district: 'home', cue: 'd15letter', hour: 18 } });
+CLIPS.push({ id: id('demo-walk-market-teasquare-teashop'), name: 'Demo walk: market -> tea square -> tea shop -> talk', group: 'demo', seconds: 26, timeline: [
+  [0, { district: 'market', hour: 11 }], [6, { district: 'market', zone: 'teasquare', hour: 11 }], [13, { district: 'market', room: 'teashop', hour: 11 }],
+  [19, { district: 'market', room: 'teashop', mode: 'talk', tension: 0.5, speaking: true, hour: 11 }]] });
+window.CLIPS = CLIPS;
+
+const songOf = (c) => { const s = c.state || c.timeline?.[0]?.[1] || {}; return s; };
+
+// ---------- offline render helpers (headless previews) ----------
+function wavB64(buf) {
+  const ch = buf.numberOfChannels, len = buf.length, sr = buf.sampleRate;
+  const out = new DataView(new ArrayBuffer(44 + len * ch * 2));
+  const w = (o, s) => { for (let i = 0; i < s.length; i++) out.setUint8(o + i, s.charCodeAt(i)); };
+  w(0, 'RIFF'); out.setUint32(4, 36 + len * ch * 2, true); w(8, 'WAVE'); w(12, 'fmt ');
+  out.setUint32(16, 16, true); out.setUint16(20, 1, true); out.setUint16(22, ch, true); out.setUint32(24, sr, true);
+  out.setUint32(28, sr * ch * 2, true); out.setUint16(32, ch * 2, true); out.setUint16(34, 16, true); w(36, 'data'); out.setUint32(40, len * ch * 2, true);
+  const data = [...Array(ch)].map((_, c) => buf.getChannelData(c));
+  let o = 44;
+  for (let i = 0; i < len; i++) for (let c = 0; c < ch; c++) { const v = Math.max(-1, Math.min(1, data[c][i])); out.setInt16(o, v < 0 ? v * 0x8000 : v * 0x7fff, true); o += 2; }
+  const bytes = new Uint8Array(out.buffer);
+  let s = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(s);
+}
+function measure(buf) {
+  let peak = 0, sum = 0;
+  for (let c = 0; c < buf.numberOfChannels; c++) { const d = buf.getChannelData(c); for (let i = 0; i < d.length; i++) { const v = Math.abs(d[i]); if (v > peak) peak = v; sum += d[i] * d[i]; } }
+  return { peak: +peak.toFixed(3), rmsDb: +(10 * Math.log10(sum / (buf.length * buf.numberOfChannels) + 1e-12)).toFixed(1) };
+}
+window.renderClip = async (cid, seconds, solo) => {
+  const c = CLIPS.find((x) => x.id === cid);
+  const t0 = performance.now();
+  const buf = await renderScape({ seconds: seconds || c.seconds || 20, state: c.state, timeline: c.timeline, stings: c.stings, solo });
+  const ms = Math.round(performance.now() - t0);
+  return { id: cid + (solo ? '~' + solo : ''), ms, ...measure(buf), stats: buf.stats, wav: wavB64(buf) };
+};
+// the game's current music (music.js) rendered the same way, to match loudness
+window.measureMusicJs = async (period = 'noon', seconds = 12) => {
+  const oac = new OfflineAudioContext(2, 44100 * seconds, 44100);
+  const bus = oac.createGain(), comp = oac.createDynamicsCompressor();
+  bus.gain.value = 0.8; comp.threshold.value = -16; comp.knee.value = 12; comp.ratio.value = 4; comp.attack.value = 0.003; comp.release.value = 0.15;
+  bus.connect(comp); comp.connect(oac.destination);
+  const m = createMusic({ context: oac, output: bus, muted: false, state: 'running' });
+  m.setPeriod(period); m.update(false);
+  for (let k = 1; k * 0.2 < seconds - 0.05; k++) { const tt = Math.round(k * 200) / 1000; oac.suspend(tt).then(() => { m.update(false); oac.resume(); }); }
+  const buf = await oac.startRendering();
+  return { period, ...measure(buf) };
+};
+window.measureClip = async (cid, seconds) => { const r = await window.renderClip(cid, seconds); delete r.wav; return r; };
+
+// ---------- live ----------
+const audio = createAudio();
+const sound = createSoundscape(audio);
+window.sound = sound;
+const sel = { district: 'home', zone: null, room: null, cue: null, mode: null, hour: 11, rain: false, speaking: false, tension: 0.7 };
+let curBtn = null;
+function mk(parent, title, small, fn) {
+  const b = document.createElement('button');
+  b.innerHTML = `<b>${title}</b>${small ? `<small>${small}</small>` : ''}`;
+  b.onclick = () => { fn(b); };
+  document.getElementById(parent).appendChild(b);
+  return b;
+}
+function choose(b, s) {
+  Object.assign(sel, { zone: null, room: null, cue: null, mode: null }, s);
+  curBtn?.classList.remove('on'); curBtn = b; b.classList.add('on');
+}
+for (const d of DISTRICTS) {
+  const S = SONGS['town:' + d], A = AMBIENCE[d + ':day'];
+  mk('towns', DISTRICT_NAME[d], `♪ ${S.name} — ${S.vibe}<br>~ ${A.vibe}`, (b) => choose(b, { district: d }));
+}
+for (const [z, Z] of Object.entries(ZONES)) {
+  const S = SONGS['area:' + z];
+  mk('areas', Z.name.en, `♪ ${S.name} — ${S.vibe}<br>~ ${AMBIENCE['area:' + z].vibe}`, (b) => choose(b, { district: Z.district, zone: z }));
+}
+for (const [t, room] of Object.entries(ROOM_PICK)) {
+  const S = SONGS['room:' + (t === 'press' ? 'workshop' : t)];
+  mk('rooms', t === 'press' ? 'press (workshop)' : t, `♪ ${S.name} — ${S.vibe}<br>~ ${AMBIENCE['room:' + t].vibe}`, (b) => choose(b, { district: ROOM_DISTRICT[room], room }));
+}
+for (const [c, s] of [['talk', { mode: 'talk' }], ['focus', { mode: 'act' }], ['nightpage', { cue: 'nightpage' }], ['finale', { cue: 'finale' }], ['d12rain', { cue: 'd12rain', district: 'garden' }], ['d14back', { room: 'backcover', district: 'blank' }], ['d15letter', { cue: 'd15letter' }]]) {
+  const S = SONGS['cue:' + c];
+  mk('cues', c, `♪ ${S.name} — ${S.vibe}`, (b) => choose(b, { district: sel.district, ...s }));
+}
+for (const [k, S] of Object.entries(STINGS)) {
+  if (k === 'arrive') for (const d of DISTRICTS) mk('stings', 'arrive: ' + d, S.vibe, () => sound.sting('arrive', d));
+  else mk('stings', S.name, S.vibe, () => sound.sting(k));
+}
+let demo = null;
+mk('demos', 'Walk: market → tea square → tea shop → talk', 'cross-fades every 6-7 s', (b) => {
+  const c = CLIPS.find((x) => x.group === 'demo');
+  demo = { t0: performance.now(), tl: c.timeline };
+  curBtn?.classList.remove('on'); curBtn = b; b.classList.add('on');
+});
+const PER = { morning: 8, noon: 12, evening: 17.5, night: 22 };
+for (const [p, h] of Object.entries(PER)) {
+  const b = document.createElement('button'); b.textContent = p; b.onclick = () => { sel.hour = h; [...document.querySelectorAll('#periods button')].forEach((x) => x.classList.toggle('on', x === b)); };
+  if (p === 'noon') b.classList.add('on');
+  document.getElementById('periods').appendChild(b);
+}
+document.getElementById('rain').onclick = (e) => { sel.rain = !sel.rain; e.currentTarget.textContent = 'Rain: ' + (sel.rain ? 'on' : 'off'); e.currentTarget.classList.toggle('on', sel.rain); };
+document.getElementById('speak').onclick = (e) => { sel.speaking = !sel.speaking; e.currentTarget.textContent = 'Speaking (duck): ' + (sel.speaking ? 'on' : 'off'); e.currentTarget.classList.toggle('on', sel.speaking); };
+document.getElementById('tension').oninput = (e) => { sel.tension = +e.target.value; };
+document.getElementById('start').onclick = async (e) => {
+  if (audio.muted) audio.muted = false;
+  await audio.unlock();
+  e.currentTarget.textContent = audio.state === 'running' ? '♪ sound on (tap a layer)' : 'sound blocked: tap again';
+};
+let lastT = performance.now();
+function loop(now) {
+  const dt = (now - lastT) / 1000; lastT = now;
+  let s = sel;
+  if (demo) {
+    const t = (now - demo.t0) / 1000;
+    for (const [tt, st] of demo.tl) if (tt <= t) s = { ...st, hour: sel.hour, rain: sel.rain };
+    if (t > 32) demo = null;
+  }
+  sound.update(dt, s);
+  const st = sound.stats(), R = sound.state;
+  document.getElementById('now').innerHTML = st
+    ? `music <b>${st.music || '—'}</b>${st.fading ? ` (+${st.fading} fading)` : ''} · ${R?.period}<br>ambience <b>${st.layers.join(', ') || '—'}</b> · beds ${st.beds} · notes ${st.notes} · events ${st.events} · bank ${st.bankKB} KB`
+    : `${audio.muted ? 'muted' : audio.state} — tap Start`;
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+document.title = 'calls · soundscape';
+window.soundReady = true;
+</script>
+</body>
+</html>

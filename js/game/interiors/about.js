@@ -1351,7 +1351,7 @@ function rugBuilder(v, x, z, w, d) {
   }
 }
 
-/** Long runner from the entrance to the big rug: gold border, cream chevrons, little sparkles. */
+/** Long runner from the entrance to the big rug: gold border, cream diamonds, little sparkles. */
 function runnerRug(v, x, z0, z1, w) {
   v.boxMin(x - w / 2, 0, z0, x + w / 2, 0.016, z1, PALETTE.gold);
   v.boxMin(x - w / 2 + 0.06, 0, z0 + 0.06, x + w / 2 - 0.06, 0.02, z1 - 0.06, '#7E2531');
@@ -1363,8 +1363,8 @@ function runnerRug(v, x, z0, z1, w) {
     const zc = z0 + 0.3 + i * 0.32;
     if (i % 3 === 1) addSparkle(v, x, 0.022, zc, 0.2, PALETTE.gold, { depth: 0.008, rx: -Math.PI / 2 });
     else {
-      boxR(v, x - 0.07, 0.022, zc, 0.17, 0.004, 0.035, i % 2 ? PALETTE.cream : '#E2B85A', 0, 0.62, 0); // chevron
-      boxR(v, x + 0.07, 0.022, zc, 0.17, 0.004, 0.035, i % 2 ? PALETTE.cream : '#E2B85A', 0, -0.62, 0);
+      // a small diamond, not a chevron (a row of chevrons on a runner reads as arrows pointing the way: no guidance)
+      boxR(v, x, 0.022, zc, 0.1, 0.004, 0.1, i % 2 ? PALETTE.cream : '#E2B85A', 0, Math.PI / 4, 0);
     }
   }
   for (let i = 0; i < 7; i++) v.box(x - w / 2 + 0.1 + (i * (w - 0.2)) / 6, 0.008, z0 - 0.04, 0.04, 0.016, 0.08, i % 2 ? PALETTE.gold : PALETTE.cream); // fringe

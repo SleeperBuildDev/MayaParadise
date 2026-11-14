@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="my">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>props6</title>
+<link rel="stylesheet" href="dev.css">
+<style>
+  #names { position: fixed; left: 0; right: 0; bottom: 8px; text-align: center; font: 600 12px/1.6 system-ui, sans-serif; color: #2A2118; padding: 0 12px; }
+  body.dusk #names { color: #F2E6CC; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="names"></div>
+<script type="module">
+// Dev page for js/story/props6.js (Blank Page, Back Cover, launch evening, shared items, weather).
+// ?scene=launch (default) | blank | lodge | cover | room | lights | small | rain
+// ?glow=0..1 (lamps)  ?open=0..1 (doors)  ?fold=0..1 (plane)  ?dusk=0|1  plus devview's ?yaw ?tilt ?dist ?t.
+// Handles on window.P.
+window.addEventListener('error', (e) => { document.title = `ERR ${e.message} @${e.lineno}`; });
+window.addEventListener('unhandledrejection', (e) => { document.title = `ERR ${e.reason?.message || e.reason}`; });
+import * as THREE from '../js/game/three.js';
+import { PALETTE, addStandardLights, fontsReady } from '../js/game/toon.js';
+import { VoxelBuilder, jitter } from '../js/game/voxel.js';
+import { createPerson } from '../js/story/people.js';
+import { CAST } from '../js/story/cast.js';
+import * as K from '../js/story/props6.js';
+import { startDevView } from './devview.js';
+
+const q = new URLSearchParams(location.search);
+const num = (k, d) => (q.has(k) ? parseFloat(q.get(k)) : d);
+const sceneName = q.get('scene') || 'launch';
+await fontsReady();
+const scene = new THREE.Scene();
+const { hemi, sun } = addStandardLights(scene);
+const dusk = q.has('dusk') ? q.get('dusk') === '1' : ['launch', 'lights'].includes(sceneName);
+const rainy = sceneName === 'rain';
+if (dusk) {
+  document.body.classList.add('dusk');
+  scene.background = new THREE.Color('#2F3654');
+  hemi.color.set('#8E9AC8'); hemi.groundColor.set('#5A4A40'); hemi.intensity = 0.75;
+  sun.color.set('#FFB08A'); sun.intensity = 0.7;
+} else if (rainy) {
+  scene.background = new THREE.Color('#9AA6B2');
+  hemi.color.set('#C8D2DC'); hemi.intensity = 1.25; sun.color.set('#D8DEE6'); sun.intensity = 0.7;
+} else scene.background = new THREE.Color('#F2E6CC');
+
+const ground = new VoxelBuilder();
+const blank = sceneName === 'blank' || sceneName === 'cover';
+// dusk: a trodden-earth plaza at night (the real launch ground is dark and cool, so the lamps carry it)
+ground.boxMin(-30, -0.1, -30, 30, 0, 12, blank ? '#F8F4EA' : rainy ? '#C9BFA9' : dusk ? '#8C7466' : PALETTE.paper);
+if (!blank) for (let i = -30; i <= 30; i += 1) ground.boxMin(i - 0.005, 0, -30, i + 0.005, 0.002, 12, rainy ? '#B5AA92' : dusk ? '#7E675B' : '#D8CDB6');
+scene.add(ground.mesh({ outline: false }));
+if (dusk) {
+  // a warm wash on the ground where the crowd stands (dev stand-in for the night grade's lamp light)
+  const cv = document.createElement('canvas'); cv.width = cv.height = 128;
+  const g = cv.getContext('2d'), grd = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+  grd.addColorStop(0, 'rgba(255,190,120,0.42)'); grd.addColorStop(0.5, 'rgba(255,160,90,0.16)'); grd.addColorStop(1, 'rgba(255,140,70,0)');
+  g.fillStyle = grd; g.fillRect(0, 0, 128, 128);
+  const tx = new THREE.CanvasTexture(cv); tx.colorSpace = THREE.SRGBColorSpace;
+  const wash = new THREE.Mesh(new THREE.PlaneGeometry(12, 8), new THREE.MeshBasicMaterial({ map: tx, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false }));
+  wash.rotation.x = -Math.PI / 2; wash.position.set(0, 0.01, 0.6);
+  scene.add(wash);
+}
+
+const P = (window.P = {});
+const people = [], tickers = [];
+const cast = CAST.filter((c) => c.look);
+let ci = 0;
+function person(x, z, ry = 0, id) {
+  const c = (id && CAST.find((k) => k.id === id)) || cast[ci++ % cast.length];
+  const p = createPerson(c.look);
+  p.root.position.set(x, 0, z);
+  p.root.rotation.y = ry;
+  scene.add(p.root);
+  people.push(p);
+  return p;
+}
+const add = (h, x, y, z, ry = 0) => { h.root.position.set(x, y, z); h.root.rotation.y = ry; scene.add(h.root); if (h.update) tickers.push(h); return h; };
+let pool = null;
+let view = { target: new THREE.Vector3(0, 0.8, 0), distance: 10, tilt: 30, yaw: 0 };
+const names = [];
+
+if (sceneName === 'launch') {
+  pool = K.createGlowPool({ max: 40 });
+  scene.add(pool.mesh);
+  // two launch tables on the west, the tea table on the east, the banner on the north between two posts
+  const t1 = add(K.launchTable(PALETTE.maroon), -1.75, 0, 1.6, 1.25);
+  const t2 = add(K.launchTable('#E9DFC8'), -2.05, 0, 3.4, 1.35);
+  for (let i = 0; i < 5; i++) {
+    const v = K.vase(1);
+    v.setTag(true);
+    t1.root.add(v.root);
+    v.root.position.copy(t1.slots[i]);
+  }
+  const bb = K.bookletBox(12); t2.root.add(bb.root); bb.root.position.copy(t2.slots[1]);
+  const ib = K.invitationStack({ n: 6 }); t2.root.add(ib.root); ib.root.position.copy(t2.slots[3]);
+  const pt = K.proofSlips({ n: 4 }); t2.root.add(pt.root); pt.root.position.copy(t2.slots[4]);
+  P.tea = add(K.teaTable(), 1.9, 0, 2.4, -0.9);
+  P.banner = add(K.banner({ posts: true }), 0, 0, -2.6);
+  // the guests' arc, each with their own light (one gap between Nay Chi and Toe Toe)
+  const kinds = [['windmillLamp', 'phothar'], ['beanJar', 'toetoe'], ['clayLamp', 'micho'], ['raftLamp', 'kothiha'], ['kiteLamp', 'thiri'], ['teapotLamp', 'kophyo'],
+    ['blockLamp', 'kolwin'], ['typeLamp', 'kowunna'], ['emberTin', 'khinmay'], ['weaveLamp', 'eimon'], ['vineLamp', 'hpohtaw'], ['plain', 'naychi'], [null, null], ['lantern', 'wintwar']];
+  P.lights = [];
+  kinds.forEach(([kind, id], i) => {
+    const a = Math.PI * (0.12 + 0.76 * (i / (kinds.length - 1)));
+    const x = -Math.cos(a) * 2.5, z = -Math.sin(a) * 1.5 + 0.2 + (i % 2) * 0.25;
+    if (!kind) { // Maya's gap: her lantern stands alone on its stick for now
+      const m = K.paperLantern({ word: 'စာ', pool, color: '#E9C7A0' });
+      add(m, x, 0.0, z); m.root.scale.setScalar(1.6); m.setGlow(1); P.lights.push(m);
+      return;
+    }
+    const p = person(x, z, Math.atan2(-x, 4 - z) * 0.4, id);
+    const L = kind === 'lantern' ? K.paperLantern({ pool, color: '#D99A9A', size: 1.5 }) : K.guestLight(kind, { pool, word: kind === 'plain' ? 'ကိုယ့်ဘာသာ မေးတယ်' : '', count: 2, size: kind === 'kiteLamp' ? 1.25 : 1.9, halo: 1.1 }); // the kite's line scales too: keep it under the banner
+    const handY = kind === 'clayLamp' ? 0.62 : kind === 'kiteLamp' || kind === 'windmillLamp' || kind === 'vineLamp' ? 0.55 : 0.78;
+    add(L, x + 0.22, handY, z + 0.18);
+    L.setGlow(num('glow', 1));
+    P.lights.push(L);
+  });
+  P.plane = add(K.paperPlane(), 0.5, 1.7, 2.6, 0.3);
+  P.plane.setFold(num('fold', 1));
+  view = { target: new THREE.Vector3(0, 1.0, 0.6), distance: 9.2, tilt: 30, yaw: 0 };
+  names.push('launch: tables, vases, booklet box, tea table, banner, guest lights, paper plane');
+}
+
+if (sceneName === 'lights') {
+  pool = K.createGlowPool({ max: 20 });
+  scene.add(pool.mesh);
+  const kinds = ['windmillLamp', 'beanJar', 'clayLamp', 'raftLamp', 'kiteLamp', 'teapotLamp', 'blockLamp', 'typeLamp', 'emberTin', 'weaveLamp', 'vineLamp', 'plain', 'lantern'];
+  P.lights = kinds.map((k, i) => {
+    const L = k === 'lantern' ? K.paperLantern({ word: 'စာ', pool }) : K.guestLight(k, { pool, word: k === 'plain' ? 'ကိုယ့်ဘာသာ မေးတယ်' : '', count: 4 });
+    const col = i % 3, row = Math.floor(i / 3);
+    add(L, -0.62 + col * 0.62, 2.85 - row * 0.6 - (['kiteLamp', 'windmillLamp', 'vineLamp', 'lantern', 'plain', 'clayLamp'].includes(k) ? 0.3 : 0), 0);
+    L.setGlow(num('glow', 1));
+    return L;
+  });
+  view = { target: new THREE.Vector3(0, 1.45, 0), distance: 5.6, tilt: 8, yaw: 0 };
+  names.push(kinds.join(' · '));
+}
+
+if (sceneName === 'blank') {
+  P.hedge = add(K.blankHedge(), -2.5, 0, 5.5);
+  P.lodge = add(K.lodge(), 2.5, 0, -1.5);
+  P.lodge.setLamp(num('glow', 0.6));
+  P.cover = add(K.backCover({ width: 22 }), 0, 0, -9);
+  P.fp = add(K.footprints(), 0, 0, 0);
+  // six walkers from the lodge north to the cover, a couple of strays
+  const r = (s) => { const x = Math.sin(s * 12.9898) * 43758.5453; return x - Math.floor(x); };
+  for (let w = 0; w < 6; w++) for (let s = 0; s <= 1; s += 0.01) {
+    const z = 0.6 - s * 9, x = 2.5 - s * 2.3 + Math.sin(s * 5 + w) * 0.1 + (r(w) - 0.5) * 0.25;
+    P.fp.walk('w' + w, x, z, Math.PI + 0.25);
+  }
+  for (let s = 0; s <= 1; s += 0.01) P.fp.walk('stray', -1.5 + s * 3, 2 - s * 1.5 + Math.sin(s * 6) * 0.3, 2.0);
+  person(2.2, 2.3, -0.4, 'naychi');
+  person(0.6, -3.5, 2.8, 'toetoe');
+  view = { target: new THREE.Vector3(0.5, 0.8, -1.2), distance: 20, tilt: 40, yaw: 0 };
+  names.push('blankHedge · lodge · footprints · backCover');
+}
+
+if (sceneName === 'hedge') {
+  P.hedge = add(K.blankHedge(), 0, 0, 0);
+  P.fp = add(K.footprints(), 0, 0, 0);
+  for (let s = 0; s <= 1; s += 0.01) P.fp.walk('maya', 0.1 + Math.sin(s * 4) * 0.15, 3.0 - s * 6, Math.PI);
+  person(0.9, 2.2, -0.3, 'naychi');
+  view = { target: new THREE.Vector3(0, 0.7, 0.3), distance: 9.5, tilt: 42, yaw: 0 };
+  names.push('blankHedge (gravel runs out, two pencil lines go on) · footprints');
+}
+
+if (sceneName === 'lodge') {
+  P.lodge = add(K.lodge(), 0, 0, 0);
+  P.lodge.setLamp(num('glow', 0.8));
+  P.lodge.setOpen(num('open', 0.45));
+  const hb = K.houseBoard({});
+  add(hb, 2.6, 0, 3.4, -0.2);
+  person(-0.5, 3.3, 0.3, 'naychi');
+  person(1.2, 2.9, -0.5, 'toetoe');
+  view = { target: new THREE.Vector3(0, 1.4, 0.2), distance: 14, tilt: 40, yaw: 0 };
+  names.push('lodge (lamp ' + num('glow', 0.8) + ', door open) · houseBoard');
+}
+
+if (sceneName === 'cover') {
+  P.cover = add(K.backCover({ width: 10 }), 0, 0, -1);
+  P.cover.setOpen(num('open', 0.35));
+  P.cover.setInterior(1);
+  person(1.0, 0.6, 0.0, 'naychi');
+  view = { target: new THREE.Vector3(0, 1.6, -0.6), distance: 9, tilt: 16, yaw: 0 };
+  names.push('backCover (door ajar, keyhole at 1 m)');
+}
+
+if (sceneName === 'room') {
+  P.room = add(K.backCoverRoom({ refs: q.get('refs') === '1' ? ['(draft) her reference list goes here, verbatim, only with her yes'] : null }), 0, 0, 0);
+  P.room.setFilled(num('filled', 5));
+  const bb = add(K.bookletBundle(), 1.6, 0, -1.2, 0.3);
+  P.bundle = bb;
+  person(-0.9, -1.9, 0.5, 'naychi');
+  view = { target: new THREE.Vector3(0.3, 1.0, -2.2), distance: 7.6, tilt: 30, yaw: 0 };
+  names.push('backCoverRoom: endpaper floor, marbled walls, writing slope + gold-ink pot, stool, pigeonholes (5 filled), reference plate (blank)');
+}
+
+if (sceneName === 'small') {
+  // a work table of small things
+  const tb = new VoxelBuilder();
+  tb.boxMin(-0.62, 0, -1.2, 0.62, 0.5, 1.2, PALETTE.woodDark);
+  tb.boxMin(-0.66, 0.5, -1.25, 0.66, 0.56, 1.25, '#CDA577');
+  for (let i = 0; i < 5; i++) tb.boxMin(-0.66 + i * 0.33, 0.561, -1.25, -0.66 + i * 0.33 + 0.004, 0.562, 1.25, '#B58A5A');
+  tb.boxMin(-0.66, 0.56, -1.27, 0.66, 1.6, -1.21, '#E8DCC6'); // a wall behind
+  scene.add(tb.mesh());
+  const Y = 0.562;
+  const items = [
+    ['storagePot', K.storagePot(), -0.3, Y, -0.85, 0],
+    ['bookletBox', K.bookletBox(10), 0.3, Y, -0.85, 0.1],
+    ['vase', K.vase(1), -0.42, Y, -0.35, 0],
+    ['bookletBundle', K.bookletBundle(), 0.22, Y, -0.33, -0.15],
+    ['invitationStack', K.invitationStack({}), -0.3, Y, 0.12, 0.1],
+    ['invitation', K.invitationStack({ single: true }), 0.3, Y, 0.12, -0.15],
+    ['proofSlips', K.proofSlips({ n: 5, text: { my: 'ဒီညပွဲ ဝင်ဖို့ ဖိတ်စာ မလိုဘူး။' } }), -0.36, Y, 0.5, 0.15],
+    ['brassKey', K.brassKey('မာရာ'), 0.1, Y, 0.5, 0.3],
+    ['hairpin', K.hairpin(), 0.4, Y, 0.48, 0.6],
+    ['essayPage', K.essayPage(), -0.22, Y, 0.92, 0],
+    ['sheet', K.paperPlane(), 0.36, Y + 0.003, 0.9, -0.3],
+    ['paperPlane', K.paperPlane(), 0.3, Y + 0.32, 0.25, 0.5],
+  ];
+  for (const [n, h, x, y, z, ry] of items) { add(h, x, y, z, ry); P[n] = h; }
+  P.paperPlane.setFold(1);
+  P.sheet.setFold(0);
+  P.storagePot.setLid(num('lid', 0));
+  P.hairpin.setGlint(1);
+  P.vase.setTag(true);
+  P.houseBoard = add(K.houseBoard({ cover: q.get('cover') === '1' }), 0.25, 0.75, -1.205); P.houseBoard.root.scale.setScalar(0.55);
+  P.gecko = add(K.gecko({}), -0.45, 1.35, -1.205); P.gecko.root.scale.setScalar(2.2);
+  P.oil = add(K.oilLamp({ hung: 'low' }), -0.24, 1.62, -1.1); P.oil.setGlow(0.9);
+  view = { target: new THREE.Vector3(0, 0.7, -0.05), distance: 3.3, tilt: 46, yaw: 0 };
+  names.push('proof slips · invitations · essay · bundle · key · storage pot · vase · booklet box · plane · hairpin · board · gecko · oil lamp');
+}
+
+if (sceneName === 'rain') {
+  P.lodge = add(K.lodge(), 0, 0, -2.5);
+  P.lodge.setLamp(0.35);
+  P.lodge.setRain(num('amount', 1));
+  P.pud = add(K.puddles({ n: 9, area: [-5, 0.5, 5, 4.5] }), 0, 0, 0);
+  P.pud.setRain(1);
+  P.rain = add(K.rainFx({}), 0, 0, 0);
+  P.rain.setAmount(num('amount', 1));
+  person(-1.2, 1.6, 0.2, 'toetoe');
+  view = { target: new THREE.Vector3(0, 1.0, 0.8), distance: 14, tilt: 38, yaw: 0 };
+  names.push('rainFx · puddles · lodge');
+}
+
+document.getElementById('names').textContent = names.join(' ');
+startDevView({
+  scene, target: view.target, distance: view.distance, tilt: view.tilt, yaw: view.yaw, fov: num('fov', 50),
+  update(dt, t, { camera }) {
+    for (const p of people) p.update(dt, { speed: 0 });
+    for (const h of tickers) h.update(dt, t);
+    if (P.rain) P.rain.follow(view.target);
+    if (P.gecko && Math.floor(t) % 6 === 0 && !P.gecko.moving) P.gecko.run();
+    pool?.update(camera);
+  },
+});
+</script>
+</body>
+</html>

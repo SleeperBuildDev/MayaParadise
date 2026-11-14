@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="my">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>town intro</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #F6F0E2; overflow: hidden; }
+  #g { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; }
+  #bar { position: fixed; left: 6px; right: 6px; bottom: 6px; display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; z-index: 9;
+    font: 600 11px/1 system-ui, sans-serif; }
+  #bar a { color: #2A2118; background: #F6F0E2; border: 2px solid #A47A2C; border-radius: 9px; padding: 5px 7px; text-decoration: none; }
+  #bar a.on { background: #6E1F2A; color: #F6F0E2; }
+  #bar span { padding: 6px 2px; color: #6A5A48; }
+  #msg { position: fixed; left: 8px; top: 8px; z-index: 9; font: 600 11px/1.3 system-ui, sans-serif; color: #6E1F2A; pointer-events: none; }
+</style>
+</head>
+<body>
+<!--
+  Dev page for js/story/world/townintro.js, played in the real game (an iframe of index.html?story&play=1&foot=1).
+  ?town=market|wharf|garden|exercise|envelope|junction|hearth|blank|home
+  &style=A|B      the fly-over's name card (A: luggage tag on a string; B: chapter header with a gold rule)
+  &banner=A|B     the later-entry banner (A: ribbon bookmark; B: pencil-underlined paper strip)
+  &mode=intro     (default) forget the town, put Maya inside it: the detection itself starts the fly-over
+  &mode=banner    mark it seen, put her in a neighbouring district, then walk her in: the banner
+  &mode=play      call ti.play(town) straight away (no detection)
+  &slow=2         the fly-over at half speed (for screenshots)
+  &save=quiet     (tests only) writes a quiet Day-10-done save first (the old one is kept under rc-story-v1.bak-townintro)
+  &keep=0         leave the top label ("Paper Town") alone instead of naming the district
+  &mode=stamps    no game: card B's nine stamp emblems side by side
+  &mini=0         without the corner map preview (minimap.js, top right)
+  &ui=0           hide this bar
+  &motion=0       honour the PC's reduced-motion setting (by default the preview shows the animation anyway)
+  Exposes window.__ti (the module's object) and window.__tiState ('boot' | 'ready' | 'done').
+-->
+<iframe id="g" title="game"></iframe>
+<div id="msg"></div>
+<div id="bar"></div>
+<script type="module">
+const q = new URLSearchParams(location.search);
+const town = q.get('town') || 'market', style = q.get('style') || 'A', banner = q.get('banner') || 'A', mode = q.get('mode') || 'intro';
+const slow = +(q.get('slow') || 1);
+const msg = (t) => { if (q.get('ui') !== '0') document.getElementById('msg').textContent = t; };
+window.__tiState = 'boot';
+
+// the bar: every town x style
+if (q.get('ui') !== '0') {
+  const bar = document.getElementById('bar');
+  const link = (o, label) => {
+    const u = new URLSearchParams(q); for (const [k, v] of Object.entries(o)) u.set(k, v); u.delete('save');
+    const a = document.createElement('a'); a.href = `?${u}`; a.textContent = label;
+    if (Object.entries(o).every(([k, v]) => (q.get(k) || { town: 'market', style: 'A', banner: 'A', mode: 'intro' }[k]) === v)) a.classList.add('on');
+    bar.appendChild(a);
+  };
+  for (const t of ['home', 'exercise', 'envelope', 'market', 'wharf', 'junction', 'hearth', 'garden', 'blank']) link({ town: t }, t);
+  bar.appendChild(Object.assign(document.createElement('span'), { textContent: 'card' }));
+  link({ style: 'A', mode: 'intro' }, 'A tag'); link({ style: 'B', mode: 'intro' }, 'B chapter');
+  bar.appendChild(Object.assign(document.createElement('span'), { textContent: 'banner' }));
+  link({ banner: 'A', mode: 'banner' }, 'A ribbon'); link({ banner: 'B', mode: 'banner' }, 'B pencil');
+}
+
+// where to stand in each district: the road node nearest its middle, well inside it (computed in the game's realm)
+const IN_GAME = `
+import { installTownIntro, TOWNS } from '/js/story/world/townintro.js';
+import { ALL_REGIONS, ROAD_NODES } from '/js/story/world/region.js';
+const P = ${JSON.stringify({ town, style, banner, mode, slow, keep: q.get('keep') !== '0', mini: q.get('mini') !== '0' })};
+const spotIn = (id) => {
+  const r = ALL_REGIONS.find((x) => x.id === id);
+  if (id === 'home') return { x: 0, z: 8.4 };
+  const [x0, z0, x1, z1] = r.rect, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, m = 8;
+  const ok = ROAD_NODES.filter((n) => n.x > x0 + m && n.x < x1 - m && n.z > z0 + m && n.z < z1 - m && !(r.holes || []).some(([a, b, c, d]) => n.x > a - m && n.x < c + m && n.z > b - m && n.z < d + m));
+  ok.sort((a, b) => Math.hypot(a.x - cx, a.z - cz) - Math.hypot(b.x - cx, b.z - cz));
+  return ok[0] ? { x: ok[0].x, z: ok[0].z } : { x: cx, z: cz };
+};
+const story = window.__story, game = window.__mwGame, ow = story.openWorld;
+const idle = () => !story.talking && !game.busy && !game.ui.dialogOpen && !document.getElementById('game').classList.contains('cinema');
+const until = async (f, ms = 20000) => { const end = performance.now() + ms; while (!f() && performance.now() < end) await new Promise((r) => setTimeout(r, 100)); };
+await until(idle, 30000);
+if (!story.foot.active) { await story.foot.toFoot(); story.refreshHud?.(); }
+const ti = installTownIntro(game, story, { card: P.style, banner: P.banner, slow: P.slow, keepName: P.keep });
+window.__ti = ti;
+// the corner map preview too (top right, under EN / sound), so the banner can be checked against it (&mini=0: off)
+if (P.mini) { try { const { createMinimap } = await import('/js/story/world/minimap.js'); window.__mm = createMinimap({ game, ow, story, style: 1 }); } catch (e) { console.warn('minimap', e.message); } }
+window.__tiSpot = spotIn;
+if (P.mode === 'banner') {
+  ti.markSeen(P.town);
+  const other = P.town === 'market' ? 'envelope' : P.town === 'wharf' ? 'market' : P.town === 'garden' ? 'hearth' : P.town === 'home' ? 'exercise' : 'market';
+  ti.markSeen(other);
+  const a = spotIn(other); ow.jump(a.x, a.z, 0);
+  await until(() => ti.current === other, 8000);
+  await new Promise((r) => setTimeout(r, 3600)); // (its own banner, for the district she was put in, goes first)
+  window.__tiState = 'ready';
+  const b = spotIn(P.town); ow.jump(b.x, b.z, 0);
+} else if (P.mode === 'play') {
+  const b = spotIn(P.town); ow.jump(b.x, b.z, 0);
+  await new Promise((r) => setTimeout(r, 1500));
+  window.__tiState = 'ready';
+  ti.play(P.town);
+} else {
+  ti.forget(P.town);
+  // (stand somewhere else she has seen first, so the walk-in is a real entry)
+  const other = P.town === 'home' ? 'exercise' : 'home';
+  ti.markSeen(other);
+  const a = spotIn(other); ow.jump(a.x, a.z, 0);
+  await until(() => ti.current === other, 8000);
+  const b = spotIn(P.town);
+  await story.openWorld.streamer.ensureAsync(b.x, b.z);
+  window.__tiState = 'ready';
+  ow.jump(b.x, b.z, 0);
+}
+`;
+
+const QUIET = (spot) => ({ v: 1, created: '2026-11-14', day: 10, dayDone: false, flags: { 'd10.done': true, 'd10.morning': true, bridgeOpen: true, creaseMended: true, backCover: true, 'desk:home': true },
+  bag: { notebook: 1, quill: 1, letter: 1, mug: 1, windmill: 1 }, place: { mode: 'foot', x: spot.x, z: spot.z, heading: 0 } });
+if (q.get('save') === 'quiet') {
+  try {
+    const old = localStorage.getItem('rc-story-v1');
+    if (old && !localStorage.getItem('rc-story-v1.bak-townintro')) localStorage.setItem('rc-story-v1.bak-townintro', old);
+    localStorage.setItem('rc-story-v1', JSON.stringify(QUIET({ x: 0, z: 8.4 })));
+  } catch { /* private mode */ }
+}
+
+if (mode === 'stamps') {
+  // card B's emblems, all nine (a picture per district: never a number, which would read as an order to go in)
+  const { MARKS, TOWNS } = await import('../js/story/world/townintro.js');
+  const { ALL_REGIONS } = await import('../js/story/world/region.js');
+  document.getElementById('g').remove();
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'position:fixed;inset:0;display:flex;flex-wrap:wrap;gap:14px 8px;justify-content:center;align-content:center;padding:16px;background:#F6F0E2';
+  for (const [id, t] of Object.entries(TOWNS)) {
+    const nm = ALL_REGIONS.find((r) => r.id === id)?.name || { my: id, en: id };
+    const c = document.createElement('div');
+    c.style.cssText = 'width:120px;text-align:center;font:600 11px/1.3 system-ui,sans-serif;color:#2A2118';
+    c.innerHTML = `<div style="width:58px;height:58px;margin:0 auto 6px;border-radius:50%;border:3px double #6E1F2A;display:flex;align-items:center;justify-content:center;transform:rotate(-14deg);background:#FBF6EA">`
+      + `<svg viewBox="0 0 40 28" style="width:32px;height:23px;fill:none;stroke:#6E1F2A;stroke-width:2.6;stroke-linejoin:round">${MARKS[t.mark]}</svg></div>`
+      + `<div style="font:700 13px/1.7 'Noto Sans Myanmar',system-ui">${nm.my}</div><div>${nm.en}</div>`;
+    wrap.appendChild(c);
+  }
+  document.body.appendChild(wrap);
+  window.__tiState = 'ready';
+  await new Promise(() => {}); // (stops here: no game)
+}
+const frame = document.getElementById('g');
+frame.src = '../index.html?story&play=1&foot=1';
+msg(`${town} · card ${style} · banner ${banner} · ${mode}: loading the game…`);
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+for (let i = 0; i < 1200; i++) {
+  await wait(250);
+  const w = frame.contentWindow;
+  if (w && w.__story && w.__mwGame && w.__story.openWorld) break;
+}
+const w = frame.contentWindow;
+await wait(1200);
+// (this PC may ask for reduced motion, which the site's CSS honours by dropping every animation; the
+// preview shows the movement anyway unless &motion=0; the game itself keeps honouring it)
+if (q.get('motion') !== '0') {
+  for (const sh of w.document.styleSheets) {
+    let rules; try { rules = sh.cssRules; } catch { continue; }
+    for (let i = rules.length - 1; i >= 0; i--) if (rules[i].media && /reduced-motion/.test(rules[i].media.mediaText)) sh.deleteRule(i);
+  }
+}
+window.__reduced = w.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const s = w.document.createElement('script');
+s.type = 'module';
+s.textContent = IN_GAME;
+w.document.head.appendChild(s);
+for (let i = 0; i < 600 && !w.__ti; i++) await wait(100);
+window.__ti = w.__ti;
+window.__game = w.__mwGame;
+for (let i = 0; i < 600 && w.__tiState !== 'ready'; i++) await wait(100);
+window.__tiState = 'ready';
+msg(`${town} · card ${style} · banner ${banner} · ${mode}`);
+setTimeout(() => msg(''), 2500);
+</script>
+</body>
+</html>

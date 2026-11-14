@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="my">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>cast</title>
+<link rel="stylesheet" href="dev.css">
+<style>
+  html, body { overflow: auto; height: auto; background: #F2E9D6; }
+  body { font: 14px/1.6 "Noto Sans Myanmar", system-ui, sans-serif; color: #2A2118; padding: 12px 12px 40px; box-sizing: border-box; }
+  h1 { margin: 0 0 2px; font-size: 19px; color: #6E1F2A; }
+  .sub { margin: 0 0 10px; color: #8C6A28; font-size: 12.5px; }
+  h2 { margin: 18px 0 8px; font-size: 15.5px; color: #6E1F2A; border-bottom: 2px solid #C9A24A; padding-bottom: 2px; display: flex; justify-content: space-between; align-items: baseline; }
+  h2 small { color: #8C6A28; font-weight: 600; font-size: 12px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 8px; }
+  .card { background: #FFFDF8; border: 1.5px solid #E2D5B8; border-radius: 14px; padding: 4px 6px 7px; text-align: center; box-shadow: 0 2px 0 #E2D5B8; position: relative; }
+  .card canvas.body { width: 100%; height: auto; aspect-ratio: 10 / 13; display: block; border-radius: 10px; background: linear-gradient(#F7F1E1, #EFE4CA); }
+  .card canvas.face { position: absolute; right: 6px; top: 6px; width: 34px; height: 34px; border-radius: 50%; border: 2px solid #C9A24A; background: #F6F0E2; }
+  .card b { display: block; font-size: 13.5px; line-height: 1.5; margin-top: 3px; }
+  .card .en { display: block; font-size: 11.5px; color: #6A5A48; line-height: 1.35; }
+  .card .role { display: block; font-size: 10.5px; color: #8C6A28; line-height: 1.35; margin-top: 2px; }
+  .card .id { position: absolute; left: 7px; top: 6px; font: 600 9.5px/1.2 ui-monospace, monospace; color: #A89878; background: rgba(255,253,248,.85); padding: 1px 3px; border-radius: 4px; }
+  .icons { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
+  .icons .card svg { width: 48px; height: 48px; margin: 6px auto 0; display: block; }
+  .icons .card q { display: block; font-size: 10.5px; color: #6A5A48; font-style: italic; line-height: 1.35; }
+  #err { color: #B8473A; white-space: pre-wrap; }
+</style>
+</head>
+<body>
+<h1>Reality Check · လူတွေ (cast)</h1>
+<p class="sub">Every person in days/INDEX.md 3, by district, as people.js draws them (the day's own build, skin, hair, clothes). Then the 23 companions and the bag.</p>
+<div id="err"></div>
+<div id="out"></div>
+<script type="module">
+// Dev page: the whole cast lined up (js/story/cast.js), each drawn full-body with its talk portrait.
+// ?ids=a,b (only these) · ?items=0 / ?comp=0 (hide those sections) · ?lang=en
+window.addEventListener('error', (e) => { document.getElementById('err').textContent += `ERR ${e.message} @${e.lineno}\n`; document.title = `ERR ${e.message}`; });
+window.addEventListener('unhandledrejection', (e) => { document.getElementById('err').textContent += `ERR ${e.reason?.message || e.reason}\n`; document.title = `ERR ${e.reason?.message || e.reason}`; });
+import * as THREE from '../js/game/three.js';
+import { PALETTE, addStandardLights, fontsReady, setOutlineResolution } from '../js/game/toon.js';
+import { createPerson } from '../js/story/people.js';
+import { CAST, DISTRICTS } from '../js/story/cast.js';
+import { COMPANIONS, companionIcon } from '../js/story/companions.js';
+import { ITEMS, itemIcon } from '../js/story/items.js';
+
+const params = new URLSearchParams(location.search);
+if (params.get('lang')) document.documentElement.setAttribute('data-lang', params.get('lang'));
+const en = params.get('lang') === 'en';
+await fontsReady();
+
+// one small renderer: each person is drawn into it, then copied to their card
+const W = 200, H = 260;
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(1);
+renderer.setSize(W, H);
+renderer.toneMapping = THREE.NeutralToneMapping;
+renderer.setClearColor(0x000000, 0);
+setOutlineResolution(W, H);
+const scene = new THREE.Scene();
+addStandardLights(scene);
+const disc = new THREE.Mesh(new THREE.CircleGeometry(0.42, 28), new THREE.MeshBasicMaterial({ color: '#E2D5B8' }));
+disc.rotation.x = -Math.PI / 2; disc.position.y = 0.001;
+scene.add(disc);
+const camera = new THREE.PerspectiveCamera(26, W / H, 0.1, 50);
+const yaw = 0.42;
+camera.position.set(Math.sin(yaw) * 4.1, 1.05, Math.cos(yaw) * 4.1);
+camera.lookAt(0, 0.6, 0);
+
+const ids = params.get('ids') ? new Set(params.get('ids').split(',')) : null;
+const out = document.getElementById('out');
+const roleOf = (c) => (en ? c.role?.en : c.role?.my) || '';
+const order = Object.keys(DISTRICTS);
+const groups = new Map(order.map((d) => [d, []]));
+for (const c of CAST) if (!ids || ids.has(c.id)) (groups.get(c.district) || groups.set(c.district, []).get(c.district)).push(c);
+let n = 0;
+for (const [d, list] of groups) {
+  if (!list.length) continue;
+  const h = document.createElement('h2');
+  h.innerHTML = `<span>${DISTRICTS[d]?.my || d}</span><small>${DISTRICTS[d]?.en || d} · ${list.length}</small>`;
+  out.appendChild(h);
+  const grid = document.createElement('div');
+  grid.className = 'grid';
+  out.appendChild(grid);
+  for (const c of list) {
+    const p = createPerson(c.look);
+    p.root.rotation.y = 0.12;
+    scene.add(p.root);
+    p.update(1 / 60, { speed: 0 });
+    p.setFace('smile');
+    p.update(1 / 60, { speed: 0 });
+    renderer.render(scene, camera);
+    const card = document.createElement('div');
+    card.className = 'card';
+    const body = document.createElement('canvas');
+    body.className = 'body'; body.width = W; body.height = H;
+    body.getContext('2d').drawImage(renderer.domElement, 0, 0);
+    card.appendChild(body);
+    const face = p.portrait('smile');
+    face.className = 'face';
+    card.appendChild(face);
+    const age = c.years ? ` · ${c.years}` : '';
+    card.insertAdjacentHTML('beforeend', `<span class="id">${c.id}</span><b>${c.name.my}</b><span class="en">${c.name.en}${age}</span><span class="role">${roleOf(c)}</span>`);
+    grid.appendChild(card);
+    scene.remove(p.root);
+    p.dispose();
+    n++;
+  }
+}
+
+if (params.get('comp') !== '0') {
+  const h = document.createElement('h2');
+  h.innerHTML = `<span>အဖော်လေးတွေ</span><small>Companions · ${COMPANIONS.length}</small>`;
+  out.appendChild(h);
+  const g = document.createElement('div'); g.className = 'icons'; out.appendChild(g);
+  for (const c of COMPANIONS) g.insertAdjacentHTML('beforeend', `<div class="card">${companionIcon(c.id)}<span class="id">${c.ch}</span><b>${c.name.my}</b><span class="en">${c.name.en} · D${c.lifts}</span><q>${en ? c.line.en : c.line.my}</q></div>`);
+}
+if (params.get('items') !== '0') {
+  const h = document.createElement('h2');
+  h.innerHTML = `<span>အိတ်</span><small>The bag · ${Object.keys(ITEMS).length + 1}</small>`;
+  out.appendChild(h);
+  const g = document.createElement('div'); g.className = 'icons'; out.appendChild(g);
+  for (const id of [...Object.keys(ITEMS), 'proof:sample']) {
+    const it = ITEMS[id] || { name: { my: 'သက်သေစာရွက်', en: 'Proof slip' }, kind: 'proof' };
+    g.insertAdjacentHTML('beforeend', `<div class="card">${itemIcon(id)}<span class="id">${it.kind || ''}</span><b>${it.name.my}</b><span class="en">${it.name.en}</span></div>`);
+  }
+}
+renderer.dispose();
+window.__castDone = n;
+document.title = `cast ${n}`;
+</script>
+</body>
+</html>

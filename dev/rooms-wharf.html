@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="my">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>wharf rooms</title>
+<link rel="stylesheet" href="dev.css">
+<style>
+  #label { position: fixed; left: 0; right: 0; top: 10px; text-align: center; font: 700 17px/1.7 "Noto Sans Myanmar", sans-serif; color: #2A2118; pointer-events: none; }
+  #label small { display: block; font: 600 13px/1.3 "Cormorant Garamond", Georgia, serif; color: #7A5434; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="label"></div>
+<div id="stats"></div>
+<script type="module">
+// Dev page for js/story/rooms/wharf.js
+// ?room=weighhouse|sandahouse|caneshed  &day=5|6  &evening=0..1  &rain=1  &people=0  &spots=a,b  &mayah=<rad>  &view=close&x=<m>  &tilt=52  &t=2
+window.addEventListener('error', (e) => { window.__err = e.error?.stack; document.title = `ERR ${e.message} @${e.lineno}`; });
+window.addEventListener('unhandledrejection', (e) => { document.title = `ERR ${e.reason?.message || e.reason}`; });
+import * as THREE from '../js/game/three.js';
+import { fontsReady } from '../js/game/toon.js';
+import { ROOMS, WALKONS, FALLBACK_CAST } from '../js/story/rooms/wharf.js';
+import { createPerson } from '../js/story/people.js';
+import { CAST } from '../js/story/cast.js';
+import { startDevView } from './devview.js';
+
+const q = new URLSearchParams(location.search);
+await fontsReady();
+const id = q.get('room') || 'weighhouse';
+const def = ROOMS[id];
+const room = def.build({ day: q.has('day') ? +q.get('day') : undefined });
+await room.ready;
+document.getElementById('label').innerHTML = `${def.name.my}<small>${def.name.en}</small>`;
+if (q.has('evening')) room.setEvening(+q.get('evening'));
+if (q.get('rain') === '1') room.setRain(true);
+
+// people on the room's spots (cast ids first, then the module's fallbacks / walk-on looks)
+const OLD = { kothiha: 'kohlaing', ubolay: 'ubathaw' };
+const lookOf = (who) => CAST.find((c) => c.id === who)?.look || FALLBACK_CAST[who] || CAST.find((c) => c.id === OLD[who])?.look || WALKONS[who];
+const people = [];
+let maya = null;
+if (q.get('people') !== '0') {
+  // ?spots=a,b (default: the room's main scene, without the alternates)
+  const ALT = { weighhouse: ['merchant', 'child', 'porter3'], sandahouse: ['kothihaStand'], caneshed: [] }[id] || [];
+  const only = q.get('spots') ? q.get('spots').split(',') : null;
+  for (const [name, s] of Object.entries(room.spots)) {
+    if (only ? !only.includes(name) : ALT.includes(name)) continue;
+    if (name === 'maya') {
+      const { createMaya } = await import('../js/game/actors/maya.js');
+      maya = createMaya({ outfit: 'writer', seed: 11 });
+      maya.root.position.set(s.x, s.sit || 0, s.z);
+      maya.root.rotation.y = q.has('mayah') ? +q.get('mayah') : s.h;
+      if (s.sit) maya.setMode('drive', true);
+      room.scene.add(maya.root);
+      continue;
+    }
+    if (!s.who) continue;
+    const look = lookOf(s.who);
+    if (!look) continue;
+    const p = createPerson(look);
+    p.root.position.set(s.x, 0, s.z);
+    p.root.rotation.y = s.h;
+    if (s.mood) p.setMood(s.mood);
+    room.scene.add(p.root);
+    people.push({ p, s, hip: null });
+  }
+}
+
+const aspect = innerWidth / innerHeight;
+const vfov = 45, tilt = parseFloat(q.get('tilt') || 52);
+const hfov = 2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(vfov / 2)) * aspect);
+const close = q.get('view') === 'close';
+const widthToShow = close ? 6 : room.width + 0.6;
+const dist = Math.max(close ? 6 : 10, widthToShow / 2 / Math.tan(hfov / 2));
+const target = new THREE.Vector3(close ? +(q.get('x') || 0) : 0, 0.6, close ? +(q.get('z') || -0.6) : 0.4);
+startDevView({
+  scene: room.scene, target, distance: dist, tilt, fov: vfov,
+  update(dt, t) {
+    room.update(dt, t, {});
+    for (const e of people) {
+      e.p.update(dt, { speed: 0 });
+      if (e.s.sit) {
+        // seated: legs forward, hips on the seat
+        if (e.hip === null) e.hip = e.p.bones.hips.position.y;
+        e.p.bones.legL.rotation.x = -1.45;
+        e.p.bones.legR.rotation.x = -1.45;
+        e.p.root.position.y = e.s.sit - e.hip + 0.02;
+      }
+    }
+    maya?.update(dt, { speed: 0, turn: 0, accel: 0, t });
+  },
+});
+window.__room = room;
+</script>
+</body>
+</html>

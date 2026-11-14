@@ -5,6 +5,8 @@
 // is a sampled, arc-length parameterised centreline; the car can only move along them.
 //
 //   export createNetwork()            -> net  { nodes, edges, nearest(x, z) }
+//   export homeRoadData()             -> the same roads as data { nodes: [{ id, x, z }], edges: [{ id, a, b, pts, bias, group }] }
+//   export createNetworkFromData(d)   -> net from data (story mode joins the open world's roads to the book's)
 //   export addRoadsTo(v, net, pads)   -> adds road surfaces, gold edges, dashes and pads to a VoxelBuilder
 //   export createDrive(net, places)   -> drive (see ARCHITECTURE.md: setStick, goTo, stop, teleport, update, route)
 import * as THREE from '../three.js';
@@ -23,10 +25,10 @@ const rad = THREE.MathUtils.degToRad;
 // ---------------------------------------------------------------------------------
 // Sampled edges
 // ---------------------------------------------------------------------------------
-function makeEdge(index, id, a, b, pts2, bias) {
+function makeEdge(index, id, a, b, pts2, bias, sample = SAMPLE) {
   const curve = new THREE.CatmullRomCurve3(pts2.map(([x, z]) => new THREE.Vector3(x, 0, z)), false, 'centripetal');
   curve.arcLengthDivisions = Math.max(300, pts2.length * 60);
-  const segs = Math.max(4, Math.ceil(curve.getLength() / SAMPLE));
+  const segs = Math.max(4, Math.ceil(curve.getLength() / sample));
   const pts = curve.getSpacedPoints(segs);
   const n = pts.length;
   const xs = new Float32Array(n), zs = new Float32Array(n), cum = new Float32Array(n), tx = new Float32Array(n), tz = new Float32Array(n);
@@ -100,31 +102,26 @@ function nearestOnEdge(e, x, z) {
 // ---------------------------------------------------------------------------------
 // The network
 // ---------------------------------------------------------------------------------
-export function createNetwork() {
+/** A point on a circle round the plaza hub (angle 0 = east, 90 = north). */
+export const hubPoint = (deg, r = HUB.r) => [HUB.x + r * Math.cos(rad(deg)), HUB.z - r * Math.sin(rad(deg))];
+/** Points along an arc round the hub, every `step` degrees or less. */
+export function hubArc(r, d0, d1, step = 3) {
+  const out = [];
+  const n = Math.max(2, Math.ceil(Math.abs(d1 - d0) / step));
+  for (let i = 0; i <= n; i++) out.push(hubPoint(d0 + ((d1 - d0) * i) / n, r));
+  return out;
+}
+
+/**
+ * The open book's roads as data: { nodes: [{ id, x, z }], edges: [{ id, a, b, pts: [[x, z], ...], bias, group }] }.
+ * Edge end points are snapped to their nodes when the network is built.
+ */
+export function homeRoadData() {
+  const hub = hubPoint, arc = hubArc;
   const nodes = [];
   const edges = [];
-  const hub = (deg, r = HUB.r) => [HUB.x + r * Math.cos(rad(deg)), HUB.z - r * Math.sin(rad(deg))];
-  const arc = (r, d0, d1, step = 3) => {
-    const out = [];
-    const n = Math.max(2, Math.ceil(Math.abs(d1 - d0) / step));
-    for (let i = 0; i <= n; i++) out.push(hub(d0 + ((d1 - d0) * i) / n, r));
-    return out;
-  };
-  const node = (id, [x, z]) => {
-    const nd = { id, index: nodes.length, x, z, edges: [] };
-    nodes.push(nd);
-    return nd;
-  };
-  const edge = (id, a, b, pts, bias, group = id) => {
-    pts[0] = [a.x, a.z];
-    pts[pts.length - 1] = [b.x, b.z];
-    const e = makeEdge(edges.length, id, a, b, pts, bias);
-    e.group = group;
-    a.edges.push(e);
-    b.edges.push(e);
-    edges.push(e);
-    return e;
-  };
+  const node = (id, [x, z]) => { nodes.push({ id, x, z }); return id; };
+  const edge = (id, a, b, pts, bias, group = id) => edges.push({ id, a, b, pts, bias, group });
 
   // Roundabout exits (angle 0 = east, 90 = north) and rim junctions.
   const rE = node('rE', hub(0)), rNE = node('rNE', hub(45)), rN = node('rN', hub(90)), rNW = node('rNW', hub(135)), rW = node('rW', hub(180));
@@ -148,7 +145,42 @@ export function createNetwork() {
   edge('spokeNW', rNW, T, [hub(135), hub(135, RIM_R)], 0);
   edge('spokeN', rN, S, [hub(90), hub(90, RIM_R)], 0);
   edge('spokeNE', rNE, N, [hub(45), hub(45, RIM_R)], 0);
+  return { nodes, edges };
+}
 
+/** The open book's own network (the normal site). */
+export function createNetwork() {
+  return createNetworkFromData(homeRoadData());
+}
+
+/**
+ * Builds a drivable network from road data (see homeRoadData for the format). Several data sets can
+ * be joined by concatenating their nodes and edges (edges name nodes by id). Optional per edge:
+ * `sample` (metres between centreline samples, default 0.25) for long straight streets.
+ */
+export function createNetworkFromData(data) {
+  const nodes = [];
+  const edges = [];
+  const byId = new Map();
+  for (const n of data.nodes) {
+    if (byId.has(n.id)) continue;
+    const nd = { id: n.id, index: nodes.length, x: n.x, z: n.z, edges: [] };
+    nodes.push(nd);
+    byId.set(n.id, nd);
+  }
+  for (const d of data.edges) {
+    const a = byId.get(d.a), b = byId.get(d.b);
+    if (!a || !b) throw new Error(`road ${d.id}: unknown node ${a ? d.b : d.a}`);
+    const pts = d.pts ? d.pts.map((p) => [p[0], p[1]]) : [[a.x, a.z], [b.x, b.z]];
+    pts[0] = [a.x, a.z];
+    pts[pts.length - 1] = [b.x, b.z];
+    const e = makeEdge(edges.length, d.id, a, b, pts, d.bias ?? 0, d.sample);
+    e.group = d.group ?? d.id;
+    if (d.style) e.style = d.style;
+    a.edges.push(e);
+    b.edges.push(e);
+    edges.push(e);
+  }
   return {
     nodes,
     edges,
@@ -156,6 +188,11 @@ export function createNetwork() {
     nearest(x, z, only = null) {
       let best = null;
       for (const e of only || edges) {
+        // skip roads whose bounding box is already farther than the best found (same answer, fewer tests)
+        if (best) {
+          const bx = Math.max(e.box.minX - x, 0, x - e.box.maxX), bz = Math.max(e.box.minZ - z, 0, z - e.box.maxZ);
+          if (bx * bx + bz * bz >= best.dist * best.dist) continue;
+        }
         const r = nearestOnEdge(e, x, z);
         if (!best || r.dist < best.dist) best = { edge: e, s: r.s, dist: r.dist };
       }
@@ -624,6 +661,31 @@ export function createDrive(net, places) {
       state.steer = steerS = 0;
       state.accel = accelS = 0;
       padId = id;
+    },
+    /** Put the car on the road point nearest (x, z), pointing as close to `heading` as the road allows
+     * (story mode: the car comes to wherever Maya is walking). Returns that point. */
+    placeAt(x, z, heading = 0) {
+      const r = net.nearest(x, z);
+      if (!r) return null;
+      edge = r.edge;
+      s = r.s;
+      tangentAt(edge, s, tan);
+      const fwd = Math.atan2(tan.x, tan.z);
+      dir = Math.abs(wrapAngle(fwd - heading)) < Math.PI / 2 ? 1 : -1;
+      speed = 0;
+      lastSpeed = 0;
+      pivot = 0;
+      auto.active = false;
+      auto.id = null;
+      auto.steps = null;
+      syncPose();
+      visHeading = lastVis = pathHeading;
+      state.heading = visHeading;
+      state.speed = 0;
+      state.steer = steerS = 0;
+      state.accel = accelS = 0;
+      padId = null;
+      return state.position;
     },
     /** Route points (every ~0.5 m, y = road top) from the car to a place's pad. */
     route(id) {

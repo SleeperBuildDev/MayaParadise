@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="my">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>props3</title>
+<link rel="stylesheet" href="dev.css">
+<style>
+  #names { position: fixed; left: 8px; right: 8px; bottom: 8px; text-align: center; font: 600 11px/1.5 system-ui, sans-serif; color: #2A2118; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="names"></div>
+<script type="module">
+// Dev page for js/story/props3.js (Exercise-Book Quarter + Envelope Market outdoor props).
+// ?only=<name>[,<name>...]  or  ?group=quarter|market|shops|small
+// ?ground=letter  the Market's letter paper as the floor (with two creases through the view)
+// ?open=0..1 (curtain)  ?painted=0..1 (backdrop)  ?rolled=1  ?glow=0..1 (carving brazier)  ?wake=1 (dogs up)
+// ?flag14=0..1  ?stamp=1 (tea shop's stamp awning)  ?lang=en (programme)  ?anim=1
+// plus devview's ?yaw ?tilt ?dist ?t. Handles are on window.P for evals.
+window.addEventListener('error', (e) => { document.title = `ERR ${e.message} @${e.lineno}`; });
+window.addEventListener('unhandledrejection', (e) => { document.title = `ERR ${e.reason?.message || e.reason}`; });
+import * as THREE from '../js/game/three.js';
+import { PALETTE, addStandardLights, fontsReady } from '../js/game/toon.js';
+import { VoxelBuilder } from '../js/game/voxel.js';
+import { createPerson } from '../js/story/people.js';
+import { CAST } from '../js/story/cast.js';
+import * as K from '../js/story/props3.js';
+import { startDevView } from './devview.js';
+
+const q = new URLSearchParams(location.search);
+const num = (k, d) => (q.has(k) ? parseFloat(q.get(k)) : d);
+await fontsReady();
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#F2E6CC');
+addStandardLights(scene);
+const P = (window.P = {});
+if (q.get('ground') === 'letter') {
+  const gr = K.letterGround({ w: 44, d: 30, lanesX: [-9, 9], lanesZ: [-3.2], seed: 4 });
+  gr.root.position.z = -4;
+  scene.add(gr.root);
+  P.ground = gr;
+} else {
+  const ground = new VoxelBuilder();
+  ground.boxMin(-24, -0.1, -18, 24, 0, 6, PALETTE.paper);
+  for (let i = -23; i <= 23; i += 1) ground.boxMin(i - 0.005, 0, -18, i + 0.005, 0.002, 6, '#D8CDB6');
+  scene.add(ground.mesh({ outline: false }));
+}
+
+/** A post for pinned things, or a wall chunk for mounted ones. */
+function stand(kind, h = 1.25, w = 0.5) {
+  const v = new VoxelBuilder();
+  if (kind === 'wall') { v.boxMin(-w / 2, 0, -0.12, w / 2, h, 0, '#E9DFC8'); v.boxMin(-w / 2, 0, -0.12, w / 2, 0.15, 0.02, '#D6C8AC'); }
+  else { v.box(0, h / 2, -0.05, 0.08, h, 0.08, PALETTE.woodDark); v.box(0, h - 0.2, -0.02, w, 0.5, 0.02, PALETTE.wood); }
+  return v.mesh();
+}
+const big = !!q.get('only');
+const g = (fn) => () => { const grp = new THREE.Group(); const extra = fn(grp); return { root: grp, ...extra }; };
+
+// [name, make() -> handle with root, width]
+const ITEMS = [
+  ['pageCrease', () => K.pageCrease({ w: 3 }), 3.0],
+  ['parcelCart', () => K.parcelCart({ parcels: [{ picture: 'book', label: true }, { picture: 'scale' }, { picture: 'jasmine', label: true }, { picture: 'pot' }] }), 2.0],
+  ['parcelCartShelves', () => K.parcelCart({ shelves: true, parcels: [{ picture: 'duck', label: true }, { picture: 'fish', label: true }, { picture: 'cane' }, { picture: 'duck' }, { picture: 'fish' }, { picture: 'rice', label: true }] }), 2.0],
+  ['markSheet', g((grp) => { const a = K.markSheet(), b = K.markSheet({ flat: true, stack: 4 }); a.root.position.set(-0.15, 1.0, 0); b.root.position.set(0.2, 0.75, 0.05); b.root.rotation.y = -0.3; const t = new VoxelBuilder(); t.box(0.2, 0.37, 0.05, 0.36, 0.74, 0.4, PALETTE.wood); grp.add(a.root, b.root, t.mesh()); return { a, b }; }), 0.8],
+  ['paperBoat', g((grp) => { const a = K.paperBoat({ scale: 2.5 }), b = K.paperBoat({ torn: true, scale: 2.5 }); a.root.position.x = -0.25; b.root.position.x = 0.25; b.root.rotation.y = 0.4; grp.add(a.root, b.root); return { a, b }; }), 0.9],
+  ['jobNotice', g((grp) => { const a = K.jobNotice(); a.root.position.set(0, 1.25, 0.02); grp.add(stand('post', 1.6, 0.5), a.root); return { a }; }), 0.6],
+  ['storagePot', () => K.storagePot(), 0.8],
+  ['kilnSmoke', g((grp) => { const s = K.kilnSmoke({ height: 4 }); const v = new VoxelBuilder(); v.box(0, 0.4, 0, 0.3, 0.8, 0.3, '#A0503A'); s.root.position.y = 0.8; grp.add(v.mesh(), s.root); return { s, update: s.update }; }), 1.4],
+  ['stageClock', () => K.stageClock(), 0.9],
+  ['frontCurtain', () => K.frontCurtain(big ? 10 : 4, { h: big ? 3 : 2.4 }), big ? 10.6 : 4.6],
+  ['backdrop', () => K.backdrop(big ? { w: 7.2, h: 2.4 } : { w: 4, h: 1.6 }), big ? 7.4 : 4.2],
+  ['propBasket', () => K.propBasket(), 1.0],
+  ['costumeQuill', g((grp) => { const a = K.costumeQuill(); a.root.position.set(0, 1.55, 0); grp.add(stand('wall', 1.75, 0.6), a.root); return { a }; }), 0.7],
+  ['seatCard', g((grp) => { const b = K.schoolBench(); const c = K.seatCard('မာရာ'); c.root.position.set(0.2, 0.45, 0.02); grp.add(b.root, c.root); return { b, c }; }), 1.7],
+  ['programmePoster', g((grp) => { const a = K.programmePoster({ lang: q.get('lang') || 'my' }); a.root.position.set(0, 1.25, 0.02); grp.add(stand('wall', 1.8, 0.8), a.root); return { a }; }), 0.9],
+  ['benchStack', () => K.benchStack(4), 3.6],
+  ['brimBowl', () => K.brimBowl(1), 0.6],
+  ['takeOneShelf', () => K.takeOneShelf(), 1.0],
+  ['schoolShelf', () => K.schoolShelf(), 1.3],
+  // Market
+  ['stampAwning', () => K.stampAwning({ color: 'red' }), 3.2],
+  ['stampAwningGreen', () => K.stampAwning({ color: 'green', striped: false }), 3.2],
+  ['stampAwningGold', () => K.stampAwning({ color: 'gold', striped: true }), 3.2],
+  ['stampAwningDoor', g((grp) => { const a = K.stampAwning({ door: true, color: 'red' }); grp.add(stand('wall', 3.0, 2.8), a.root); return { a }; }), 2.8],
+  ['letterCounter', () => K.letterCounter(), 7.4],
+  ['teaShop', () => K.teaShop({ awning: q.get('stamp') === '1' ? 'stamp' : 'plain' }), 5.6],
+  ['freeFoodStall', () => K.freeFoodStall(), 6.0],
+  ['kite', g((grp) => { const p = K.bambooPost(); const k = K.kite({ height: 0.35 }); k.setAnchor(p.tieAnchor.position); grp.add(p.root, k.root); return { p, k }; }), 1.6],
+  ['bambooPost', () => K.bambooPost(), 0.4],
+  ['paperPlane', g((grp) => { const a = K.paperPlane(); a.root.position.y = 0.9; a.root.rotation.y = 0.7; a.root.scale.setScalar(2); grp.add(a.root); return { a }; }), 0.6],
+  ['planeStack', () => K.planeStack({ table: true }), 1.0],
+  ['thanakaStall', () => K.thanakaStall(), 1.4],
+  ['smallTeapot', g((grp) => { const a = K.smallTeapot(), b = K.smallTeapot({ chipped: true }); a.root.position.x = -0.15; b.root.position.x = 0.15; grp.add(a.root, b.root); return { a, b }; }), 0.5],
+  ['streetPump', () => K.streetPump(), 1.2],
+  ['dogs', g((grp) => {
+    const coats = ['tan', 'black', 'white'];
+    const dogs = coats.map((c, i) => { const d = K.streetDog({ coat: c, old: i === 0, seed: i + 1 }); d.root.position.set((i - 1) * 0.8, 0, (i % 2) * 0.2); d.root.rotation.y = (i - 1) * -0.5; grp.add(d.root); return d; });
+    const bowls = [0, 1, 2].map((i) => { const b = K.waterBowl(); b.root.position.set((i - 1) * 0.8 + 0.05, 0, 0.55 + (i % 2) * 0.2); grp.add(b.root); return b; });
+    return { dogs, bowls, update(dt, t) { for (const d of dogs) d.update(dt, t); } };
+  }), 2.6],
+  ['mapStall', () => K.mapStall(), 2.2],
+  ['envelopeCrates', () => K.envelopeCrates(), 2.6],
+  ['bookCrate', () => K.bookCrate(), 0.7],
+  ['riceSack', () => K.riceSack(), 0.6],
+  ['riceCart', () => K.riceCart(), 2.0],
+  ['carvingBench', () => K.carvingBench({ cold: !q.has('glow') }), 2.2],
+  ['stampBlock', g((grp) => { const a = K.stampBlock('ribbonPlane', false, { faceUp: true }), b = K.stampBlock('twoTails', true, { faceUp: true }), c = K.stampBlock('ribbonPlane'); a.root.position.x = -0.18; b.root.position.x = 0.0; c.root.position.x = 0.18; grp.add(a.root, b.root, c.root); grp.scale.setScalar(3); return { a, b, c }; }), 1.3],
+  ['trialBlocks', () => K.trialBlocks(), 1.4],
+  ['contestNotice', g((grp) => { const a = K.contestNotice(); a.root.position.set(0, 1.3, 0); grp.add(stand('wall', 1.8, 1.2), a.root); return { a }; }), 1.2],
+  ['teaLeafBasket', () => K.teaLeafBasket(), 0.6],
+  ['teaCup', g((grp) => { const a = K.teaCup(); a.root.scale.setScalar(2.5); grp.add(a.root); return { a }; }), 0.4],
+];
+const GROUPS = {
+  quarter: ['parcelCart', 'parcelCartShelves', 'storagePot', 'kilnSmoke', 'stageClock', 'propBasket', 'brimBowl', 'takeOneShelf', 'schoolShelf', 'benchStack', 'jobNotice', 'programmePoster', 'costumeQuill', 'seatCard', 'markSheet', 'paperBoat'],
+  stage: ['frontCurtain', 'backdrop'],
+  shops: ['letterCounter', 'teaShop', 'freeFoodStall'],
+  market: ['stampAwning', 'stampAwningGreen', 'stampAwningGold', 'mapStall', 'envelopeCrates', 'riceCart', 'carvingBench', 'thanakaStall', 'streetPump', 'dogs', 'kite', 'planeStack'],
+  small: ['bookCrate', 'riceSack', 'smallTeapot', 'teaLeafBasket', 'teaCup', 'stampBlock', 'trialBlocks', 'contestNotice', 'paperPlane', 'bambooPost', 'pageCrease', 'stampAwningDoor'],
+};
+const only = q.get('only') || (q.get('group') ? GROUPS[q.get('group')]?.join(',') : null);
+const single = !!q.get('only');
+const chosen = only ? ITEMS.filter(([n]) => only.split(',').includes(n)) : ITEMS;
+// rows no wider than ~13 m
+const rows = [];
+let row = [], rw = 0;
+const ROWMAX = q.get('group') === 'shops' ? 30 : 13;
+for (const it of chosen) { if (rw + it[2] > ROWMAX && row.length) { rows.push(row); row = []; rw = 0; } row.push(it); rw += it[2] + 0.8; }
+if (row.length) rows.push(row);
+const cast = ['ukyaw', 'toetoe', 'dawohn', 'micho', 'kophyo', 'hninwai', 'phothar'].map((id) => CAST.find((c) => c.id === id)).filter(Boolean);
+const people = [];
+let ci = 0, widest = 0;
+const GAP = 0.8, ROWD = 4.2;
+rows.forEach((items, r) => {
+  const total = items.reduce((a, [, , w]) => a + w + GAP, 0) - GAP;
+  widest = Math.max(widest, total);
+  let x = -total / 2;
+  items.forEach(([name, make, w], i) => {
+    const h = make();
+    h.root.position.set(x + w / 2, 0, r * -ROWD);
+    scene.add(h.root);
+    P[name] = h;
+    x += w + GAP;
+    if (single || (i % 3 === 1 && w < 4)) {
+      const c = cast[ci++ % cast.length];
+      const p = createPerson(c.look);
+      p.root.position.set(x - GAP / 2 + (single ? 0.15 : 0), 0, r * -ROWD + 0.6);
+      p.root.rotation.y = -0.3;
+      scene.add(p.root);
+      people.push(p);
+    }
+  });
+});
+document.getElementById('names').textContent = chosen.map(([n]) => n).join(' · ');
+
+P.frontCurtain?.setOpen(num('open', 0.25));
+P.frontCurtain?.setKnot(q.get('knot') || 'bow');
+P.backdrop?.setPainted(num('painted', 0.6));
+if (q.get('rolled') === '1') P.backdrop?.setRolled(true);
+if (q.has('glow')) P.carvingBench?.setGlow(num('glow', 1));
+P.carvingBench?.setShavings(num('shavings', 0.8));
+P.stageClock?.setTime(5, 52);
+if (q.has('flag14')) P.letterCounter?.setFlag(14, num('flag14', 0));
+if (q.get('wake') === '1') P.dogs?.dogs.forEach((d, i) => (i === 0 ? d.drink() : d.wake()));
+P.brimBowl?.setTilt(num('tilt', 0.6));
+const anim = q.get('anim') === '1';
+const span = single ? Math.max(1.6, widest) : widest;
+const depth = (rows.length - 1) * ROWD;
+// fit the widest row across the screen (portrait phones see far less across than up)
+const FOV = 35, aspect = innerWidth / innerHeight;
+const hfov = 2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(FOV / 2)) * aspect);
+const fitW = (span + (single ? 0.6 : 1.0)) / (2 * Math.tan(hfov / 2));
+const tallest = single ? Math.max(...chosen.map(([n]) => P[n]).map((h) => new THREE.Box3().setFromObject(h.root).getSize(new THREE.Vector3()).y)) : 0;
+const fitH = (tallest + 0.6) / (2 * Math.tan(THREE.MathUtils.degToRad(FOV / 2)));
+startDevView({
+  scene, target: new THREE.Vector3(0, single ? Math.max(0.5, tallest * 0.45) : 0.6, single ? 0 : -depth / 2), distance: single ? Math.max(fitW, fitH, 1.4) : Math.max(fitW, depth * 1.6) * (aspect < 1 ? 1.1 : 1.05) + 0.8, tilt: single ? 18 : 34, fov: FOV,
+  update(dt, t) {
+    for (const p of people) p.update(dt, { speed: 0 });
+    P.kilnSmoke?.update(dt, t);
+    P.teaShop?.update(dt, t);
+    P.carvingBench?.update(dt, t);
+    P.mapStall?.update(dt, t);
+    P.dogs?.update(dt, t);
+    P.kite?.k.setSway(t);
+    if (anim) {
+      P.frontCurtain?.setOpen(0.5 + 0.5 * Math.sin(t * 0.6));
+      P.backdrop?.setPainted(0.5 + 0.5 * Math.sin(t * 0.4));
+      P.streetPump?.setHandle(Math.sin(t * 3));
+      P.streetPump?.setFlow(Math.max(0, Math.sin(t * 3)));
+      P.brimBowl?.setTilt(Math.sin(t * 1.5));
+      P.letterCounter?.setFlag(14, 0.5 + 0.5 * Math.sin(t));
+      P.kite?.k.setHeight(0.5 + 0.4 * Math.sin(t * 0.3));
+    }
+  },
+});
+</script>
+</body>
+</html>

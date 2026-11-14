@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="my">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hearth Row rooms</title>
+<link rel="stylesheet" href="dev.css">
+<style>
+  #bar { position: fixed; left: 6px; right: 6px; top: 6px; display: flex; flex-wrap: wrap; gap: 4px; z-index: 2; }
+  #bar button { font: 600 12px/1.6 "Noto Sans Myanmar", system-ui, sans-serif; padding: 3px 8px; border-radius: 10px; border: 1.5px solid #A47A2C; background: #F6F0E2; color: #2A2118; }
+  #bar button.on { background: #6E1F2A; color: #F6F0E2; }
+  #bar .sep { flex-basis: 100%; height: 0; }
+  #label { position: fixed; left: 0; right: 0; bottom: 34px; text-align: center; font: 700 15px/1.7 "Noto Sans Myanmar", sans-serif; color: #2A2118; pointer-events: none; }
+  #label small { display: block; font: 600 11px/1.4 system-ui, sans-serif; color: #6E5A44; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="bar"></div>
+<div id="label"></div>
+<div id="stats"></div>
+<script type="module">
+// Dev page for js/story/rooms/hearth.js (Hearth Row story interiors).
+//   ?room=bakery|provingroom|noodlehouse|eveningclass|boxshop|lampshop|hearthtea|loomshed
+//   &scene=<name> (people on the room's spots; default: its first scene)  &evening=0..1  &rain=1
+//   &view=near (default)|fit|low  &lift=0..1  &fx=<x> (slide the near crop)  &t=<seconds> (freeze time)  &nobar=1  &tags=n (loomshed)
+// Debug: window.__show(room, scene) · window.__view(name) · window.__room (the built room) · window.__devStats
+window.addEventListener('error', (e) => { document.title = `ERR ${e.message} @${e.lineno}`; });
+window.addEventListener('unhandledrejection', (e) => { document.title = `ERR ${e.reason?.message || e.reason}`; });
+import * as THREE from '../js/game/three.js';
+import { fontsReady, setOutlineResolution } from '../js/game/toon.js';
+import { createPerson } from '../js/story/people.js';
+import { CAST } from '../js/story/cast.js';
+import { ROOMS, LOOKS, frameCamera, spotLook } from '../js/story/rooms/hearth.js';
+
+const params = new URLSearchParams(location.search);
+await fontsReady();
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+renderer.toneMapping = THREE.NeutralToneMapping;
+const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 200);
+const frozen = params.has('t') ? parseFloat(params.get('t')) : null;
+let view = params.get('view') || 'near';
+let room = null, people = [], roomId = null, sceneName = null;
+
+let maya = null;
+async function mayaActor() {
+  if (maya) return maya;
+  try {
+    const { createMaya } = await import('../js/game/actors/maya.js');
+    const m = createMaya({ outfit: 'writer' });
+    maya = { root: m.root, update: (dt, t) => m.update(dt, { speed: 0, t }), seat: () => m.setMode('drive'), stand: () => m.setMode('stand'), lookAt: (v) => m.lookAt(v), isMaya: true };
+  } catch (e) { maya = null; }
+  return maya;
+}
+function lookFor(id) {
+  const c = CAST.find((p) => p.id === id);
+  if (c) return c.look;
+  return LOOKS[id] || { age: 'adult', top: 'shirt', topColor: 'cream', bottom: 'longyi', bottomColor: 'brown', seed: id.length };
+}
+
+async function show(id, scene) {
+  if (room) { for (const p of people) { p.root.removeFromParent(); p.dispose?.(); } room.dispose(); }
+  people = [];
+  roomId = id;
+  const t0 = performance.now();
+  room = ROOMS[id].build({ day: params.get('day') ? Number(params.get('day')) : null });
+  window.__buildMs = Math.round(performance.now() - t0);
+  window.__room = room;
+  const names = Object.keys(room.scenes);
+  sceneName = scene && room.scenes[scene] ? scene : names[0];
+  const d = sceneName.match(/^d(\d+)/);
+  if (d) room.applyDressing('d' + d[1]);
+  room.applyDressing(sceneName);
+  if (params.has('evening')) room.setEvening(parseFloat(params.get('evening')));
+  if (params.get('rain') === '1') room.setRain(true);
+  if (params.has('tags')) room.props.setTags?.(Number(params.get('tags')));
+  const cast = room.scenes[sceneName] || {};
+  for (const [spotName, who] of Object.entries(cast)) {
+    const s = room.spots[spotName];
+    if (!s) { console.warn('missing spot', spotName); continue; }
+    let actor;
+    if (who === 'maya') {
+      actor = await mayaActor();
+      if (!actor) continue;
+    } else {
+      const p = createPerson(lookFor(who));
+      actor = { root: p.root, bones: p.bones, update: (dt) => p.update(dt, { speed: 0 }), dispose: () => p.dispose(), lookAt: (v) => p.lookAt(v), person: p };
+      if (s.mood) p.setMood(s.mood);
+    }
+    actor.root.position.set(s.x, s.y || 0, s.z);
+    actor.root.rotation.y = s.h;
+    actor.sit = s.sit || 0;
+    actor.spot = s;
+    if (actor.isMaya) actor.sit ? actor.seat() : actor.stand();
+    room.scene.add(actor.root);
+    // body cheated toward the camera (spot.h), head turned to what the person is really looking at
+    actor.lookAt?.(spotLook(s, (s.sit ? s.sit + 0.75 : 1.35) + (s.y || 0)));
+    people.push(actor);
+  }
+  const bar = document.getElementById('bar');
+  if (params.get('nobar') !== '1') {
+    bar.innerHTML = '';
+    for (const rid of Object.keys(ROOMS)) {
+      const b = document.createElement('button');
+      b.textContent = rid;
+      if (rid === id) b.className = 'on';
+      b.onclick = () => show(rid);
+      bar.appendChild(b);
+    }
+    bar.appendChild(Object.assign(document.createElement('div'), { className: 'sep' }));
+    for (const sn of names) {
+      const b = document.createElement('button');
+      b.textContent = sn;
+      if (sn === sceneName) b.className = 'on';
+      b.onclick = () => show(id, sn);
+      bar.appendChild(b);
+    }
+    for (const [label, fn] of [['☀', () => room.setEvening(0)], ['🌇', () => room.setEvening(0.55)], ['🌙', () => room.setEvening(1)], ['☔', () => room.setRain(!room.raining)], ['view', () => setView(view === 'near' ? 'fit' : view === 'fit' ? 'low' : 'near')]]) {
+      const b = document.createElement('button');
+      b.textContent = label;
+      b.onclick = fn;
+      bar.appendChild(b);
+    }
+  }
+  window.__showMs = Math.round(performance.now() - t0);
+  document.getElementById('label').innerHTML = `${ROOMS[id].name.my}<small>${ROOMS[id].name.en} · ${sceneName}</small>`;
+  if (!window.__camLock) setView(view);
+  return { calls: renderer.info.render.calls };
+}
+
+function setView(name) {
+  view = name;
+  if (!room) return;
+  frameCamera(camera, room, name, { lift: params.has('lift') ? parseFloat(params.get('lift')) : 0, focusX: params.has('fx') ? parseFloat(params.get('fx')) : null }); // the same framing the in-game hook should use
+}
+
+function resize() {
+  renderer.setSize(innerWidth, innerHeight);
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  const v = renderer.getDrawingBufferSize(new THREE.Vector2());
+  setOutlineResolution(v.x, v.y);
+  if (!window.__camLock) setView(view);
+}
+addEventListener('resize', resize);
+resize();
+
+window.__show = show;
+window.__view = setView;
+window.__cam = camera;
+await show(params.get('room') || 'bakery', params.get('scene'));
+
+const timer = new THREE.Timer();
+timer.connect(document);
+let frames = 0;
+renderer.setAnimationLoop((ts) => {
+  timer.update(ts);
+  const dt = frozen !== null ? 1 / 60 : Math.min(timer.getDelta(), 0.1);
+  const t = frozen !== null ? frozen + (frames % 2) * 0 : timer.getElapsed();
+  if (room) {
+    room.update(dt, t, {});
+    for (const p of people) {
+      p.update(dt, t);
+      if (p.sit && p.bones) {
+        p.bones.legL.rotation.x = p.bones.legR.rotation.x = -1.45;
+        p.root.position.y = p.sit + 0.02 - p.bones.hips.position.y;
+      } else if (p.sit && p.isMaya) {
+        p.root.position.y = p.sit - 0.42;
+      }
+    }
+    renderer.render(room.scene, camera);
+  }
+  if (++frames % 30 === 1) {
+    const i = renderer.info;
+    window.__devStats = { calls: i.render.calls, triangles: i.render.triangles, geometries: i.memory.geometries, textures: i.memory.textures };
+    document.title = `calls ${i.render.calls} | tris ${i.render.triangles} | geo ${i.memory.geometries} | tex ${i.memory.textures}`;
+    document.getElementById('stats').textContent = document.title;
+  }
+});
+</script>
+</body>
+</html>

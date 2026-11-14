@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="my">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>rooms · garden</title>
+<link rel="stylesheet" href="dev.css">
+<style>
+  #names { position: fixed; left: 0; right: 0; bottom: 14px; text-align: center; font: 600 13px/1.7 "Noto Sans Myanmar", sans-serif; color: #2A2118; padding: 0 10px; text-shadow: 0 1px 0 #fff8; }
+  #title { position: fixed; left: 0; right: 0; top: 34px; text-align: center; font: 700 17px/1.8 "Noto Sans Myanmar", sans-serif; color: #2A2118; text-shadow: 0 1px 0 #fff8; }
+  #stats { top: 4px; bottom: auto; left: 50%; transform: translateX(-50%); white-space: nowrap; font-size: 10px; background: rgba(255,255,255,.82); }
+  #title small { display: block; font: 600 12px/1.2 "Cormorant Garamond", Georgia, serif; color: #6E1F2A; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="stats"></div>
+<div id="title"></div>
+<div id="names"></div>
+<script type="module">
+// Dev page for js/story/rooms/garden.js (story interiors: Diary Garden, Blank Page, Back Cover,
+// the sorting room, and the story dressing of the Home Book rooms).
+//   ?room=<id>            kilntea | paperstore | packroom | gourdhouse | hpohtawshed | dryinghall | committeeroom |
+//                         lodge | backcover | sortingroom | about | templates | content | library (dressed)
+//   &evening=0..1  &rain=1  &day=<n>  &variant=<v>  &people=0  &close=1 (phone-width view)  &t=2 (freeze)
+//   window.__show(id, opts) switches room in place (one headless run can shoot every room).
+window.addEventListener('error', (e) => { document.title = `ERR ${e.message} @${e.lineno}`; });
+window.addEventListener('unhandledrejection', (e) => { document.title = `ERR ${e.reason?.message || e.reason}`; });
+import * as THREE from '../js/game/three.js';
+import { fontsReady } from '../js/game/toon.js';
+import { createPerson } from '../js/story/people.js';
+import { CAST } from '../js/story/cast.js';
+import { createMaya } from '../js/game/actors/maya.js';
+import { ROOMS, dressHomeRoom, WALKON_LOOKS, WALKON_NAMES, HOME_PEOPLE } from '../js/story/rooms/garden.js';
+import { startDevView } from './devview.js';
+
+const params = new URLSearchParams(location.search);
+await fontsReady();
+const HOME = ['about', 'templates', 'content', 'library'];
+const holder = new THREE.Scene(); // swapped to the room's own scene
+let current = null;
+let actors = [];
+let view = null;
+
+function lookFor(id) {
+  const c = CAST.find((x) => x.id === id);
+  return c ? { look: c.look, name: c.name } : WALKON_LOOKS[id] ? { look: WALKON_LOOKS[id], name: WALKON_NAMES[id] || { my: id, en: id } } : null;
+}
+
+function placeActor(scene, who, spot) {
+  if (who === 'maya') {
+    const m = createMaya({ outfit: 'writer' });
+    if (spot.sit) { m.setMode('drive', true); m.root.position.set(spot.x, spot.seat ?? 0.32, spot.z); } else m.root.position.set(spot.x, 0, spot.z);
+    m.root.rotation.y = spot.h;
+    scene.add(m.root);
+    return { name: 'မာရာ', update: (dt, t) => m.update(dt, { speed: 0, t }), dispose: () => { m.root.removeFromParent(); m.dispose?.(); } };
+  }
+  const L = lookFor(who);
+  if (!L) return null;
+  const p = createPerson(L.look);
+  p.root.position.set(spot.x, 0, spot.z);
+  p.root.rotation.y = spot.h;
+  scene.add(p.root);
+  const seat = spot.sit ? (spot.seat ?? 0.3) : 0;
+  return {
+    name: L.name.my,
+    update(dt) {
+      p.update(dt, { speed: 0 });
+      if (seat) {
+        p.bones.legL.rotation.x = -1.45; p.bones.legR.rotation.x = -1.45;
+        p.root.position.y = seat - p.bones.hips.position.y + 0.04;
+      }
+    },
+    dispose() { p.root.removeFromParent(); p.dispose(); },
+  };
+}
+
+async function show(id, opts = {}) {
+  for (const a of actors) a.dispose();
+  actors = [];
+  current?.dispose?.();
+  let r, people;
+  if (HOME.includes(id)) {
+    const mod = await import(`../js/game/interiors/${id}.js`);
+    const base = await mod.buildInterior({});
+    const dress = dressHomeRoom(base, id, opts);
+    r = { scene: base.scene, width: base.width || 7, spots: dress.spots, update: (dt, t) => { base.update?.(dt, t, { visited: new Set() }); dress.update(dt, t); }, setEvening: dress.setEvening, dispose: () => { dress.dispose(); base.dispose?.(); }, name: base.name };
+    people = HOME_PEOPLE[id]?.(opts) || [];
+  } else {
+    const def = ROOMS[id];
+    if (!def) throw new Error('no room ' + id);
+    r = def.build(opts);
+    people = (typeof def.people === 'function' ? def.people(opts.day) : def.people) || [];
+  }
+  current = r;
+  holder.clear();
+  holder.add(r.scene);
+  holder.background = r.scene.background;
+  if (params.get('people') !== '0') {
+    for (const [spotName, who] of people) {
+      const s = r.spots[spotName];
+      if (!s) { console.warn('missing spot', id, spotName); continue; }
+      const a = placeActor(r.scene, who, s);
+      if (a) actors.push(a);
+    }
+  }
+  document.getElementById('title').innerHTML = `${(r.name || ROOMS[id]?.name)?.my ?? id}<small>${(r.name || ROOMS[id]?.name)?.en ?? ''} · ${id}</small>`;
+  document.getElementById('names').textContent = actors.map((a) => a.name).join(' · ');
+  // camera: fit the room's width (phones) or a closer 6 m view (?close=1)
+  const aspect = innerWidth / innerHeight;
+  const vfov = 45;
+  const hfov = 2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(vfov / 2)) * aspect);
+  const show = params.get('close') === '1' || opts.close ? 6 : (r.width || 7) + 0.3;
+  const dist = Math.max(7, show / 2 / Math.tan(hfov / 2));
+  if (!view) {
+    view = startDevView({ scene: holder, target: new THREE.Vector3(0, 0.55, 0.3), distance: dist, tilt: parseFloat(params.get('tilt') || 50), fov: vfov,
+      update: (dt, t, { renderer, camera }) => {
+        if (!current) return;
+        current.update?.(dt, t);
+        for (const a of actors) a.update(dt, t);
+      } });
+  }
+  const tilt = THREE.MathUtils.degToRad(parseFloat(params.get('tilt') || 50));
+  const tgt = new THREE.Vector3(0, 0.55, (r.depth ?? 8) * 0.04);
+  view.camera.position.set(tgt.x, tgt.y + Math.sin(tilt) * dist, tgt.z + Math.cos(tilt) * dist);
+  view.camera.lookAt(tgt);
+  window.__room = r;
+  return r;
+}
+window.__show = show;
+const optsFrom = (p) => { const o = { evening: parseFloat(p.get('evening') || 0), day: p.get('day') ? Number(p.get('day')) : undefined, variant: p.get('variant') || undefined }; if (p.has('rain')) o.rain = p.get('rain') === '1'; for (const k of ['night', 'lantern', 'paper', 'tea', 'after', 'lit', 'mug']) if (p.get(k) === '1') o[k] = true; if (p.get('filled')) o.filled = Number(p.get('filled')); return o; };
+await show(params.get('room') || 'kilntea', optsFrom(params));
+window.__ready = true;
+</script>
+</body>
+</html>

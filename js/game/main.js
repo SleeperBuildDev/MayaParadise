@@ -127,7 +127,20 @@ class Game {
       import('./world/world.js'), import('./actors/maya.js?v=6'), import('./actors/car.js'), import('./fx.js'), import('./audio.js'),
     ]);
     onProgress?.(0.45);
-    this.world = w.createWorld({ detail: this.tier === 'low' ? 'low' : 'high' });
+    // story mode: the open world's streets join the book's roads into one drivable network
+    const openRoads = this.opts.story ? await import('../story/world/net.js').then((m) => m.bookWorldOptions()).catch((e) => { console.error('open world roads', e); return null; }) : null;
+    this.world = w.createWorld({ detail: this.tier === 'low' ? 'low' : 'high', ...(openRoads || {}) });
+    if (this.opts.story) {
+      // story mode never points the way: no gold pad rings at the doors, no glowing route ribbon
+      const rings = this.world.scene.getObjectByName('padRings');
+      if (rings) {
+        const hulls = [];
+        this.world.scene.traverse((o) => { if (o !== rings && o.isInstancedMesh && o.instanceMatrix === rings.instanceMatrix) hulls.push(o); });
+        for (const o of [rings, ...hulls]) o.removeFromParent();
+      }
+      const setRoute0 = this.world.setRoute;
+      if (setRoute0) this.world.setRoute = () => setRoute0(null);
+    }
     this.maya = m.createMaya({ outfit: 'writer', onEvent: (type, data) => this.onMayaEvent(type, data) });
     this.car = c.createCar({});
     this.fx = f.createFX({ density: this.tier === 'low' ? 0.5 : 1 });
@@ -155,6 +168,7 @@ class Game {
       // the shadow never needs to cover more than the open book (plus a little cloud under its edge)
       const bounds = new THREE.Box3(new THREE.Vector3(-30, -2, -22), new THREE.Vector3(30, 13, 22));
       this.worldShadow = setupSceneShadows(this.world.scene, { tier: this.tier, bounds, heights: [0, 4.5] });
+      this.worldShadowBounds = bounds; // story mode widens it over the open world
     }
     // Morning, noon, evening or night from the player's own clock (?time=21 or ?period=night to test)
     this.day = createDaytime({ renderer: this.renderer, tier: this.tier, params, sunScale: 0.62 });
@@ -238,7 +252,7 @@ class Game {
     } else if (params.get('room')) {
       await this.enterPlace(params.get('room'), { fast: true, push: false });
       if (params.get('station')) this.goToStation(params.get('station'), { instant: true });
-    } else if (!params.has('nointro')) {
+    } else if (!params.has('nointro') && !this.opts.story) {
       this.intro();
     }
     history.replaceState({ mw: 'root' }, '', location.pathname + location.search + (startStation ? `#${startStation}` : startPlace ? `#${startPlace}` : ''));
@@ -281,7 +295,7 @@ class Game {
       this.ui.setVisited(this.visitedPlaces);
       if (this.mode === 'world') this.setWorldLabels(); else this.setRoomLabels();
       if (this.arrivedAt && this.ui.cardOpen) this.showArrivalCard(this.arrivedAt);
-      this.ui.setWhere(this.mode === 'room' ? tr(this.placeById(this.room.id).name) : tr({ my: 'မာရာ့ စာအုပ်ကမ္ဘာ', en: "Maya's Book World" }));
+      this.ui.setWhere(this.mode === 'room' ? tr(this.room.placeName || this.placeById(this.room.id).name) : tr({ my: 'မာရာ့ စာအုပ်ကမ္ဘာ', en: "Maya's Book World" }));
     });
     document.addEventListener('mw:order', () => this.onOrder());
     document.addEventListener('visibilitychange', () => {
@@ -335,6 +349,7 @@ class Game {
     const t = this.timer.getElapsed();
     this.t = t;
     if (this.mode === 'world') this.updateWorld(dt, t); else this.updateRoom(dt, t);
+    this.story?.update(dt, t); // story mode: townspeople, quests
     this.fx.update(dt);
     this.rig.update(dt);
     // world: the sun's shadow covers exactly what the camera sees (texel-snapped); rooms: fitted once
@@ -358,6 +373,7 @@ class Game {
   }
 
   updateWorld(dt, t) {
+    if (this.story?.footActive) return this.story.updateFoot(dt, t); // story mode: Maya walking outdoors
     const drive = this.world.drive;
     if (this.worldWalk) {
       this.stepWorldWalk(dt);
@@ -435,7 +451,7 @@ class Game {
 
   updateRoom(dt, t) {
     const room = this.room;
-    const stick = !this.busy && !this.ui.sheetOpen ? this.input.stick() : null;
+    const stick = !this.busy && !this.ui.sheetOpen && !(this.story && (this.story.talking || this.ui.dialogOpen)) ? this.input.stick() : null; // (story: she stands still while people talk)
     const speed = this.walker.update(dt, stick, this.walkSpeed || SCALE.walkSpeed); // walkSpeed: a slower stroll in cut-scenes
     if (this.faceTarget) this.walker.turnToward(this.faceTarget.x, this.faceTarget.z, dt);
     this.maya.root.position.set(this.walker.pos.x, 0, this.walker.pos.y);
@@ -538,6 +554,7 @@ class Game {
   onTap(x, y) {
     if (this.ui.dialogOpen) { this.ui.els.dialog.click(); return; }
     if (this.busy || this.ui.sheetOpen) return;
+    if (this.story?.onTap?.(x, y)) return; // story mode: taps on people, on-foot walking
     const W = this.viewW, H = this.viewH;
     // tap on Maya
     const head = this.maya.getHeadTop ? this.maya.getHeadTop(this.tmp) : null;
@@ -654,6 +671,7 @@ class Game {
   }
 
   showArrivalCard(id) {
+    if (this.opts.story) return; // story mode: no place card pointing at a door (doors are walked into, or tapped)
     const p = this.placeById(id);
     this.ui.showCard({ title: tr(p.name), sub: pages.placeFrom(id) || tr(LINES.arrive[id]) });
   }
@@ -693,10 +711,10 @@ class Game {
     this.ui.tip(tr(TIPS.tapPlace), 5000);
   }
 
-  async getRoom(id) {
+  async getRoom(id, build = null) {
     if (this.rooms.has(id)) return this.rooms.get(id);
-    const mod = await import(`./interiors/${id}.js?v=6`);
-    const room = await mod.buildInterior({ quality: this.tier });
+    // build: story mode's own rooms (story/doors.js) come from their own builder, cached under their own key
+    const room = build ? await build() : await (await import(`./interiors/${id}.js?v=6`)).buildInterior({ quality: this.tier });
     room.id = room.id || id;
     if (PHOTOS[id]) this.fillPhoto(room, PHOTOS[id]);
     if (this.shadowsOn) {
@@ -764,7 +782,7 @@ class Game {
       bounds: { minX: -slide, maxX: slide, minZ: ROOM_LOOK_Z, maxZ: ROOM_LOOK_Z } });
     this.ui.showRoomUI(true);
     this.ui.hideCard();
-    this.ui.setWhere(tr(this.placeById(room.id).name));
+    this.ui.setWhere(tr(room.placeName || this.placeById(room.id).name)); // placeName: a story room
     this.ui.setDockCurrent(room.id);
     this.setRoomLabels();
   }
@@ -813,7 +831,7 @@ class Game {
       call(this.maya, 'emote', 'wave');
       call(this.maya, 'talk', 2);
       this.ui.say([LINES.enter[id]], { face: fc, onTick: () => call(this.audio, 'play', 'type') }).then(() => {
-        if (!store('mw-tip-walk')) { store('mw-tip-walk', '1'); this.ui.tip(tr(TIPS.walk), 4500); }
+        if (!this.opts.story && !store('mw-tip-walk')) { store('mw-tip-walk', '1'); this.ui.tip(tr(TIPS.walk), 4500); } // (story mode: no "tap the gold circles" pointer)
       });
     }
   }

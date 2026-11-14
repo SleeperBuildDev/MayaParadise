@@ -705,13 +705,18 @@ export function createWorld(opts = {}) {
   const ownedMaterials = [sky.material];
 
   // ---- roads, landmarks, places, drive ----
-  const net = createNetwork();
+  // Story mode passes a bigger network (the open world's streets joined on): `net` drives the car,
+  // `drawNet` (its part on the book) is what this module paints; keepClear(x, z) drops set dressing
+  // that would stand on the new roads. The normal site passes none of these.
+  const net = opts.net || createNetwork();
+  const drawNet = opts.drawNet || net;
+  const keep = opts.keepClear ? (x, z) => !opts.keepClear(x, z) : () => true;
   const landmarks = createLandmarks();
   root.add(landmarks.group);
   const places = landmarks.list.map((L) => {
     let px = HUB.x, pz = HUB.z + HUB.r;
     if (L.id !== 'about') {
-      const r = net.nearest(L.door.x, L.door.z);
+      const r = drawNet.nearest(L.door.x, L.door.z);
       const e = r.edge;
       let i = 0;
       while (i < e.n - 2 && e.cum[i + 1] < r.s) i++;
@@ -744,39 +749,40 @@ export function createWorld(opts = {}) {
   buildBook(vs, flat);
   buildPlaza(vs, flat);
   addPencil(vs, flat, 16.4, 10.9, 0.28);
-  addRoadsTo(flat, net, places.map((p) => ({ x: p.pad.x, z: p.pad.z })));
+  addRoadsTo(flat, drawNet, places.map((p) => ({ x: p.pad.x, z: p.pad.z })));
   const bench = benchBuilder(), lamps = [lampBuilder(0), lampBuilder(1), lampBuilder(2)];
   for (const [x, z, ry] of BENCHES) {
+    if (!keep(x, z)) continue;
     vs.merge(bench, _m.makeRotationY(ry).setPosition(x, 0, z));
     flat.box(x, 0.003, z, 1.8, 0.006, 0.9, SHADOW, ry);
   }
   LAMPS.forEach(([x, z], i) => {
     // basket / pennant arms point away from the nearest road so they never overhang it
-    const nr = net.nearest(x, z), e = nr.edge;
+    const nr = drawNet.nearest(x, z), e = nr.edge;
     let k = 0;
     while (k < e.n - 2 && e.cum[k + 1] < nr.s) k++;
     const away = Math.atan2(z - e.zs[k], x - e.xs[k]);
     vs.merge(lamps[i % 3], _m.makeRotationY(-away).setPosition(x, 0, z));
     flat.box(x + 0.12, 0.003, z - 0.08, 0.62, 0.006, 0.62, SHADOW);
   });
-  BEDS.forEach(([x, z, w, d], i) => vs.merge(bedBuilder(w, d, 20 + i), _m.makeTranslation(x, 0, z)));
+  BEDS.forEach(([x, z, w, d], i) => keep(x, z) && vs.merge(bedBuilder(w, d, 20 + i), _m.makeTranslation(x, 0, z)));
   for (const [x, z, w, d] of FOOTPRINTS) flat.box(x, 0.002, z, w, 0.004, d, SHADOW);
   flat.add(cylGeo(3.8, 28), SHADOW, _m.makeScale(1, 0.004, 1).setPosition(13.8, 0.002, -9.2));
 
   // Trees: the original spots alternate broadleaf and golden padauk; slim cypresses and toddy
   // palms are added only where no road lies just north of them (they must never hide the car).
   const clearNorth = (x, z, h) => {
-    for (let t = 0; t <= h * 0.8 + 0.8; t += 0.4) for (const dx of [-1.1, 0, 1.1]) if (net.nearest(x + dx, z - t).dist < ROAD.width / 2 + 0.25) return false;
+    for (let t = 0; t <= h * 0.8 + 0.8; t += 0.4) for (const dx of [-1.1, 0, 1.1]) if (drawNet.nearest(x + dx, z - t).dist < ROAD.width / 2 + 0.25) return false;
     return true;
   };
   // (the original spots keep their original size, turn and sway phase, so camera shots near them are unchanged)
   const treeSpots = TREES.map(([x, z], i) => ({ kind: i % 3 === 1 ? 1 : 0, x, z, s: 0.85 + ((i * 37) % 10) * 0.04, ry: (i * 1.7) % (Math.PI * 2), ph: i * 0.9 }));
   EXTRA_TREES.forEach(([kind, x, z], k) => {
     const i = TREES.length + k;
-    if (clearNorth(x, z, kind === 3 ? 5.4 : kind === 2 ? 5.0 : 3.6)) treeSpots.push({ kind, x, z, s: (kind >= 2 ? 0.92 : 0.85) + ((i * 37) % 10) * (kind >= 2 ? 0.02 : 0.04), ry: (i * 2.3) % (Math.PI * 2), ph: i * 0.9 });
+    if (keep(x, z) && clearNorth(x, z, kind === 3 ? 5.4 : kind === 2 ? 5.0 : 3.6)) treeSpots.push({ kind, x, z, s: (kind >= 2 ? 0.92 : 0.85) + ((i * 37) % 10) * (kind >= 2 ? 0.02 : 0.04), ry: (i * 2.3) % (Math.PI * 2), ph: i * 0.9 });
   });
   for (const t of treeSpots) flat.add(cylGeo(1.15, 14), SHADOW, _m.makeScale(t.kind >= 2 ? 0.7 : t.kind === 1 ? 1.15 : 1, 0.006, t.kind >= 2 ? 0.7 : t.kind === 1 ? 1.1 : 1).setPosition(t.x + 0.3, 0.003, t.z - 0.2));
-  buildScatter(vs, flat, net, treeSpots, low, places);
+  buildScatter(vs, flat, drawNet, treeSpots, low, places);
   buildDoodles(flat, vs);
   addPlazaDetail(vs, flat);
 

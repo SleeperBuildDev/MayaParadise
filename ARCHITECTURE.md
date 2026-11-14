@@ -303,3 +303,10 @@ same toon material and outline as the doves in the sky. barks.js listens for `mw
   using `dev/devview.js` (`startDevView({ scene, target, distance, tilt, update })`).
   Renderer stats (draw calls, triangles) show in the page title and `window.__devStats`.
 - Syntax check: `node --check <file>`.
+- Story game (`index.html?story`): `?story&reset` starts Day 1, whose opening (Ma Wint War's letter) holds the
+  dialogue box and letterbox on screen until the player taps through it, so walk-through shots taken without
+  taps all show it. To test the land without it, inject the save first: set `flags['d1.letter'] = true` (plus
+  any gate flags: `bridgeOpen`, `creaseMended`, `backCover`) in localStorage `rc-story-v1`, then load the page
+  WITHOUT `reset` (add `&foot=1` to start on foot). `__openWorld.jump(x, z, heading)` teleports;
+  `__openWorld.stats()` gives draw calls and triangles. For spots beside buildings, read the merged
+  `ITEMS` / `ART` from `js/story/world/region.js` in the page (`await import(...)`) rather than guessing.

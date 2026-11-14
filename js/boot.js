@@ -82,8 +82,18 @@ async function start({ autoplay = false } = {}) {
   const creep = setInterval(() => setP(p + (0.85 - p) * 0.06), 120);
   try {
     sessionStorage.setItem('mw-running', '1');
+    const story = params.has('story'); // the Reality Check story game (not linked yet)
+    // lazy towns (?lazy=1): the story's code downloads alongside the game's, not after it (one wait, not two)
+    const lazy = params.get('lazy') === '1' || (params.get('lazy') !== '0' && window.__LAZY_TOWNS === true);
+    if (story && lazy) import('./story/world/townboot.js').catch(() => {}); // (the starting towns, first of all)
+    const storyEarly = story && lazy ? import('./story/story.js?v=1') : null;
+    storyEarly?.catch(() => {});
     const { startGame } = await import('./game/main.js?v=6');
-    const game = await startGame({ tier: pickTier(info), onProgress: setP, audioCtx: window.__mwAudioCtx || null, startHash: location.hash.slice(1), autoplay });
+    const game = await startGame({ tier: pickTier(info), onProgress: setP, audioCtx: window.__mwAudioCtx || null, startHash: story ? '' : location.hash.slice(1), autoplay, story });
+    if (story) {
+      const { createStory } = await (storyEarly || import('./story/story.js?v=1'));
+      game.story = await createStory(game);
+    }
     clearInterval(creep);
     setP(1);
     window.__mwGame = game;

@@ -8,15 +8,15 @@
 //   audio.play('honk');
 //   audio.engine(0.6);   // continuous soft hum, 0 = silent (call every frame if you like)
 //   audio.muted = true;  // remembered in localStorage 'mw-muted'
-export const SOUNDS = ['honk', 'bell', 'page', 'step', 'pop', 'door', 'click', 'type', 'whoosh', 'chime', 'sparkle', 'kiss', 'cheer', 'flutter', 'chirp'];
+export const SOUNDS = ['honk', 'bell', 'page', 'step', 'pop', 'door', 'click', 'type', 'whoosh', 'chime', 'sparkle', 'kiss', 'cheer', 'flutter', 'chirp', 'ring', 'thud', 'chalk'];
 
 const STORE_KEY = 'mw-muted';
 const MASTER = 0.8;
 const MAX_VOICES = 18;
 // minimum spacing between two plays of the same sound (s), so per-letter ticks never pile up
-const SPACING = { chirp: 0.25, flutter: 0.3, type: 0.03, step: 0.08, click: 0.04, pop: 0.03, sparkle: 0.06, default: 0.035 };
+const SPACING = { ring: 0.4, chalk: 0.05, thud: 0.1, chirp: 0.25, flutter: 0.3, type: 0.03, step: 0.08, click: 0.04, pop: 0.03, sparkle: 0.06, default: 0.035 };
 // Per-sound loudness trim (measured with renderOffline): events sit around 0.1 peak, UI ticks well below.
-const LEVEL = { honk: 0.7, bell: 0.8, chime: 0.72, cheer: 0.87, page: 2.2, door: 1.4, whoosh: 1.2, kiss: 1.1, pop: 1.2, sparkle: 1.35, step: 1.75, click: 1.3, type: 1.45, flutter: 1.5, chirp: 0.75 };
+const LEVEL = { honk: 0.7, bell: 0.8, chime: 0.72, cheer: 0.87, page: 2.2, door: 1.4, whoosh: 1.2, kiss: 1.1, pop: 1.2, sparkle: 1.35, step: 1.75, click: 1.3, type: 1.45, flutter: 1.5, chirp: 0.75, ring: 0.8, thud: 1.5, chalk: 1.6 };
 // C major pentatonic, octaves 5-7
 const PENTA = [523.25, 587.33, 659.25, 783.99, 880.0, 1046.5, 1174.66, 1318.51, 1567.98, 1760.0, 2093.0, 2349.32, 2637.02, 3135.96, 3520.0];
 
@@ -241,6 +241,30 @@ const SYNTH = {
       tone(ac, out, { f: f * 2, t: t0, a: 0.004, d: last ? 0.4 : 0.15, g: 0.014 });
     });
     return t + 1.0;
+  },
+  // Class hand-bell (story): a brass bell shaken three times, warm partials, a soft clapper knock each strike.
+  ring(ac, out, t, nb) {
+    const f = 1046.5;
+    for (let i = 0; i < 3; i++) {
+      const t0 = t + i * 0.16, k = vary(0.01);
+      for (const [m, g, d] of [[1, 0.07, 0.55], [2.4, 0.025, 0.3], [3.9, 0.012, 0.18]]) tone(ac, out, { f: f * m * k, t: t0, a: 0.003, d, g, lp: 5200 });
+      hiss(ac, out, nb, { t: t0, d: 0.01, g: 0.02, type: 'highpass', f: 3000, q: 0.7 });
+    }
+    return t + 0.32 + 0.6;
+  },
+  // Soft thud: something set down on wood or a sack dropped (low sine knock under muffled noise).
+  thud(ac, out, t, nb) {
+    const k = vary(0.06);
+    tone(ac, out, { f: 120 * k, f1: 48 * k, t, a: 0.004, d: 0.16, g: 0.13 });
+    hiss(ac, out, nb, { t, a: 0.003, d: 0.08, g: 0.06, type: 'lowpass', f: 380 * k, q: 0.5 });
+    return t + 0.2;
+  },
+  // Chalk on a slate: a short dry scratch with a tiny squeak on top.
+  chalk(ac, out, t, nb) {
+    const k = vary(0.12);
+    hiss(ac, out, nb, { t, a: 0.01, h: 0.05 * k, d: 0.05, g: 0.035, f: 2600 * k, f1: 3600 * k, q: 2.2 });
+    tone(ac, out, { type: 'triangle', f: 2900 * k, f1: 3200 * k, t: t + 0.02, a: 0.01, d: 0.05, g: 0.004, lp: 4000 });
+    return t + 0.14;
   },
 };
 

@@ -47,7 +47,9 @@ export function createWalker(room) {
     const g = new Float32Array(N).fill(Infinity);
     const came = new Int32Array(N).fill(-1);
     const closed = new Uint8Array(N);
+    const inOpen = new Uint8Array(N); // O(1) membership (open.includes() froze big outdoor grids)
     const open = [si + sj * cols];
+    inOpen[open[0]] = 1;
     const f = new Float32Array(N).fill(Infinity);
     g[open[0]] = 0;
     f[open[0]] = Math.hypot(ti - si, tj - sj);
@@ -57,6 +59,7 @@ export function createWalker(room) {
       for (let k = 1; k < open.length; k++) if (f[open[k]] < f[open[bi]]) bi = k;
       const cur = open[bi];
       open.splice(bi, 1);
+      inOpen[cur] = 0;
       if (cur === goal) break;
       closed[cur] = 1;
       const ci = cur % cols, cj = (cur / cols) | 0;
@@ -72,7 +75,7 @@ export function createWalker(room) {
           g[n] = ng;
           came[n] = cur;
           f[n] = ng + Math.hypot(ti - ni, tj - nj);
-          if (!open.includes(n)) open.push(n);
+          if (!inOpen[n]) { open.push(n); inOpen[n] = 1; }
         }
       }
     }
@@ -119,6 +122,7 @@ export function createWalker(room) {
       pathIdx = 1;
       onArrive = onDone || null;
       if (!path) { const cb = onArrive; onArrive = null; cb?.(false); }
+      else if (path.length < 2) { path = null; const cb = onArrive; onArrive = null; cb?.(true); } // already there
     },
     stop() { path = null; onArrive = null; },
     teleport(x, z, h) { pos.set(x, z); if (h !== undefined) heading = h; path = null; vel.set(0, 0); },

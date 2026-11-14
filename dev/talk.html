@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="my" data-lang="my">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>talk</title>
+<link rel="stylesheet" href="dev.css">
+<style>
+  #game { position: fixed; inset: 0; }
+  #again { position: fixed; left: 50%; top: 40%; transform: translateX(-50%); z-index: 50; font: 700 16px/1.6 "Noto Sans Myanmar", sans-serif; padding: 8px 22px; border-radius: 999px;
+    border: 2px solid #A47A2C; background: #FFFDF8; color: #6E1F2A; }
+</style>
+</head>
+<body>
+<div id="game"><canvas id="c"></canvas></div>
+<script type="module">
+// Dev page for js/story/talk.js: a talk on a plain backdrop, for previews.
+//   ?talk=sample (default: Ko Phyo, hot, 4 stones, last stone his, scrolling hand) | d1 (Pho Thar, Day 1)
+//   ?lang=en   ?tut=0 (skip the first-talk lines)   ?start=<stone>
+// window.__talk is the talk API (debug: __talk.debug.st is the rules state, __talk.debug.ui the screen).
+window.addEventListener('error', (e) => { document.title = `ERR ${e.message} @${e.lineno}`; });
+window.addEventListener('unhandledrejection', (e) => { document.title = `ERR ${e.reason?.message || e.reason}`; });
+import * as THREE from '../js/game/three.js';
+import { PALETTE, addStandardLights, fontsReady } from '../js/game/toon.js';
+import { VoxelBuilder } from '../js/game/voxel.js';
+import { createMaya } from '../js/game/actors/maya.js';
+import { createPerson } from '../js/story/people.js';
+import { castById } from '../js/story/cast.js';
+import { createTalk } from '../js/story/talk.js';
+import { TALK_SAMPLE } from '../js/story/talks/sample.js';
+import { TALK_D1_FAIR } from '../js/story/talks/day1.js';
+import { startDevView } from './devview.js';
+
+const params = new URLSearchParams(location.search);
+if (params.get('lang') === 'en') document.documentElement.setAttribute('data-lang', 'en');
+const data = { ...(params.get('talk') === 'd1' ? TALK_D1_FAIR : TALK_SAMPLE) };
+if (params.get('tut') === '0') delete data.tutorial;
+if (params.has('start')) data.start = +params.get('start');
+await fontsReady();
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#F2E6CC');
+scene.fog = new THREE.Fog('#F2E6CC', 9, 22);
+addStandardLights(scene);
+const ground = new VoxelBuilder();
+ground.boxMin(-14, -0.1, -10, 14, 0, 10, PALETTE.paper);
+for (let i = -13; i <= 13; i += 1.3) ground.boxMin(-14, 0, i - 0.006, 14, 0.002, i + 0.006, '#D8CDB6');
+scene.add(ground.mesh({ outline: false }));
+
+const maya = createMaya({ outfit: 'writer' });
+const person = createPerson(castById(data.person).look);
+maya.root.position.set(-0.58, 0, 0);
+person.root.position.set(0.58, 0, 0);
+// facing each other, cheated a little toward the camera (as the game's two-shot does)
+maya.root.rotation.y = Math.PI / 2 - Math.PI / 4;
+person.root.rotation.y = -Math.PI / 2 + Math.PI / 4;
+maya.setMode('stand');
+scene.add(maya.root, person.root);
+
+const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 400);
+const portrait = () => window.innerWidth < window.innerHeight;
+function placeCam() {
+  // the game's two-shot numbers: 6.2 m away and 2.4 m up on a phone, 3.8 / 1.6 on a laptop
+  camera.position.set(0, portrait() ? 2.4 : 1.6, portrait() ? 6.2 : 3.8);
+  camera.lookAt(0, 0.62, 0);
+}
+placeCam();
+window.addEventListener('resize', placeCam);
+
+const game = { maya, camera, audio: null, ui: null, fx: null, rig: null };
+const story = { people: new Map([[data.person, { id: data.person, cast: castById(data.person), p: person }]]) };
+const talk = createTalk(game, story, {});
+window.__talk = talk;
+
+startDevView({ scene, camera, update(dt, t) { maya.update(dt, { speed: 0, turn: 0, accel: 0, t }); person.update(dt, { speed: 0 }); } });
+
+async function go() {
+  document.getElementById('again')?.remove();
+  window.__talkResult = null;
+  const r = await talk.run(data);
+  window.__talkResult = r;
+  const b = document.createElement('button');
+  b.id = 'again';
+  b.textContent = (r.won ? '✓ ' : '… ') + 'again';
+  b.onclick = () => go();
+  document.body.appendChild(b);
+}
+go();
+</script>
+</body>
+</html>

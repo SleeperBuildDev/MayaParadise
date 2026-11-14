@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="my">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>props5</title>
+<link rel="stylesheet" href="dev.css">
+<style>
+  #names { position: fixed; left: 8px; right: 8px; bottom: 8px; text-align: center; font: 600 11px/1.5 system-ui, sans-serif; color: #2A2118; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="names"></div>
+<script type="module">
+// Dev page for js/story/props5.js (Hearth Row + Diary Garden outdoor props).
+// ?set=hearth|garden|garden2|big|bakery|shells|hearth2|hand|loom|tag|rain  a group laid out in rows (default hearth)
+//   bakery = bakeryFront close-up with the Note Wall across the street; tag = handLoom({ cover: 'tagged' }) close-up
+// ?calls=1  draw calls per factory (visible meshes x material groups, outlines included) -> window.__calls + #names
+// ?only=a,b  just these factories   ?open= ?tip= ?lit= ?curl= ?state= ?rain= ?anim=1   plus devview's ?yaw ?tilt ?dist ?t
+// Handles are on window.P for evals.
+window.addEventListener('error', (e) => { document.title = `ERR ${e.message} @${e.lineno}`; });
+window.addEventListener('unhandledrejection', (e) => { document.title = `ERR ${e.reason?.message || e.reason}`; });
+import * as THREE from '../js/game/three.js';
+import { PALETTE, addStandardLights, fontsReady } from '../js/game/toon.js';
+import { VoxelBuilder } from '../js/game/voxel.js';
+import { createPerson } from '../js/story/people.js';
+import { CAST } from '../js/story/cast.js';
+import * as K from '../js/story/props5.js';
+import { startDevView } from './devview.js';
+
+const q = new URLSearchParams(location.search);
+const num = (k, d) => (q.has(k) ? parseFloat(q.get(k)) : d);
+const has = (n) => typeof K[n] === 'function';
+await fontsReady();
+const scene = new THREE.Scene();
+if (q.get('set') === 'rain') {
+  // an overcast sky: pale at the horizon, slate-blue-grey above (a gradient, not a flat band)
+  const cv = document.createElement('canvas'); cv.width = 4; cv.height = 256;
+  const g = cv.getContext('2d'); const grd = g.createLinearGradient(0, 0, 0, 256);
+  grd.addColorStop(0, '#7C8894'); grd.addColorStop(0.1, '#9AA4AB'); grd.addColorStop(0.16, '#AEB6BA'); grd.addColorStop(1, '#AEB6BA');
+  g.fillStyle = grd; g.fillRect(0, 0, 4, 256);
+  const bg = new THREE.CanvasTexture(cv); bg.colorSpace = THREE.SRGBColorSpace;
+  scene.background = bg;
+  scene.fog = new THREE.Fog('#AEB6BA', 14, 46); // the far ground melts into the rain instead of meeting a flat band
+} else scene.background = new THREE.Color('#F2E6CC');
+addStandardLights(scene);
+const ground = new VoxelBuilder();
+ground.boxMin(-30, -0.1, -30, 30, 0, 12, '#E8D6B4');
+for (let i = -29; i <= 29; i += 1) ground.boxMin(i - 0.005, 0, -30, i + 0.005, 0.002, 12, '#D8C4A0');
+scene.add(ground.mesh({ outline: false }));
+
+const P = (window.P = {});
+const group = (list) => { const g = new THREE.Group(); const hs = list.map(([h, x, z, ry]) => { h.root.position.set(x, 0, z || 0); h.root.rotation.y = ry || 0; g.add(h.root); return h; }); return { root: g, hs, update(dt, t) { for (const h of hs) h.update?.(dt, t); } }; };
+// name -> [make, width, set]
+const DEF = {
+  bakeryFront: [() => K.bakeryFront({ open: num('open', 0.45) }), 10, 'big'],
+  noteWall: [() => K.noteWall({ curl: num('curl', 0.6) }), 8.2, 'big'],
+  diaryClasp: [() => K.diaryClasp({ open: num('open', 0) }), 6.6, 'big'],
+  kilnBig: [() => K.kilnBig(), 6.2, 'big'],
+  paperStore: [() => K.paperStore(), 8, 'big'],
+  breadCart: [() => K.breadCart({ tipped: num('tip', 0) }), 1.9, 'hearth'],
+  breads: [() => group([[K.breadTray(6, { split: 4 }), -0.45, 0], [K.loaf(), 0.35, 0.25], [K.loaf({ split: true }), 0.55, -0.1]]), 1.4, 'hearth'],
+  flourSacks: [() => K.flourSacks(6), 1.4, 'hearth'],
+  kiteBench: [() => K.kiteBench(), 1.8, 'hearth'],
+  lampBench: [() => K.lampBench({ lit: num('lit', 1) }), 1.4, 'hearth'],
+  shopSign: [() => { const s = K.shopSign({ text: { my: 'ကြွေထည်ဆိုင်', en: 'Tin & Lamps' } }); s.root.position.y = 1.2; const g = new THREE.Group(); g.add(s.root); return { root: g, s }; }, 1.8, 'hearth'],
+  smalls: [() => group([[K.tinLamp({ lit: num('lit', 1) }), -0.5, 0], [K.tinSapling(), -0.1, 0.1], [K.tinSapling({ planted: true }), 0.3, 0.1], [K.umbrella(), 0.85, 0], [K.twineCoil(), 1.3, 0.2], [K.rosette(), 1.65, 0], [K.replyPin({ hot: num('hot', 0.8) }), 1.95, 0.1]]), 2.6, 'hearth'],
+  scorchRing: [() => K.scorchRing(), 1.6, 'hearth'],
+  tornCrease: [() => K.tornCrease({ len: 5, laced: q.get('laced') === '1' }), 5.2, 'hearth'],
+  lockedGate: [() => K.lockedGate(), 2.6, 'garden'],
+  trellisPost: [() => K.trellisPost(), 1.2, 'garden'],
+  bulbRack: [() => K.bulbRack(), 1.6, 'garden'],
+  seedBeds: [() => K.seedBeds({ state: q.get('state') || 'tended' }), 3.2, 'garden'],
+  gardenBench: [() => K.gardenBench(), 1.6, 'garden'],
+  gourdTrellis: [() => K.gourdTrellis(q.get('state') === 'down' ? 'down' : 'up'), 1.8, 'garden'],
+  gsmalls: [() => group([[K.nameStick('ဦးဖိုးထော်'), -0.6, 0], [K.seedTin(), -0.2, 0.1], [K.waterCan(), 0.25, 0], [K.trueWeight(), 0.65, 0.1], [K.paperBale(), 1.2, 0], [K.paperBale({ damp: true }), 1.9, 0]]), 2.8, 'garden'],
+  marketStall: [() => K.marketStall(), 2.0, 'garden2'],
+  handCart: [() => K.handCart({ lit: num('lit', 1) }), 2.4, 'garden2'],
+  angerPot: [() => K.angerPot(), 1.0, 'garden2'],
+  marketScale: [() => K.marketScale(), 1.8, 'garden2'],
+  glazeShelf: [() => K.glazeShelf(), 1.5, 'garden2'],
+  shardHeap: [() => group([[K.shardHeap({ glazed: true }), -0.35, 0], [K.shardHeap({ glazed: false }), 0.4, 0.1]]), 1.4, 'garden2'],
+  noticeBoard: [() => K.noticeBoard(), 1.6, 'garden2'],
+  steelyard: [() => { const s = K.handSteelyard(); s.root.position.y = 1.2; const g = new THREE.Group(); g.add(s.root); return { root: g, s }; }, 0.9, 'garden2'],
+  eveningClass: [() => K.eveningClass({ open: num('open', 0.4), lit: num('lit', 0.8) }), 8, 'shells'],
+  weavingShed: [() => K.weavingShed({ lit: num('lit', 1) }), 13, 'shells'],
+  noodleShopFront: [() => K.noodleShopFront({ open: num('open', 1), lit: num('lit', 0.8) }), 8, 'shells'],
+  looms: [() => group([[K.handLoom(), -1.6, 0], [K.handLoom({ cover: 'on', cloth: '#B5643C' }), 0, 0], [K.handLoom({ cover: 'tagged', beam: 'empty' }), 1.6, 0]]), 4.4, 'loom'],
+  loomBare: [() => K.handLoom({ beam: 'empty', bench: false }), 1.4, 'loom'],
+  brickOven: [() => K.brickOven({ open: num('open', 0.7), glow: num('glow', 0.9) }), 2.2, 'hearth2'],
+  backStep: [() => K.backStep({ open: num('open', 0.35) }), 3.3, 'hearth2'],
+  noodleStreet: [() => K.noodleCounter('street'), 3.2, 'hearth2'],
+  noodleSoup: [() => K.noodleCounter('soup'), 2.0, 'hearth2'],
+  noodleDry: [() => K.noodleCounter('dry'), 2.0, 'hearth2'],
+  hand: [() => group([[K.tiffin({ open: num('tiff', 1) }), -0.9, 0], [K.orderBook(), -0.55, 0.05], [K.paperBox({ folded: 1 }), -0.25, 0], [K.paperBox({ folded: 0 }), 0.05, 0.05], [K.paperBoxTower(6), 0.35, 0], [K.coveredBundle({ tie: 'blue' }), 0.85, 0.05], [K.coveredBundle({ tie: 'green', lift: 0.8 }), 0.85, -0.3]]), 2.4, 'hand'],
+  musicStand: [() => K.musicStand(), 0.8, 'hand'],
+  // a short stretch of class wall to hang the two paper things on (posts, lime-washed plaster, plank dado)
+  wallThings: [() => { const g = new THREE.Group(); const w = new VoxelBuilder(); w.boxMin(-0.75, 0, -0.1, 0.75, 1.25, -0.02, '#EADDC2'); for (let x = -0.75; x < 0.74; x += 0.15) w.boxMin(x + 0.005, 0, -0.02, x + 0.145, 0.38, 0.0, x % 0.3 < 0.1 ? '#B88A5C' : '#A97C50'); w.boxMin(-0.75, 0.38, -0.03, 0.75, 0.42, 0.01, '#6E4E32'); for (const sx of [-1, 1]) w.boxMin(sx * 0.75 - 0.05, 0, -0.12, sx * 0.75 + 0.05, 1.3, 0.02, '#5E3F27'); w.boxMin(-0.8, 1.25, -0.12, 0.8, 1.32, 0.02, '#5E3F27'); w.box(0.3, 0.95, -0.015, 0.22, 0.14, 0.005, '#DCCBA8'); g.add(w.mesh()); const a = K.practiceSheet(); a.root.position.set(-0.36, 0.8, 0); const b = K.wallCalendar(); b.root.position.set(0.4, 0.78, 0); g.add(a.root, b.root); return { root: g, a, b, update(dt) { b.update(dt); } }; }, 1.6, 'hand'],
+  bakeryScene: [() => { const g = new THREE.Group(); const b = K.bakeryFront({ open: num('open', 0.45) }); const w = K.noteWall({ curl: num('curl', 0.6) }); w.root.position.set(0, 0, num('wz', 10.8)); g.add(b.root, w.root); return { root: g, b, w, update(dt, t) { b.update?.(dt, t); w.update?.(dt, t); } }; }, 10, 'bakery'],
+  loomTag: [() => K.handLoom({ cover: 'tagged', beam: 'empty' }), 1.4, 'tag'],
+  gardenDiary: [() => K.gardenDiary({ open: num('open', 1) }), 1.2, 'hand'],
+  committeeTable: [() => K.committeeTable({ lit: num('lit', 1) }), 1.8, 'hand'],
+  rainset: [() => group([[K.seedBeds({ state: 'flat' }), -2.2, 0], [K.gourdTrellis('down'), 1.0, 0], [K.puddle({ w: 1.6, d: 1.0 }), 3.0, 0.6], [K.soakedSheets(5, 3), 3.0, -0.6], [K.paperBale({ damp: true }), 4.4, 0]]), 8, 'rain'],
+};
+const set = q.get('set') || 'hearth';
+const only = q.get('only');
+const names = only ? only.split(',') : Object.keys(DEF).filter((n) => DEF[n][2] === set);
+const chosen = names.filter((n) => DEF[n]);
+const rows = [];
+const BIG = set === 'big' || set === 'shells';
+const maxRow = only ? 99 : (BIG ? 14 : num('row', 4.4));
+let row = [], rw = 0;
+for (const n of chosen) { const w = DEF[n][1]; if (rw + w > maxRow && row.length) { rows.push(row); row = []; rw = 0; } row.push(n); rw += w + 0.8; }
+if (row.length) rows.push(row);
+const cast = ['ukyaw', 'toetoe', 'dawohn', 'micho', 'kophyo', 'hninwai'].map((id) => CAST.find((c) => c.id === id)).filter(Boolean);
+const people = [];
+let widest = 0, depth = 0;
+const rowGap = BIG ? 8.5 : num('gap', 4.2);
+rows.forEach((r, ri) => {
+  const total = r.reduce((a, n) => a + DEF[n][1] + 0.8, -0.8);
+  widest = Math.max(widest, total);
+  let x = -total / 2;
+  r.forEach((n) => {
+    const w = DEF[n][1];
+    let h;
+    try { h = DEF[n][0](); } catch (e) { console.error(n, e); window.__errs = (window.__errs || '') + n + ': ' + e.message + '; '; x += w + 0.8; return; }
+    h.root.position.set(x + w / 2, 0, -ri * rowGap);
+    scene.add(h.root);
+    P[n] = h;
+    x += w + 0.8;
+  });
+  depth = ri * rowGap;
+});
+if (q.get('people') !== '0' && cast.length) {
+  const p = createPerson(cast[0].look);
+  p.root.position.set(-widest / 2 - 0.4, 0, 0.6);
+  p.root.rotation.y = 0.4;
+  scene.add(p.root);
+  people.push(p);
+}
+if (set === 'rain' && has('rainFx')) {
+  const r = K.rainFx();
+  r.setAmount(num('rain', 1));
+  scene.add(r.root);
+  P.rain = r;
+}
+document.getElementById('names').textContent = chosen.join(' · ');
+const anim = q.get('anim') === '1';
+// per-set cameras: big = the whole row of buildings fits (bakery's front included); bakery / tag = close-ups
+const CAM = {
+  big: { ty: 1.2, tz: -depth / 2 + 1.5, dist: 52, tilt: 36 },
+  bakery: { ty: 1.8, tz: 5.6, dist: 34, tilt: 25 },
+  hand: { dist: 15.5 },
+  tag: { ty: 0.85, tz: 0.2, dist: 4.6, tilt: 14 },
+}[set] || {};
+// ?calls=1: draw calls per factory, counted as the renderer would without frustum culling
+if (q.get('calls') === '1') {
+  const callsOf = (o) => { let n = 0; o.traverseVisible((m) => { if (m.isMesh || m.isPoints || m.isLine || m.isSprite) n += Array.isArray(m.material) ? Math.max(1, m.geometry.groups.length) : 1; }); return n; };
+  window.__calls = Object.fromEntries(chosen.filter((n) => P[n]).map((n) => [n, callsOf(P[n].root)]));
+  document.getElementById('names').textContent = Object.entries(window.__calls).map(([n, c]) => `${n} ${c}`).join(' · ');
+}
+startDevView({
+  scene, target: new THREE.Vector3(num('tx', 0), num('ty', CAM.ty ?? (BIG ? 1.6 : 0.6)), num('tz', CAM.tz ?? -depth / 2)), distance: num('dist', CAM.dist ?? Math.max(widest * (innerWidth < innerHeight ? 3.0 : 1.3), depth * 1.5 + 2, 3.2)), tilt: num('tilt', CAM.tilt ?? 26), fov: 35,
+  update(dt, t) {
+    for (const p of people) p.update(dt, { speed: 0 });
+    for (const n of chosen) P[n]?.update?.(dt, t);
+    P.rain?.update(dt, t);
+    if (anim) {
+      P.breadCart?.setTipped(0.5 + 0.5 * Math.sin(t));
+      P.bakeryFront?.setOpen(0.5 + 0.5 * Math.sin(t * 0.7));
+      P.diaryClasp?.setOpen(0.5 + 0.5 * Math.sin(t * 0.6));
+      P.noteWall?.setCurl(0.5 + 0.5 * Math.sin(t));
+    }
+  },
+});
+</script>
+</body>
+</html>

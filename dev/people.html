@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="my">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>people</title>
+<link rel="stylesheet" href="dev.css">
+<style>
+  #names { position: fixed; left: 0; right: 0; bottom: 8px; text-align: center; font: 600 13px/1.6 "Noto Sans Myanmar", sans-serif; color: #2A2118; }
+  #portraits { position: fixed; left: 6px; top: 6px; display: flex; flex-wrap: wrap; gap: 4px; max-width: 98vw; }
+  #portraits canvas { width: 56px; height: 56px; border: 2px solid #A47A2C; border-radius: 10px; background: #F6F0E2; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="portraits"></div>
+<div id="names"></div>
+<script type="module">
+// Dev page for js/story/people.js
+// ?ids=a,b,c (default: everyone in a lineup)  ?walk=1 (they walk on the spot)  ?face=<name>  ?emote=<name>  ?with=maya
+window.addEventListener('error', (e) => { document.title = `ERR ${e.message} @${e.lineno}`; });
+window.addEventListener('unhandledrejection', (e) => { document.title = `ERR ${e.reason?.message || e.reason}`; });
+import * as THREE from '../js/game/three.js';
+import { PALETTE, toon, addStandardLights, fontsReady } from '../js/game/toon.js';
+import { VoxelBuilder } from '../js/game/voxel.js';
+import { createPerson } from '../js/story/people.js';
+import { CAST } from '../js/story/cast.js';
+import { startDevView } from './devview.js';
+
+const params = new URLSearchParams(location.search);
+await fontsReady();
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#F2E6CC');
+addStandardLights(scene);
+const ground = new VoxelBuilder();
+ground.boxMin(-12, -0.1, -3, 12, 0, 3, PALETTE.paper);
+for (let i = -11; i <= 11; i += 1) ground.boxMin(i - 0.005, 0, -3, i + 0.005, 0.002, 3, '#D8CDB6');
+scene.add(ground.mesh({ outline: false }));
+
+const ids = params.get('ids') ? params.get('ids').split(',') : CAST.map((c) => c.id);
+const chosen = ids.map((id) => CAST.find((c) => c.id === id)).filter(Boolean);
+const people = [];
+const gap = 0.78;
+const rows = chosen.length > 12 ? 2 : 1;
+const perRow = Math.ceil(chosen.length / rows);
+chosen.forEach((c, i) => {
+  const p = createPerson(c.look);
+  const r = Math.floor(i / perRow), k = i % perRow;
+  p.root.position.set((k - (perRow - 1) / 2) * gap, 0, r * -1.6 + (rows - 1) * 0.8);
+  scene.add(p.root);
+  if (params.get('face')) p.setFace(params.get('face'));
+  if (params.get('emote')) setInterval(() => p.emote(params.get('emote')), 2200);
+  people.push(p);
+  const cv = p.portrait(params.get('face') || 'smile');
+  document.getElementById('portraits').appendChild(cv);
+});
+if (params.get('with') === 'maya') {
+  const { createMaya } = await import('../js/game/actors/maya.js');
+  const m = createMaya({ outfit: 'writer' });
+  m.root.position.set(-((perRow + 1) / 2) * gap, 0, 0);
+  scene.add(m.root);
+  people.push({ update: (dt) => m.update(dt, { speed: 0, t: 0 }) });
+}
+document.getElementById('names').textContent = chosen.map((c) => c.name.my).join(' · ');
+const walk = params.get('walk') === '1';
+startDevView({
+  scene, target: new THREE.Vector3(0, 0.6, 0), distance: Math.max(5, perRow * 0.62), tilt: 12, fov: 35,
+  update(dt) { for (const p of people) p.update(dt, { speed: walk ? 1.3 : 0 }); },
+});
+</script>
+</body>
+</html>

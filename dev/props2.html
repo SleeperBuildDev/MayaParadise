@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="my">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>props2</title>
+<link rel="stylesheet" href="dev.css">
+<style>
+  #names { position: fixed; left: 0; right: 0; bottom: 8px; text-align: center; font: 600 12px/1.6 system-ui, sans-serif; color: #2A2118; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="names"></div>
+<script type="module">
+// Dev page for js/story/props2.js (Day 2 props), laid out in two rows with a few townspeople for scale.
+// ?only=<name>  one prop (potterWheel, dryingShelf, pots, kiln, beanPlanter, snackScale, seeSaw, flowerBed, examChart, chalkSlate)
+// ?clay=0..3  ?tilt=-1..1  ?open=0..1  ?glow=0..1  ?beans=dead|growing  ?chalk=<text>  ?anim=1 (tilts and door move)
+// plus devview's ?yaw ?tilt ?dist ?t. Handles are on window.P for evals.
+window.addEventListener('error', (e) => { document.title = `ERR ${e.message} @${e.lineno}`; });
+window.addEventListener('unhandledrejection', (e) => { document.title = `ERR ${e.reason?.message || e.reason}`; });
+import * as THREE from '../js/game/three.js';
+import { PALETTE, addStandardLights, fontsReady } from '../js/game/toon.js';
+import { VoxelBuilder } from '../js/game/voxel.js';
+import { createPerson } from '../js/story/people.js';
+import { CAST } from '../js/story/cast.js';
+import * as K from '../js/story/props2.js';
+import { startDevView } from './devview.js';
+
+const q = new URLSearchParams(location.search);
+const num = (k, d) => (q.has(k) ? parseFloat(q.get(k)) : d);
+await fontsReady();
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#F2E6CC');
+addStandardLights(scene);
+const ground = new VoxelBuilder();
+ground.boxMin(-16, -0.1, -8, 16, 0, 5, PALETTE.paper);
+for (let i = -15; i <= 15; i += 1) ground.boxMin(i - 0.005, 0, -8, i + 0.005, 0.002, 5, '#D8CDB6');
+scene.add(ground.mesh({ outline: false }));
+
+const P = (window.P = {});
+// [name, make() -> handle with root, width]
+const ITEMS = [
+  ['potterWheel', () => K.potterWheel({ clay: num('clay', 3), chalk: q.get('chalk') ?? 'မရသေးဘူး' }), 2.0],
+  ['dryingShelf', () => K.dryingShelf(Array.from({ length: 12 }, (_, i) => (i % 5 === 3 ? null : { kind: ['raw', 'whole', 'raw', 'cracked', 'whole'][i % 5], size: 0.75 + (i % 3) * 0.06 }))), 2.0],
+  ['pots', () => {
+    const g = new THREE.Group();
+    const list = ['whole', 'cracked', 'raw'].map((k, i) => { const p = K.pot(k, 1.25); p.root.position.x = (i - 1) * 0.62; g.add(p.root); return p; });
+    return { root: g, list };
+  }, 2.0],
+  ['kiln', () => K.kiln(), 2.6],
+  ['beanPlanter', () => {
+    const g = new THREE.Group();
+    const a = K.beanPlanter('dead'), b = K.beanPlanter('growing');
+    a.root.position.x = -0.6; b.root.position.x = 0.6;
+    if (q.get('beans')) { a.setState(q.get('beans')); b.setState(q.get('beans')); }
+    g.add(a.root, b.root);
+    return { root: g, dead: a, growing: b };
+  }, 2.4],
+  ['snackScale', () => K.snackScale(), 2.0],
+  ['seeSaw', () => K.seeSaw(), 3.4],
+  ['flowerBed', () => K.flowerBed(), 2.0],
+  ['examChart', () => K.examChart({ posts: true }), 2.3],
+  ['chalkSlate', () => {
+    const g = new THREE.Group();
+    const a = K.chalkSlate({ text: 'မရဘူး', lean: 0.15 }), b = K.chalkSlate({ text: [{ text: 'မရဘူး', strike: true }, 'မရသေးဘူး'], lean: 0.15 });
+    a.root.position.x = -0.3; b.root.position.x = 0.3;
+    g.add(a.root, b.root);
+    return { root: g, a, b };
+  }, 1.2],
+];
+const only = q.get('only');
+const chosen = only ? ITEMS.filter(([n]) => only.split(',').includes(n)) : ITEMS;
+const rows = only ? [chosen] : [chosen.slice(0, 5), chosen.slice(5)];
+const cast = ['ukyaw', 'toetoe', 'dawohn', 'micho', 'kophyo', 'hninwai', 'phothar'].map((id) => CAST.find((c) => c.id === id)).filter(Boolean);
+const people = [];
+let ci = 0;
+const GAP = 0.9;
+let widest = 0;
+rows.forEach((row, r) => {
+  const total = row.reduce((a, [, , w]) => a + w + GAP, 0) + 0.6;
+  widest = Math.max(widest, total);
+  let x = -total / 2;
+  row.forEach(([name, make, w], i) => {
+    const h = make();
+    h.root.position.set(x + w / 2, 0, r * -3.4);
+    scene.add(h.root);
+    P[name] = h;
+    x += w + GAP;
+    if (i % 2 === 1 || only) {
+      const c = cast[ci++ % cast.length];
+      const p = createPerson(c.look);
+      p.root.position.set(x - GAP / 2 + (only ? 0.1 : 0), 0, r * -3.4 + 0.5);
+      p.root.rotation.y = -0.3;
+      scene.add(p.root);
+      people.push(p);
+    }
+  });
+});
+document.getElementById('names').textContent = chosen.map(([n]) => n).join(' · ');
+
+const clay = num('clay', 3), tilt = num('tilt', 0.6), open = num('open', 0.75), glow = num('glow', 0.9);
+P.snackScale?.setTilt(tilt);
+P.seeSaw?.setTilt(-tilt);
+P.kiln?.setOpen(open);
+P.kiln?.setGlow(glow);
+P.potterWheel?.setClay(clay);
+const anim = q.get('anim') === '1';
+const span = only ? Math.max(2.6, widest) : widest;
+startDevView({
+  scene, target: new THREE.Vector3(0, only ? 0.7 : 0.5, only ? 0 : -1.4), distance: only ? span * 1.55 : span * 1.0, tilt: only ? 16 : 24, fov: 35,
+  update(dt, t) {
+    for (const p of people) p.update(dt, { speed: 0 });
+    P.potterWheel?.spin(dt, 5);
+    if (anim) {
+      P.snackScale?.setTilt(Math.sin(t * 1.3));
+      P.seeSaw?.setTilt(Math.sin(t * 0.9));
+      P.kiln?.setOpen(0.5 + 0.5 * Math.sin(t * 0.7));
+      P.kiln?.setGlow(0.5 + 0.5 * Math.sin(t * 0.5));
+      P.potterWheel?.setClay(Math.floor(t / 1.5) % 4);
+    }
+  },
+});
+</script>
+</body>
+</html>

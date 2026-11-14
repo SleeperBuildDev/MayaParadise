@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="my">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>corner map preview</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #2A2118; }
+  iframe { display: block; border: 0; width: 100vw; height: 100vh; }
+  #pick { position: fixed; left: 50%; bottom: 8px; transform: translateX(-50%); z-index: 9; display: none; gap: 6px; font: 12px system-ui, sans-serif; }
+  #pick.on { display: flex; }
+  #pick button { padding: 6px 10px; border-radius: 999px; border: 2px solid #A47A2C; background: #F6F0E2; color: #6E1F2A; font-weight: 700; }
+  #pick button.on { background: #6E1F2A; color: #FFFDF8; }
+</style>
+</head>
+<body>
+<iframe id="g" title="game" allow="autoplay"></iframe>
+<div id="pick"></div>
+<script type="module">
+// Corner-map preview over the real game (story mode).
+//   dev/minimap.html?style=1|2|3   &rot=1 (heading-up; default north-up)   &ui=1 (style buttons at the bottom)
+//   &time=18 / &period=night: passed to the game (its clock)
+//   &hold=1: do not load the game yet; a test sets localStorage 'rc-story-v1' (a save) and calls __go().
+// Hooks: window.G (the game's window), __mm (the corner map: setStyle, setRotate, stats), __place(x, z, heading).
+const q = new URLSearchParams(location.search);
+const ifr = document.getElementById('g');
+let style = +q.get('style') || 1, rot = q.get('rot') === '1';
+const extra = ['time', 'period'].filter((k) => q.has(k)).map((k) => `&${k}=${q.get(k)}`).join('');
+window.__go = (path = '../index.html?story&play=1' + extra) => { ifr.src = path; };
+if (!q.has('hold')) window.__go();
+
+const ready = () => {
+  const w = ifr.contentWindow;
+  return w && w.__openWorld && w.__mwGame && w.__story && w.document.body.classList.contains('playing');
+};
+const wait = setInterval(async () => {
+  if (!ready()) return;
+  clearInterval(wait);
+  const w = (window.G = ifr.contentWindow);
+  const { createMinimap } = await import('../js/story/world/minimap.js');
+  window.__mm = createMinimap({ game: w.__mwGame, ow: w.__openWorld, story: w.__story, style, rotate: rot, doc: w.document, win: w });
+  window.__place = (x, z, h = Math.PI) => w.__openWorld.jump(x, z, h);
+  // test helpers: the road point nearest (x, z); mark the roads where test(x, z) holds as seen (a walked trail)
+  window.__roadNear = (x, z) => { let b = null, d = 1e9; for (const e of w.__openWorld.net.edges) for (let i = 0; i < e.n; i++) { const k = Math.hypot(e.xs[i] - x, e.zs[i] - z); if (k < d) { d = k; b = { x: e.xs[i], z: e.zs[i] }; } } return b; };
+  window.__walked = (test, step = 5) => { let n = 0; for (const e of w.__openWorld.net.edges) for (let i = 0; i < e.n; i += step) if (test(e.xs[i], e.zs[i])) { w.__openWorld.seen.mark(e.xs[i], e.zs[i]); n++; } return n; };
+  if (q.get('ui') === '1') buildPicker();
+}, 300);
+
+function buildPicker() {
+  const pick = document.getElementById('pick');
+  pick.classList.add('on');
+  const add = (label, on, fn) => { const b = document.createElement('button'); b.textContent = label; b.className = on() ? 'on' : ''; b.onclick = () => { fn(); [...pick.children].forEach((c) => c.refresh()); }; b.refresh = () => (b.className = on() ? 'on' : ''); pick.appendChild(b); };
+  for (const n of [1, 2, 3]) add(String(n), () => style === n, () => { style = n; window.__mm.setStyle(n); });
+  add('N-up', () => !rot, () => { rot = false; window.__mm.setRotate(false); });
+  add('turn', () => rot, () => { rot = true; window.__mm.setRotate(true); });
+}
+</script>
+</body>
+</html>
