@@ -672,22 +672,39 @@ export function createCar(opts = {}) {
   body.add(bodyOutline);
   bodyShape.add(body);
 
-  const lens = new THREE.Mesh(lensGeo, basic(LENS));
+  // Head- and tail-lamp lenses: one unlit mesh (one draw call), coloured per vertex; the tail lenses'
+  // colour animates (brake lights) by repainting their few vertices.
+  const tailGeo = tailLensGeometry();
+  const paintGeo = (g, c) => {
+    const n = g.attributes.position.count, a = new Float32Array(n * 3);
+    for (let i = 0; i < n; i++) { a[i * 3] = c.r; a[i * 3 + 1] = c.g; a[i * 3 + 2] = c.b; }
+    const out = g.clone();
+    out.setAttribute('color', new THREE.BufferAttribute(a, 3));
+    return out;
+  };
+  const lensC = basic(LENS).color.clone();
+  const lampParts = [paintGeo(lensGeo, lensC), paintGeo(tailGeo, TAIL_DIM)];
+  const lampGeo = mergeGeometries(lampParts);
+  for (const g of lampParts) g.dispose();
+  const tailFrom = lensGeo.attributes.position.count, tailN = tailGeo.attributes.position.count;
+  const tailCol = lampGeo.attributes.color;
+  tailCol.setUsage(THREE.DynamicDrawUsage);
+  const lampMat = new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: false });
+  const lens = new THREE.Mesh(lampGeo, lampMat);
   lens.name = 'carLamps';
   lens.position.y = -PIVOT_Y;
   lens.userData.dynamic = true;
   lens.raycast = () => {};
   bodyShape.add(lens);
-
-  // Tail lamps: own unlit material (not the shared cache) because its colour animates (brake lights).
-  const tailGeo = tailLensGeometry();
-  const tailMat = new THREE.MeshBasicMaterial({ color: TAIL_DIM.clone(), toneMapped: false });
-  const tailLamps = new THREE.Mesh(tailGeo, tailMat);
-  tailLamps.name = 'carTailLamps';
-  tailLamps.position.y = -PIVOT_Y;
-  tailLamps.userData.dynamic = true;
-  tailLamps.raycast = () => {};
-  bodyShape.add(tailLamps);
+  const tailNow = TAIL_DIM.clone();
+  let tailShown = 0;
+  const paintTail = (k) => {
+    if (Math.abs(k - tailShown) < 0.003) return;
+    tailShown = k;
+    tailNow.copy(TAIL_DIM).lerp(TAIL_ON, k);
+    for (let i = tailFrom; i < tailFrom + tailN; i++) tailCol.setXYZ(i, tailNow.r, tailNow.g, tailNow.b);
+    tailCol.needsUpdate = true;
+  };
   let brakeK = 0;
 
   // Number plates and logo medallions (one atlas, one unlit mesh): blank plate and plain medallions
@@ -834,7 +851,7 @@ export function createCar(opts = {}) {
       // Brake lamps glow while slowing down, then ease back to a soft red.
       const braking = aspd > 0.3 && accel * (speed < 0 ? -1 : 1) < -1.2 ? 1 : 0;
       brakeK += (braking - brakeK) * Math.min(1, dt * (braking ? 14 : 4));
-      tailMat.color.copy(TAIL_DIM).lerp(TAIL_ON, brakeK);
+      paintTail(brakeK);
 
       // Turn rate: explicit, measured from the root's world heading (works with rotation.y,
       // lookAt or a rotating parent), or from steer when the root is not turning.
@@ -966,7 +983,8 @@ export function createCar(opts = {}) {
       wheelGeo.dispose();
       lensGeo.dispose();
       tailGeo.dispose();
-      tailMat.dispose();
+      lampGeo.dispose();
+      lampMat.dispose();
       wheels.dispose();
       shadow.geometry.dispose();
       if (plate) {

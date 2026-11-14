@@ -183,6 +183,57 @@ function plan(space, sx, sz, tx, tz) {
   return out;
 }
 
+/** The nearest spot to (x, z), searched in rings outward, where a body of radius r stands free.
+ * o.ok(x, z) can veto a spot (the parked car); o.roomy wants room round it too (two of four steps free,
+ * so she is not put in a pocket she cannot walk out of); o.open also rules out a closed pocket (boxedIn).
+ * null when nothing within o.maxR. */
+export function freeSpot(space, x, z, o = {}) {
+  const r = o.r ?? RADIUS, maxR = o.maxR ?? 8, ok = o.ok || null, roomy = !!o.roomy;
+  const room = (px, pz) => {
+    let n = 0;
+    if (!space.collides(px + 0.4, pz, r)) n++;
+    if (!space.collides(px - 0.4, pz, r)) n++;
+    if (!space.collides(px, pz + 0.4, r)) n++;
+    if (!space.collides(px, pz - 0.4, r)) n++;
+    return n >= 2;
+  };
+  // (o.open: not a pocket either, she can walk a metre or more away from it)
+  const good = (px, pz) => !space.collides(px, pz, r) && (!ok || ok(px, pz)) && (!roomy || room(px, pz)) && (!o.open || !boxedIn(space, px, pz, { r }));
+  if (good(x, z)) return { x, z, d: 0 };
+  for (let d = 0.2; d <= maxR + 1e-6; d += 0.2) {
+    const n = Math.max(8, Math.ceil((2 * Math.PI * d) / 0.25));
+    for (let i = 0; i < n; i++) {
+      const a = (i / n) * Math.PI * 2, px = x + Math.sin(a) * d, pz = z + Math.cos(a) * d;
+      if (good(px, pz)) return { x: px, z: pz, d };
+    }
+  }
+  return null;
+}
+
+/** True when a body of radius r at (x, z) cannot walk `reach` metres away in any direction: a pocket
+ * between a fence, a stall and a wall (a small flood fill, 0.2 m steps, only ever run once in a while). */
+export function boxedIn(space, x, z, o = {}) {
+  const r = o.r ?? RADIUS, reach = o.reach ?? 1.2, S = 0.2, N = Math.ceil((reach + 0.4) / S), W = N * 2 + 1;
+  const seen = new Uint8Array(W * W); // 0 unknown, 1 queued, 2 blocked
+  const q = [N * W + N];
+  seen[N * W + N] = 1;
+  while (q.length) {
+    const k = q.pop(), i = k % W, j = (k / W) | 0;
+    for (const [di, dj] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const ni = i + di, nj = j + dj;
+      if (ni < 0 || nj < 0 || ni >= W || nj >= W) continue;
+      const n = nj * W + ni;
+      if (seen[n]) continue;
+      const px = x + (ni - N) * S, pz = z + (nj - N) * S;
+      if (space.collides(px, pz, r)) { seen[n] = 2; continue; }
+      if (Math.hypot(ni - N, nj - N) * S >= reach) return false;
+      seen[n] = 1;
+      q.push(n);
+    }
+  }
+  return true;
+}
+
 export function createOpenWalker(space, spawn = { x: 0, z: 0, heading: Math.PI }) {
   const pos = new THREE.Vector2(spawn.x, spawn.z);
   const vel = new THREE.Vector2();
@@ -190,6 +241,7 @@ export function createOpenWalker(space, spawn = { x: 0, z: 0, heading: Math.PI }
   const tmp = new THREE.Vector2();
   let heading = spawn.heading ?? Math.PI;
   let path = null, pathIdx = 0, onArrive = null, stuck = 0;
+  let esc = null, escT = 0; // (standing inside a keep-out: the free spot she steps out to)
   const done = (ok) => { path = null; const cb = onArrive; onArrive = null; cb?.(ok); };
   return {
     pos,
@@ -206,8 +258,32 @@ export function createOpenWalker(space, spawn = { x: 0, z: 0, heading: Math.PI }
       else if (path.length < 2) done(true);
     },
     stop() { path = null; onArrive = null; },
-    teleport(x, z, h) { pos.set(x, z); if (h !== undefined) heading = h; path = null; vel.set(0, 0); },
+    teleport(x, z, h) { pos.set(x, z); if (h !== undefined) heading = h; path = null; vel.set(0, 0); esc = null; },
+    /** Standing inside a keep-out (a fence's corner, a stall, a lamp, a town that came in round her):
+     * every step would collide, so she could never walk again. With the stick pushed (or a path), she
+     * steps out to the nearest free spot instead (a far one is a hop). Returns the speed, or -1 when free. */
+    escape(dt, maxSpeed) {
+      if (!space.collides(pos.x, pos.y, RADIUS)) { esc = null; return -1; }
+      if (!esc || (escT -= dt) <= 0 || space.collides(esc.x, esc.z, RADIUS)) {
+        esc = freeSpot(space, pos.x, pos.y, { r: RADIUS + 0.02, maxR: 12, roomy: true, open: true }) || freeSpot(space, pos.x, pos.y, { r: RADIUS, maxR: 20 });
+        escT = 0.5;
+      }
+      if (!esc) return -1;
+      const dx = esc.x - pos.x, dz = esc.z - pos.y, d = Math.hypot(dx, dz);
+      if (d < 1e-4 || d > 2.5) { pos.set(esc.x, esc.z); vel.set(0, 0); esc = null; return 0; }
+      const step = Math.min(d, Math.max(1.2, maxSpeed) * dt);
+      pos.x += (dx / d) * step; pos.y += (dz / d) * step;
+      vel.set((dx / d) * (step / Math.max(dt, 1e-4)), (dz / d) * (step / Math.max(dt, 1e-4)));
+      let diff = Math.atan2(dx, dz) - heading;
+      diff = Math.atan2(Math.sin(diff), Math.cos(diff));
+      heading += diff * (1 - Math.exp(-dt * 14));
+      return vel.length();
+    },
     update(dt, stick, maxSpeed) {
+      if ((stick && stick.lengthSq() > 0.0025) || path) {
+        const sp = this.escape(dt, maxSpeed);
+        if (sp >= 0) { this.speed = sp; return sp; }
+      }
       desired.set(0, 0);
       if (stick && stick.lengthSq() > 0.0025) {
         path = null; onArrive = null;

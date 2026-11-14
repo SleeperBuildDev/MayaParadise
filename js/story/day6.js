@@ -648,7 +648,7 @@ export async function create(story) {
   }
   async function cartTap() {
     if (F('gust') && following() && !F('s4got') && story.people.get('naychi')) return s4Lift();
-    return D.say('maya', [{ my: '(ဘဲဆိပ် စင်၊ ငါးဆိပ် စင်။ တံဆိပ်တိုင်းမှာ စာနဲ့ ပုံ။)', en: '(A Duck shelf and a Fish shelf. Every tag has a word and a picture.)' }], { face: 'smile' }); // (added)
+    return D.say('maya', [{ my: '(ဘဲဆိပ်စင်၊ ငါးဆိပ်စင်။ တံဆိပ်တိုင်းမှာ စာနဲ့ ပုံ။)', en: '(A Duck shelf and a Fish shelf. Every tag has a word and a picture.)' }], { face: 'smile' }); // (added)
   }
   async function s4Lift() {
     await D.say('maya', L.cartLift, { face: 'smile' });

@@ -29,7 +29,7 @@ export const SMALLTALK = {
     c([
       ['ဆီဈေး ထပ်တက်ပြန်ပြီ။', 'Cooking oil went up again.'],
       ['ငါ့လစာကတော့ မတက်ဘူးနော်။', "My pay didn't, though."],
-      ['လစာက သစ္စာရှိတယ်၊ တစ်နေရာထဲမှာပဲ။', "Your pay is loyal. It never moves."],
+      ['လစာက သစ္စာရှိတယ်၊ တစ်နေရာတည်းမှာပဲ။', "Your pay is loyal. It never moves."],
     ]),
     c([
       ['ဖုန်းလိုင်း မမိဘူးဟ။', 'No signal again.'],
@@ -46,11 +46,11 @@ export const SMALLTALK = {
       ['ငါ့ကြက်မ မတွေ့မိဘူးလား။', 'Have you seen my hen?'],
       ['အဖြူလား၊ အညိုလား။', 'White or brown?'],
       ['အညို။ စိတ်တိုတတ်တယ်။', 'Brown. Short temper.'],
-      ['အော်… မနေ့က ငါ့ခြေထောက် ဆိတ်သွားတဲ့ကောင်။', 'Ah. The one that pecked my foot yesterday.'],
+      ['ဪ… မနေ့က ငါ့ခြေထောက် ဆိတ်သွားတဲ့ကောင်။', 'Ah. The one that pecked my foot yesterday.'],
     ]),
     c([
       ['ဘေးအိမ်က ရေဒီယို ကျယ်လိုက်တာ။', "Next door's radio is so loud."],
-      ['အဲ့သီချင်း ငါ အလွတ်ရနေပြီ။', 'I know that song by heart now.'],
+      ['အဲဒီသီချင်း ငါ အလွတ်ရနေပြီ။', 'I know that song by heart now.'],
       ['ငါလည်း။ မကြိုက်ဘဲနဲ့။', "Me too. And I don't even like it."],
     ]),
     c([
@@ -106,7 +106,7 @@ export const SMALLTALK = {
     c([
       ['လမ်းပိတ်နေလို့ နောက်ကျတာ။', 'Sorry, traffic.'],
       ['နင့်အိမ်က အိမ်နှစ်လုံးပဲ ခြားတာလေ။', 'You live two houses away.'],
-      ['အဲ့ကြားမှာ ကြက်တွေ လမ်းပိတ်နေတာ။', 'Chickens were blocking the way.'],
+      ['အဲဒီကြားမှာ ကြက်တွေ လမ်းပိတ်နေတာ။', 'Chickens were blocking the way.'],
     ]),
     c([
       ['ခြင်တွေ များလိုက်တာ။', 'So many mosquitoes.'],
@@ -142,7 +142,7 @@ export const SMALLTALK = {
     c([
       ['ငါ့ဖိနပ် ဘယ်သူ စီးသွားလဲ။', 'Who walked off in my slippers?'],
       ['နင် စီးထားတာ ဘယ်သူ့ဟာလဲ။', "Whose are you wearing, then?"],
-      ['…ဟုတ်သားပဲ။', '...Oh.'],
+      ['…မှန်သားပဲ။', '...Oh.'],
     ]),
     c([
       ['ညက ခွေးတွေ တစ်ညလုံး ဟောင်တယ်။', 'The dogs barked all night.'],
@@ -153,7 +153,7 @@ export const SMALLTALK = {
       ['ရေခဲမုန့် စားချင်တယ်။', 'I want ice cream.'],
       ['ငါလည်း။ ပိုက်ဆံ ပါလား။', 'Me too. Got money?'],
       ['မပါဘူး။ နင်ရော။', 'No. You?'],
-      ['ဒါဆို စားချင်ရုံပဲ အတူ စားချင်ကြမယ်။', "Then we'll just want it together."],
+      ['ဒါဆို စားချင်ရုံပဲ အတူစားချင်ကြမယ်။', "Then we'll just want it together."],
     ], { time: 'noon' }),
     c([
       ['မီးပျက်ပြန်ပြီ။', 'Power cut again.'],
@@ -192,7 +192,7 @@ export const SMALLTALK = {
       ['နင်က ဘာကြားကြား အိပ်ချင်တာပဲ။', 'Everything makes you sleepy.'],
     ], { rain: true }),
     c([
-      ['ငါ မက်ဆေ့ပို့တာ ဘာလို့ မပြန်တာလဲ။', "Why didn't you answer my message?"],
+      ['ငါ မက်ဆေ့ချ်ပို့တာ ဘာလို့ မပြန်တာလဲ။', "Why didn't you answer my message?"],
       ['ပြန်ထားပါတယ်။ စိတ်ထဲမှာ။', 'I did. In my head.'],
     ]),
     c([
@@ -216,7 +216,7 @@ export const SMALLTALK = {
     c([
       ['မနက်ဖြန် ငါ့မွေးနေ့။', "Tomorrow's my birthday."],
       ['အသက် ဘယ်လောက် ရှိပြီလဲ။', 'How old?'],
-      ['အဲ့ဒါ မမေးနဲ့။ ကိတ်မုန့်ပဲ မေး။', "Don't ask that. Ask about the cake."],
+      ['အဲဒါ မမေးနဲ့။ ကိတ်မုန့်ပဲ မေး။', "Don't ask that. Ask about the cake."],
     ]),
     c([
       ['မိုးလာပြီ! အဝတ်တွေ!', 'Rain! The washing!'],
@@ -258,7 +258,7 @@ export const SMALLTALK = {
     c([
       ['ညီမလေးက ငါ့ခဲတံ ယူသွားတယ်။', 'My little sister took my pencil.'],
       ['ဘောပင် ပေးလိုက်လေ။', 'Give her a pen, then.'],
-      ['အဲ့ဒါလည်း ယူသွားပြီ။', 'She took that too.'],
+      ['အဲဒါလည်း ယူသွားပြီ။', 'She took that too.'],
     ], { jobs: ['kid'] }),
     c([
       ['ပန်ကာ ငါ့ဘက် လှည့်ပေး။', 'Point the fan at me.'],
@@ -294,7 +294,7 @@ export const SMALLTALK = {
     ]),
     c([
       ['ဒီအိုး ဘာလို့ စောင်းနေတာလဲ။', 'Why is this pot leaning?'],
-      ['အနုပညာ။', "It's art."],
+      ['အနုပညာလေ။', "It's art."],
       ['လက်ချော်သွားတာ မဟုတ်လား။', "Didn't your hand just slip?"],
       ['အနုပညာ လို့ ပြောတယ်နော်။', 'I said art.'],
     ], { jobs: ['potter', 'worker'] }),
@@ -373,7 +373,7 @@ export const SMALLTALK = {
     c([
       ['အဘိုးက ဒီလမ်းကို ခြေကျင် လျှောက်ခဲ့တာတဲ့။', 'Grandpa says he walked this road on foot.'],
       ['မိုးထဲ၊ ဖိနပ်မပါ၊ အတက်လမ်းချည်းပဲ မဟုတ်လား။', 'In the rain, barefoot, uphill both ways?'],
-      ['အဲ့ဒါပဲ။', "That's the one."],
+      ['အဲဒါပဲ။', "That's the one."],
     ]),
     c([
       ['မြို့ထဲမှာ ကြယ်တွေ ဒီလောက် မမြင်ရဘူး။', "You don't see this many stars in town."],
@@ -431,7 +431,7 @@ export const SMALLTALK = {
     ], { rain: true }),
     c([
       ['ငါးပိနံ့က ဈေးအဝမှာတင် ကြိုဆိုတယ်။', 'The fish-paste smell greets you at the gate.'],
-      ['အဲ့ဒါ ဈေးရဲ့ ရေမွှေးလေ။', "That's the market's perfume."],
+      ['အဲဒါ ဈေးရဲ့ ရေမွှေးလေ။', "That's the market's perfume."],
     ]),
     c([
       ['ဖရဲသီး ချိုလား။', 'Is the watermelon sweet?'],
@@ -473,7 +473,7 @@ export const SMALLTALK = {
     ], { time: 'morning' }),
     c([
       ['ကလေးတွေ ရေကူးနေကြတယ်။', 'The kids are swimming.'],
-      ['ငယ်ငယ်က ငါတို့လည်း အဲ့လိုပဲ။', 'We were just the same.'],
+      ['ငယ်ငယ်က ငါတို့လည်း အဲဒီလိုပဲ။', 'We were just the same.'],
       ['အခုတော့ ရေအေးတာ ကြောက်တယ်။', "Now I'm scared of cold water."],
     ], { time: 'noon' }),
     c([
@@ -492,7 +492,7 @@ export const SMALLTALK = {
     c([
       ['ဒီနေ့ သတင်းစာမှာ ဘာထူးလဲ။', "Anything new in today's paper?"],
       ['မိုးလေဝသ။ ပူမယ်တဲ့။', "Weather. It'll be hot."],
-      ['အဲ့ဒါ သတင်းစာ မလိုဘူး။', "Didn't need a paper for that."],
+      ['အဲဒါ သတင်းစာ မလိုဘူး။', "Didn't need a paper for that."],
     ], { time: 'morning' }),
     c([
       ['လက်တွေ မင်တွေ ပေကုန်ပြီ။', 'My hands are all inky.'],
@@ -534,7 +534,7 @@ export const SMALLTALK = {
     c([
       ['စာလုံး ပြောင်းပြန်တွေ ဖတ်တတ်လာပြီ။', 'I can read backwards letters now.'],
       ['အတည့်ရော။', 'And the right way round?'],
-      ['အဲ့ဒါ ခက်လာပြီ။', "That's getting harder."],
+      ['အဲဒါ ခက်လာပြီ။', "That's getting harder."],
     ], { jobs: ['worker'] }),
   ],
 
@@ -546,7 +546,7 @@ export const SMALLTALK = {
     ]),
     c([
       ['မနက် လေးနာရီ ထရတယ်။', 'I get up at four.'],
-      ['ငါ အဲ့အချိန် အိပ်ရာဝင်တာ။', "That's when I go to bed."],
+      ['ငါ အဲဒီအချိန် အိပ်ရာဝင်တာ။', "That's when I go to bed."],
     ], { time: 'morning', jobs: ['baker'] }),
     c([
       ['ခေါက်ဆွဲပန်းကန် ကြီးလိုက်တာ။', 'Huge noodle bowl!'],
@@ -558,7 +558,7 @@ export const SMALLTALK = {
       ['ညကျ မီးထွန်းထားရင် ပိုလှတယ်။', "Prettier at night, when it's lit."],
     ]),
     c([
-      ['ယက်ကန်းသံ တချက်ချက်။', 'Clack, clack, go the looms.'],
+      ['ယက်ကန်းသံ တချပ်ချပ်။', 'Clack, clack, go the looms.'],
       ['နှလုံးခုန်သံလိုပဲ။', 'Like a heartbeat.'],
       ['ငါ့နှလုံးက ဒီလောက် မမြန်ပါဘူး။', "My heart isn't that fast."],
     ], { jobs: ['weaver'] }),

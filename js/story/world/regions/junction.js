@@ -363,7 +363,7 @@ add({ k: 'planters', x: 143.8, z: 290.6, seed: 305 }); add({ k: 'jWaterPot', x: 
 add({ k: 'lowTea', x: 65.4, z: 307.0, seed: 82 });
 folk(64.65, 307.0, 'drink', HP, { stool: false }); folk(65.4, 307.55, 'read', PI, { stool: false });
 folk(67.8, 309.2, 'squat', -0.6, { hat: true }); // splicing rope beside the bundles
-chalk(62.6, 305.4, [{ my: 'ပြင်လို့ရတာ', en: 'The one you can mend' }, { my: 'ကိုယ့်ကိုယ်', en: 'is yourself,' }, { my: 'ကိုယ်ပဲ', en: 'only you' }]); // "the one you can mend is yourself"
+chalk(62.6, 305.4, [{ my: 'ပြင်လို့ရတာ', en: 'The one you can mend' }, { my: 'ကိုယ့်ကိုယ်ကိုယ်', en: 'is yourself,' }, { my: 'ကိုယ်ပဲ', en: 'only you' }]); // "the one you can mend is yourself"
 add({ k: 'jCrates', x: 62.6, z: 309.4, seed: 11 });
 // east foot: a man reads the day sheet aloud, two listen (one frowns, one nods); a woman goes by with her basket
 folk(130.8, 305.2, 'readStand', 0);
@@ -554,9 +554,9 @@ export function useLive(ow, names, on = true) {
 // chapter's lesson and never at where to go; the day scripts give them their real lines.
 // ---------------------------------------------------------------------------------
 export const PEOPLE = [
-  { id: 'komin', x: 133.8, z: 298.6, heading: 2.6, hello: { my: 'ပေးတာကို ကပ်ရုံပဲ ဗျ။ မှန်မမှန်ကတော့ ကိုယ့်မျက်စိနဲ့ ကိုယ် ကြည့်ပေါ့။', en: "I just paste what I'm given. True or not, that's for your own eyes." },
+  { id: 'komin', x: 133.8, z: 298.6, heading: 2.6, hello: { my: 'ပေးတာကို ကပ်ရုံပဲ ဗျ။ မှန်မမှန်ကတော့ ကိုယ့်မျက်စိနဲ့ကိုယ် ကြည့်ပေါ့။', en: "I just paste what I'm given. True or not, that's for your own eyes." },
     job: { area: { x: 133.6, z: 298.6, r: 1.1 }, spot: { x: 133.8, z: 298.6, h: 2.6 }, mood: 'work', workChance: 0.85, workFor: [8, 16] } },
-  { id: 'kosan', x: 121.6, z: 302.9, heading: -0.5, hello: { my: 'တံတား ယိမ်းတယ်လို့ လူတွေ ပြောကြတယ်။ ကျွန်တော်ကတော့ နေ့တိုင်း ကိုယ့်ခြေနဲ့ ကိုယ် စမ်းတယ်။', en: 'Folk say the bridge sways. Me, I test it every day with my own feet.' },
+  { id: 'kosan', x: 121.6, z: 302.9, heading: -0.5, hello: { my: 'တံတား ယိမ်းတယ်လို့ လူတွေ ပြောကြတယ်။ ကျွန်တော်ကတော့ နေ့တိုင်း ကိုယ့်ခြေနဲ့ကိုယ် စမ်းတယ်။', en: 'Folk say the bridge sways. Me, I test it every day with my own feet.' },
     job: { area: { x: 122.4, z: 303.0, r: 1.4 }, spot: { x: 121.6, z: 302.9, h: -0.5 }, mood: 'work', workChance: 0.7, workFor: [6, 12] } },
   { id: 'kan', x: 157.9, z: 310.3, heading: 0.1, hello: { my: 'သတင်းစာထဲ ပါတယ်ဆိုတော့ မှန်မှာပေါ့… မဟုတ်ဘူးလား။', en: "It's in the paper, so it must be true… mustn't it?" },
     job: { area: { x: 158.0, z: 310.4, r: 0.8 }, spot: { x: 157.9, z: 310.3, h: 0.1 }, mood: 'read', workChance: 0.9, workFor: [12, 24] } },
@@ -567,7 +567,7 @@ export const PEOPLE = [
     job: { area: { x: 122.4, z: 298.6, r: 0.9 }, spot: { x: 122.4, z: 298.5, h: 0.3 }, mood: 'read', workChance: 0.8, workFor: [8, 16] } },
   { id: 'sein', x: 145.6, z: 299.0, heading: -1.2, hello: { my: 'ဒီဆိုင်မှာ လက်ဖက်ရည်ထက် သတင်းက ပိုမြန်မြန် ကုန်တယ်။ မှန်တာ မမှန်တာ ရောမွှေပြီးပေါ့။', en: 'In this shop the news goes faster than the tea. True and untrue, all stirred in together.' },
     job: { area: { x: 145.8, z: 299.2, r: 1.0 }, spot: { x: 145.6, z: 299.0, h: -1.2 }, mood: 'work', workChance: 0.8, workFor: [6, 14] } },
-  { id: 'moemoe', x: 137.4, z: 313.4, heading: -0.3, hello: { my: 'ကိုယ့်ပေါင်းလဒ်ကိုယ် မှန်တယ်လို့ ထင်တာပဲ။ …ထင်ရုံပဲနော်။', en: 'I think my own sum is right. …I only think so, mind.' },
+  { id: 'moemoe', x: 137.4, z: 313.4, heading: -0.3, hello: { my: 'ကိုယ့်ပေါင်းလဒ် ကိုယ် မှန်တယ်လို့ ထင်တာပဲ။ …ထင်ရုံပဲနော်။', en: 'I think my own sum is right. …I only think so, mind.' },
     job: { area: { x: 137.0, z: 313.0, r: 1.4 }, spot: { x: 137.4, z: 313.4, h: -0.3 }, mood: 'play', workChance: 0.6, workFor: [6, 12] } },
   ...FOLK_PEOPLE, // the fill pass's townsfolk at their yard work (junction-people.js; they appear once cast.js lists them)
 ];

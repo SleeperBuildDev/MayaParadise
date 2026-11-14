@@ -48,7 +48,7 @@ export const L = {
   invite: { my: 'မနက်ဖြန်ည စာရေးခန်းရှေ့မှာ စာအုပ်မိတ်ဆက်ပွဲ။\n"{line}" — {name}\nဒီစာမျက်နှာကို ကျွန်မနဲ့အတူ စမ်းကြည့်ပေးလို့ ကျေးဇူးပါ။', en: 'The launch, tomorrow night, in front of the Writing Room.\n"{line}" — {name}\nThank you for trying this page with me.' },
   mayaSign: { my: 'မာရာ', en: 'Maya' },
   postmarked: { my: 'တံဆိပ်ခတ်လိုက်ပြီ', en: 'Postmarked' }, // NEW draft (the stamp card's caption)
-  needInv: [{ my: '(ဖိတ်စာတွေက ပုံစံဆိုင်မှာ ကျန်နေသေးတယ်။)', en: '(The invitations are still at the Template Shop.)' }], // NEW draft (Maya's own memory of ww2)
+  needInv: [{ my: '(ဖိတ်စာတွေ ပုံစံဆိုင်မှာ ကျန်နေသေးတယ်။)', en: '(The invitations are still at the Template Shop.)' }], // NEW draft (Maya's own memory of ww2)
 
   // ---- 5. Quarter
   kids: [
@@ -181,25 +181,25 @@ export const L = {
     { my: 'ဒီလုံးကတော့ အမေ့နည်း။ ဗန်းပေါ်မှာ အဲဒီအတိုင်း ရေးထားမယ်။ ကျွန်မ တီထွင်တာလို့ ထင်နေကြတာ။', en: "The round one is my mother's recipe. I'll write that on the tray. People think I made it up." },
   ],
   kmAfter: [{ my: '"အမေ့ မုန့်လုံး"။ ဗန်းမှာ ရေးထားပြီ။', en: '"Mother\'s round loaf." It\'s on the tray now.' }], // NEW draft
-  emShop: [{ my: 'မုန့်လုံးတစ်လုံး ဝယ်နေတာ အစ်မ။', en: "Just buying a loaf, sister." }], // NEW draft
+  emShop: [{ my: 'မုန့်လုံး တစ်လုံး ဝယ်နေတာ အစ်မ။', en: "Just buying a loaf, sister." }], // NEW draft
   emAsk: [{ my: 'စာစောင်လေး တစ်အုပ် ဖွင့်ကြည့်ခွင့် ရမလား အစ်မ။', en: 'May I open one of the booklets, sister?' }],
   emChoices: [
-    { my: '«ဖွင့်ကြည့်ပါ»', en: '"Go ahead."' },
-    { my: '«မဖွင့်နဲ့»', en: '"Better not."' },
+    { my: '«ဖွင့်ကြည့်ပါ။»', en: '"Go ahead."' },
+    { my: '«မဖွင့်နဲ့။»', en: '"Better not."' },
   ],
   emRead: [{ my: 'ဒီမှာ… ကျွန်မစကား၊ ကျွန်မနာမည်နဲ့။ ကိုဝဏ္ဏ မရိုက်ခင် ကျွန်မကို လာမေးသွားတယ်လေ။ ဒါကြောင့် စိတ်ချတယ်။', en: "Here… my words, with my name. Ko Wunna came and asked me before he printed them. That's why I don't mind." }],
   emNo: [{ my: 'ရပါတယ်။ မနက်ဖြန်မှ ကြည့်မယ်။', en: "That's fine. I'll see it tomorrow." }],
-  hhBefore: [{ my: 'တံခါး ဖွင့်ထားတယ်ကွယ်။ ဝင်ချင်ရင် ဝင်။', en: "The gate's open. Come in if you like." }], // NEW draft
+  hhBefore: [{ my: 'တံခါး ဖွင့်ထားတယ်ကွယ်။ ဝင်ချင်ရင် ဝင်ခဲ့။', en: "The gate's open. Come in if you like." }], // NEW draft
   hhInv: [
     { my: 'တံခါး ပိတ်မထားတော့ဘူး။ လမ်းကိုလည်း မစောင့်ကြည့်တော့ဘူး။', en: "The gate stays open. I don't watch the lane any more, either." },
     { my: 'ပွဲကို လာမလား မလာဘူးလား… ကိုယ့်ဘာသာ ဆုံးဖြတ်မယ်ကွယ်။', en: "Whether I come or not… I'll decide that myself." },
   ],
-  hhMaya: [{ my: '(ဖိတ်ပြီးပြီ။ ကျန်တာ သူ့ဟာ။)', en: "(He's invited. The rest is his.)" }],
-  spBefore: [{ my: 'ခြောက်တဲ့ ထုပ်တွေမှ နာမည်ရေးတယ်။ စိုတဲ့ဟာ မရောင်းဘူး။', en: "Only the dry bales get my name. I don't sell damp ones." }], // NEW draft (ch 17 lived)
+  hhMaya: [{ my: '(ဖိတ်ပြီးပြီ။ ကျန်တာ သူ့အပိုင်း။)', en: "(He's invited. The rest is his.)" }],
+  spBefore: [{ my: 'ခြောက်တဲ့ ထုပ်တွေမှ နာမည်ရေးတယ်။ စိုတဲ့ဟာတွေ မရောင်းဘူး။', en: "Only the dry bales get my name. I don't sell damp ones." }], // NEW draft (ch 17 lived)
   spInv: [{ my: 'ငါ့ကိုလည်း? …ကောင်းပြီ။ ပွဲမှာ စက္ကူထုပ်တွေ ချိန်ပြီးမှ ပေးမယ်။ ခြောက်ခြောက်သွေ့သွေ့။', en: "Me too? …All right. I'll bring paper for the launch. Weighed. Dry." }],
 
   // ---- 6.5 the Blank Page
-  psBefore: [{ my: 'ဒီမှာ ခဏ နားကြတာ။ ထိုင်ပါဦး။', en: "We're resting here a while. Sit down." }], // NEW draft
+  psBefore: [{ my: 'ဒီမှာ ခဏ နားနေကြတာ။ ထိုင်ပါဦး။', en: "We're resting here a while. Sit down." }], // NEW draft
   psInv: [
     { my: 'ဖိတ်စာ? ကျွန်တော်တို့က ခရီးသည်တွေပဲလေ။ …ဒါပေမဲ့ လာမယ်။', en: "An invitation? We're only travellers. …But we'll come." },
     { my: 'မနေ့က အတူလျှောက်ခဲ့တဲ့လမ်းက မြောက်ဘက် မာရာ့ စာအုပ်ကြီးရဲ့ နောက်ကျောဖုံးအထိ ရောက်တယ်။', en: 'The road we walked yesterday runs north to the back cover of your big book.' },
@@ -216,12 +216,12 @@ export const L = {
     ],
     micho: [{ my: 'ဘီးပေါ်က "မရသေးဘူး" ကို မဖျက်ဘဲ ထားထားတယ်။ ပွဲမှာ အိုးလေးလုံး ပြမယ်။', en: 'I kept "not yet" on my wheel. I\'ll show four pots at the launch.' }],
     dawohn: [{ my: 'ဆရာ့ကျေးဇူးလည်း မမေ့ဘူး။ တပည့်ဆီက သင်ရတာလည်း မမေ့ဘူး။', en: "I don't forget what I owe my master. Or what my pupil taught me." }],
-    sunwe: [{ my: 'တိုးတိုးက ကျွန်မနာမည် ထည့်တယ်တဲ့! "မသိရင် မသိဘူး ပြောတတ်လို့" တဲ့။', en: 'Toe Toe put my name in! "For saying I don\'t know", he says.' }],
+    sunwe: [{ my: 'တိုးတိုးက ကျွန်မနာမည် ထည့်တယ်တဲ့! "မသိရင် မသိဘူး ပြောတတ်လို့" တဲ့လေ။', en: 'Toe Toe put my name in! "For saying I don\'t know", he says.' }],
     maungnge: [{ my: 'ကျွန်တော့်နာမည်ကို စာထဲမှာ ကိုယ်တိုင် ဖတ်ကြည့်မယ်။ စာလုံး သုံးလုံးလောက် ဖတ်တတ်နေပြီ။', en: "I'll read my own name in it myself. I can read three letters of it already." }],
     yeyint: [{ my: 'မနက်ဖြန် စင်ပေါ်မှာ ကျွန်တော် ခုံတွေပဲ ချပေးမယ်။ ဇာတ်ဆောင်က တခြားသူ။ အေးဆေးပဲ။', en: "Tomorrow I'm just setting out the benches. Someone else leads. It's a relief." }],
     thiri: [{ my: 'အကြောင်းပြန်စာ မစောင့်တော့ဘူး။ ဖိတ်စာကိုတော့ ဝမ်းသာစွာ လက်ခံတယ်။', en: "I don't wait for replies now. This one I'm glad to take." }],
     kowunna: [{ my: 'ခြောက်လား ကိုးလား၊ နာမည်လား ဘယ်သူ့လဲ… မသေချာရင် မေးတယ်။', en: "Six or nine, whose name… if I'm not sure, I ask." }],
-    wintwar: [{ my: 'ဖိတ်စာ ကျန်ရင် ထားခဲ့။ မနက်ဖြန် မနက် ကျွန်မ လိုက်ပို့ပေးမယ်။', en: "If any invitations are left, leave them. I'll take them round in the morning." }],
+    wintwar: [{ my: 'ဖိတ်စာ ကျန်ရင် ထားခဲ့လေ။ မနက်ဖြန် မနက် ကျွန်မ လိုက်ပို့ပေးမယ်။', en: "If any invitations are left, leave them. I'll take them round in the morning." }],
     dawpwint: [{ my: 'ဒီမှာ ဘယ်သူ့ကိုမှ ယုံခိုင်းမထားဘူး။ ကိုယ်တိုင် စမ်းကြည့်ပြီး မှန်မှ ဘုတ်အောက်မှာ လက်မှတ်ထိုးကြတာ။', en: 'Nobody here is told to believe. They try it themselves, and sign under the board if it holds.' }],
     tintin: [{ my: 'ဆိပ်ကမ်းကလူ၊ ဈေးကလူ၊ ခရီးသည်… ပထမခွက်က အတူတူပဲ။', en: 'Wharf people, market people, travellers… the first cup is the same for all.' }],
   },
@@ -244,7 +244,7 @@ export const L = {
   unload: [{ my: 'မနက်ဖြန် မဝင့်ဝါ လာယူမယ်။ ဒီည ဒီမှာ အိပ်ပါစေ။', en: 'Ma Wint War will fetch them tomorrow. Let them sleep here tonight.' }],
   holesEmpty: [{ my: '(အကန့်ငယ် ရှစ်ခု။ ဘာမှ မထည့်ရသေးဘူး။)', en: '(Eight pigeonholes, still empty.)' }], // NEW draft
   holesFull: [{ my: '(စာစောင်တွေ အကန့်ထဲမှာ အိပ်နေကြပြီ။)', en: '(The booklets are asleep in the pigeonholes.)' }], // NEW draft
-  replyTitle: { my: 'နာမည်မပါတဲ့ စာကို ပြန်စာ', en: 'Reply to the unsigned letter' },
+  replyTitle: { my: 'နာမည်မပါတဲ့ စာရဲ့ ပြန်စာ', en: 'Reply to the unsigned letter' },
   replyHint: { my: 'ကိုယ်တိုင် စမ်းကြည့်ခဲ့တာကိုပဲ ရေးပါ', en: 'Write only what you have tried yourself' },
   replyPrompt: { my: '"လမ်းမပျောက်အောင် မြေပုံလေး ရှိလား" တဲ့။', en: '"Is there a map, so I don\'t get lost?"' },
   replyFragments: [ // the good ones are written out in this order
@@ -252,15 +252,15 @@ export const L = {
     { my: 'မြေပုံဆိုတာ လမ်းကို ပြရုံပဲ။', en: 'A map only shows the road.', good: true },
     { my: 'လမ်းကို ကိုယ်တိုင် လျှောက်ပြီး ကိုယ်တိုင် စစ်ကြည့်ပါ။', en: 'Walk it yourself, and check it yourself.', good: true },
     { my: 'ကျွန်မ စာထဲက စကားတွေ ဘယ်သူ့ဆီကလဲ နောက်ဆုံးစာမျက်နှာမှာ ရေးထားတယ်။', en: 'Where my words came from is written on my last page.', good: true },
-    { my: 'ကိုယ့်ကိုယ်ကို အားကိုးပါ။', en: 'Rely on yourself.', good: true },
+    { my: 'ကိုယ့်ကိုယ်ကိုယ် အားကိုးပါ။', en: 'Rely on yourself.', good: true },
     { my: 'လမ်းပျောက်မှာ စိုးရင် ကျွန်မကို မေးပါ။', en: "If you're afraid of getting lost, ask me.", good: false }, // Day 2's crossed-out line
-    { my: 'ကျွန်မ ပြောသလို လုပ်ရင် မမှားဘူး။', en: "Do as I say and you won't go wrong.", good: false },
+    { my: 'ကျွန်မ ပြောသလို လုပ်ရင် မမှားပါဘူး။', en: "Do as I say and you won't go wrong.", good: false },
   ],
   replyParrot: [{ my: '(ဒါ မှီခိုင်းတဲ့ စာကြောင်း။ ဖြတ်ခဲ့ပြီးသား။)', en: '(That line asks them to lean. I crossed it out already.)' }],
-  replySit: [{ my: '(မှတ်စုစာအုပ်ရဲ့ နောက်ကျောစာမျက်နှာ "စာကို ပြန်စာ"။ ခဲတံနဲ့ ရေးခဲ့တာတွေ။ အခု မင်နဲ့ ရေးမယ်။)', en: '(The notebook\'s back page, "Reply to the letter". My pencil lines. Now I write it in ink.)' }], // NEW draft (spec 8.4 narration)
+  replySit: [{ my: '(မှတ်စုစာအုပ်ရဲ့ နောက်ကျောစာမျက်နှာ "စာရဲ့ ပြန်စာ"။ ခဲတံနဲ့ ရေးခဲ့တာတွေ။ အခု မင်နဲ့ ရေးမယ်။)', en: '(The notebook\'s back page, "Reply to the letter". My pencil lines. Now I write it in ink.)' }], // NEW draft (spec 8.4 narration)
   lastQ: { my: 'နောက်ဆုံး တစ်ကြောင်း…', en: 'One last line…' },
   lastChoices: [
-    { my: 'ကျွန်မ လျှောက်ခဲ့တဲ့လမ်းအတိုင်း လိုက်ခဲ့ပါ။', en: 'Follow the road I walked.' },
+    { my: 'ကျွန်မ လျှောက်ခဲ့တဲ့လမ်းအတိုင်း လိုက်လျှောက်ပါ။', en: 'Follow the road I walked.' },
     { my: 'လမ်းပျောက်ရင် ပြန်စာရေးပါ။ ကျွန်မ ဖြေပေးမယ်။', en: "If you get lost, write back. I'll answer." },
     { my: '(ဒီစာကြောင်းကို ချန်ထားမယ်။)', en: '(Leave this line.)' },
   ],
@@ -282,7 +282,7 @@ export const L = {
   nightWrong: [
     [{ my: '(မဟုတ်ဘူး… ချော့ပြောတာ။ ကယ်တာ မဟုတ်ဘူး၊ လမ်းကို ကိုယ်တိုင် လျှောက်ကြတာ။)', en: '(No… that flatters. I saved nobody; they walked it themselves.)' }],
     [],
-    [{ my: '(မဟုတ်ဘူး… အားလျှော့ပြောတာ။ မမှီတော့တာ၊ ဘေးကနေ လက်တွဲလို့ ရသေးတယ်။)', en: "(No… too gloomy. They don't lean now; we can still walk side by side.)" }],
+    [{ my: '(မဟုတ်ဘူး… အားလျှော့ပြောတာ။ မမှီတော့တာပဲ ရှိတာ၊ ဘေးကနေ လက်တွဲလို့ ရသေးတယ်။)', en: "(No… too gloomy. They don't lean now; we can still walk side by side.)" }],
   ],
   sleepQ: { my: 'ဒီည မှတ်စုစာမျက်နှာလေး ဘယ်သူ့အိမ်မှာ အိပ်မလဲ။', en: "Whose house does tonight's notebook page sleep at?" },
   stampText: { my: 'စာမျက်နှာ ၂၃ — ကိုးကား\nကိုယ်သယ်လာတဲ့ စကားတွေ ဘယ်သူ့ဆီကလဲ ပြောခဲ့ပြီ။ တခြားသူ တစ်ယောက်လည်း ကိုယ်တိုင် ပြောတတ်သွားတာ မြင်ခဲ့ပြီ။', en: 'Page 23 — References\nShe said whose words she carries, and saw someone else learn to say it himself.' },
@@ -310,7 +310,7 @@ export const INVITES = {
   home: { who: 'phothar', line: { my: 'လည်ပြီ! ချုပ်ရိုးလိုပဲ… ထပ်ခါထပ်ခါ လုပ်မှ ရတာပဲ။', en: 'It turns! Just like the stitches… it takes again and again.' } },
   quarter: { who: 'toetoe', line: { my: 'ကျွန်တော့် ပဲပင်တွေ အရိပ်ထဲမှာ နေလို့ နေရောင်မရဘဲ သေသွားတယ်။', en: 'My beans stayed in the shade, got no sun, and died.' } },
   market: { who: 'khwarnyo', line: { my: 'အစမ်း လေးဆယ် ထွင်းပြီးမှ ရတာ။', en: 'It took forty trial blocks.' } },
-  wharf: { who: 'kothiha', line: { my: 'ရေစီးက မမျှဘူး။ မျှောမလား၊ လှော်မလား၊ ကိုယ်ရွေးတယ်။', en: "The stream isn't fair. Drift or pole: I choose." } },
+  wharf: { who: 'kothiha', line: { my: 'ရေစီးက မမျှဘူး။ မျှောမလား၊ လှော်မလား၊ ကိုယ်ပဲ ရွေးတယ်။', en: "The stream isn't fair. Drift or pole: I choose." } },
   junction: { who: 'naychi', line: { my: 'ကိုယ့်သော့က ကိုယ့်လက်ထဲမှာ။', en: 'My key is in my own hand.' } },
   hearth: { who: 'khinmay', line: { my: 'တောင်းပန်တယ်။ နောက်က ဒါပေမဲ့ မပါဘူး။', en: "I'm sorry. No 'but' after it." } },
   garden: { who: 'hpohtaw', line: { my: 'ဆက်ပါ၊ မနွယ်ပါနဲ့။', en: "Connect. Don't entwine." } },
@@ -324,7 +324,7 @@ export const SLEPT13 = {
   yadanar: { my: '"အကြောင်းရင်း ပြောတာနဲ့ ဆင်ခြေပေးတာ မတူဘူး။" — ရတနာ', en: '"Giving a reason isn\'t the same as making an excuse." — Yadanar' },
   khinmay: { my: '"မကျက်သေးတဲ့ မုန့်ကို မဖော်နဲ့။ လူလည်း ဒီလိုပဲ။" — ဒေါ်ခင်မေ', en: '"Don\'t uncover a loaf before it\'s baked. People too." — Daw Khin May' },
   maungarkar: { my: '"တစ်ယောက်ယောက် ပျောက်နေရင် စာနံရံမှာ ရေးတာထက် ကိုယ်တိုင် သွားရှာ။" — မောင်အာကာ', en: '"If someone\'s missing, go and look, don\'t just write it on the wall." — Maung Arkar' },
-  dawpwint: { my: '"တိတ်ဆိတ်တာ တံခါးပိတ်တာ မဟုတ်ဘူး။ ပြတင်းဖွင့်တာ။" — ဒေါ်ပွင့်', en: '"Quiet isn\'t a shut door. It\'s an open window." — Daw Pwint' },
+  dawpwint: { my: '"တိတ်ဆိတ်တာ တံခါးပိတ်တာ မဟုတ်ဘူး။ ပြတင်းဖွင့်တာပဲ။" — ဒေါ်ပွင့်', en: '"Quiet isn\'t a shut door. It\'s an open window." — Daw Pwint' },
   pyaesone: { my: '"မသိဘူးလို့ ပြောတဲ့ ခေါင်းဆောင်နောက် လိုက်ရတာ ပိုလုံခြုံတယ်။" — ပြည့်စုံ', en: '"Safer to follow a leader who says \'I don\'t know\'." — Pyae Sone' },
   shwesin: { my: '"နှစ်ကြောင်းမြောက်ကို မနက်ဖြန် ထိုးမယ်။ ဒီနေ့ မေးပြီးမှ ငှားခဲ့ပြီ။" — ရွှေစင်', en: '"I\'ll sign line two tomorrow. Today I asked before borrowing." — Shwe Sin' },
   moe: { my: '"အိမ်မြှောင်လေး တွန်တယ်။ တိတ်တော့ ကြားရတယ်။" — မိုး', en: '"The gecko chirped. You only hear it in the quiet." — Moe' },
@@ -341,7 +341,7 @@ export const EM_NOTE = {
 export const SLEPT14 = {
   toetoe: { my: '"ဒီနေ့မေးခွန်း: စာအုပ်တစ်အုပ်ထဲမှာ လူဘယ်နှစ်ယောက်ရဲ့ စကား ပါသလဲ။" — တိုးတိုး', en: '"Today\'s question: how many people\'s words are in one book?" — Toe Toe' },
   khwarnyo: { my: '"ဘောင် — ကိုလွင်။ ရေးလိုက်ပြီ။" — ခွာညို', en: '"Border — Ko Lwin. Written." — Khwar Nyo' },
-  kothiha: { my: '"ဆိပ်ကမ်း လေးခုလုံးမှာ ရပ်တယ်။ ဦးဘိုလေးလည်း လက်ပြတယ်။ နည်းနည်းလေး။" — ကိုသီဟ', en: '"Stopped at all four jetties. U Bo Lay waved. A little." — Ko Thiha' },
+  kothiha: { my: '"ဆိပ်ကမ်း လေးခုလုံးမှာ ရပ်တယ်။ ဦးဘိုလေးလည်း လက်ပြတယ်။ နည်းနည်းလေးပေါ့။" — ကိုသီဟ', en: '"Stopped at all four jetties. U Bo Lay waved. A little." — Ko Thiha' },
   naychi: { my: '"ဘောင်ပိတ်ပြီးပြီ။ သော့ခတ်ပြီးပြီ။ လာခဲ့မယ်။" — နေခြည်', en: '"Frame locked. Shed locked. On my way." — Nay Chi' },
   hpohtaw: { my: '"လာမယ်။ ကိုယ့်ဘာသာ ဆုံးဖြတ်တာ။" — ဦးဖိုးထော်', en: '"I\'ll come. My own decision." — U Hpo Htaw' },
 };

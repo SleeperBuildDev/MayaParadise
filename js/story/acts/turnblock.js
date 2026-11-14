@@ -18,7 +18,7 @@ import { whoChip } from './sort.js';
 const T = {
   turn: { my: 'လှည့်မယ်', en: 'Turn' },
   both: { my: 'နှစ်ဖက်လုံး မြင်ပြီ', en: "I've seen both sides" },
-  drag: { my: 'တုံးကို လက်နဲ့ ဝိုင်းဆွဲ၍ လှည့်ပါ', en: 'Drag round the block to turn it' },
+  drag: { my: 'တုံးကို လက်နဲ့ ဝိုင်းဆွဲပြီး လှည့်ပါ', en: 'Drag round the block to turn it' },
 };
 
 export function turnblock({ title = '', hint = '', glyph = '6', sides = [] } = {}) {

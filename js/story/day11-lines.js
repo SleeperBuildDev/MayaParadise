@@ -17,7 +17,7 @@ export const L = {
   kpNote: { my: 'အစ်မ… ဒီမနက် စက္ကူထုပ်ပေါ်မှာ ကျွန်တော့်နာမည် ကိုယ်တိုင် ရေးထိုးလိုက်တယ်။\nဝယ်သူ ချိန်ကြည့်တော့ ပေါ့တယ်။ ခြောက်နေလို့ပေါ့။ သူ့မျက်လုံးကို တည့်တည့် ကြည့်နိုင်ခဲ့တယ်။\nအမြတ်က နည်းတယ်။ ဒါပေမဲ့ ညက တစ်ခါမှ မနိုးဘူး။', en: "Sister… this morning I signed my own name on the bale.\nThe buyer weighed it: light, because it's dry. I could look him straight in the eye.\nLess profit. But I didn't wake once last night." },
   join: [{ my: '(မှတ်စုထဲက "ချမ်းသာ" ကတ်နဲ့ "သုခ" ကတ် တစ်ဆက်တည်း ဖြစ်သွားတယ်… ချမ်းသာသုခ။)', en: '(In the notebook the "plenty" card and the "ease" card join into one word… ချမ်းသာသုခ.)' }],
   lift: [{ my: '(မနေ့က စာမျက်နှာပေါ်က ခုံတန်းလေး၊ နွယ်ညွန့်လေးနဲ့ အိပ်ပျော်ကြောင်လေး ထွက်လာကြတယ်။ နွယ်ညွန့်က မာရာ့လက်ကို ခဏထိပြီး လွှတ်လိုက်တယ်။)', en: "(The Two-Seat Bench, the little Tendril and the Sound-Asleep Cat lift off yesterday's page. The Tendril touches Maya's sleeve, then lets go.)" }],
-  liftMaya: [{ my: 'ထိပြီးရင် လွှတ်… မနက်ဖြန် ကိုယ့်ကိုယ်ကို ကြည့်ရဲအောင်။ လာ၊ လိုက်ခဲ့ကြ။', en: 'Touch, then let go… so I can look at myself tomorrow. Come on, all of you.' }],
+  liftMaya: [{ my: 'ထိပြီးရင် လွှတ်… မနက်ဖြန် ကိုယ့်ကိုယ်ကိုယ် ကြည့်ရဲအောင်။ လာ၊ လိုက်ခဲ့ကြ။', en: 'Touch, then let go… so I can look at myself tomorrow. Come on, all of you.' }],
   tt: { my: '"ဒီနေ့မေးခွန်း: မိုးမရွာခင် ကျွန်တော့် လေ့ကျင့်ခန်းစာအုပ် ထောင့်တွေက ဘာလို့ ကော့တက်လာတာလဲ။" — တိုးတိုး', en: '"Today\'s question: why do the corners of my exercise book curl up before it rains?" — Toe Toe' },
   bloom: [
     { my: 'တိုးတိုးရဲ့ ပဲပင်တွေ ပွင့်ပြီ။ နေရောင်ရတဲ့နေရာမှာ စိုက်ခဲ့လို့ပဲ။', en: "Toe Toe's beans are in flower. Because they went where the sun reaches." },
@@ -33,7 +33,7 @@ export const L = {
   ],
   wwLater: [{ my: 'ဖဲကြိုးနဲ့ ကွေ့သွားလည်း ရတယ်၊ ခေါက်ကြောင်းတံတားကနေ မောင်းသွားလည်း ရတယ်။ ကိုယ်နဲ့ ကိုက်တာ ရွေး။ မရွေးတဲ့လမ်းက ဆိုးလို့ မဟုတ်ဘူး။', en: "Take the ribbon, or drive over the Fold bridge. Pick what suits you. The road you don't pick isn't bad for it." }],
   wwEvening: [{ my: 'နေခြည် ဒီကို ခဏ ရောက်သွားတယ်။ ဘုတ်ပေါ်က သူ့စာကို သူကိုယ်တိုင် ဖြုတ်သွားတယ်။', en: 'Nay Chi dropped by. She took her own note off the board herself.' }],
-  arrive: [{ my: 'စာတွေ မဖတ်ရသေးဘူး။ နံရံတစ်ခုလုံး ပူနေတာ မြင်နေရပြီ။', en: "I haven't read a word yet, and the whole wall looks hot." }],
+  arrive: [{ my: 'စာတွေ မဖတ်ရသေးဘူး။ နံရံတစ်ခုလုံး ပူနေတာ မြင်ရပြီ။', en: "I haven't read a word yet, and the whole wall looks hot." }],
   vanBoy: { my: 'နံရံဆီလား အစ်မ။ မုန့်ဖိုဘေးမှာ! ကျွန်တော်ကတော့ မဖတ်တော့ဘူး။ ဖတ်ရင် ပူလာလို့။', en: "The wall, sister? Next to the bakery! I've stopped reading it. It only heats me up." },
   vanBoyName: { my: 'ပေါင်မုန့်ကား ကောင်လေး', en: 'Bread-van boy' },
 
@@ -167,7 +167,7 @@ export const L = {
   ],
   ssWrong: [{ my: "(ဒါလည်း သူ့အတွေးပဲ။ ဒါပေမဲ့ အရှိအတိုင်း မဟုတ်ဘူး။)", en: "(That's his thought too. But it isn't how things are.)" }],
   ssTrue: [
-    { my: 'သူတို့က ကျုပ် မဟုတ်ဘူး… ဟုတ်တယ်။ ဒါဆိုလည်း ဘာလို့ လိုလဲ ပြောမပြရသေးဘူးပဲ။', en: "They aren't me… right. And I never told them what it's for." },
+    { my: 'သူတို့က ကျုပ် မဟုတ်ဘူး… ဟုတ်တယ်။ ဒါဆိုလည်း ဘာလို့ လိုလဲ ရှင်းမပြရသေးဘူးပဲ။', en: "They aren't me… right. And I never told them what it's for." },
     { my: 'နောက်တစ်ခါ ရှင်းပြမယ်။ ဖြည်းဖြည်းလေး။', en: "I'll explain once more. Slowly." },
   ],
   traceTitle: { my: 'ဦးစံရှားနဲ့ ဘူးခေါက်မယ်', en: 'Fold a box with U San Shar' },
@@ -208,7 +208,7 @@ export const L = {
   ],
   nn2: [{ my: '…မှန်ပါတယ်။ ကျွန်တော် တစ်ညမှ မလာခဲ့တာ။', en: "…Fair. I didn't come once." }],
   ch3: [{ my: 'အောက်သံ ဆိုတတ်တဲ့သူ ရှိလား…', en: 'Does anyone know the low part…?' }],
-  ch3Pause: [{ my: '(ဘယ်သူမှ ထမလာဘူး။ စားပွဲက လူတွေ ခေါင်းလေး ညိတ်ပြီး ပြုံးပြကြတယ်။)', en: '(Nobody steps up. At the tables people shake their heads kindly.)' }], // NEW (the pause, said)
+  ch3Pause: [{ my: '(ဘယ်သူမှ ထမလာဘူး။ စားပွဲက လူတွေ ခေါင်းလေး ခါပြီး ပြုံးပြကြတယ်။)', en: '(Nobody steps up. At the tables people shake their heads kindly.)' }], // NEW (the pause, said)
   ch4: [
     { my: 'တစ်ယောက်တည်းဆိုတော့ သီချင်းက သေးသွားတယ်။ ဒါပေမဲ့ ကျွန်မ သီချင်းပဲ။', en: "Alone, it's a smaller song. But it's mine." },
     { my: 'အောက်သံနေရာကို ချန်ထားမယ်။ လေ့ကျင့်မယ့်သူ ရောက်လာရင် နှစ်ယောက် ဆိုမယ်။', en: "I'll keep the low part open. When someone who practises comes, we'll sing it as two." },
@@ -220,10 +220,10 @@ export const L = {
   uncleName: { my: 'လက်ဖက်ရည်ဆိုင် ဦးလေး', en: 'Tea-shop uncle' },
 
   // ---- 5.7 piece 7
-  uc1: [{ my: 'ဒီကစ်ကို ကြည့်… ကြိုးထုံး နှစ်ထပ်ချည်ထားလို့ လေပြင်းပြင်းမှာလည်း မပြုတ်ဘူး။', en: 'Look at this kite… double knot at the bridle, so it holds in a hard gust.' }],
+  uc1: [{ my: 'ဒီစွန်ကို ကြည့်… ကြိုးထုံး နှစ်ထပ်ချည်ထားလို့ လေပြင်းပြင်းမှာလည်း မပြုတ်ဘူး။', en: 'Look at this kite… double knot at the bridle, so it holds in a hard gust.' }],
   ml3: [
     { my: 'ဦးချစ် ပြောတာ အကုန်မှန်တယ်! နံရံမှာ ကျွန်တော် ကပ်ထားတာ။', en: 'Everything Uncle Chit says is right! I pinned it on the wall.' },
-    { my: 'ဦးချစ်က ကျွန်တော့် ကစ်ကို အလကား ပြင်ပေးတယ်။ ဒါကြောင့် ဦးချစ် ပြောသမျှ မှန်တယ်။', en: 'He fixed my kite for free. So everything he says is right.' },
+    { my: 'ဦးချစ်က ကျွန်တော့် စွန်ကို အလကား ပြင်ပေးတယ်။ ဒါကြောင့် ဦးချစ် ပြောသမျှ မှန်တယ်။', en: 'He fixed my kite for free. So everything he says is right.' },
   ],
   ucList: [{ my: 'ပန်းလေးက ကျုပ်ပြောတာတွေကို စာရင်းလုပ်ပြီး နံရံမှာ ကပ်ထားတယ်ဆိုလား… "အကုန်မှန်တယ်" တဲ့။ ကဲ၊ တစ်ခုချင်း ကြည့်ပါဦး။', en: 'Pan made a list of my sayings and pinned it on the wall, I hear… "all true", he says. Go on, look at them one by one.' }], // NEW (when Maung Pan is still in the class)
   sortTitle: { my: 'ဦးချစ် ပြောတာတွေ', en: 'Things Uncle Chit says' },
@@ -233,7 +233,7 @@ export const L = {
     { id: 'check', my: 'အရင် စစ်ကြည့်ဦး', en: 'Check first' },
   ],
   sortCards: [
-    { id: 'knot', basket: 'seen', my: 'ကြိုးထုံး နှစ်ထပ်ဆို လေထဲမှာ ကစ် မပြုတ်ဘူး။', en: 'A double knot keeps a kite up in a gust.' },
+    { id: 'knot', basket: 'seen', my: 'ကြိုးထုံး နှစ်ထပ်ဆို လေထဲမှာ စွန် မပြုတ်ဘူး။', en: 'A double knot keeps a kite up in a gust.' },
     { id: 'curl', basket: 'seen', my: 'နံရံက စာရွက်ထောင့်တွေ ကော့တက်နေပြီ။', en: "The notes' corners on the wall are curling up." },
     { id: 'loaf', basket: 'check', my: 'ဒေါ်ခင်မေ့ ပေါင်မုန့်အသစ်က နေ့လယ်ဆို မာသွားတယ်။', en: "Daw Khin May's new loaf goes hard by noon." },
     { id: 'class', basket: 'check', my: 'ညနေတန်းက အချိန်ကုန်ရုံပဲ။', en: 'The evening class is a waste of time.' },
@@ -244,7 +244,7 @@ export const L = {
   wrongCheckChit: { who: 'uchit', my: 'ဒါကတော့ မျက်စိရှေ့မှာတင် မြင်နေရတာပဲ သမီး။', en: 'But you can see that one right in front of you, dear.' }, // NEW (Uncle Chit says it when Pan is not here yet)
   ml4: [{ my: 'ဦးချစ်က သဘောကောင်းတယ်။ ပြီးတော့ မှားလည်း မှားတတ်တယ်။ နှစ်ခုလုံး ဟုတ်တယ်။', en: 'Uncle Chit is kind. And he can be wrong. Both are true.' }],
   uc2: [
-    { my: 'ကျုပ် မှားတာ ခဏခဏပဲ။ ကျုပ်ပါးစပ်ကို မယုံနဲ့၊ ကျုပ်ကစ်ကို စစ်ကြည့်။', en: "I'm wrong all the time. Don't trust my mouth, check my kites." },
+    { my: 'ကျုပ် မှားတာ ခဏခဏပဲ။ ကျုပ်ပါးစပ်ကို မယုံနဲ့၊ ကျုပ်စွန်ကို စစ်ကြည့်။', en: "I'm wrong all the time. Don't trust my mouth, check my kites." },
     { my: 'ထောင့်တွေ ကော့နေတာတော့ ကျုပ် မနက်ကတည်းက မြင်တယ်။ မိုးလာတော့မယ် ထင်တယ်။ မနက်ဖြန်ကျမှ သိမှာပေါ့။', en: "The curling corners I saw myself this morning. Rain's coming, I'd say. We'll know tomorrow." },
   ],
   cardAsk: { my: 'မေးခွန်းကတ်နဲ့ "မနက်ဖြန် မိုးရွာမယ်" ကို စစ်ကြည့်မလား။', en: 'Test "rain tomorrow" with the question card?' }, // NEW (the optional use)
@@ -259,10 +259,10 @@ export const L = {
   // ---- the seven short pieces (item `notes`, one page each)
   notes: {
     burn: { my: 'မီးကို ကိုင်ပြီး ပစ်ရင် ကိုယ်အရင် လောင်တယ်။ ချလိုက်လို့ ရတယ်၊ ကျော်သွားလို့ ရတယ်။', en: 'Pick up fire to throw it and you burn first. You can put it down, and walk past.' },
-    notbad: { my: 'ကိုယ် မရွေးတိုင်း မကောင်းတာ မဟုတ်ဘူး။ တခြားသူအတွက် ကိုက်နေနိုင်တယ်။', en: "What I don't choose isn't bad for that. It may suit someone else." },
+    notbad: { my: 'ကိုယ် မရွေးတိုင်း မကောင်းတာ မဟုတ်ဘူး။ တခြားသူအတွက် အဆင်ပြေနေနိုင်တယ်။', en: "What I don't choose isn't bad for that. It may suit someone else." },
     today: { my: 'ဆယ်နှစ်ဆိုတာ ကြားရတာပဲ ကြာတာ။ တကယ်က မြန်တယ်။ စချင်ရင် ဒီနေ့ စ။', en: 'Ten years only sound long. They go fast. If you mean to start, start today.' },
     quiet: { my: 'အမှားကို တစ်ယောက်တည်းကို တိုးတိုး ပြောတယ်၊ ကောင်းစေချင်လို့။ လူစုပြီး အပြစ်ပြောတာက ဂုဏ်ယူစရာ မဟုတ်ဘူး။', en: 'A mistake is told quietly, to the one person, wishing them well. Piling on is nothing to be proud of.' },
-    notme: { my: 'စေတနာကို ရယ်ခံရရင် ကိုယ့်အတွေးကို အရင် ပြောင်း: သူတို့က ကိုယ် မဟုတ်ဘူး။ ပြီးမှ ရှင်းအောင် နောက်တစ်ခါ ပြော။', en: "When your goodwill is laughed at, change your own thought first: they aren't you. Then explain once more, clearly." },
+    notme: { my: 'စေတနာကို အရယ်ခံရရင် ကိုယ့်အတွေးကို အရင် ပြောင်း: သူတို့က ကိုယ် မဟုတ်ဘူး။ ပြီးမှ ရှင်းအောင် နောက်တစ်ခါ ပြော။', en: "When your goodwill is laughed at, change your own thought first: they aren't you. Then explain once more, clearly." },
     standard: { my: 'ကိုယ်သတ်မှတ်ထားတာကို မလျှော့နဲ့။ ဘယ်သူမှ မလာရင်တောင် တွေ့ရာလူထက် ကိုယ့်စည်းနဲ့ကိုယ် တစ်ယောက်တည်းက ပိုကောင်းတယ်။', en: "Don't lower what you set. Even if nobody comes, alone on your own terms beats whoever turns up." },
     weigh: { my: 'ကြိုက်စရာ တစ်ခု ရှိတာနဲ့ လုပ်သမျှ မှန်တာ မဟုတ်ဘူး။ တစ်ခုချင်း ချိန်ပြီး အရှိကို အရှိအတိုင်း ကြည့်။', en: "One thing to like about someone doesn't make all they do right. Weigh each thing; see it as it is." },
   },
@@ -278,14 +278,14 @@ export const L = {
       [{ my: 'မီးဖိုက အပူကို ယူသွားပြီ။ နောက်ဘက်ခြမ်းကိုတော့ သတိထားနေတယ်။', en: "The oven took the heat. I'm watching the back of it, though." }],
       [{ my: 'ပေါင်မုန့်အသစ် နူးတယ်နော်။ နေ့လယ်မှာ မာတယ် ဆိုတာ ဘယ်သူ ပြောလဲ မသိဘူး။ လာဖိကြည့်။', en: "The new loaf's soft, you know. Who says it goes hard by noon? Come and press it." }],
     ],
-    arkarBefore: [[{ my: 'ဟင်းချိုက အိမ်လို အရသာ။ ခြောက်ခြောက်ကဟာ ဘယ်သူ စားလဲ မသိဘူး။', en: 'Soup tastes like home. Who eats it dry, I wonder.' }]],
+    arkarBefore: [[{ my: 'ဟင်းချိုက အိမ်လို အရသာ။ အခြောက်ကို ဘယ်သူ စားလဲ မသိဘူး။', en: 'Soup tastes like home. Who eats it dry, I wonder.' }]],
     arkarAfter: [[{ my: 'ဦးပုဆိုင်မှာလည်း လူတန်းကြီး။ ကျွန်တော့်အတွက် မဟုတ်ရုံပဲ။', en: "Long queue at U Pu's too. It's just not for me." }]],
     eimonBefore: [
-      [{ my: 'နံရံမှာ ကိုယ့်အကြောင်း ကပ်ခံရရင်… ကျွန်မဆို ဖြုတ်ပြီး ဆုတ်ပစ်မှာ။', en: "If they pinned me on the wall… I'd rip it down and tear it up." }],
+      [{ my: 'နံရံမှာ ကိုယ့်အကြောင်း အကပ်ခံရရင်… ကျွန်မဆို ဖြုတ်ပြီး ဆုတ်ပစ်မှာ။', en: "If they pinned me on the wall… I'd rip it down and tear it up." }],
       [{ my: 'ပန်းလေးရဲ့ အပင်က ဘူးထဲမှာ အမြစ်တွေ ထွက်နေပြီ။ ညနေတန်းထဲက ပြတင်းပေါက်ခုံပေါ်မှာ။', en: "Pan's tree has roots coming out of its tin. On the windowsill inside the evening class." }],
     ],
     eimonAfter: [
-      [{ my: 'နံရံမှာ ကိုယ့်အကြောင်း ကပ်ခံရရင်… ကျွန်မဆို ဖြုတ်ပြီး ဆုတ်ပစ်မှာ။', en: "If they pinned me on the wall… I'd rip it down and tear it up." }],
+      [{ my: 'နံရံမှာ ကိုယ့်အကြောင်း အကပ်ခံရရင်… ကျွန်မဆို ဖြုတ်ပြီး ဆုတ်ပစ်မှာ။', en: "If they pinned me on the wall… I'd rip it down and tear it up." }],
       [{ my: 'အပင်လေး မြေထဲ ရောက်သွားပြီ။ ကျွန်မလည်း စမယ်ဆိုတာ ဒီနေ့ စလိုက်မယ်။', en: "The little tree's in the ground. Whatever I've been meaning to start, I'll start today." }],
     ],
     upuAfter: [[{ my: 'ဟင်းချို ကြိုက်တဲ့သူ ကြိုက်ပါစေ။ ကျုပ်ဆိုင်မှာလည်း ထိုင်ခုံ မလွတ်ဘူး။', en: 'Let the soup folk love soup. My stools are full too.' }]],
@@ -313,7 +313,7 @@ export const L = {
     { my: 'ဒီနံရံကို ဘယ်သူမှ မဖတ်ကြတော့ဘူး။', en: 'Nobody reads this wall any more.' },
   ],
   deskWrong: [{ my: '(ဒါ ကြားခဲ့တာ။ မျက်လုံးနဲ့ ပြန်ကြည့်ပါဦး။)', en: "(That's what I heard. Look again.)" }],
-  deskDone: [{ my: 'ဖဲကြိုးလေး တက်သွားပြီ။ နံရံဆီ စာမျက်နှာ လှန်ပြီး ပြန်လာလို့ ရပြီ။', en: 'The ribbon is up. I can turn the page straight back to the wall now.' }],
+  deskDone: [{ my: 'ဖဲကြိုးလေး တက်သွားပြီ။ စာမျက်နှာ လှန်ပြီး နံရံဆီ ပြန်လာလို့ ရပြီ။', en: 'The ribbon is up. I can turn the page straight back to the wall now.' }],
 
   // ---- proof slips
   proofLoaf: { my: 'ပေါင်မုန့်အသစ်က နေ့လယ်ရောက်လည်း နူးနေတုန်းပဲ။ ကိုယ်တိုင် ဖိကြည့်ခဲ့တယ်။', en: 'The new loaf is still soft at noon. Pressed it myself.' },
@@ -327,7 +327,7 @@ export const L = {
     { my: 'မနက်ဖြန်ဆို နံရံ ပြန်ပြည့်မှာပဲ။ ကျွန်မ ဘာရေးရေး ဘယ်သူမှ မပြောင်းဘူး။', en: 'The wall will be full again tomorrow. Nothing I write changes anyone.' },
   ],
   nightWrong: [
-    [{ my: '(မဟုတ်ဘူး… ဒါ ချော့ပြောတာ။ စာတိုတွေက သူတို့ လုပ်ပြီးမှ ရေးခဲ့တာ။ နေခြည်ကလည်း သူ့ဟာသူ ဆုံးဖြတ်တာ။)', en: "(No… that flatters. I wrote the notes after they'd done it. And Nay Chi decided for herself.)" }],
+    [{ my: '(မဟုတ်ဘူး… ဒါ မြှောက်ပြောတာ။ စာတိုတွေက သူတို့ လုပ်ပြီးမှ ရေးခဲ့တာ။ နေခြည်ကလည်း သူ့ဟာသူ ဆုံးဖြတ်တာ။)', en: "(No… that flatters. I wrote the notes after they'd done it. And Nay Chi decided for herself.)" }],
     [],
     [{ my: '(မဟုတ်ဘူး… ဒါ အားလျှော့ပြောတာ။ နံရံ ပူတာ နည်းသွားတယ်။ ဆိုင်းဘုတ်လည်း ပြင်ပြီးပြီ။)', en: '(No… too gloomy. The wall is less hot. The sign is fixed.)' }],
   ],

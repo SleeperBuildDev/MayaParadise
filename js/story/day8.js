@@ -91,7 +91,7 @@ export const W = {
 const PROOF = {
   mayasays: { my: 'မင်တစ်အိုး သိမ်းထားဖို့ ခွာညိုတစ်ယောက်တည်းကို ပြောခဲ့တာ။ တံဆိပ်ထုမယ့်နေ့ တစ်နေ့အတွက်ပဲ။ ရပ်ကွက်တစ်ခုလုံးကို မဟုတ်ဘူး။', en: 'I told one carver, Khwar Nyo, to keep one pot of ink, for one stamp day. Not the whole Junction.' },
   well: { my: 'ဒီနေ့ ရွှေမင်တွင်း ကိုယ်တိုင် သွားကြည့်တယ်။ တတိယအကွင်းအထိ ပြည့်နေတယ်။ မနက်ဖြန် ထပ်ကြည့်ရမယ်။', en: 'I looked in the gold-ink well myself today: full to the third ring. Look again tomorrow.' },
-  post: { my: 'စာတိုက်ပုံးက မနက် 6:00 မှာ ထုတ်တယ်။ ပုံးပေါ်က ပြားမှာ ရေးထားတယ်။', en: 'The bridge-box is cleared at 6:00 a.m. It says so on the box.' },
+  post: { my: 'စာတိုက်ပုံးက မနက် 6:00 မှာ စာထုတ်တယ်။ ပုံးပေါ်က ပြားမှာ ရေးထားတယ်။', en: 'The bridge-box is cleared at 6:00 a.m. It says so on the box.' },
   printday: { my: 'ပုံနှိပ်နေ့တွေမှာလည်း တံတား ဖွင့်ထားတယ်။ ကိုယ်တိုင် ဖြတ်လာခဲ့တယ်။', en: 'The bridge is open on printing days. I crossed it myself.' },
   printer: { my: 'ဦးတင့်က လူငယ်ကို မုန်းတာ မဟုတ်ဘူး။ စာစီသင်ခွင့်ကို သူကိုယ်တိုင် ကမ်းခဲ့တာ။', en: "U Tint doesn't hate young people. He offered the type-setting chance himself." },
   sheet: { my: 'နေ့စဉ်စာရွက်မှာလည်း အမှား ပါတတ်တယ်။ ဒီနေ့ စာတိုက်ပုံး အချိန်ကို မှားပြီး ရိုက်မိတယ်။', en: 'The day sheet can be wrong too. Today it printed the box time wrong.' },
@@ -194,7 +194,7 @@ export async function create(story) {
   boxOb(W.slips.x, W.slips.z - 0.06, 3.5, 0.4);
   if (F('pinned')) board.pin(F('sheet') ? L.blankSheet : L.pinSheet);
   // the school (north-east corner)
-  addProp(eveningClass({ open: 1, lit: 0.5, title: { my: 'လမ်းဆုံ ကျောင်း', en: 'Junction School' }, chalk: ['ဒီနေ့ — ပေါင်းခြင်း', 'မင် ယူလာပါ'] }), W.school.x, W.school.z);
+  addProp(eveningClass({ open: 1, lit: 0.5, title: { my: 'လမ်းဆုံကျောင်း', en: 'Junction School' }, chalk: ['ဒီနေ့ — ပေါင်းခြင်း', 'မင် ယူလာပါ'] }), W.school.x, W.school.z);
   boxOb(W.school.x, W.school.z, 7.2, 5.1);
   // the Gold Ink Press, the chalk slate on its easel left of the door
   const shed = addProp(printShed({ doors: 1, slate: true }), W.shed.x, W.shed.z);

@@ -262,14 +262,16 @@ export function homeBookBudget(world) {
         const size = multi ? CELLS[o.name] : 0; // (without multi-draw each piece is a call of its own: no cells)
         const cells = new Map();
         const P = flat.position.array;
+        // (the body leaves the unseen faces out; its ink outline keeps every face, so the ink is drawn as before)
         for (let t = 0; t < nT; t++) {
-          if (mask && mask[t]) continue;
           const k = size ? Math.floor((P[t * 9] + P[t * 9 + 3] + P[t * 9 + 6]) / 3 / size) + ',' + Math.floor((P[t * 9 + 2] + P[t * 9 + 5] + P[t * 9 + 8]) / 3 / size) : '0';
-          let l = cells.get(k);
-          if (!l) cells.set(k, (l = []));
-          l.push(t);
+          let c = cells.get(k);
+          if (!c) cells.set(k, (c = { all: [], kept: [] }));
+          c.all.push(t);
+          if (!(mask && mask[t])) c.kept.push(t);
         }
-        const cellTris = [...cells.values()];
+        const cellList = [...cells.values()].filter((c) => c.kept.length);
+        const cellTris = cellList.map((c) => c.kept);
         if (!cellTris.length) continue;
         info.trisIn += nT; info.trisOut += cellTris.reduce((n, l) => n + l.length, 0);
         const key = mat.uuid + (o.receiveShadow ? 'r' : '');
@@ -284,7 +286,7 @@ export function homeBookBudget(world) {
           const same = (og.index ? og.index.count / 3 : og.attributes.position.count / 3) === nT; // (toon.js outlineGeometry keeps the body's triangle order)
           const col = ol.material.color.clone();
           outRef = outRef || ol.material;
-          outRecs.push({ obj: ol, geos: same ? cellTris.map((l) => pickOutline(og, l, px, col)) : [pickOutline(og, null, px, col)], n: ol.isInstancedMesh ? ol.instanceMatrix.count : 1, body: false });
+          outRecs.push({ obj: ol, geos: same ? [...cells.values()].map((c) => pickOutline(og, c.all, px, col)) : [pickOutline(og, null, px, col)], n: ol.isInstancedMesh ? ol.instanceMatrix.count : 1, body: false });
         }
       }
     }
@@ -338,12 +340,14 @@ export function homeBookBudget(world) {
       if (r.obj.isInstancedMesh && r.obj.instanceColor) B.colors = true;
     }
     mesh.onBeforeRender = function (renderer, sc, camera, geometry, mat, group) {
-      if (rank >= 0) ranks(renderer, camera);
-      sync(B, renderer, false);
+      try {
+        if (rank >= 0) ranks(renderer, camera);
+        sync(B, renderer, false);
+      } catch (err) { giveUp(err); }
       THREE.BatchedMesh.prototype.onBeforeRender.call(this, renderer, sc, camera, geometry, mat, group);
     };
     mesh.onBeforeShadow = function (renderer, object, camera, shadowCamera, geometry, depthMaterial) {
-      sync(B, renderer, true);
+      try { sync(B, renderer, true); } catch (err) { giveUp(err); }
       THREE.BatchedMesh.prototype.onBeforeRender.call(this, renderer, null, shadowCamera, geometry, depthMaterial);
     };
     return B;
@@ -367,6 +371,18 @@ export function homeBookBudget(world) {
       list.sort((a, b) => (a.renderOrder - b.renderOrder) || (b.userData.rankZ - a.userData.rankZ) || (a.id - b.id));
       list.forEach((o, i) => rankOf.set(o, i));
     }
+  }
+
+  /** Something went wrong keeping a copy in step: the originals draw themselves again, the copies go. */
+  function giveUp(err) {
+    if (info.err) return;
+    info.err = String(err?.message || err);
+    console.warn('homeBookBudget', err);
+    for (const B of batches) {
+      B.mesh.visible = false;
+      for (const r of B.recs) if (r.obj.layers.mask === HIDDEN) r.obj.layers.mask = 1;
+    }
+    for (const B of batches) B.recs = [];
   }
 
   /** Is the original shown (it and every parent up to the scene)? Hidden on the camera's layer by us is fine. */

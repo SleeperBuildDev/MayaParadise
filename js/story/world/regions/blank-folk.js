@@ -35,13 +35,13 @@ const job = (x, z, h, mood = 'work', r = 0.9, workFor = [8, 16]) => ({ area: { x
 /** heading 0 faces +Z (toward the follow camera). Spots stand beside the blank-life.js things placed in blank.js. */
 export const FOLK_PEOPLE = [
   { id: 'bkolay', x: 132.0, z: 9.3, heading: 0.5,
-    hello: { my: 'ကောင်းတယ်လို့ ကျွန်တော် ပြောတာကို မယုံနဲ့ဦး။ တစ်ငုံ သောက်ကြည့်ပြီးမှ ပြောပါ။', en: "Don't take my word that it's good. Have a sip, then you tell me." },
+    hello: { my: 'ကောင်းတယ်လို့ ကျွန်တော် ပြောတာ မယုံနဲ့ဦး။ တစ်ငုံ သောက်ကြည့်ပြီးမှ ပြော။', en: "Don't take my word that it's good. Have a sip, then you tell me." },
     job: job(132.0, 9.3, 0.5, 'work', 0.6) },
   { id: 'bhlayi', x: 127.9, z: 6.2, heading: 0.3,
-    hello: { my: 'ဒီရေက မင်နံ့ ရမယ်လို့ လူတိုင်း ပြောကြတယ်။ ကိုယ်တိုင် ခပ်ပြီး မြည်းကြည့်တော့ ချိုတယ်။', en: 'Everyone said this water would taste of ink. I drew a bucket and tasted it myself. Sweet.' },
+    hello: { my: 'ဒီရေက မင်နံ့ ရမယ်လို့ လူတိုင်း ပြောကြတာ။ ကိုယ်တိုင် ခပ်မြည်းကြည့်တော့ ချိုတယ်။', en: 'Everyone said this water would taste of ink. I drew a bucket and tasted it myself. Sweet.' },
     job: job(127.9, 6.2, 0.3, 'work', 0.7) },
   { id: 'bnwe', x: 133.2, z: 1.0, heading: 0,
-    hello: { my: 'ဒီဖိနပ် ပြင်လို့ မရတော့ဘူးတဲ့။ ကိုယ်တိုင် လှန်ကြည့်တော့ ကြိုးတစ်ချောင်း ပြုတ်ရုံပဲ။', en: "They told me these sandals were past mending. I turned them over myself: one strap off, that's all." },
+    hello: { my: 'ဒီဖိနပ် ပြင်မရတော့ဘူးတဲ့။ ကိုယ်တိုင် လှန်ကြည့်တော့ ကြိုးတစ်ချောင်း ပြုတ်ရုံပဲ။', en: "They told me these sandals were past mending. I turned them over myself: one strap off, that's all." },
     job: job(133.2, 1.0, 0, 'work', 0.4) },
   { id: 'bsawpaw', x: 129.6, z: 11.6, heading: -0.3,
     hello: { my: 'ဒီစာမျက်နှာပေါ် ဆွဲလို့ မရဘူးလို့ အကြီးတွေက ပြောတယ်။ ကျွန်တော် စမ်းကြည့်တယ်။ ရတယ်လေ!', en: "The big kids said you can't draw on this page. I tried it. You can!" },

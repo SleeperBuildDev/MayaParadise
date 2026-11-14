@@ -2225,5 +2225,5 @@ export const ROOMS = {
   sandahouse: { name: { my: 'ဒေါ်စန္ဒာတို့ အိမ်', en: "Daw Sanda's house" }, district: 'wharf', build: buildSandahouse },
   caneshed: { name: { my: 'ဦးဘိုလေးရဲ့ ကြိမ်တဲ', en: "U Bo Lay's cane shed" }, district: 'wharf', build: buildCaneshed },
   // (a Junction building, kept in this file because doors.js looks for it here: HINT bridgehut -> wharf)
-  bridgehut: { name: { my: 'တံတားစောင့် တဲ', en: "The bridge hands' hut" }, district: 'junction', days: [7, 8], build: buildBridgehut },
+  bridgehut: { name: { my: 'တံတားစောင့်တဲ', en: "The bridge hands' hut" }, district: 'junction', days: [7, 8], build: buildBridgehut },
 };

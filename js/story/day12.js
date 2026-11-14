@@ -719,7 +719,23 @@ export async function create(story) {
     const room = story.room;
     const sp = room?.spots?.mayaStall;
     if (sp) { await walkMaya(sp.x, sp.z, 4000); faceMaya(-2.6, -0.2); }
+    // re-frame on the pair once she stands at the stall (the talk's two-shot was set before the walk, so she
+    // ended up between the lens and Daw Ohn)
+    // (each speaker in turn with Maya, she a little toward the lens, as in a talk)
+    const pairShot = (id) => {
+      const e = story.people?.get?.(id);
+      if (!sp || !e || !story.twoShot) return;
+      try {
+        const m = game.maya.root.position, q = e.p.root.position;
+        const az = story.twoShot(m, q);
+        let h = Math.atan2(q.x - m.x, q.z - m.z), d = az - h;
+        d = Math.atan2(Math.sin(d), Math.cos(d));
+        faceMaya(m.x + Math.sin(h + d * 0.5), m.z + Math.cos(h + d * 0.5));
+      } catch { /* no shot */ }
+    };
+    pairShot('dawohn');
     await say('dawohn', L.oh1, { face: 'hot' });
+    pairShot('micho');
     await say('micho', L.mcHere, { face: 'worried' });
     F('ohnMet', true);
     await lidScene();
@@ -1220,6 +1236,9 @@ export async function create(story) {
     if (!F('htMet') && ht && Math.hypot(m.x - ht.p.root.position.x, m.z - ht.p.root.position.z) < 3.4) { story.talkTo(ht); return; }
     // he is at the far bed and Maya is in his plot: the three rows
     if (F('htOut') && htAtBed && !F('replant') && m.x > P.plotHP.x0 - 1 && m.x < P.plotHP.x1 + 1 && m.z > P.backZ && m.z < P.fenceZ + 2.2) { stage(replantScene); return; }
+    // (a reload between the replant and the gate: the gate scene was only ever started by the replant, so ch 19
+    // could never finish; it runs again when Maya is back in his plot)
+    if (F('replant') && !F('gate') && !gateRunning && m.x > P.plotHP.x0 - 1 && m.x < P.plotHP.x1 + 1 && m.z > P.backZ && m.z < P.fenceZ + 2.2) { stage(gateScene); return; }
     // Daw Ohn at the scale: the weighing when Maya is close
     if (F('lent') && !F('weighed') && ohnAtScale && near(P.ohnScale.x, P.ohnScale.z, 4)) { stage(weighScene); return; }
     // home in the evening: Ma Wint War by the board

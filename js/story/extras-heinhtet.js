@@ -60,7 +60,7 @@ const MEET_WAIT = 25; // a meet with nobody near: keep looking this long (she wa
 const SHARE = { dash: 0.44, meet: 0.36 }; // the rest: pass
 const SING = { pass: 0.5, meet: 0.12, dash: 0.14 };
 const WALKUP = { after: 200, every: 15, chance: 0.16, fromDay: 2 };
-const DASH_GAP = [120, 420]; // car dash: actual driving time
+const DASH_GAP = [180, 900]; // car dash: 3-15 min of actual driving time (owner)
 const BLOCK = { fromDay: 2, everyDays: 2, check: 5, chance: 0.05, minDrive: 120, speed: 4.6 };
 // his own 4 calls on top of the frame stay under the cap the town chatter keeps (72), never past the triangle budget
 const CALL_CAP = 68, CALL_LEAVE = 80, TRI_CAP = 152000;
@@ -239,7 +239,7 @@ export function installHeinHtet(game, story, ow) {
     const px = Math.hypot(a.x - b.x, a.y - b.y);
     const mp = mayaXZ(), ma = proj(mp.x, 0, mp.z), mb = proj(mp.x, 1.3, mp.z);
     const mpx = ma && mb ? Math.hypot(ma.x - mb.x, ma.y - mb.y) : 0;
-    return px >= Math.max(W() * (driving() ? 0.06 : 0.08), mpx * 0.8);
+    return px >= (driving() ? W() * 0.05 : Math.max(W() * 0.08, mpx * 0.8));
   }
   /** may he stand / run here? o: { allow: entry, mayaR, noCar, avoidCarPath } */
   const whyNot = {}; // (tests) what stopped his paths
@@ -635,11 +635,15 @@ export function installHeinHtet(game, story, ow) {
     const car = driving();
     const opt = { avoidCarPath: car, ...o };
     const near = kind === 'dash' ? Math.random() < 0.45 : Math.random() < 0.3;
-    const depths = car ? [9, 13, 6, 17, 4] : near ? [-1.6, 2.2, 3.5, 6, 9] : [6, 9, 12, 4, 2.5, 15];
+    const depths = car ? [2, 5, -2, 8, -5, 11] : near ? [-1.6, 2.2, 3.5, 6, 9] : [6, 9, 12, 4, 2.5, 15];
+    // driving: the lens rides with the car, so a point is judged where it will be on screen as he crosses (about a
+    // second on), not where it is now (he once crossed under the top bar while she drove on)
+    let lx = 0, lz = 0;
+    if (car) { const st = drive().state, k = Math.min(1.2, 0.9 + Math.abs(st.speed) * 0.03); lx = Math.sin(st.heading) * st.speed * k; lz = Math.cos(st.heading) * st.speed * k; }
     const cands = [];
     for (const k of depths) {
       const jx = rand(-1.2, 1.2);
-      const qx = mp.x + cam.fx * k + cam.rx * jx, qz = mp.z + cam.fz * k + cam.rz * jx;
+      const qx = mp.x + lx + cam.fx * k + cam.rx * jx, qz = mp.z + lz + cam.fz * k + cam.rz * jx;
       const r = ow?.net?.nearest?.(qx, qz);
       if (r && r.dist < 7) {
         const pt = pointAt(r.edge, r.s, new THREE.Vector3());
@@ -652,7 +656,14 @@ export function installHeinHtet(game, story, ow) {
         cands.push({ x: qx, z: qz, dx: dx / l, dz: dz / l, road: false });
       }
     }
-    if (!car) {
+    if (car) {
+      // driving: along the pavement beside her road, racing the car (never into its way)
+      const st = drive().state, hx = Math.sin(st.heading), hz = Math.cos(st.heading);
+      for (const side of [3.6, -3.6, 4.8, -4.8]) {
+        const k = rand(-1, 3);
+        cands.push({ x: mp.x + lx + hz * side + hx * k, z: mp.z + lz - hx * side + hz * k, dx: hx, dz: hz, road: false, along: true });
+      }
+    } else {
       // up / down the screen past her, a step or two to her side
       for (const side of [1.5, -1.5, 2.5, -2.5]) {
         const k = rand(0.5, 3);
@@ -672,7 +683,7 @@ export function installHeinHtet(game, story, ow) {
         camBasis();
         t0 = performance.now();
       }
-      if (!inView(c.x, c.z, [0.06, 0.26, 0.94, 0.8])) continue;
+      if (!inView(c.x - lx, c.z - lz, car ? [0.08, 0.32, 0.92, 0.76] : [0.06, 0.26, 0.94, 0.8])) continue;
       dg.view++;
       if (!clearAt(c.x, c.z, opt)) continue;
       dg.clear++;
@@ -770,15 +781,20 @@ export function installHeinHtet(game, story, ow) {
       if (!leaving) {
         faceAt = { x: mp.x, z: mp.z };
         await sleep(0.45);
-        await quietWait(t, 4);
         const anim = line?.anim && !sing ? line.anim : pick(ANIMS_STOP);
-        // (he stopped to say it: after a few seconds' wait the town chatter is paused for him, never her own thought)
+        // his bit starts at once; the line waits a moment for a townsperson's line to end, then the town chatter is
+        // paused for him (never over her own thought)
+        const animP = !sing && alive(t) && !leaving ? hh.play(anim) : null;
+        await quietWait(t, 1.6);
         if (line && !game.ui?.barkOpen && alive(t) && !leaving) {
           holdChatter(true);
           bubble(hh, line, null, sing ? 'hh sing' : 'hh');
           if (sing) { stats.sing++; singT = msFor(line) / 1000; }
         }
-        if (alive(t) && !leaving) { if (!sing) await hh.play(anim); else await sleep(Math.min(3.2, msFor(line || {}) / 1000)); }
+        if (alive(t) && !leaving) {
+          if (animP) await animP;
+          if (line && alive(t) && !leaving) await sleep(Math.min(2.6, msFor(line) / 1000 * 0.6));
+        }
         if (alive(t) && !leaving) await sleep(0.5);
         holdChatter(false);
       }

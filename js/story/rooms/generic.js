@@ -143,7 +143,7 @@ const JOB_NAMES = {
   cook: { my: 'ထမင်းချက်နေတယ်', en: 'cooking' }, knead: { my: 'မုန့်နယ်နေတယ်', en: 'kneading dough' }, pour: { my: 'လက်ဖက်ရည် ဖျော်နေတယ်', en: 'making tea' },
   keep: { my: 'ဆိုင်ထိုင်နေတယ်', en: 'minding the shop' }, pot: { my: 'ပျိုးပင် စိုက်နေတယ်', en: 'potting seedlings' }, press: { my: 'စာရွက် ရိုက်နေတယ်', en: 'printing' },
   plane: { my: 'ပျဉ်ချပ် ရွေနေတယ်', en: 'planing a board' }, carve: { my: 'တံဆိပ်တုံး ထွင်းနေတယ်', en: 'carving a stamp' }, mend: { my: 'ပိုက်ကွန် ဖာနေတယ်', en: 'mending a net' },
-  throw: { my: 'အိုးလုပ်နေတယ်', en: 'throwing a pot' }, weave: { my: 'ယက်ကန်း ခတ်နေတယ်', en: 'weaving' }, draw: { my: 'အခန်းကို ဆွဲနေတယ်', en: 'drawing the room in' },
+  throw: { my: 'အိုးလုပ်နေတယ်', en: 'throwing a pot' }, weave: { my: 'ရက်ကန်း ခတ်နေတယ် |', en: 'weaving' }, draw: { my: 'အခန်းကို ဆွဲနေတယ်', en: 'drawing the room in' },
   read: { my: 'စာဖတ်နေတယ်', en: 'reading' }, study: { my: 'စာကျက်နေတယ်', en: 'studying' }, sweep: { my: 'တံမြက်လှည်းနေတယ်', en: 'sweeping' },
   play: { my: 'ကစားနေတယ်', en: 'playing' }, nap: { my: 'မှေးနေတယ်', en: 'napping' }, idle: { my: 'နားနေတယ်', en: 'resting' },
 };

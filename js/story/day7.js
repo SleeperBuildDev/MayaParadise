@@ -93,7 +93,7 @@ const BEATS = [
   ['owners', ['owners']],
   ['yyTalk', ['yyTalk', 'still']],
   ['knot', ['slate7', 'knot']],
-  ['gave', ['gave', 'oldWay']],
+  ['gave', ['shelved', 'gave', 'oldWay']],
   ['changed', ['see.beans', 'see.chart', 'see.wheel', 'changed', 'slate9']],
   ['benches', ['carryStarted', 'benches']],
   ['bowl', ['bowl']],

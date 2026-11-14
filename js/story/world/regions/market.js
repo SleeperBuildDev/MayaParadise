@@ -249,7 +249,7 @@ const SUN = add({ k: 'sundries', x: 33.4, z: CF - 2.6, w: 5.2, d: 5.2 });
 add({ k: 'planters', x: 37.4, z: 296.4, seed: 4 });
 for (const x of [-34.2, -20.4, -7.0, 10.1, 29.6, 38.4]) add({ k: 'lamp', x, z: 297.95 });
 add({ k: 'dog', x: 36.6, z: 298.2, ry: 0.4, seed: 5 }); // asleep on the footpath by Ma Yu Yu's
-folk(-30.9, 297.6, -0.5, 'sweep', 710, { woman: true }); // sweeping the corner of the west lane
+folk(-33.1, 297.6, -0.5, 'sweep', 710, { woman: true }); // sweeping the corner of the west lane (on the footpath: at x -30.9 she stood in the lane, the car drove past her elbow)
 for (const [x0, x1] of [[-48, -40], [-20, -6], [11, 17]]) add({ k: 'drain', x: (x0 + x1) / 2, z: 297.7, len: x1 - x0 });
 
 // ---- Counter Lane, south side: low things only (hawkers' mats, street tea, a food cart, a trishaw)
@@ -503,12 +503,12 @@ export const DESKS = [
 // Spots the day scripts use (world metres; h = heading, 0 faces +Z / the camera)
 // ---------------------------------------------------------------------------------
 const flagAt = (n) => ({ x: PO.x + poFlagX(PO.w, n), y: 4.31, z: poFront + 0.18 });
-const CB = (i) => CARV.x - CARV.w / 2 + (CARV.w / 3) * (i + 0.5) - 0.2; // carvers' bench i (0, 1)
+const CB = (i) => CARV.x - CARV.w / 2 + (CARV.w / 3) * (i + 0.5) - 0.2; // carvers' bench i (0, 1); its stool is at (CB(i), CARV.z + 1.85), so they stand 0.55 m to its side (not in it)
 export const SPOTS = {
   crease: { x: 7, z: 258 },                       // where the envelope road comes over the fold onto the letter
   gateSign: { x: -3.2, z: 260.6 },
   riceCart: { x: 2.6, z: 261.4 }, kyar: { x: 3.9, z: 262.7, h: -0.4 },
-  mapStall: { x: 12.0, z: STALL_Z }, yaung: { x: 12.4, z: STALL_Z - 0.3, h: 0 },
+  mapStall: { x: 12.0, z: STALL_Z }, yaung: { x: 11.75, z: STALL_Z - 0.3, h: 0 },
   pyoneStall: { x: 21.6, z: STALL_Z }, pyone: { x: 21.2, z: STALL_Z - 0.3, h: 0 },
   shortcutMouth: { x: SHORTCUT_X, z: STAMP_Z + 2.5 },    // the gap's mouth on Stamp Lane's south footpath
   naychiShortcut: { x: SHORTCUT_X, z: SOUTH_Z1 + 1.4, h: 0 }, // Nay Chi in the gap, facing the crates
@@ -524,7 +524,7 @@ export const SPOTS = {
   thanaka: { x: 12.6, z: 296.6 }, pwapwa: { x: 12.6, z: 295.8, h: 0 },
   counterDesk: { x: 27.6, z: 296.8 },
   carvers: { x: CARV.x, z: CARV.z }, khwarnyoBench: { x: CB(0), z: CARV.z + 2.4 }, kolwinBench: { x: CB(1), z: CARV.z + 2.4 },
-  khwarnyo: { x: CB(0), z: CARV.z + 1.85, h: 0 }, kolwin: { x: CB(1), z: CARV.z + 1.85, h: 0 },
+  khwarnyo: { x: CB(0) + 0.55, z: CARV.z + 1.85, h: 0 }, kolwin: { x: CB(1) + 0.55, z: CARV.z + 1.85, h: 0 },
   kolwinDoor: { x: kolwinDoorX, z: CARV.z + 1.9 }, kolwinChimney: { x: kolwinDoorX + 1.0, y: 5.3, z: CARV.z - 0.6 }, // smoke after ch 10
   kolwinOutside: { x: 27.4, z: 298.6, h: -0.4 },  // Day 6: by the post office's east end (the desk corner)
   sundriesDoor: { x: SUN.x, z: SUN.z + SUN.d / 2 + 0.35 },
@@ -546,11 +546,11 @@ export const TOWN = town({ ITEMS, add, folk, defs: { ...ART, ...PROP }, keep: KE
 export const MK = {
   crease: { x: 7, z: 258.4 },
   cart: { x: 2.6, z: 261.4 }, kyar: { x: 3.9, z: 262.7, h: -0.4 },
-  mapStall: { x: 12.0, z: STALL_Z }, yaung: { x: 12.4, z: STALL_Z - 0.3, h: 0 },
+  mapStall: { x: 12.0, z: STALL_Z }, yaung: { x: 11.75, z: STALL_Z - 0.3, h: 0 },
   north: [[15.2, 'red'], [18.4, 'green'], [21.6, 'gold'], [24.8, 'red']], northZ: STALL_Z,
   pyone: { x: 21.2, z: STALL_Z - 0.3, h: 0 },
   benches: [{ x: CB(0), z: CARV.z + 2.4 }, { x: CB(1), z: CARV.z + 2.4 }],
-  khwarnyo: { x: CB(0), z: CARV.z + 1.85, h: 0 }, kolwin: { x: CB(1), z: CARV.z + 1.85, h: 0 },
+  khwarnyo: { x: CB(0) + 0.55, z: CARV.z + 1.85, h: 0 }, kolwin: { x: CB(1) + 0.55, z: CARV.z + 1.85, h: 0 },
   south: [[SHORTCUT_X - 2.15, 'gold'], [SHORTCUT_X + 2.15, 'green']], southZ: SOUTH_Z1,
   gap: { x: SHORTCUT_X, z: SOUTH_Z1 }, crates: { x: SHORTCUT_X, z: SOUTH_Z2 + 1.75 }, naychi: { x: SHORTCUT_X, z: SOUTH_Z1 + 1.4, h: 0 },
   tree: { x: 31.6, z: 280.4 }, stone: { x: 29.9, z: 281.4 }, dogs: [[28.8, 282.3, 'tan', true], [30.9, 282.9, 'black', false], [32.4, 281.9, 'brindle', false]],
@@ -574,12 +574,12 @@ export const MK = {
 const job = (x, z, h, r, mood = 'work', workChance = 0.8, workFor = [6, 14]) => ({ area: { x, z, r }, spot: { x, z, h }, mood, workChance, workFor });
 export const PEOPLE = [
   { id: 'kyar', x: 3.9, z: 262.7, heading: -0.4, hello: { my: 'ကိုယ့်လယ်က ဆန်လေ။ ဘယ်ကို ပေးမလဲ ကိုယ် ရွေးပြီးပြီ။', en: "Rice from my own field. I've chosen where it goes." }, job: job(3.9, 262.7, -0.4, 1.4, 'work', 0.7, [6, 12]) },
-  { id: 'yaung', x: 12.4, z: STALL_Z - 0.3, heading: 0, hello: { my: 'မာရာ့လမ်း! လမ်းမပျောက်ချင်ရင် မာရာ့နောက် လိုက်!', en: "Maya's Way! Don't want to get lost? Follow Maya!" }, job: job(12.4, STALL_Z - 0.3, 0, 1.0) },
+  { id: 'yaung', x: 11.75, z: STALL_Z - 0.3, heading: 0, hello: { my: 'မာရာ့လမ်း! လမ်းမပျောက်ချင်ရင် မာရာ့နောက် လိုက်!', en: "Maya's Way! Don't want to get lost? Follow Maya!" }, job: job(11.75, STALL_Z - 0.3, 0, 0.35) },
   { id: 'pyone', x: 21.2, z: STALL_Z - 0.3, heading: 0, hello: { my: 'ဆိုင်ရှေ့ ပိတ်မရပ်နဲ့! စာအိတ် မရွေးရင် ဘေးဖယ်။', en: "Don't block my stall! Not choosing envelopes? Move aside." }, job: job(21.2, STALL_Z - 0.3, 0, 1.0) },
   { id: 'pwapwa', x: 12.6, z: 295.8, heading: 0, hello: { my: 'သနပ်ခါး ကိုယ့်လက်နဲ့ သွေးမှ မွှေးတယ်။ သူများ သွေးပေးတာ စောင့်နေရင် နေကုန်သွားမယ်။', en: "Thanaka smells sweetest ground by your own hand. Wait for someone else to grind it and the day is gone." }, job: job(12.6, 295.8, 0, 0.9, 'work', 0.85, [8, 16]) },
   { id: 'thiri', x: 15.4, z: 295.95, heading: 0, hello: { my: 'စာတိုက်အလံ မြင့်လာမလား မသိဘူး…', en: 'I wonder if the post-office flag will go up…' }, job: job(15.4, 295.95, 0.2, 1.2, 'read', 0.6, [5, 10]) },
-  { id: 'khwarnyo', x: CB(0), z: CARV.z + 1.85, heading: 0, hello: { my: 'သုံးဆယ့်ရှစ်… သုံးဆယ့်ကိုး… စမ်းတုံး လေးဆယ်ပြည့်ရင် ပြိုင်ပွဲ တင်မယ်။', en: "Thirty-eight… thirty-nine… at forty trial blocks I'll enter the contest." }, job: job(CB(0), CARV.z + 1.85, 0, 0.6, 'work', 0.9, [10, 20]) },
-  { id: 'kolwin', x: CB(1), z: CARV.z + 1.85, heading: 0, hello: { my: 'ငါ့တပည့်ဟောင်းလား။ သူ့ဘာသာ ထုပါစေ။', en: 'My old pupil? Let her carve on her own.' }, job: job(CB(1), CARV.z + 1.85, 0, 0.6, 'work', 0.9, [10, 20]) },
+  { id: 'khwarnyo', x: CB(0) + 0.55, z: CARV.z + 1.85, heading: 0, hello: { my: 'သုံးဆယ့်ရှစ်… သုံးဆယ့်ကိုး… စမ်းတုံး လေးဆယ်ပြည့်ရင် ပြိုင်ပွဲ တင်မယ်။', en: "Thirty-eight… thirty-nine… at forty trial blocks I'll enter the contest." }, job: job(CB(0) + 0.55, CARV.z + 1.85, 0, 0.2, 'work', 0.9, [10, 20]) },
+  { id: 'kolwin', x: CB(1) + 0.55, z: CARV.z + 1.85, heading: 0, hello: { my: 'ငါ့တပည့်ဟောင်းလား။ သူ့ဘာသာ ထုပါစေ။', en: 'My old pupil? Let her carve on her own.' }, job: job(CB(1) + 0.55, CARV.z + 1.85, 0, 0.2, 'work', 0.9, [10, 20]) },
   ...FOLK_PEOPLE, // townsfolk at their work (market-folk.js; they appear once cast.js lists them)
   ...TOWN.TOWN_PEOPLE, // and the town pass's (market-townfolk.js; the same: once cast.js lists them)
 ];

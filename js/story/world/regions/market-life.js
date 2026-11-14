@@ -25,6 +25,7 @@
 import { PALETTE } from '../../../game/toon.js';
 import { jitter } from '../../../game/voxel.js';
 import { shade, rng } from '../kit.js';
+import { folkArms, broom } from '../folk-arms.js';
 
 const K = {
   wood: PALETTE.wood, woodD: PALETTE.woodDark, woodL: '#CDA577', ink: PALETTE.ink, cream: '#F6EEDB', white: PALETTE.white,
@@ -77,34 +78,33 @@ function folk(g, f, it) {
   const tw = 0.4 * s, th = (kid ? 0.42 : 0.5), ty = hipY + th / 2;
   const lean = pose === 'sweep' ? 0.25 : pose === 'read' ? 0.15 : squat ? 0.3 : 0;
   g.boxR(0, ty, lean * 0.3, tw, th, 0.26 * s, top, lean, 0, 0);
-  // arms: down at the sides, or at work
+  // arms: down at the sides, or at work; each turns about its shoulder and ends in a hand, and what the pose holds
+  // is drawn in the hand that holds it (folk-arms.js)
   const ay = ty + th / 2 - 0.05, ax = tw / 2 + 0.06;
-  const arm = (sx, rx, rz = 0) => g.boxR(sx * ax, ay - 0.2 * s, 0.04 + Math.sin(rx) * 0.2, 0.11 * s, 0.42 * s, 0.11 * s, top, rx, 0, rz);
-  const hand = (x, y, z) => g.box(x, y, z, 0.1 * s, 0.1 * s, 0.1 * s, skin);
+  const { arm, reach } = folkArms(g, f, { ax, ty, th, lean, s, top, skin });
   if (pose === 'sweep') {
-    arm(-1, -0.9); arm(1, -0.7);
-    g.boxR(0.05, 0.62, 0.42, 0.04, 1.2, 0.04, K.woodL, 0.55, 0, 0.1); // the broom handle
-    g.boxR(0.0, 0.08, 0.78, 0.36, 0.16, 0.08, K.bambooD, 0.4, 0, 0); // its head
+    // the broom in the right hand, its head on the paving ahead; the left hand at the top of the handle
+    reach(1, broom(g, arm(-1, -0.55, 0.3), { handle: K.woodL, head: K.bambooD }));
   } else if (pose === 'carry') {
-    arm(-1, 0); arm(1, -2.6);
-    g.box(0.18, ty + th / 2 + 0.16, -0.02, 0.5, 0.32, 0.36, it.load || K.rice); // a sack on the shoulder
+    arm(-1, 0); reach(1, [ax, ay + 0.2, 0.22]); // the left hand steadies the sack
+    g.box(0.18, ty + th / 2 + 0.16, -0.02, 0.5, 0.32, 0.36, it.load || K.rice); // a sack on the left shoulder
     g.box(0.18, ty + th / 2 + 0.34, -0.02, 0.2, 0.06, 0.18, K.twine);
   } else if (pose === 'head') {
-    arm(-1, -2.9); arm(1, 0);
+    reach(-1, [-0.34, ay + 0.42, 0.02]); arm(1, 0); // the right hand up at the basket's rim
     const c = it.load || K.mustard;
     g.box(0, ty + th / 2 + 0.36, 0, 0.62, 0.12, 0.62, K.bambooD); // the flat basket on her head
     for (let k = 0; k < 4; k++) f.box(-0.14 + (k % 2) * 0.28, ty + th / 2 + 0.47, -0.14 + (k >> 1) * 0.28, 0.2, 0.12, 0.2, k % 2 ? c : shade(c, 0.85));
   } else if (pose === 'read') {
-    arm(-1, -1.0); arm(1, -1.0);
+    reach(-1, [-0.2, ty - 0.02, 0.36]); reach(1, [0.2, ty - 0.02, 0.36]); // a hand at each side of the paper
     g.boxR(0, ty + 0.0, 0.36, 0.36, 0.26, 0.02, K.cream, -0.7, 0, 0); // a newspaper / a letter
     f.box(0, ty + 0.02, 0.37, 0.24, 0.02, 0.01, K.ink);
   } else if (pose === 'pour') {
-    arm(-1, -1.2); arm(1, -0.6, -0.3);
-    g.box(0.24, ay - 0.1, 0.4, 0.16, 0.18, 0.14, K.white); // the kettle
-    g.box(0.3, ay - 0.04, 0.5, 0.05, 0.05, 0.1, K.white);
+    arm(-1, -1.2);
+    const [hx, hy, hz] = arm(1, -0.6, -0.3); // the kettle hangs from the left hand
+    g.box(hx - 0.02, hy - 0.1, hz + 0.04, 0.16, 0.18, 0.14, K.white);
+    g.box(hx + 0.04, hy - 0.04, hz + 0.14, 0.05, 0.05, 0.1, K.white);
   } else if (pose === 'kid' && it.hold === 'kite') {
-    arm(-1, 0); arm(1, -2.4);
-    hand(ax, ay + 0.3, 0.08);
+    arm(-1, 0); reach(1, [ax, ay + 0.6, 0.06]); // the left hand up, holding the kite line
   } else {
     arm(-1, sit ? -0.6 : 0); arm(1, sit ? -0.6 : 0);
   }
@@ -220,10 +220,12 @@ function foodCart(g, f, it) {
   g.box(0, 0.75, 0.355, 1.3, 0.12, 0.02, K.cream);
   for (const sx of [-0.45, 0.45]) { g.box(sx, 0.28, 0.4, 0.06, 0.5, 0.5, K.ink); g.box(sx, 0.28, 0.4, 0.04, 0.36, 0.36, '#8E8173'); }
   g.boxR(-0.95, 0.85, 0, 0.6, 0.05, 0.05, K.woodD, 0, 0, 0.1);
-  // the parasol
+  // the parasol: eight striped wedges of a true low cone (kit.js parasol: overlapping tilted panels tore into
+  // stripes and holes on phones while the camera moved), a cap on top
   g.box(0.5, 1.6, -0.25, 0.05, 1.2, 0.05, K.woodD);
   const pc = [K.red, K.cream];
-  for (let k = 0; k < 8; k++) g.box(0.5 + Math.cos(k * Math.PI / 4) * 0.5, 2.18, -0.25 + Math.sin(k * Math.PI / 4) * 0.5, 0.62, 0.05, 0.62, pc[k % 2], k * Math.PI / 4);
+  g.parasol(0.5, 2.21, -0.25, 0.8, 0.2, pc);
+  g.box(0.5, 2.24, -0.25, 0.12, 0.08, 0.12, K.red);
   if (kind === 'mohinga') {
     g.box(-0.3, 1.2, 0, 0.5, 0.32, 0.5, K.tinD); g.box(-0.3, 1.38, 0, 0.54, 0.04, 0.54, K.tin); // the big soup pot
     for (let k = 0; k < 4; k++) f.box(0.25 + (k % 2) * 0.2, 1.08, -0.15 + (k >> 1) * 0.25, 0.16, 0.06, 0.16, K.white); // bowls

@@ -52,8 +52,9 @@ const FRAG_BODY = `
     if ( uCutN > 0.0 ) {
       vec2 cd2 = uCutB.xz - uCutA.xz;
       float ti = dot( vCutAnc.xy - uCutA.xz, cd2 ) / max( dot( cd2, cd2 ), 1e-3 );
-      float kn = ( ti - uCutN + 0.1 ) / 0.1;
-      if ( kn < 1.0 && ( kn < 0.0 || cutNoise( vec2( 27.619, 57.583 ) ) > kn ) ) discard;
+      // a clean, whole cut at one line (the signs' line too, index.js updateSigns): the item's anchor is one
+      // point, so a dithered band here left a house standing in it speckled for as long as she stood still
+      if ( ti < uCutN - 0.05 ) discard;
     }
     for ( int k = 0; k < ${BLOCKERS}; k++ ) {
       vec4 bk = uCutI[ k ];
@@ -64,7 +65,12 @@ const FRAG_BODY = `
         float keepY = bk.w;
       #endif
       if ( bk.z > 0.0 && abs( vCutAnc.x - bk.x ) + abs( vCutAnc.y - bk.y ) < 0.02 && vCutW.y > keepY ) {
-        if ( bk.z >= 0.999 || cutNoise( vec2( 12.9898, 78.233 ) ) < bk.z ) discard;
+        #ifdef CUT_DEPTH
+          // the shadow goes in one step: dithered in the sun's map it fell on the ground as speckled grain
+          if ( bk.z > 0.5 ) discard;
+        #else
+          if ( bk.z >= 0.999 || cutNoise( vec2( 12.9898, 78.233 ) ) < bk.z ) discard;
+        #endif
       }
     }
   }

@@ -29,6 +29,7 @@
 //        'sweep' (broom), 'carry' (a yoke of two buckets), 'head' (a basket on the head), 'squat' (weeding),
 //        'sit' (on a low stool), 'stand', 'play' (a child with a cane ball)
 import { rng, shade } from '../kit.js';
+import { folkArms, broom } from '../folk-arms.js';
 
 const K = {
   ink: '#2A2118', dark: '#3A2E25', iron: '#4A3B30', wood: '#B58A5A', woodD: '#7A5434', woodL: '#CDA577', woodG: '#9E8A70', woodR: '#A0704A',
@@ -291,24 +292,24 @@ function person(g, f, it) {
   g.box(0, hy + 0.21 * s, hz - 0.02, 0.4 * s, 0.1 * s, 0.4 * s, hair);
   g.box(0, hy + 0.02 * s, hz - 0.19 * s, 0.4 * s, 0.34 * s, 0.06 * s, hair);
   if (woman && !kid) g.box(0, hy + 0.12 * s, hz - 0.26 * s, 0.16 * s, 0.16 * s, 0.12 * s, hair); // the bun
-  const arms = (lz, ly, up = false) => {
-    for (const sx of [-1, 1]) {
-      g.box(sx * 0.26 * s, ty + ly * s, lz * s, 0.11 * s, 0.4 * s, 0.11 * s, top);
-      f.box(sx * 0.26 * s, ty + (ly + (up ? 0.24 : -0.24)) * s, lz * s, 0.1 * s, 0.1 * s, 0.1 * s, skin);
-    }
-  };
+  // arms turn about the shoulder and end in a hand; whatever the pose holds is drawn in that hand (folk-arms.js).
+  // sx = -1 is the figure's own right arm, +1 its left.
+  const { arm, reach } = folkArms(g, f, { ax: 0.26 * s, ty, th: 0.48 * s, lean: bend, tz: 0.04 * bend, z0: 0, s, top, skin, len: 0.36, w: 0.11 });
   if (pose === 'sweep') {
-    arms(0.16, -0.06);
-    g.boxR(0.06, 0.55, 0.4, 0.05, 1.1, 0.05, K.bambooD, 0.45, 0, 0); g.box(0.06, 0.07, 0.66, 0.4, 0.12, 0.12, K.thatch);
+    // the broom in the right hand, its head on the path ahead; the left hand at the top of the handle
+    reach(1, broom(g, arm(-1, -0.55, 0.3), { handle: K.bambooD, head: K.thatch, headW: 0.4 }));
     for (let k = 0; k < 3; k++) f.flat(0.3 + r() * 0.6, 0.55 + r() * 0.5, 0.42 + r() * 0.6, 0.65 + r() * 0.5, 0.006, K.leafY);
   } else if (pose === 'carry') {
-    arms(0, 0.06, true); g.box(0, ty + 0.27 * s, -0.02, 1.5, 0.06, 0.06, K.bambooD);
+    // a yoke on the shoulders, a hand on the pole each side
+    reach(-1, [-0.6 * s, ty + 0.27 * s, 0]); reach(1, [0.6 * s, ty + 0.27 * s, 0]);
+    g.box(0, ty + 0.27 * s, -0.02, 1.5, 0.06, 0.06, K.bambooD);
     for (const sx of [-0.7, 0.7]) { f.box(sx, ty - 0.05, 0, 0.02, 0.62, 0.02, K.iron); g.box(sx, ty - 0.5, 0, 0.32, 0.34, 0.32, K.tin); }
   } else if (pose === 'head') {
-    arms(0, 0.3, true); g.box(0, hy + 0.34 * s, 0, 0.56 * s, 0.16 * s, 0.56 * s, K.bamboo); f.box(0, hy + 0.45 * s, 0, 0.42 * s, 0.08, 0.42 * s, pick([K.orange, K.leafL, K.red], r));
+    reach(-1, [-0.3 * s, hy + 0.34 * s, 0]); arm(1, 0); // the right hand up at the basket's rim
+    g.box(0, hy + 0.34 * s, 0, 0.56 * s, 0.16 * s, 0.56 * s, K.bamboo); f.box(0, hy + 0.45 * s, 0, 0.42 * s, 0.08, 0.42 * s, pick([K.orange, K.leafL, K.red], r));
   } else if (pose === 'play') {
-    arms(0.08, 0.06); f.box(0.36 * s + 0.2, 0.45, 0.4, 0.18, 0.18, 0.18, K.bambooL);
-  } else arms(0, 0);
+    arm(-1, -0.2, -0.25); arm(1, -0.2, 0.25); f.box(0.36 * s + 0.2, 0.45, 0.4, 0.18, 0.18, 0.18, K.bambooL); // arms out, the ball in the air
+  } else { arm(-1, 0); arm(1, 0); }
 }
 
 /** A raised bed like the plots' (frame, soil, a dated board at the head) with its crop as leafy rows: the light

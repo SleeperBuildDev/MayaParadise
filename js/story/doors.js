@@ -51,6 +51,7 @@ import * as REGION from './world/region.js';
 import { createPerson } from './people.js';
 import { castById } from './cast.js';
 import { createEntryFrame } from './rooms/entry-frame.js';
+import { townWait } from './world/townwait.js';
 
 const call = (o, fn, ...a) => (o && typeof o[fn] === 'function' ? o[fn](...a) : undefined);
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -195,7 +196,8 @@ for (const [f, ids] of Object.entries({
 
 const fileCache = new Map();
 function loadFile(f) {
-  if (!fileCache.has(f)) fileCache.set(f, import(`./rooms/${f}.js`).catch((e) => { console.warn(`rooms/${f}.js`, e?.message || e); return null; }));
+  // (a file that failed (offline) is tried again next time)
+  if (!fileCache.has(f)) fileCache.set(f, import(`./rooms/${f}.js`).catch((e) => { console.warn(`rooms/${f}.js`, e?.message || e); fileCache.delete(f); return null; }));
   return fileCache.get(f);
 }
 
@@ -552,7 +554,17 @@ export async function createDoors(game, story) {
     try { return await fn(...a); } catch (err) {
       console.error('doors', err);
       game.busy = false;
+      game.worldWalk = null;
       game.ui.cinema(false);
+      // (out on the street with no one walking her: back on her feet where she stands)
+      try {
+        if (!cur && game.mode === 'world' && !foot.active && game.maya.root.parent === game.world.scene) {
+          const q = game.maya.root.position, s = foot.landAt?.(q.x, q.z) || { x: q.x, z: q.z };
+          foot.walker.teleport(s.x, s.z, game.mayaHeading());
+          foot.active = true;
+          game.rig.setFollow(FOOT_VIEW);
+        }
+      } catch { /* (as it was) */ }
       document.getElementById('fader')?.setAttribute('class', '');
       return false;
     }
@@ -577,7 +589,14 @@ export async function createDoors(game, story) {
     const roomP = loadRoom(id, o).catch((err) => { console.error('room', id, err); return null; });
     call(game.audio, 'play', 'door');
     await game.ui.irisClose();
+    // (a slow connection: the room's file is still on its way: a page turns over the dark and flutters until
+    // it is here, then turns away; never a still screen)
+    let roomIn = false, pw = null, pwSay = 0;
+    const pwT = setTimeout(() => { if (!roomIn) { pw = townWait(game); pwSay = setTimeout(() => pw?.say(), 2000); } }, 600);
     R = await roomP;
+    roomIn = true;
+    clearTimeout(pwT); clearTimeout(pwSay);
+    if (pw) await pw.close();
     if (!R) { // no such room (yet): stay outside
       await game.ui.irisOpen();
       game.ui.cinema(false);
@@ -696,6 +715,9 @@ export async function createDoors(game, story) {
         const side = (to.x - cp.x) * Math.cos(to.heading) - (to.z - cp.z) * Math.sin(to.heading) >= 0 ? 1 : -1;
         to.x += Math.cos(to.heading) * side * 0.6; to.z -= Math.sin(to.heading) * side * 0.6;
       }
+      // ...and on open ground she can walk away from (a step, a stall, a fence or a lamp right at the
+      // door had her come out inside it or in a pocket, unable to walk)
+      try { const s = foot.landAt?.(to.x, to.z); if (s) { to.x = s.x; to.z = s.z; } } catch (err) { console.warn('door exit spot', err); }
     }
     game.world.scene.add(game.maya.root);
     game.maya.setMode('walk');

@@ -113,7 +113,7 @@ export const TALK_D3_NAYCHI = {
       { my: 'တဲက မင်နံ့ကို ကြိုက်တယ်… ကွင်းထဲက လူတွေကိုလည်း ကြိုက်တယ်…', en: 'I like the smell of ink at the shed… and I like the people in the square…', need: 'unknown', face: 'think', heard: true },
     ] },
     { lines: [
-      { my: 'အမေက ကွင်းက စိတ်ချရတယ်တဲ့။ သူငယ်ချင်းက တဲက ပိုကောင်းတယ်တဲ့။ လူတိုင်းမှာ အဖြေရှိတယ်။ ကျွန်မမှာပဲ မရှိဘူး။', en: 'Mum says the square is safer. My friend says the shed is better. Everyone has an answer except me.', need: 'afraid', seems: 'cling', face: 'worried',
+      { my: 'အမေက ကွင်းက စိတ်ချရတယ်တဲ့။ သူငယ်ချင်းက တဲက ပိုကောင်းတယ်တဲ့။ လူတိုင်းမှာ အဖြေရှိတယ်။ ကျွန်မမှာပဲ မရှိတာ။', en: 'Mum says the square is safer. My friend says the shed is better. Everyone has an answer except me.', need: 'afraid', seems: 'cling', face: 'worried',
         tell: { my: 'အမေ့စကားကို တွယ်ထားတာ မဟုတ်ဘူး။ မှားရွေးမိမှာ ကြောက်နေတာ။ စာရွက်တွေကို သေးသေးလေး ခေါက်နေတယ်။', en: "She isn't clinging to her mother's word. She's afraid of choosing wrong. She keeps folding the papers smaller." } },
       { my: 'မှားရွေးမိရင် ပြန်ပြင်လို့ ရမှာ မဟုတ်ဘူး။', en: "If I pick wrong, there's no putting it right.", need: 'afraid', face: 'sad' },
     ] },

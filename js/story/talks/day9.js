@@ -29,7 +29,7 @@ export const D9_KM_CARDS = [
     line: { my: 'အာကာ့အပေါ် စေတနာက အစစ်ပါ။ အစစ်ဆိုတော့ အော်သံနဲ့ ကာပေးစရာ မလိုဘူးလေ။', en: "Your goodwill for Arkar is real. Being real, it doesn't need the shouting to guard it." },
     answers: ['cling', 'hot'], from: { my: 'တိမ်အေး', en: 'the Cool Cloud' } },
   { id: 'goodheart', lookalike: true, name: { my: 'စိတ်ရင်းကောင်းတာပဲ', en: "Your heart's in the right place" }, // the rumour from the post
-    line: { my: 'ဒေါ်ဒေါ်က နှုတ်ကြမ်းပေမဲ့ စိတ်ရင်းကောင်းတာ လူတိုင်း သိပါတယ်။ ဘာမှ မဖြစ်ပါဘူး။', en: "Everyone knows you're rough-mouthed but good-hearted. It's nothing." },
+    line: { my: 'ဒေါ်ဒေါ်က နှုတ်ကြမ်းပေမဲ့ စိတ်ရင်းကောင်းတာ လူတိုင်း သိတယ်။ ဘာမှ မဖြစ်ပါဘူး။', en: "Everyone knows you're rough-mouthed but good-hearted. It's nothing." },
     shows: ['afraid', 'cling'], really: { my: 'အမှားကို ကောင်းတာနဲ့ ဖုံးပေးတာ', en: 'shielding a fault with a good' },
     backfire: { they: { my: 'ဟုတ်တယ် မဟုတ်လား! ဒါဆို ပြင်စရာ ဘာမှ မရှိဘူးပေါ့။', en: "Right? So there's nothing to fix." },
                 maya: { my: '(သူ့အမှားကို ကောင်းတာနဲ့ ဖုံးပေးလိုက်မိပြီ။)', en: '(I just covered her fault with her good.)' } } },
@@ -48,7 +48,7 @@ export const TALK_D9_KHINMAY = {
   theirs: [4], // the last stone is hers: hold Step back
   hand: D9_KM_CARDS,
   tutorial: [ // first Day 9 talk only
-    { at: 'acts', my: 'ဒီနေ့ကစပြီး "နားထောင်" ခလုတ်က "မေးကြည့်" ဖြစ်သွားပြီ။ အဖြေ မပေးဘဲ မေးခွန်းနဲ့ ပြန်ဖြေတာ။', en: 'From today the Listen button is Ask: answering with a question instead of an answer.' },
+    { at: 'acts', my: 'ဒီနေ့ကစပြီး "နားထောင်" ခလုတ်က "မေးကြည့်" ဖြစ်သွားပြီ။ အဖြေ မပေးဘဲ မေးခွန်း ပြန်မေးတာ။', en: 'From today the Listen button is Ask: answering with a question instead of an answer.' },
   ],
   stones: [
     { lines: [
@@ -67,7 +67,7 @@ export const TALK_D9_KHINMAY = {
       { my: 'ဒါပေမဲ့ သူ တတ်လာတယ်လေ! အော်လို့ မရဘူးဆိုရင် ဘာလို့ တတ်လာတာလဲ။', en: "But he learns! If shouting doesn't work, why is he learning?", need: 'unknown', seems: 'hot', face: 'think', heard: true,
         tell: { my: 'ငြင်းချင်တာ မဟုတ်ဘူး။ တခြားနည်း တစ်ခါမှ စမ်းမကြည့်ဖူးလို့ မသိတာ။', en: "She isn't arguing. She has never tried another way, so she doesn't know." },
         ask: { my: 'ပူလောင်ပြီးတောင် သင်လို့ ရနေရင်… မပူလောင်ဘဲရော မရနိုင်ဘူးလား။', en: 'If he learns even while you burn… could he not learn without the burning?' } }, // the chapter's own question (p74)
-      { my: 'ကျွန်မ ဆရာတွေလည်း အော်ပြီး သင်ခဲ့တာ။ သူတို့ကို ချစ်တယ်၊ ကြောက်တယ်၊ ရိုသေတယ်။', en: 'My teachers shouted too. I loved them, feared them, respected them.', need: 'unknown', seems: 'cling', face: 'think', heard: true,
+      { my: 'ကျွန်မ ဆရာတွေလည်း အော်ပြီး သင်ခဲ့တာပဲ။ သူတို့ကို ချစ်တယ်၊ ကြောက်တယ်၊ ရိုသေတယ်။', en: 'My teachers shouted too. I loved them, feared them, respected them.', need: 'unknown', seems: 'cling', face: 'think', heard: true,
         tell: { my: 'ဆရာတွေကို အပြစ်ပြောခံရမှာ စိုးနေတာ မဟုတ်ဘူး။ တခြားနည်း မမြင်ဖူးသေးတာ။', en: "She isn't guarding her teachers. She has simply never seen another way." },
         ask: { my: 'သူတို့ အော်တဲ့အချိန် ဒေါ်ဒေါ် ဘာကို အရင် မှတ်မိခဲ့လဲ။ စာလား၊ အော်သံလား။', en: 'When they shouted, what stayed with you first: the lesson, or the shout?' } },
     ] },
@@ -83,7 +83,7 @@ export const TALK_D9_KHINMAY = {
   react: {
     miss: { my: '…အဲဒါက မုန့်နဲ့ မဆိုင်ဘူး ကလေးမ။', en: '…That has nothing to do with bread, girl.' },
     hot: { my: '(ဒေါ်ခင်မေ မုန့်စိမ်းကို ဆောင့်ဆောင့် နယ်နေတယ်။ ဘာမှ မကြားဘူး။)', en: '(Daw Khin May is pounding the dough. Nothing gets through.)' },
-    lean: { my: 'ဒါဆို မင်းပဲ ပြောပါလား ဘယ်လို သင်ရမလဲ။ …မင်း မရှိတဲ့ မနက်တွေကျရင်ကော။', en: "Then you tell me how to teach. …And the mornings you aren't here?" },
+    lean: { my: 'ဒါဆို မင်းပဲ ပြောလေ ဘယ်လို သင်ရမလဲ။ …မင်း မရှိတဲ့ မနက်တွေကျရင်ကော။', en: "Then you tell me how to teach. …And the mornings you aren't here?" },
   },
   decision: [
     { my: 'ကျွန်မ မှားတာ ကျွန်မ ကိုယ်တိုင် ပြင်မယ်။ ဆင်ခြေ မပါဘဲ။', en: "My fault, I'll put right myself. No excuses.", face: 'think' },
@@ -99,10 +99,10 @@ export const D9_EM_CARDS = [
     line: { my: 'လေးတဲ့ ဗန်း အောက်ဆုံး၊ ပေါ့တာ အပေါ်။ ကြိုးတစ်ချောင်း ဖြတ်ချည်။ ငါ့ဆိုင်က ဗန်းတွေလည်း ဒီလိုပဲ။', en: 'Heavy trays at the bottom, light on top, one rope across. Our shop stacks the same way.' },
     answers: ['unknown'], from: { my: 'အိမွန့်ဆိုင်က', en: "from Ei Mon's shop" } },
   { id: 'kept', name: { my: 'မုန့်ချန်ထားခဲ့တာ', en: 'You kept me a loaf' },
-    line: { my: 'ငါ နောက်ကျတဲ့ညက နင် မုန့်တစ်လုံး ချန်ထားပေးခဲ့တာ မှတ်မိလား။ နင် အရင် သူငယ်ချင်း ဖြစ်ခဲ့တာ။', en: 'Remember the night I was late and you kept me a loaf? You were the friend first.' },
+    line: { my: 'ငါ နောက်ကျတဲ့ညက နင် မုန့်တစ်လုံး ချန်ထားပေးတာ မှတ်မိလား။ နင် အရင် သူငယ်ချင်း ဖြစ်ခဲ့တာ။', en: 'Remember the night I was late and you kept me a loaf? You were the friend first.' },
     answers: ['afraid'], from: { my: 'အိမွန် မှတ်မိနေတာ', en: 'what Ei Mon remembers' } },
   { id: 'eat', name: { my: 'အတူစားမယ်', en: "Let's eat together" },
-    line: { my: 'မနက်ဖြန် ထမင်းချိုင့် ငါ့ဆိုင် ယူလာခဲ့။ ခုံတစ်လုံး ချန်ထားမယ်။', en: "Bring your tiffin to the shop tomorrow. I'll keep you a stool." },
+    line: { my: 'မနက်ဖြန် ထမင်းချိုင့် ငါ့ဆိုင် ယူလာခဲ့။ ခုံတစ်လုံး ချန်ထားပေးမယ်။', en: "Bring your tiffin to the shop tomorrow. I'll keep you a stool." },
     answers: ['afraid', 'given'], from: { my: 'အိမွန့်ကိုယ်ပိုင်', en: "Ei Mon's own" } },
   { id: 'cheer', lookalike: true, name: { my: 'စိတ်မညစ်နဲ့', en: 'Cheer up' },
     line: { my: 'စိတ်မညစ်ပါနဲ့ဟာ။ ပြုံးထား၊ ပြီးသွားမှာပါ။', en: "Don't be down. Keep smiling, it'll pass." },
@@ -127,7 +127,7 @@ export const TALK_D9_ARKAR = {
   hand: D9_EM_CARDS,
   tutorial: [ // first time `by` is used
     { at: 'path', my: 'ဒီတစ်ခါ မောင်အာကာနဲ့ ထိုင်တာ အိမွန်။ မာရာက ဘေးကနေ ကူရုံပဲ။', en: "This time it's Ei Mon who sits with Maung Arkar. Maya only stands by." },
-    { at: 'hand', my: 'အိမွန့် အကြံတွေ မှောက်ထားတယ်။ သူ ပြောလို့ မပြီးခင် မလှန်နဲ့။ အရင် မေး၊ နားထောင်။', en: "Ei Mon's advice is face down. Don't turn it over before he's finished. Ask and listen first." },
+    { at: 'hand', my: 'အိမွန့် အကြံတွေ မှောက်ထားတယ်။ သူ ပြောလို့ မပြီးခင် မလှန်နဲ့။ အရင် မေး၊ နားထောင်ပေး။', en: "Ei Mon's advice is face down. Don't turn it over before he's finished. Ask and listen first." },
   ],
   stones: [
     { lines: [
@@ -149,7 +149,7 @@ export const TALK_D9_ARKAR = {
       { my: 'လှည်း ဘာလို့ မှောက်တာလဲ မသိဘူး။ ကျွန်တော် ညံ့လို့ပဲ နေမှာ။', en: "I don't know why the cart tipped. I must just be no good.", need: 'unknown', face: 'think',
         tell: { my: 'ညံ့တာ မဟုတ်ဘူး။ လေးတဲ့ဗန်းတွေ အပေါ်ဆုံးမှာ။ နည်းကို မသိသေးတာ။', en: "Not no good. The heavy trays were on top. He just doesn't know the way yet." } },
       { my: 'ဒီလမ်းမှာ ကျွန်တော့်ကို ဘယ်သူမှ မလိုဘူး ထင်တယ်။', en: "I don't think anyone on this street needs me.", need: 'afraid', face: 'sad',
-        tell: { my: 'တကယ် ပြောနေတာ မဟုတ်ဘူး။ ကိုယ့်ကိုယ်ကို ဝန်ထုပ်လို့ ထင်ပြီး ကြောက်နေတာ။', en: "He doesn't mean it. He's afraid he's a burden." } },
+        tell: { my: 'တကယ် ပြောတာ မဟုတ်ဘူး။ ကိုယ့်ကိုယ်ကို ဝန်ထုပ်လို့ ထင်ပြီး ကြောက်နေတာ။', en: "He doesn't mean it. He's afraid he's a burden." } },
     ] },
     { lines: [ // his
       { my: 'လှည်း ပြန်တင်ရဦးမယ်… ကျွန်တော်…', en: 'I have to load the cart again… I…', need: 'own', face: 'think',
@@ -159,7 +159,7 @@ export const TALK_D9_ARKAR = {
   react: {
     miss: { my: '…ဟုတ်။', en: '…Right.' },
     hot: { my: '(မောင်အာကာ ပြုံးပြီး ခေါင်းငုံ့နေတယ်။ ဘာမှ မဝင်ဘူး။)', en: '(Maung Arkar smiles at the ground. Nothing gets in.)' },
-    interrupt: { my: '(အိမွန် အကြံပေးချင်လို့ စကား ဖြတ်ပြောမိတယ်။ မောင်အာကာ ပါးစပ် ပြန်ပိတ်သွားတယ်။)', en: '(Ei Mon cuts in with advice. Maung Arkar closes up again.)' },
+    interrupt: { my: '(အိမွန် အကြံပေးချင်လို့ စကား ဖြတ်ပြောမိတယ်။ မောင်အာကာ ပါးစပ် ပြန်ပိတ်သွားရော။)', en: '(Ei Mon cuts in with advice. Maung Arkar closes up again.)' },
     lean: { my: 'အိမွန် ပြောတဲ့အတိုင်း လုပ်မယ်လေ…', en: "I'll just do what you say, Ei Mon…" },
   },
   decision: [
@@ -186,12 +186,12 @@ export const D9_SQ_CARDS = [
     answers: ['envy'], from: { my: 'သူလည်းကိုယ်လည်း ဖဲကြိုး', en: 'the Two-Tailed Ribbon' } },
   { id: 'sideHer', lookalike: true, name: { my: 'အိမွန် မှန်တယ်', en: "Ei Mon's right" },
     line: { my: 'အာကာ၊ အိမွန် ပြောတာ မှန်တယ်လေ။ နားထောင်လိုက်ပါ။', en: "Arkar, Ei Mon's right. Just listen to her." },
-    shows: ['unknown'], really: { my: 'ဘက်တစ်ဖက် လိုက်တာ', en: 'taking a side' },
+    shows: ['unknown'], really: { my: 'တစ်ဖက်သတ် လိုက်တာ', en: 'taking a side' },
     backfire: { they: { my: 'ဒါဆို ကျွန်တော်ပဲ မှားတာပေါ့။ အမြဲတမ်း။', en: "So it's me who's wrong. As always." },
                 maya: { my: '(ဘက်လိုက်လိုက်မိပြီ။ ကတောက်ကဆတ်က ပိုကြီးသွားတယ်။)', en: '(I took a side. The squabble just got bigger.)' } } },
   { id: 'sideHim', lookalike: true, name: { my: 'သူ့ကို မအော်နဲ့', en: "Don't snap at him" },
     line: { my: 'အိမွန်၊ အာကာ့ကို မအော်ပါနဲ့လား။ မနက်ကတည်းက ပင်ပန်းနေတာ။', en: "Ei Mon, don't snap at Arkar. He's been worn out since morning." },
-    shows: ['hot'], really: { my: 'ဘက်တစ်ဖက် လိုက်တာ', en: 'taking a side' },
+    shows: ['hot'], really: { my: 'တစ်ဖက်သတ် လိုက်တာ', en: 'taking a side' },
     backfire: { they: { my: 'ငါက ကူမလို့ပါ! ဒါဆို ငါက လူဆိုးပေါ့။', en: "I was trying to help! So I'm the bad one." },
                 maya: { my: '(ဘက်လိုက်လိုက်မိပြီ။)', en: '(I took a side.)' } } },
 ];
@@ -223,7 +223,7 @@ export const TALK_D9_SQUABBLE = {
         tell: { my: 'သူ့အသံ သူကိုယ်တိုင် ပြင်နေတာ။ နောက်ဆုတ်ပေး။', en: 'She is mending her own tone. Step back.' } },
     ] },
     { lines: [ // his
-      { who: 'maungarkar', my: 'ကျွန်တော်လည်း မနာလိုသလို ပြောမိတယ်။ …ပြန်ပြပါဦး။ ဖြည်းဖြည်း။', en: 'I said it like I was jealous. …Show me again? Slowly.', need: 'own', face: 'think',
+      { who: 'maungarkar', my: 'ကျွန်တော်လည်း မနာလိုသလို ပြောမိတယ်။ …ပြန်ပြပါဦး။ ဖြည်းဖြည်းချင်း။', en: 'I said it like I was jealous. …Show me again? Slowly.', need: 'own', face: 'think',
         tell: { my: 'သူ့အသံ သူကိုယ်တိုင် ပြင်နေတာ။ နောက်ဆုတ်ပေး။', en: 'He is mending his own tone. Step back.' } },
     ] },
   ],

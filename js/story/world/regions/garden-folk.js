@@ -68,7 +68,7 @@ const HP = Math.PI / 2;
 export const FOLK_PEOPLE = [
   // ---- the kiln square
   folk('teauncle', [10, 12], 224.2, 97.2, 0.4,
-    { my: 'လက်ဖက်ရည်ကို အချိုလျှော့ပြီး ဈေးနှုန်းအတိုင်း ရောင်းလို့ ရတယ်။ ဒါပေမဲ့ နောက်နေ့ ဖောက်သည် မျက်နှာကို ဘယ်လို ကြည့်မလဲ။', en: 'I could make the tea thinner and keep the price. But how would I look my regulars in the face tomorrow?' },
+    { my: 'လက်ဖက်ရည် အချိုလျှော့ပြီး ဈေးအတိုင်း ရောင်းလို့ ရတယ်။ ဒါပေမဲ့ နောက်နေ့ ဖောက်သည် မျက်နှာ ဘယ်လို ကြည့်မလဲ။', en: 'I could make the tea thinner and keep the price. But how would I look my regulars in the face tomorrow?' },
     job(224.2, 97.2, 0.4, 'work', 0.9)),
   folk('kaung', [10, 12], 207.0, 92.6, 0.3,
     { my: 'မီးဖိုထဲက အိုးကို စောစော ထုတ်ရင် အက်တယ်။ စောင့်ရတာ ပင်ပန်းတယ်၊ ဒါပေမဲ့ အိုးက ကျေးဇူးတင်တယ်။', en: 'Take a pot out of the kiln too early and it cracks. Waiting is hard work, but the pot thanks you for it.' },
@@ -91,7 +91,7 @@ export const FOLK_PEOPLE = [
   { id: 'gmyo', x: 233.6, z: 108.6, heading: Math.PI, job: job(233.6, 108.6, Math.PI, 'work', 1.2),
     hello: { my: 'ညက လေတိုက်လို့ အဝတ်တွေ ရွှံ့ထဲ ကျကုန်တယ်။ ပြန်လျှော်ရုံပေါ့။ လေကို ဆူလို့ မရဘူး။', en: "Last night the wind blew the washing into the mud. So I wash it again. You can't scold the wind." } },
   { id: 'gsoe', x: 263.6, z: 110.8, heading: -HP, job: job(263.6, 110.8, -HP, 'work', 0.9),
-    hello: { my: 'ပျားအုံကို အတင်း မဖွင့်ရဘူး။ သူတို့ အဆင်သင့် ဖြစ်တော့ သူ့ဟာသူ ထွက်လာတာ။', en: "You don't force a hive open. When they are ready, they come out on their own." } },
+    hello: { my: 'ပျားအုံကို အတင်း မဖွင့်ရဘူး။ သူတို့ အဆင်သင့် ဖြစ်တော့ သူ့ဘာသာ ထွက်လာတာ။', en: "You don't force a hive open. When they are ready, they come out on their own." } },
   { id: 'gpaing', x: 178.6, z: 116.4, heading: -HP, job: job(178.6, 116.4, -HP, 'play', 1.4, [5, 10], { speed: 1.1 }),
     hello: { my: 'ဒီကြက်မက ဥ ဝပ်နေတာ။ တစ်ကောင်တည်း နေချင်နေတာ။ ဒါကြောင့် ဝေးဝေးကနေ ကျွေးတယ်။', en: "This hen is sitting on her eggs. She wants to be left alone. So I feed her from over here." } },
   { id: 'gyin', x: 168.2, z: 112.0, heading: HP, job: job(168.2, 112.0, HP, 'play', 1.0, [5, 10], { speed: 1.2 }),

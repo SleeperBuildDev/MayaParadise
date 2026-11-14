@@ -10,6 +10,7 @@
 //   g.flat(x0, z0, x1, z1, y, colour)          a flat quad (ground decals; no outline)
 //   g.flatR(cx, cz, w, d, y, colour, ry)
 //   g.quad(a, b, c, d, colour, nx, ny, nz)     four world points (arrays), facing the normal
+//   g.parasol(x, y, z, r, drop, colours, n)    an umbrella canopy: a true cone of n wedges (crown at x, y, z)
 //   g.mesh({ px }) -> Mesh (+ outline child)   one toon draw call (+ one for the outline)
 import * as THREE from '../../game/three.js';
 import { toon, outlineMaterial } from '../../game/toon.js';
@@ -132,6 +133,31 @@ export class Geo {
     HALF[0] = w / 2; HALF[1] = h / 2; HALF[2] = d / 2;
     return this.#emit(color, 1);
   }
+  /** An umbrella canopy in the item's local space: a true low cone of n wedges from the crown (x, y, z) down to
+   * a rim of radius r, `drop` lower, the wedges taking `colours` in turn, a shaded underside and a short hem.
+   * (Overlapping tilted slabs, the old way, cut through each other along shallow seams: on a phone's depth
+   * buffer they showed as torn stripes and holes that crawled while the camera moved. Wedges never overlap.) */
+  parasol(x, y, z, r, drop, colours, n = 8, hem = 0.07) {
+    const P = (a, rr, dy) => { const o = [0, 0, 0]; this.#wp(x + Math.cos(a) * rr, y + dy, z + Math.sin(a) * rr, o, 0); return o; };
+    const N = (lx, ly, lz) => [lx * this.tc + lz * this.ts, ly, -lx * this.ts + lz * this.tc];
+    const crown = P(0, 0, 0), crownU = P(0, 0, -0.03);
+    const sl = drop / r, nl = Math.hypot(1, sl);
+    for (let k = 0; k < n; k++) {
+      const a0 = (k / n) * Math.PI * 2, a1 = ((k + 1) / n) * Math.PI * 2, am = (a0 + a1) / 2;
+      const col = colours[k % colours.length], under = shade(col, 0.72);
+      const r0 = P(a0, r, -drop), r1 = P(a1, r, -drop);
+      // the wedge's own (flat) normal: up and out along its middle
+      const ca = Math.cos(am), sa = Math.sin(am), up = N((ca * sl) / nl, 1 / nl, (sa * sl) / nl);
+      this.quad(crown, r0, r1, crown, col, up[0], up[1], up[2]);
+      const u0 = P(a0, r - 0.02, -drop - 0.03), u1 = P(a1, r - 0.02, -drop - 0.03);
+      this.quad(crownU, u0, u1, crownU, under, -up[0], -up[1], -up[2]);
+      if (hem > 0) {
+        const h0 = P(a0, r, -drop - hem), h1 = P(a1, r, -drop - hem), out = N(ca, 0, sa);
+        this.quad(r0, r1, h1, h0, shade(col, 0.88), out[0], 0, out[2]);
+      }
+    }
+    return this;
+  }
   #emit(color, bottom) {
     const [r, g, b] = rgb(color);
     const nf = bottom ? 6 : 5;
@@ -156,7 +182,7 @@ export class Geo {
       I[this.ni++] = base; I[this.ni++] = base + 1; I[this.ni++] = base + 2;
       I[this.ni++] = base; I[this.ni++] = base + 2; I[this.ni++] = base + 3;
     }
-    if (this.outline) {
+    if (this.outline && !this.bare) { // (bare: a part drawn without its ink hull, build.js standUp)
       this.#growO(8, 36);
       const OP = this.op, ON = this.on, base = this.onv;
       for (let id = 0; id < 8; id++) {

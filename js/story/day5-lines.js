@@ -68,13 +68,13 @@ export const L = {
     { my: 'အနားကွပ် ထွင်းပေးပါတဲ့။ ညနေ ကောင်တာ ပိတ်ချိန်မတိုင်ခင်။ …မထွင်းပေးရင် သူ မသွားရဘူးပေါ့။', en: "Carve the border, she says. Before the counter shuts tonight. …If I don't, she can't go, can she." },
   ],
   klChoices: [
-    { my: '"ကံကောင်းလိုက်တာနော်၊ ခွာညိုက။"', en: '"Lucky her, isn\'t she."' },
+    { my: '"ကံကောင်းလိုက်တာနော်၊ ခွာညိုက။"[cite: 1]', en: '"Lucky her, isn\'t she."' },
     { my: '"သူ့ကို မေ့ပစ်လိုက်ပါ။ မရှိသလို နေလိုက်။"', en: '"Just forget her. Act as if she isn\'t there."' },
     { my: '"ခွာညိုဆီ ခဏ သွားကြည့်ပြီး ပြန်လာခဲ့မယ်။"', en: '"I\'ll go and see Khwar Nyo, and come back."' },
   ],
   klLucky: [{ my: 'ဟုတ်တယ်မလား။ မာရာတောင် ကံလို့ ပြောတယ်။', en: "See? Even you say it's luck." }],
   klLuckyMaya: [{ my: '(ချီးမွမ်းသလိုနဲ့ သူ့အပူကို ထပ်လောင်းလိုက်မိပြီ။)', en: '(It sounded like praise, and it fed his heat.)' }],
-  klForget: [{ my: 'မေ့ရမယ်? တစ်နေ့လုံး ဒီတုံးကိုပဲ ကြည့်နေတာ။', en: "Forget her? I've stared at this block all day." }],
+  klForget: [{ my: 'မေ့ရမယ်? တစ်နေ့လုံး ဒီတုံးကိုပဲ ကြည့်နေရတာ။[cite: 1]', en: "Forget her? I've stared at this block all day." }],
   klForgetMaya: [{ my: '(မရှိသလို နေခိုင်းတာက အေးဆေးသလို ထင်ရတယ်။ အေးတာ မဟုတ်ဘူး။)', en: "(Pretending she doesn't exist looks calm. It isn't.)" }],
   klGo: [{ my: '…စာတိုက်ကောင်တာ နောက်က အခန်းထဲမှာ အထုပ်ထုပ်နေတယ်။ ကောင်တာအဆုံးက တံခါးပဲ။ ကျွန်တော် မသွားဘူး။', en: "…She's packing in the room behind the letter counter. The door at the counter's end. I'm not going." }],
   klNotYet: [{ my: 'ခဏ ထားပါဦး။ ကောင်တာ မပိတ်သေးပါဘူး။', en: "Leave it a while. The counter's not shut yet." }],
@@ -88,7 +88,7 @@ export const L = {
     patches: [{ my: 'အဟောင်းကြီး', en: 'a wreck' }, { my: 'ဖာထေးရာ ခုနစ်ခု။ တစ်နှစ် တစ်ခု။ အချုပ်တိုင်း အမေ့လက်ရာ။', en: 'Seven patches, one a year, every stitch hers.' }],
     grip: [{ my: 'လှော်တက် ဆွေးနေပြီ', en: "the pole's rotten" }, { my: 'လှော်တက် လက်ကိုင်နဲ့ အရောင်တူ အဝတ်စ။ ဒီအပတ်ထဲ ညှပ်ထားတာ။ အပ်လေး ထိုးထားတုန်း။', en: "A strip the colour of the pole's new grip, cut this week, her needle still in it." }],
     bail: [{ my: 'ကူးတို့က အေးဆေး', en: 'the ferry has it easy' }, { my: 'ကူးတို့ပေါ်မှာလည်း ရေခပ်ထုတ်နေရတယ်။', en: "They're bailing on the ferry too." }],
-    shallow: [{ my: 'ဘယ်သူမှ မသွားဘူး', en: 'nobody goes there' }, { my: 'ရေတိမ်တယ်။ ကူးတို့ မဝင်နိုင်ဘူး။ ဆိပ်မှာ လူတွေ စောင့်နေတယ်။', en: 'Too shallow for the ferry. People are waiting on the jetties.' }],
+    shallow: [{ my: 'ဘယ်သူမှ မသွားဘူး', en: 'nobody goes there' }, { my: 'ရေတိမ်တယ်။ ကူးတို့ မဝင်နိုင်ဘူး။ ဆိပ်မှာ လူတွေ စောင့်နေကြတယ်။[cite: 1]', en: 'Too shallow for the ferry. People are waiting on the jetties.' }],
     shifts: [{ my: 'အမေက အလုပ်အေး', en: 'Mum has it easy' }, { my: 'ဒေါ်စန္ဒာ နာမည် နှစ်ခါ။ အလှည့် နှစ်ခု ဆင်းတယ်။', en: "Daw Sanda's name twice: two shifts." }],
   },
   lookHeard: { my: 'ကြားခဲ့တာ', en: 'heard' },
@@ -106,13 +106,13 @@ export const L = {
   blockRack: [{ my: '(သူ့တုံးဟောင်းတွေ။ အားလုံး မျဉ်းဖြောင့်။)', en: '(His old blocks. All straight lines.)' }], // (added)
 
   // ---- 5.3 the envelope seller (tea shop)
-  es1: [{ my: 'ကြားပြီလား။ ခွာညိုက ဆရာ့ပုံစံကို ကူးပြီး ပြိုင်ပွဲ နိုင်တာတဲ့။ အောင်မြင်တော့မှ ပေါ်လာတာ။', en: "Heard? Khwar Nyo copied her teacher's design to win. It only came out once she'd won." }],
+  es1: [{ my: 'ကြားပြီးပြီလား။ ခွာညိုက ဆရာ့ပုံစံကို ကူးပြီး ပြိုင်ပွဲ နိုင်တာတဲ့။ အောင်မြင်တော့မှ ပေါ်လာတာ။[cite: 1]', en: "Heard? Khwar Nyo copied her teacher's design to win. It only came out once she'd won." }],
   esChoices: [
     { my: '"ဟုတ်လား… ထင်သားပဲ။"', en: '"Really… I thought so."' },
     { my: '"သူ့ စမ်းထွင်းတုံး လေးဆယ်ကို ကိုယ်တိုင် မြင်ခဲ့တယ်။ ဒီစကား သူ့ကို နာစေတယ်။ ဆက်မပြောပါနဲ့။"', en: '"I saw her forty trial blocks myself. That talk hurts her. Please don\'t pass it on."' },
   ],
   esLaugh: [{ my: '(ကိုယ်တိုင် မမြင်ဘဲ လိုက်ခေါင်းညိတ်မိပြီ။ ဒီလိုနဲ့ပဲ ပုံမှန်လို ဖြစ်သွားတာ။)', en: "(I nodded along to something I haven't seen. That's how it starts to sound normal.)" }],
-  esStop: [{ my: '…လေးဆယ်တုံး? ဒါဆို… ကျွန်မ မပြောတော့ပါဘူး။', en: "…Forty blocks? Then… I'll stop saying it." }],
+  esStop: [{ my: '…လေးဆယ်တုံးလား? ဒါဆို… ကျွန်မ မပြောတော့ပါဘူး။[cite: 1]', en: "…Forty blocks? Then… I'll stop saying it." }],
   esAfter: [{ my: 'စာအိတ် ဝယ်ဦးမလား။ …သတင်းတော့ မရောင်းတော့ဘူး။', en: "Envelopes? …I've stopped selling gossip." }],
 
   // ---- 5.5 carve / 5.6 own words / 5.7 close
@@ -167,7 +167,7 @@ export const L = {
   luaye: [{ my: 'ပြိုင်ပွဲ ဝင်တုံး အကုန် ဒီမှာ ပြန်ပို့ရတယ်။ ရှုံးတဲ့တုံးကလည်း တုံးပဲ။ လက်ရာပဲ။', en: "I had to send every losing block back from here. A block that loses is still a block. Still someone's work." }],
   carvers: [
     { my: 'ဆရာလွင့် လက်က တန်းထဲမှာ အဖြောင့်ဆုံး။ ခုတော့ ချထားတယ်။', en: 'Teacher Lwin has the straightest hand in the row. He\'s put it down.' },
-    { my: 'လက်ဖက်ရည်ဆိုင်ထဲမှာ ခွာညို ကူးတာတဲ့ ပြောနေကြတယ်။ ငါကတော့ သူ ညတိုင်း ထွင်းတာ ကိုယ်တိုင် မြင်ခဲ့တယ်။', en: "In the tea shop they're saying Khwar Nyo copied. I watched her carve every night myself." },
+    { my: 'လက်ဖက်ရည်ဆိုင်ထဲမှာ ခွာညို ကူးတာတဲ့ ပြောနေကြတယ်။ ငါကတော့ သူ ညတိုင်း ထွင်းတာ ကိုယ်တိုင် မြင်ခဲ့တယ်။[cite: 1]', en: "In the tea shop they're saying Khwar Nyo copied. I watched her carve every night myself." },
   ],
   carversAfter: [{ my: 'ဟိုမှာ… ကိုလွင့် မီးခိုးတိုင်က မီးခိုး ထွက်လာပြီ!', en: "Look… smoke from Ko Lwin's chimney!" }],
   donorTintin: [{ my: 'ဆိပ်ခံ ခြောက်ခုလုံး သစ်ကုန်သည်ကြီး လှူထားတာတဲ့။ ပိုက်ဆံ ဘယ်ကရလဲ မသိဘူး။', en: 'That timber merchant gave all six jetties, they say. Who knows where his money came from.' }],
@@ -189,7 +189,7 @@ export const L = {
   mnWait: [{ my: 'အထုပ်တွေ ဒီမှာ စောင့်နေမယ်။', en: 'The parcels and I will wait here.' }],
   mnAfter: [{ my: 'တံဆိပ် နှစ်ခုလုံး ကိုယ်တိုင် ဖတ်ခဲ့တယ်။ စုနွယ့်ကို ပြောပြမယ်။', en: "I read both labels myself. I'm telling Su Nwe." }],
   fm1: [
-    { my: 'ဆိပ်တိုင်း ရပ်တယ်? မဟုတ်ဘူး။ ဒီသင်္ဘော ရေနက်တယ်။ ဆိပ်ကြီးမှာပဲ ကပ်လို့ရတယ်။', en: 'Every jetty? No. She sits deep. She can only tie up at the Big Jetty.' },
+    { my: 'ဆိပ်တိုင်း ရပ်တယ်လား? မဟုတ်ဘူး။ ဒီသင်္ဘော ရေနက်တယ်။ ဆိပ်ကြီးမှာပဲ ကပ်လို့ရတယ်။[cite: 1]', en: 'Every jetty? No. She sits deep. She can only tie up at the Big Jetty.' },
     { my: 'အသစ်ဆိုပေမဲ့ ယိုတယ်။ မနက်တိုင်း ရေခပ်ထုတ်ရတယ်။', en: 'New, and she still leaks. I bail every morning.' },
     { my: 'အရှေ့ကမ်းလား။ ဘယ်သူမှ မကပ်ရဘူး။ ဟိုဘက်က နှင်းထဲမှာ ခေါက်ထားတုန်း။ ဒီဘက်ကမ်းတစ်လျှောက်ပဲ ပြေးတာ။', en: "The east bank? Nobody lands there. That side's still folded in the mist. We only run up and down this bank." },
   ],
@@ -201,7 +201,7 @@ export const L = {
 
   // ---- 6.2 Ko Thiha on the raft
   th1: [
-    { my: 'လှော်ပါ ဆိုလား။ အမေ ဖာထားတဲ့ ဖောင်ဟောင်းနဲ့၊ ဒီဆိပ်ကနေ? ဘယ်လိုမှ မဖြစ်နိုင်ဘူး။', en: "Pole, you say? With Mum's patched-up raft, from this jetty? No chance." },
+    { my: 'လှော်ပါ ဆိုလား။ အမေ ဖာထားတဲ့ ဖောင်ဟောင်းနဲ့၊ ဒီဆိပ်ကနေလား? ဘယ်လိုမှ မဖြစ်နိုင်ဘူး။[cite: 1]', en: "Pole, you say? With Mum's patched-up raft, from this jetty? No chance." },
     { my: 'ဟိုကူးတို့ကြည့်။ ချောချောမောမော။ ကျွန်တော်တို့ကျမှ ရုန်းကန်ရတာ။', en: 'Look at the ferry. Smooth as anything. Only we have to struggle.' },
     { my: 'ကျွန်တော့် စာရင်း ရေးထားတယ်။ အကုန် မြစ်ရဲ့ အပြစ်။', en: "I've written my list. All the stream's fault." },
   ],
@@ -210,7 +210,7 @@ export const L = {
     { my: '"ကူးတို့ကို ပြိုင်လှော်ပြလိုက်။"', en: '"Race the ferry. Show them."' },
     { my: '"မင်းစာရင်းကို အတူတူ ပြန်ကြည့်ရအောင်။"', en: '"Let\'s look at your list together."' },
   ],
-  thBlame: [{ my: 'ဟုတ်တယ်မလား။ ဒါဆို ဘာလုပ်ဖို့ လိုသေးလဲ။ (ပြန်လှဲချလိုက်တယ်။)', en: '"Right? So why do anything?" (He lies back down.)' }],
+  thBlame: [{ my: 'ဟုတ်တယ်မလား။ ဒါဆို ဘာလုပ်ဖို့ လိုသေးလဲ။ (ပြန်လှဲချလိုက်တယ်။)[cite: 1]', en: '"Right? So why do anything?" (He lies back down.)' }],
   thBlameMaya: [{ my: '(အပြစ်ကို မြစ်ပေါ် ပုံချလိုက်တော့ သူ ဆက်မျောနေရုံပဲ။)', en: '(I heaped the blame on the stream, and he just keeps drifting.)' }],
   thRace: [{ my: 'ပြိုင်ရင် ရှုံးမှာ သိပြီးသား။ …ဒါကြောင့် မလှော်တာ။', en: "I already know I'd lose a race. …That's why I don't pole." }],
   thRaceMaya: [{ my: '(မြစ်ကို ရန်သူလုပ်လိုက်မိပြီ။ ပြိုင်ဖို့ မဟုတ်ဘူး။)', en: "(I made the stream an enemy. It isn't a race.)" }],
@@ -228,7 +228,7 @@ export const L = {
     { id: 'born', my: 'ဒီဆိပ်မှာ မွေးတာ', en: 'Being born at this jetty', basket: 'nobody' },
     { id: 'fast', my: 'မြစ်ရေ မြန်တာ', en: 'The stream running fast', basket: 'nobody' },
     { id: 'old', my: 'ဖောင်က ဟောင်းနေတာ', en: 'The raft being old', basket: 'nobody' },
-    { id: 'mum', my: 'အမေက ကျွန်တော့်ကို ရွေးမွေးတာ မဟုတ်၊ ကျွန်တော်လည်း အမေ့ကို မရွေးခဲ့', en: "Mum didn't pick me, and I didn't pick her", basket: 'nobody' },
+    { id: 'mum', my: 'အမေက ကျွန်တော့်ကို ရွေးမွေးတာ မဟုတ်ဘူး၊ ကျွန်တော်လည်း အမေ့ကို မရွေးခဲ့ဘူး[cite: 1]', en: "Mum didn't pick me, and I didn't pick her", basket: 'nobody' },
     { id: 'ferry', my: 'ကူးတို့က ပိုမြန်တာ', en: 'The ferry being faster', basket: 'nobody' },
     { id: 'steer', my: 'လှော်မလား မျောမလား', en: 'Whether I steer or drift', basket: 'mine' },
     { id: 'which', my: 'ဘယ်ဆိပ်ကို သွားမလဲ', en: 'Which jetty I head for', basket: 'mine' },
@@ -247,7 +247,7 @@ export const L = {
 
   // ---- 6.6 pole
   poleTitle: { my: 'ကိုသီဟနဲ့ ဖောင်လှော်မယ်', en: 'Pole the raft with Ko Thiha' },
-  poleHint: { my: 'လှော်တက်က ကြမ်းပြင်ထိတဲ့အချိန် ထိပါ', en: 'Tap when the pole touches the bottom' },
+  poleHint: { my: 'လှော်တက်က ကြမ်းပြင်ထိတဲ့အချိန် နှိပ်ပါ[cite: 1]', en: 'Tap when the pole touches the bottom' },
   poleFerry: { my: 'သွားပါစေ။ ဒီဘက်ကို သူ မလာနိုင်ဘူး။', en: "Let it go. It can't come this side.", who: 'kothiha' },
   poleDrift: { my: 'မျောသွားရင် ကျော်သွားတာပဲ။ ပြန်လှည့်မယ်။', en: 'Drift, and you go right past. Round again.', who: 'kothiha' },
   poleDuck: { my: 'ဖောင်လေး ရောက်လာပြီ! ကူးတို့ကို တစ်ပတ်လုံး စောင့်နေတာ။', en: "The raft's here! I've waited all week on the ferry." },
@@ -305,11 +305,11 @@ export const L = {
     { my: '"ကူးတို့ကို မစီးနဲ့။ ဒီဘက်ကမ်းပဲ ပြေးတာ။ ဈေးကနေ ခေါက်ရိုးဘက် လမ်းလျှောက်ပါ။"', en: '"Don\'t take the ferry, it keeps to this bank. Walk from the Market toward the Fold."' },
     { my: '"ကျွန်မမြေပုံကို ကြည့်ပါ။ ကိုယ်တိုင် စစ်ပြီးသား။ ကျွန်မ ပြတဲ့လမ်းအတိုင်း လိုက်ပါ။"', en: '"Go by my map. I\'ve checked it myself. Follow the way I show you."' },
   ],
-  ncAfter: [{ my: 'ဟုတ်ကဲ့… မာရာ ပြောတဲ့အတိုင်း လုပ်မယ်။ ဆေးရေးမြေပုံက မယုံရဘူး။ မာရာ့ဟာကတော့ ယုံရတယ်။', en: "Okay… I'll do as you say. The painted map can't be trusted. Yours can." }],
+  ncAfter: [{ my: 'ဟုတ်ကဲ့… မာရာ ပြောတဲ့အတိုင်း လုပ်မယ်။ ဆေးရေးမြေပုံက မယုံရဘူး။ မာရာ့ဟာကတော့ ယုံရတယ်။[cite: 1]', en: "Okay… I'll do as you say. The painted map can't be trusted. Yours can." }],
   mayaNc: [{ my: '(ကူညီလိုက်ရလို့ ဝမ်းသာတယ်… ဒါပေမဲ့ သူ ဒီဆိပ်ကို ကိုယ်တိုင် ဘာလို့ မလာကြည့်ခဲ့တာလဲ။ …ကျွန်မမြေပုံလည်း မြေပုံပဲလေ။)', en: "(I'm glad I could help… but why didn't she come and look at this jetty herself? …My map is a map too.)" }],
   ncWait: [{ my: 'မာရာ ပြောတဲ့အတိုင်း စောင့်နေမယ်။', en: "I'll wait, like you said." }],
   ncBefore: [{ my: 'ဒီမှာ တံတား ရှိရမှာ… မြေပုံထဲမှာတော့ ရှိတယ်။', en: 'There should be a bridge here… it\'s on the map.' }], // (added, if tapped before the beat)
-  replyLine: { my: 'ကျွန်မမြေပုံကို ကိုယ်တိုင် စစ်ပြီးပြီ။ အဲဒီအတိုင်း လိုက်ရင် လမ်းမပျောက်ဘူး။', en: "I've checked my map myself. Follow it and you won't get lost." },
+  replyLine: { my: 'ကျွန်မမြေပုံကို ကိုယ်တိုင် စစ်ပြီးပြီ။ အဲဒီအတိုင်း လိုက်ရင် လမ်းမပျောက်ဘူး။[cite: 1]', en: "I've checked my map myself. Follow it and you won't get lost." },
 
   // ---- 7.4 board (home)
   boardQ: [{ my: '(စာတိုက်နံရံက မေးခွန်းစာရွက်တွေ။ နှစ်ရွက် အသစ်။)', en: '(The question notes on the Post Office wall. Two are new.)' }], // (added)

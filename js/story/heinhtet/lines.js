@@ -54,7 +54,7 @@ const solo = [
   A('ဖုန်းဘေလ် ကုန်ပြီ။ ဖုန်းဆက်မယ့်အစား ပြေးပြောမယ်!', "Out of phone credit. I'll run over and say it in person!"),
   A('ဖုန်းအား ကုန်ပြီ။ ခြေထောက်အားကတော့ အပြည့်!', 'Phone battery: dead. Leg battery: full!', 'stretch'),
   A('ပြေးရင်း စဉ်းစားတယ်။ စဉ်းစားရင်း မေ့သွားတယ်။', 'I think while I run. Then I forget while I think.'),
-  A('ထမင်းစားပြီးပြီလား! …ကိုယ့်ကိုယ်ကို မေးတာ။ မစားရသေးဘူး!', 'Eaten yet? …Asking myself. Not yet!'),
+  A('ထမင်းစားပြီးပြီလား! …ကိုယ့်ကိုယ်ကိုယ် မေးတာ။ မစားရသေးဘူး!', 'Eaten yet? …Asking myself. Not yet!'),
   A('ဖိနပ်ကြိုး ပြေနေတယ်။ နောက်မှ ချည်မယ်… အား!', "Lace is loose. I'll tie it later… whoa!", 'trip'),
   A('ဒီလမ်းကို ဒီနေ့ ခုနစ်ခါ ဖြတ်ပြီးပြီ။ ဘာလို့လဲ မမေးနဲ့။', "Seventh time down this street today. Don't ask why."),
   A('အမြန်လုပ်ရင် နှစ်ခါလုပ်ရတယ်တဲ့။ ငါ သုံးခါမြောက်ပြီ!', "Rush a job, do it twice, they say. I'm on my third!", 'facepalm'),
@@ -66,7 +66,7 @@ const solo = [
   A('မီးပျက်လို့ နိုးစက် မမြည်ဘူး။ အဲဒီကတည်းက ပြေးနေတာ!', "Power cut, so no alarm. I've been sprinting ever since!"),
   A('လက်ဖက်ရည် ပေါ့ဆိမ့် တစ်ခွက်… ပြေးရင်း သောက်လို့ရလား!', 'One light, creamy tea… can I drink it on the run?'),
   A('ငါ အမြန်ဆုံး မဟုတ်ဘူး။ အများဆုံး ပြေးတာပဲ။', 'Not the fastest. Just the most running.'),
-  A('အကွေ့မှာ မြန်မြန် မကွေ့နဲ့။ …ကိုယ့်ကိုယ်ကို ပြောတာ။', "Don't take corners fast. …Note to self.", 'skid'),
+  A('အကွေ့မှာ မြန်မြန် မကွေ့နဲ့။ …ကိုယ့်ကိုယ်ကိုယ် ပြောတာ။', "Don't take corners fast. …Note to self.", 'skid'),
   A('ဟိုင်း! ဘိုင်! တစ်ခါတည်း ပြောလိုက်တာ။ အချိန်ချွေတာ!', 'Hi! Bye! Both at once. Saves time!', 'wave'),
   A('ညီမလေးက "ကိုကို ထိုင်တာ မမြင်ဖူးဘူး" တဲ့။', "My little sister says she's never seen me sit down."),
   A('ဒီနေ့ အစီအစဉ်: ပြေး၊ ရပ်၊ မေ့၊ ပြန်ပြေး။', 'Today\'s plan: run, stop, forget, run back.'),
@@ -132,7 +132,7 @@ const towns = {
       ]),
       meet('home-postwoman', { age: 'adult', woman: true, job: 'postwoman' }, 'pointAtWatch', 'smile', [
         ['hh', 'အစ်မ! ကျွန်တော့်စာ ပါလား! အရေးကြီးတယ်! မြန်မြန်!', 'Sister! Any post for me? Urgent! Quick!', 'pointAtWatch'],
-        ['folk', 'ပါတယ်။ မင်း ကိုယ့်ကိုယ်ကို ရေးထားတာ။ "ဖြည်းဖြည်း" တဲ့။', "There is. You wrote it to yourself. It says 'slow down'."],
+        ['folk', 'ပါတယ်။ မင်း ကိုယ့်ကိုယ်ကိုယ် ရေးထားတာ။ "ဖြည်းဖြည်း" တဲ့။', "There is. You wrote it to yourself. It says 'slow down'."],
         ['hh', 'အာ… ဖတ်ချိန် မရှိဘူး။ နောက်မှ!', 'Ah… no time to read it. Later!'],
       ]),
       meet('home-thread', { age: 'elder', woman: true, job: 'binder' }, 'facepalm', 'smile', [
@@ -256,7 +256,7 @@ const towns = {
       meet('env-eggs', { age: 'elder', woman: true, job: 'egg seller' }, 'juggle', 'worried', [
         ['folk', 'ကြက်ဥတောင်း မထိနဲ့နော်… မထိနဲ့…', "Don't bump the egg basket… don't…"],
         ['hh', 'စိတ်ချပါ အဒေါ်! ကျွန်တော် သတိကြီးတယ်… အို! ဖမ်းမိတယ်! သုံးလုံးလုံး!', "Relax, aunty! I'm ever so care… oops! Caught them! All three!", 'juggle'],
-        ['folk', 'အဲဒါ ချက်စားဖို့။ ပြကွက်အတွက် မဟုတ်ဘူး။', 'Those are for cooking. Not for a show.'],
+        ['folk', 'အဲဒါ ချက်စားဖို့။ ပြကွက်ပြဖို့ မဟုတ်ဘူး။', 'Those are for cooking. Not for a show.'],
         ['hh', 'တောင်းပန်ပါတယ်! ပြေးရင်း သတိထားလို့ မရဘူးဆိုတာ ခုမှ သိတယ်။', "Sorry! Just learnt you can't be careful at a run.", 'bow'],
       ]),
       meet('env-song', { age: 'adult', job: 'carter' }, 'jumpCheer', 'happy', [
@@ -279,7 +279,7 @@ const towns = {
       A('ဘေးဆိုင် ရောင်းကောင်းရင် ငါလည်း ပျော်တယ်။ ငါ ဘာမှ မရောင်းပေမဲ့။', 'When the next stall sells well, I\'m happy too. Even though I sell nothing.', 'thumbsUp'),
       A('ပေးပြီးရင် မေ့လိုက်တဲ့။ ငါ ပေးပြီး ဘာပေးမိလဲ မေ့သွားတယ်။', 'Give, then forget it, they say. I gave, and forgot what I gave.'),
       A('ပန့်ရေ ငင်ရင်း ပြေးလို့ မရဘူး။ စမ်းပြီးပြီ။ စိုသွားတယ်။', "You can't pump water while running. Tried it. Soaked."),
-      A('ကြော်လှည်းက ကြော် ပြေးယူပြီး ပိုက်ဆံ ပြန်ပြေးပေးရတယ်။', 'Grabbed a fritter on the run, had to run back to pay.'),
+      A('အကြော်လှည်းက အကြော် ပြေးယူပြီး ပိုက်ဆံ ပြန်ပြေးပေးရတယ်။', 'Grabbed a fritter on the run, had to run back to pay.'),
       A('လက်ဖက်ရည်ဆိုင်က ဦးလေးက "ထိုင်ပါဦး" တဲ့။ ထိုင်ခုံ မြင်ရင် ကြောက်တယ်။', "The tea-shop uncle says 'sit a while'. Chairs frighten me."),
       A('♪ ငါးရာ၊ တစ်ထောင်၊ လျှော့ပေး ♪ ဈေးဆစ်သီချင်း။ ဘယ်သူမှ မလျှော့ဘူး။', "♪ Five hundred, a thousand, knock it down ♪ My haggling song. Nobody ever does."),
       A('ကြိုးလျှော့မှ စွန်တက်တယ်တဲ့။ ငါ့ ဖိနပ်ကြိုး လျှော့ထားတာ… မတက်ဘူး၊ လဲတယ်။', 'Let the string out and the kite climbs, they say. I let my laces out. I didn\'t climb. I fell.', 'tieShoe'),
@@ -295,7 +295,7 @@ const towns = {
       meet('mk-stamp', { age: 'adult', job: 'stamp carver' }, 'thumbsUp', 'think', [
         ['hh', 'အစ်ကို၊ "အမြန်" ဆိုတဲ့ တံဆိပ်တုံး ထွင်းပေးပါ။ နဖူးမှာ နှိပ်မလို့။', "Brother, carve me a stamp that says 'URGENT'. For my forehead."],
         ['folk', 'ထွင်းဖို့ တစ်ပတ် ကြာမယ်။', "It'll take a week to carve."],
-        ['hh', '"အမြန်" ကို တစ်ပတ်!', "A week, for 'URGENT'!"],
+        ['hh', '"အမြန်" ကို တစ်ပတ်တဲ့!', "A week, for 'URGENT'!"],
         ['folk', 'မြန်မြန် ထွင်းရင် စာလုံး ပြောင်းပြန် ထွက်တတ်လို့။', 'Carve it fast and the letters come out backwards.'],
       ]),
       meet('mk-rice', { age: 'elder', woman: true, job: 'rice cook' }, 'bow', 'smile', [
@@ -317,8 +317,8 @@ const towns = {
         ['hh', 'ရေနွေးအိုးက ငါ့ထက် အသံမြင့်တယ်။ ရော့ခ် ဆိုတာ ဒါပဲ!', "The kettle hits higher notes than me. Now THAT's rock!", 'shrug'],
       ]),
       meet('mk-fritter', { age: 'adult', woman: true, job: 'fritter seller' }, 'pocketSearch', 'think', [
-        ['hh', 'ကြော် တစ်ခု! ပိုက်ဆံက… ဒီမှာ… ဟိုမှာ…', "One fritter! Money's… here… there…", 'pocketSearch'],
-        ['folk', 'ကြော်က အေးသွားပြီ။', "The fritter's gone cold."],
+        ['hh', 'အကြော် တစ်ခု! ပိုက်ဆံက… ဒီမှာ… ဟိုမှာ…', "One fritter! Money's… here… there…", 'pocketSearch'],
+        ['folk', 'အကြော်က အေးသွားပြီ။', "The fritter's gone cold."],
         ['hh', 'ရတယ်! ကျွန်တော် ပူနေလို့ ပြန်နွေးသွားမှာ!', "No problem! I'm so hot I'll warm it back up!"],
       ]),
     ],
@@ -343,7 +343,7 @@ const towns = {
     ],
     meets: [
       meet('wh-net', { age: 'adult', job: 'net mender' }, 'trip', 'worried', [
-        ['hh', 'ပိုက်ကွန်! မမြင်လိုက်… ', "A net! Didn't see—", 'trip'],
+        ['hh', 'ပိုက်ကွန်! မမြင်လိုက်…', "A net! Didn't see—", 'trip'],
         ['folk', 'ကောင်းပြီ။ ဒီနေ့ ငါ ဖမ်းမိတဲ့ ငါးအကြီးဆုံး မင်းပဲ။', "Well. Biggest fish I've caught all day: you."],
         ['hh', 'ငါးနီ တစ်ကောင်! ဈေးကောင်းရမယ်!', "A red fish! That'll fetch a good price!"],
         ['folk', 'ဘယ်သူမှ မဝယ်ဘူး။ ငြိမ်မနေလို့။', "Nobody'd buy you. Won't keep still."],
@@ -416,7 +416,7 @@ const towns = {
         ['hh', 'ဦးလေး၊ စာတစ်စောင် ရေးပေးပါ။ "ကျွန်တော် နောက်ကျမယ်" လို့။', "Uncle, write me a letter: 'I'll be late.'"],
         ['folk', 'ဘယ်သူ့ဆီလဲ။', 'To whom?'],
         ['hh', 'လူတိုင်းဆီ။ ကြိုပို့ထားမယ်။ အချိန်ချွေတာ!', 'Everyone. In advance. Saves time!', 'bow'],
-        ['folk', 'ဒါဆို တစ်စောင်တည်း ရေးမယ်: "ကြိုတင် တောင်းပန်ပါတယ်"။', "Then one letter will do: 'Sorry in advance.'"],
+        ['folk', 'ဒါဆို တစ်စောင်တည်း ရေးမယ်- "ကြိုတင် တောင်းပန်ပါတယ်"။', "Then one letter will do: 'Sorry in advance.'"],
       ]),
       meet('jn-crossing', { age: 'elder', woman: true, job: 'grandmother' }, 'salute', 'smile', [
         ['hh', 'အဘွား၊ လမ်းကူးမလို့လား။ ကျွန်တော် တွဲပေးမယ်! အမြန်!', "Grandma, crossing? I'll help you! Quick!", 'salute'],
@@ -444,11 +444,11 @@ const towns = {
     solo: [
       A('မုန့်ဖုတ်နံ့ကြောင့် ရပ်မိတယ်။ မုန့်နံ့က ငါ့ ဘရိတ်ပဲ။', 'The smell of bread stopped me. Bread is my only brake.', 'skid'),
       A('ပေါင်မုန့်ပူပူ ပြေးရင်း စားတယ်။ လျှာ ပူသွားပြီ။ စကားလည်း ပူမှာ စိုးတယ်။', 'Ate hot bread on the run. Burnt tongue. Hope my words don\'t come out hot.', 'fanSelf'),
-      A('ယက်ကန်းက တစ်ချက်ချင်း။ ငါက တစ်ချက်တည်းနဲ့ တစ်ထည်လုံး ယက်ချင်တာ။', 'The loom goes one thread at a time. I want the whole cloth in one go.'),
+      A('ရက်ကန်းက တစ်ချက်ချင်း။ ငါက တစ်ချက်တည်းနဲ့ တစ်ထည်လုံး ရက်ချင်တာ။', 'The loom goes one thread at a time. I want the whole cloth in one go.'),
       A('ခေါက်ဆွဲဆိုင်မှာ ထိုင်စားရမယ်တဲ့။ ဒါကြောင့် မစားရသေးတာ။', "At the noodle house you have to sit to eat. That's why I haven't eaten."),
       A('"စကားကြမ်း စိတ်ကောင်း" က ဆင်ခြေတဲ့။ "စကားမြန် စိတ်ကောင်း" ကော။', "'Rough tongue, good heart' is an excuse, they say. What about 'fast tongue, good heart'?", 'shrug'),
       A('မီးဖိုထဲလို ပူနေတယ်။ အင်္ကျီနီကြောင့်လား၊ ပြေးလို့လား။', 'Hot as the oven. The red suit, or the running?', 'fanSelf'),
-      A('ညနေတန်းမှာ သင်ချင်တယ်။ ဘာသာရပ်: "နောက်ကျနည်း အဆင့်မြင့်"။', "I'd love to teach at the evening class. Subject: 'Running Late, Advanced'."),
+      A('ညနေတန်းမှာ သင်ချင်တယ်။ ဘာသာရပ်- "နောက်ကျနည်း အဆင့်မြင့်"။', "I'd love to teach at the evening class. Subject: 'Running Late, Advanced'."),
       A('အမှားကို တိတ်တိတ်လေး ဝန်ခံတဲ့။ ငါ မှားသွားတယ်… တိတ်တိတ်လေး… ကြားလား!', 'Own a mistake quietly, they say. I made a mistake… quietly… did you HEAR?!'),
       A('♪ ပေါင်မုန့်ပူပူ ပြေးလာခဲ့ ♪ ငါ့ ကြော်ငြာသီချင်း။ မုန့်တိုက်က ပိုက်ဆံ မပေးဘူး။', "♪ Hot bread, come running ♪ My own advert jingle. The bakery isn't paying me."),
       A('စာကပ်တဲ့ နံရံမှာ ငါ့စာလည်း ကပ်ချင်တယ်: "ကိုဟိန်းထက် ဒီကို ဖြတ်သွားသည်"။', "I want to pin a note on the wall too: 'Ko Hein Htet passed by here.'", null, { from: 12 }),
@@ -476,7 +476,7 @@ const towns = {
       ]),
       meet('hr-class', { age: 'child', job: 'evening-class kid' }, 'salute', 'happy', [
         ['folk', 'ဆရာ! ဆရာ! …အော်၊ ဆရာ မဟုတ်ဘူး။ အနီရောင် အစ်ကို။', 'Teacher! Teacher! …Oh. Not Teacher. The red brother.'],
-        ['hh', 'ဒီနေ့ သင်ခန်းစာ: ပြေးရင်း ဘာမှ မမှတ်မိဘူး! ပြီးပြီ။ ကျောင်းဆင်း!', "Today's lesson: you remember nothing on the run! The end. Class dismissed!", 'salute'],
+        ['hh', 'ဒီနေ့ သင်ခန်းစာ- ပြေးရင်း ဘာမှ မမှတ်မိဘူး! ပြီးပြီ။ ကျောင်းဆင်း!', "Today's lesson: you remember nothing on the run! The end. Class dismissed!", 'salute'],
         ['folk', 'အဲဒါ သင်ခန်းစာ ဟုတ်လို့လား။', 'Is that even a lesson?'],
         ['hh', 'ဟုတ်တယ်။ ငါ့ဘဝက သင်ခန်းစာ အပြည့်ပဲ!', 'It is. My life is nothing but lessons!'],
       ]),
@@ -562,8 +562,8 @@ const towns = {
       A('တိတ်လိုက်တာ။ ကိုယ့်နှလုံးခုန်သံ ကြားရတယ်။ နာရီသံလား မသိဘူး။', 'So quiet. I can hear my heartbeat. Or is that my watch?', 'checkWatch'),
       A('ခဲတံနဲ့ ရေးတာ ဖျက်လို့ရတယ်။ ငါ့ နောက်ကျတာတွေလည်း ဖျက်လို့ရရင် ကောင်းမယ်။', 'Pencil rubs out. Wish my lateness did.'),
       A('ဒီမှာ ဘယ်သူမှ နောက်မကျဘူး။ နာရီ မရှိလို့။ …ငါ့ဟာက လွဲရင်။', "Nobody's late here: no clocks. …Except mine."),
-      A('ဘယ်သူ့စကားလဲ နာမည်တပ်ရမယ်တဲ့။ ဒါ အမေ့စကား: "ဖြည်းဖြည်း"။', "Name your sources, they say. This one's Mum's: 'slowly'."),
-      A('ဒီမှာ ပြေးရင် ပဲ့တင်ထပ်တယ်: "ဟိန်းထက်… ထက်… ထက်…"', "Run here and it echoes: 'Hein Htet… Htet… Htet…'"),
+      A('ဘယ်သူ့စကားလဲ နာမည်တပ်ရမယ်တဲ့။ ဒါ အမေ့စကား- "ဖြည်းဖြည်း"။', "Name your sources, they say. This one's Mum's: 'slowly'."),
+      A('ဒီမှာ ပြေးရင် ပဲ့တင်ထပ်တယ်- "ဟိန်းထက်… ထက်… ထက်…"', "Run here and it echoes: 'Hein Htet… Htet… Htet…'"),
       A('ကိုယ်တိုင် စမ်းမှ သိမယ်တဲ့။ ဒါကြောင့် ဒီနေရာကို ငါးခါ ပြေးပတ်ပြီးပြီ။', "Test it yourself, they say. So I've run round this spot five times."),
       A('ဘာမှ မရှိတဲ့နေရာမှာ ဘာမှ မလုပ်ဘဲ ရပ်နေရတာ ခက်တယ်။ ငါ့အတွက်ပေါ့။', 'Standing still, doing nothing, somewhere with nothing. Hardest thing. For me.', 'catchBreath'),
       A('♪ လာ လာ လာ ♪ စာမျက်နှာ ဗလာရဲ့ ပထမဆုံးသီချင်း။ မူပိုင် ငါ့ဟာ!', '♪ La la la ♪ The first song ever sung on the Blank Page. Copyright: me!'),
@@ -624,7 +624,7 @@ const walkup = [
   ], { to: 2 }),
   // the owner's own line (keep it word for word)
   talk('wu-medicine', [
-    ['hh', 'ဟေ့ကောင်မလေး မင်းလှလိုက်တာ ဘာဆေးတွေကိုဆောင်ထားတုန်း', "Hey you, how are you this lovely? What medicine are you carrying?!", 'straightenJacket'],
+    ['hh', 'ဟေ့ကောင်မလေး မင်းလှလိုက်တာ ဘာဆေးတွေများ ဆောင်ထားတုန်း!', "Hey you, how are you this lovely? What medicine are you carrying?!", 'straightenJacket'],
     ['hh', '…ဆိုလိုတာက ဆေးဆိုင် ဖွင့်သေးလား! ခေါင်းကိုက်လို့! သွားပြီ!', "…I mean, is the pharmacy still open?! Headache! Gotta run!", 'checkWatch'],
     ['maya', 'ဆေးတော့ မဆောင်ထားဘူး။ ရေတော့ ပါတယ်။ သောက်မလား။', "No medicine on me. I've got water, though. Want some?", 'smile'],
     ['hh', 'ရ… ရပါတယ်! ကျွန်တော် နေကောင်းပါတယ်! လုံးဝ!', "N-no thanks! I'm fine! Perfectly fine!", 'dropPapers'],
@@ -677,7 +677,7 @@ const walkup = [
     ['hh', 'ပြောမယ်! ပြေးပြောမယ်!', 'I will! At a run!', 'salute'],
   ]),
   talk('wu-busy', [
-    ['hh', 'မမာရာ ဒီရက်ပိုင်း အလုပ်များနေတယ်နော်။ ကျွန်တော်နီးနီး။', "You've been busy lately, Ma Maya. Nearly as busy as me."],
+    ['hh', 'မမာရာ ဒီရက်ပိုင်း အလုပ်များနေတယ်နော်။ ကျွန်တော့်နီးနီး။', "You've been busy lately, Ma Maya. Nearly as busy as me."],
     ['maya', 'များပါတယ်။ ဒါပေမဲ့ ဖြည်းဖြည်း လျှောက်ရင်လည်း အလုပ်ပြီးတာပဲ။', 'I have! But things still get done at a walk, you know.', 'smile'],
     ['hh', 'လမ်းလျှောက်ရင်း အလုပ်များတာ… ဖြစ်နိုင်လို့လား။', 'Busy, at a walk… is that even possible?', 'spin'],
     ['maya', 'ဖြစ်ပါတယ်။ တစ်ရက်လောက် စမ်းကြည့်ပါလား။ တတ်မှာပါ။', "It is! Try it for a day. I bet you'd be good at it.", 'happy'],
@@ -709,7 +709,7 @@ const walkup = [
     ['hh', 'မမာရာ ကလေးတွေကို စာသင်ပေးတယ်ဆို။ ကျွန်တော့်ကိုလည်း သင်ပေးပါ။', "Ma Maya, they say you help kids learn. Teach me too."],
     ['maya', 'သင်ပေးမယ်လေ! ဘာသင်ချင်လဲ။', 'Happily! What would you like to learn?', 'happy'],
     ['hh', 'ရပ်နည်း။', 'How to stop.'],
-    ['maya', 'ပထမ သင်ခန်းစာ: ရပ်ပြီး အသက် ဝဝ ရှူ။ လုပ်နိုင်ပါတယ်။', 'Lesson one: stop, and take a deep breath. You can do it.', 'smile'],
+    ['maya', 'ပထမ သင်ခန်းစာ- ရပ်ပြီး အသက် ဝဝ ရှူ။ လုပ်နိုင်ပါတယ်။', 'Lesson one: stop, and take a deep breath. You can do it.', 'smile'],
     ['hh', '(ရပ်) …ခက်လိုက်တာ! ဒုတိယ သင်ခန်းစာ နောက်မှ!', '(stops) …So hard! Lesson two another day!', 'catchBreath'],
   ], { flag: 'd3.ch9Done' }),
   talk('wu-tonight', [
@@ -820,19 +820,19 @@ const carDash = [
     ['(ရယ်) ဘရိတ် ပြင်ပြီးမှ ပြေးနော်!', '(laughs) Fix those brakes before you run!', 'happy']),
   dash('cd-goat', ['ဆိတ်က လိုက်နေတယ်! ဆောရီး!', "The goat's after me! Sorry!", 'dodge'],
     ['ဘာမှ မဖြစ်ဘူး မဟုတ်လား။ ဂရုစိုက်!', 'Are you all right? Take care!', 'worried']),
-  dash('cd-rain', ['မိုးမရွာခင် ရောက်အောင်! …ရွာနေပြီပဲ!', 'Got to beat the rain! …Oh. Already raining!', 'facepalm'],
+  dash('cd-rain', ['မိုးမရွာခင် ရောက်အောင်! …ရွာနေပြီ!', 'Got to beat the rain! …Oh. Already raining!', 'facepalm'],
     ['လမ်းချော်တယ်နော်! ဖြည်းဖြည်း!', "The road's slippery! Go slowly!", 'worried'], RAIN),
-  dash('cd-dark', ['မှောင်နေပြီ! ဒါပေမဲ့ ကျွန်တော့် အင်္ကျီ နီတယ်! မြင်ရတယ်!', "It's dark! But my suit's red! You can see me!", 'thumbsUp'],
+  dash('cd-dark', ['မှောင်နေပြီ! ဒါပေမဲ့ ကျွန်တော့် အင်္ကျီ နီတယ်! မြင်ရမှာပါ!', "It's dark! But my suit's red! You can see me!", 'thumbsUp'],
     ['(ရယ်) မှောင်ထဲမှာ အနီရောင် သိပ်မမြင်ရဘူးနော်! ဂရုစိုက်!', "(laughs) Red's hard to see in the dark! Careful!", 'worried'], { time: 'night' }),
   dash('cd-wave', ['လက်ပဲ ပြမယ်လို့ ကတိပေးခဲ့တယ်… မေ့သွားပြီ!', "I promised I'd just wave… forgot!", 'facepalm'],
     ['ရပါတယ်! ဒီတစ်ခါ လက်ပြလိုက်!', "That's all right! Wave this time!", 'happy']),
   dash('cd-ball', ['ဘောလုံး လိုက်ကောက်နေတာ! ဆောရီး!', 'After my juggling ball! Sorry!', 'juggle'],
     ['ရပြီလား။ ကောင်းတယ်! ဘေးကို ကပ်ပြေးနော်!', 'Got it? Good! Keep to the side!', 'smile']),
-  dash('cd-spin', ['ဘယ်ဘက်လား ညာဘက်လား… နှစ်ဘက်လုံး!', 'Left way or right way… both!', 'spin'],
+  dash('cd-spin', ['ဘယ်ဘက်လား ညာဘက်လား… နှစ်ဖက်လုံး!', 'Left way or right way… both!', 'spin'],
     ['(ရယ်) မူးသွားဦးမယ်! ခဏ နားပါဦး!', "(laughs) You'll get dizzy! Rest a moment!", 'happy']),
   dash('cd-record', ['ဒီနေ့ ဘယ်သူ့ကိုမှ မတိုက်မိသေးဘူး! စံချိန်!', "Haven't bumped into anyone today! A record!", 'jumpCheer'],
     ['တော်လိုက်တာ! ဆက်ထိန်းထားနော်!', 'Well done! Keep it up!', 'happy']),
-  dash('cd-mum', ['အမေ ခေါ်နေလို့! …မခေါ်ဘူး ထင်တယ်! ပြေးမယ်!', "Mum's calling! …I think not, actually! Running anyway!", 'shrug'],
+  dash('cd-mum', ['အမေ ခေါ်နေလို့! …မခေါ်ဘူး ထင်တယ်! ပြေးဦးမယ်!', "Mum's calling! …I think not, actually! Running anyway!", 'shrug'],
     ['အမေ့ကို နှုတ်ဆက်ပေးပါ! ဂရုစိုက်နော်!', 'Say hello to your mum! Take care!', 'happy']),
   dash('cd-pharmacy', ['ဆေးဆိုင် ပိတ်တော့မယ်! …ဆေး မလိုပါဘူး! ဒါပေမဲ့ ပြေးမယ်!', "Pharmacy's closing! …I don't need medicine! Still running!", 'checkWatch'],
     ['ခေါင်းကိုက်နေသေးလား။ ရေများများ သောက်နော်!', 'Still got that headache? Drink lots of water!', 'worried']),
@@ -849,8 +849,8 @@ const carDash = [
 const bye = [
   A('သွားပြီနော်! နောက်ကျနေပြီ!', "Gotta go! I'm late!", 'checkWatch'),
   A('ဘိုင်! ကျွန်တော် မရှိတုန်း ဘာမှ မဖြစ်စေနဲ့နော်!', "Bye! Don't let anything happen while I'm gone!", 'wave'),
-  A('ပြန်တွေ့မယ်! ဘယ်မှာလဲ မသိဘူး! အမြဲ အဲလိုပဲ!', 'See you! Where? No idea! Always the way!'),
-  A('က… ကျွန်တော် ပြေးရမယ်! အလုပ်! အရေးကြီးတဲ့ အလုပ်!', 'I-I must run! Work! Terribly important work!', 'straightenJacket'),
+  A('ပြန်တွေ့မယ်! ဘယ်မှာလဲ မသိဘူး! အမြဲ အဲဒီလိုပဲ!', 'See you! Where? No idea! Always the way!'),
+  A('ကျ… ကျွန်တော် ပြေးရမယ်! အလုပ်! အရေးကြီးတဲ့ အလုပ်!', 'I-I must run! Work! Terribly important work!', 'straightenJacket'),
   A('နှုတ်ဆက်ချိန်တောင် မရှိဘူး… ဒါပေမဲ့ နှုတ်ဆက်မယ်! ဘိုင်!', 'No time even for goodbye… but here\'s one anyway! Bye!', 'wave'),
   A('အချိန်ကုန်ပြီ! နာရီက ကျွန်တော့်ကို ဆူနေပြီ!', 'Time\'s up! My watch is scolding me!', 'pointAtWatch'),
   A('နောက်တစ်ခါ ဖြည်းဖြည်း ပြောမယ်! ကတိ! …ဖြစ်နိုင်ရင်ပေါ့!', "Next time I'll talk slowly! Promise! …If at all possible!", 'salute'),
@@ -858,7 +858,7 @@ const bye = [
   A('မမာရာ၊ ကောင်းကောင်း… အင်း… ရာသီဥတု ကောင်းပါစေ! ဘိုင်!', 'Ma Maya, have a lovely… um… weather! Bye!', 'straightenJacket'),
   A('သုံး၊ နှစ်၊ တစ်… ပြေး!', 'Three, two, one… go!', 'stretch'),
   A('ထမင်းစားဖို့ မမေ့နဲ့နော်! ကျွန်တော်ကတော့ မေ့မှာ!', "Don't forget to eat! I definitely will!", 'thumbsUp'),
-  A('ဘိုင်ဘိုင်! တာ့တာ! ဆီးယူ! …သုံးခါ တစ်ပြိုင်နက်။ အချိန်ချွေတာ!', 'Bye-bye! Ta-ta! See ya! …Three at once. Saves time!', 'wave'),
+  A('ဘိုင်ဘိုင်! တာ့တာ! ဆီးယူ! …သုံးခါ တစ်ပြိုင်တည်း။ အချိန်ချွေတာ!', 'Bye-bye! Ta-ta! See ya! …Three at once. Saves time!', 'wave'),
   A('ကျွန်တော် မပြေးချင်ပါဘူး… ဒါပေမဲ့ ခြေထောက်က ပြေးချင်နေပြီ!', "I don't want to run… but my legs have already left!", 'skid'),
 ];
 
@@ -873,26 +873,26 @@ const sing = [
   S('♪ ဆန်ဈေးရဲ့ ပုံသဏ္ဌာန်… ♪ အက်ဒ် ရှီးရန်း စိတ်မဆိုးလောက်ပါဘူး။', "♪ The shape of the rice price… ♪ Ed Sheeran won't mind, surely.", 'Shape of You / Ed Sheeran'), // CHECK(song)
   S('♪ "Gangnam Style"… ပြေးနမ်းစတိုင်! ♪ မြင်းစီးက ပြေးရင် မောတယ်။', "♪ 'Gangnam Style'… running style! ♪ The horse dance at a run: exhausting.", 'Gangnam Style / PSY'), // CHECK(song)
   S('♪ "Dynamite"… ခြေထောက် ဒိုင်းနမိုက်! ♪ မပေါက်ကွဲပါဘူးနော်။', "♪ 'Dynamite'… legs of dynamite! ♪ Not exploding, promise.", 'Dynamite / BTS'), // CHECK(song)
-  S('♪ "APT." ♪ တိုက်ခန်းလား။ ငါ့တိုက်ခန်းသော့ ပျောက်နေတယ်!', "♪ 'APT.' ♪ An apartment? I've lost my apartment key!", 'APT. / ROSÉ & Bruno Mars'), // CHECK(song)
+  S('♪ "APT." ♪ တိုက်ခန်းလား။ ငါ့တိုက်ခန်းသော့ ပျောက်နေတာ!', "♪ 'APT.' ♪ An apartment? I've lost my apartment key!", 'APT. / ROSÉ & Bruno Mars'), // CHECK(song)
   S('♪ တိုက်တားနစ် သီချင်း… ♪ လှေဦးမှာ လက်ဆန့်ချင်တယ်။ လှေမရှိလို့ ပြေးမယ်!', "♪ The Titanic song… ♪ I'd stand on the bow with my arms out. No boat, so I run!", 'My Heart Will Go On / Celine Dion'), // CHECK(song)
   S('♪ "Let It Go"… ♪ စာရွက်တွေ၊ မင်းတို့ကို ပြောတာ မဟုတ်ဘူး! ပြန်လာခဲ့!', "♪ 'Let It Go'… ♪ Not you, papers! Come back!", 'Let It Go / Frozen'), // CHECK(song)
   S('♪ "Baby Shark"… ဟမ်း ဟမ်း ♪ နားထဲ စွဲသွားပြီ! ကယ်ကြပါ!', "♪ 'Baby Shark'… hm hm ♪ Stuck in my head! Help!", 'Baby Shark / Pinkfong'), // CHECK(song)
   S('♪ ဟေး… ဟေး… ♪ လေးဖြူလို အော်ဆိုမယ်! …အသံ ကွဲသွားပြီ။', '♪ Hey… hey… ♪ Rock out like Lay Phyu! …Voice cracked.', 'a Lay Phyu rock song / Lay Phyu & Iron Cross'), // CHECK(song)
   S('♪ ဟမ်း ဟမ်း ♪ စိုင်းစိုင်းလို ကရင်း ဆိုမယ်။ ကချိန် ရှိရင်ပေါ့။', '♪ Hm hm ♪ Sing and dance like Sai Sai. If I had time to dance.', 'a Sai Sai Kham Leng hit / Sai Sai Kham Leng'), // CHECK(song)
-  S('♪ "ဘတ်စ်ကား လွတ်ပြီ…" ♪ နီနီခင်ဇော် သီချင်း။ မူရင်းက ဒီလို မဟုတ်ဘူး။', "♪ 'I've missed the bus…' ♪ A Ni Ni Khin Zaw song. Pretty sure those aren't the real words.", 'a Ni Ni Khin Zaw love song / Ni Ni Khin Zaw'), // CHECK(song)
+  S('♪ "ဘတ်စ်ကား လွတ်ပြီ…" ♪ နီနီခင်ဇော် သီချင်း။ စာသား တော့ လွဲနေပြီ။', "♪ 'I've missed the bus…' ♪ A Ni Ni Khin Zaw song. Pretty sure those aren't the real words.", 'a Ni Ni Khin Zaw love song / Ni Ni Khin Zaw'), // CHECK(song)
   S('♪ အာဇာနည်လို အသံနိမ့်နိမ့်… ♪ မရဘူး။ ပြေးနေလို့ အသံ မြင့်နေတယ်။', '♪ Deep and smooth like R Zarni… ♪ No good. Running keeps my voice squeaky.', 'an R Zarni ballad / R Zarni'), // CHECK(song)
   S('♪ ဘော့ဘီဆော့ဆာလို ♪ ဆန်၊ ဆီ၊ ဆား၊ ငါ နောက်ကျ… ဒါ ငါ့ ရက်ပ်!', "♪ Rapping like Bobby Soxer… ♪ Rice, oil, salt, I'm late: that's my rap!", 'a Bobby Soxer track / Bobby Soxer'), // CHECK(song)
   S('♪ ထူးအိမ်သင် သီချင်းဟောင်း ♪ အဖေ့အကြိုက်။ စာသား မေ့လို့ "လ လ" ပဲ!', "♪ An old Htoo Ein Thin classic… ♪ Dad's favourite. Can't remember the words, so: 'la la'!", 'a Htoo Ein Thin classic / Htoo Ein Thin'), // CHECK(song)
   S('♪ "Someone Like You" ♪ ငါ့လို ပြေးတဲ့သူ နောက်တစ်ယောက် မရှိဘူး!', "♪ 'Someone Like You' ♪ Nobody else runs like me, though!", 'Someone Like You / Adele'), // CHECK(song)
   S('♪ "Uptown Funk" ♪ ငါ့ဟာက "မြို့ထဲ ပြေး" ဗားရှင်း!', "♪ 'Uptown Funk' ♪ Mine's the 'Downtown Run' version!", 'Uptown Funk / Mark Ronson ft. Bruno Mars'), // CHECK(song)
-  S('♪ ဝက်စ်လိုက်ဖ်လို ထိုင်ခုံပေါ်က ထရပ်… ♪ ငါ့မှာ ထိုင်ခုံ မရှိဘူး။ ထရပ်ပြီးသား!', '♪ Westlife-style, rising off the stool… ♪ I have no stool. Already up and running!', 'My Love / Westlife'), // CHECK(song)
+  S('♪ ဝက်စ်လိုက်ဖ်လို ထိုင်ခုံပေါ်က ထရပ်… ♪ ငါ့မှာ ထိုင်ခုံ မရှိဘူး။ မတ်တတ်ရပ်ပြီးသား!', '♪ Westlife-style, rising off the stool… ♪ I have no stool. Already up and running!', 'My Love / Westlife'), // CHECK(song)
   S('♪ မွေးနေ့… ♪ ဘယ်သူ့မွေးနေ့လဲ မသိဘူး။ တစ်ယောက်ယောက်တော့ မွေးနေ့ ဖြစ်မှာပဲ!', "♪ Happy birth— ♪ Whose birthday? No idea. Bound to be somebody's!", 'Happy Birthday (traditional)'), // CHECK(song)
   S('♪ ဟမ်း ဟမ်း ♪ ရေအိုင်ထဲ ခုန်ကမယ်… (ချော်) …ကပြီးပြီ။', "♪ Hm hm ♪ Puddle dance time… (slips) …Dance over.", "Singin' in the Rain / Gene Kelly", RAIN), // CHECK(song)
   // his own jingles (original, no song to check)
   S('♪ ပြေး ပြေး ဟိန်းထက်၊ ပြေး ပြေး ဟိန်းထက်၊ ဘယ်ကိုလဲ မသိ ♪', '♪ Run, run, Hein Htet, run, run, Hein Htet, where to? Nobody knows ♪'),
   S('♪ ပေါ့ဆိမ့် တစ်ခွက်၊ ကော်ဖီ ချိုချို၊ နာရီက တစ်တောက် တစ်တောက် ♪', '♪ Light-sweet tea, coffee nice and sweet, my watch goes tick, tick, tick ♪'),
   S('♪ မြန်မြန်လေး၊ မြန်မြန်လေး၊ မီးမပျက်ခင် အိမ်ပြန် ♪ ငါ့ မီးပျက်သီချင်း။', '♪ Hurry, hurry, home before the power goes ♪ My power-cut song.'),
-  S('♪ ဒီနေ့ ဆန်ဈေး၊ မနက်ဖြန် ဆန်ဈေး၊ ငါ့ခြေထောက်ကတော့ အလကား ♪', "♪ Rice price today, rice price tomorrow, my legs at least are free ♪"),
+  S('♪ ဒီနေ့ ဆန်ဈေး၊ မနက်ဖြန် ဆန်ဈေး၊ ငါ့ခြေထောက်ကတော့ အခမဲ့ ♪', "♪ Rice price today, rice price tomorrow, my legs at least are free ♪"),
 ];
 
 // =================================================================================================================
@@ -926,7 +926,7 @@ const mentions = {
     lines: [
       mt('ကိုဟိန်းထက် ခြင်းလုံးကို ခေါင်းနဲ့ ခံပြီး တမင်လုပ်တာ ဆိုပြန်ပြီ။', 'Ko Hein Htet headed the chinlone and called it on purpose. Again.', { job: 'kid' }),
       mt('ကလေးတွေက ကိုဟိန်းထက်ကို "အနီအနီ" လို့ ခေါ်တယ်။ သူ ကြိုက်တယ်။', "The kids call Ko Hein Htet 'Red-Red'. He loves it."),
-      mt('ကိုဟိန်းထက် ခေါင်းပေါ် လုံချည် ပါသွားပြန်ပြီ။ အဝတ်တန်း အောက်က ပြေးလို့။', 'Ko Hein Htet ran under the washing line. Longyi on his head again.', { job: 'aunty' }),
+      mt('ကိုဟိန်းထက် ခေါင်းပေါ် ပုဆိုး ပါသွားပြန်ပြီ။ အဝတ်တန်း အောက်က ပြေးလို့။', 'Ko Hein Htet ran under the washing line. Longyi on his head again.', { job: 'aunty' }),
       mt('ကိုဟိန်းထက်ကို ခြောက်ခုနစ်လီ မေးရင် "လေးဆယ့်…" ထိပဲ ရောက်တယ်။', "Ask Ko Hein Htet six times seven and he only gets to 'forty…'", { job: 'pupil' }),
       mt('ဖိနပ်ကြိုး ချည်ရင် ပိုမြန်တာ ကိုဟိန်းထက် သိသွားပြီ။ မနက်ဖြန် မေ့မှာ။', "Ko Hein Htet's learnt he's faster with his laces tied. He'll forget by tomorrow.", { job: 'uncle' }),
       mt('မုန့်ဆိုင်က ကိုဟိန်းထက် လာတာ မြင်တာနဲ့ ကြိုထုပ်ထားတယ်။', 'The snack shop wraps Ko Hein Htet\'s order the moment they see him coming.'),
@@ -947,7 +947,7 @@ const mentions = {
       mt('ငါ့ဘီးက ကိုဟိန်းထက်ကို ကျော်သွားတယ်! တောင်ဆင်းဆို ဘီး အမြဲနိုင်တယ်။', 'My tyre overtook Ko Hein Htet! Downhill, the tyre always wins.', { job: 'kid' }),
       mt('ကိုဟိန်းထက် ဖိနပ်မှာ ဘီးတပ်ချင်တယ်တဲ့။ ဘရိတ် အရင်တပ်ရမယ်။', 'Ko Hein Htet wants wheels on his shoes. Brakes first, I told him.', { job: 'uncle' }),
       mt('ကိုဟိန်းထက် ကြက်ဥ သုံးလုံး လွှဲပြတယ်။ ချက်ဖို့ ဝယ်တာနော်။', 'Ko Hein Htet juggled my three eggs. They were for cooking!', { job: 'aunty' }),
-      mt('ကြက်တွေက ကိုဟိန်းထက်ကို လေးစားလို့ လမ်းဖယ်ပေးတာတဲ့။ ကြက်တွေကို မေးကြည့်ချင်တယ်။', 'He thinks the hens clear the road out of respect. I\'d like to ask the hens.'),
+      mt('ကြက်တွေက ကိုဟိန်းထက်ကို လေးစားလို့ လမ်းဖယ်ပေးတာတဲ့။ ကြက်တွေကို မေးကြည့်ချင်သေးတယ်။', 'He thinks the hens clear the road out of respect. I\'d like to ask the hens.'),
     ],
     pairs: [],
   },
@@ -959,7 +959,7 @@ const mentions = {
       mt('ကိုဟိန်းထက် အကြော် ယူပြေးပြီး ပိုက်ဆံပေးဖို့ ပြန်ပြေးလာတယ်။ ရိုးသားလိုက်တာ။', 'Ko Hein Htet ran off with a fritter, then ran back to pay. So honest.', { job: 'vendor' }),
       mt('ကိုဟိန်းထက် လေးဖြူ သီချင်း ဟမ်းတော့ ဆိုင်က ရေနွေးအိုးပါ လိုက်ဆူတယ်။', 'Ko Hein Htet hummed Lay Phyu and the shop kettle joined in.', { job: 'porter' }), // CHECK(song): artist named only
       mt('ကိုဟိန်းထက် စွန်ကြိုးထဲ ငြိသွားပြန်ပြီ။ ငြိမ်နေရတာ သူ့ အခက်ဆုံး ဘာသာတဲ့။', 'Ko Hein Htet got tangled in a kite string again. Holding still is his hardest subject.', { job: 'teen' }),
-      mt('လက်ဖက်ရည်ဆိုင် ဦးလေးက ကိုဟိန်းထက် ထိုင်ခုံ ကြောက်တယ်တဲ့။', "The tea-shop uncle says Ko Hein Htet's scared of chairs."),
+      mt('လက်ဖက်ရည်ဆိုင် ဦးလေးက ကိုဟိန်းထက် ထိုင်ခုံ ကြောက်နေတာတဲ့။', "The tea-shop uncle says Ko Hein Htet's scared of chairs."),
       mt('ကိုဟိန်းထက် "တစ်လုတ်ပဲ" ဆိုပြီး သုံးပွဲ စားသွားတယ်။', "Ko Hein Htet said 'just one bite'. He had three helpings.", { job: 'aunty' }),
       mt('ကိုဟိန်းထက် မမာရာ အကြောင်း မေးပြီး နားရွက်လေး နီသွားတယ်။', 'Ko Hein Htet asked after Ma Maya and his ears went pink.'),
     ],
@@ -967,7 +967,7 @@ const mentions = {
       pr('mn-mk-haggle', [
         [0, 'ကိုဟိန်းထက် ဈေးဆစ်တာ ပြောင်းပြန်တဲ့။', 'Ko Hein Htet haggles backwards, I hear.'],
         [1, 'ဟုတ်တယ်။ ဆစ်လေ ဈေးတက်လေပဲ။', 'He does. The more he haggles, the more he pays.'],
-        [0, 'ဒါဆို ငါ့ဆိုင်ကို လွှတ်လိုက်။', 'Then send him to my stall.'],
+        [0, 'ဒါဆို ငါ့ဆိုင် လွှတ်လိုက်။', 'Then send him to my stall.'],
         [1, 'မင်း ယူရက်မှာ မဟုတ်ပါဘူး။', "You'd never have the heart to take it."],
       ]),
       pr('mn-mk-jacket', [
@@ -997,10 +997,10 @@ const mentions = {
         [1, 'လူတိုင်းကို ပြောတာ။ (ရယ်)', 'He tells everyone. (laughs)'],
       ]),
       pr('mn-wh-redfish', [
-        [0, 'ကိုဟိန်းထက် သူ့ကိုယ်သူ ငါးနီ တဲ့။', 'Ko Hein Htet calls himself a red fish now.'],
+        [0, 'ကိုဟိန်းထက် သူ့ကိုယ်သူ ငါးနီလေး တဲ့။', 'Ko Hein Htet calls himself a red fish now.'],
         [1, 'ငါးနီဆို ဈေးကောင်းတယ်လေ။', 'Red fish fetch a good price.'],
         [0, 'ငြိမ်ငြိမ် မနေတော့ ဘယ်သူမှ ဝယ်လို့ မရဘူး။', "Nobody can buy him. He won't keep still."],
-        [1, '(ရယ်) ဒါဆို ငါတို့ ဆိပ်ကမ်းမှာပဲ ထားမယ်။', "(laughs) Then he's ours. We'll keep him."],
+        [1, '(ရယ်) ဒါဆို ငါတို့ ဆိပ်ကမ်းမှာပဲ ထားလိုက်မယ်။', "(laughs) Then he's ours. We'll keep him."],
       ]),
     ],
   },
@@ -1014,7 +1014,7 @@ const mentions = {
       mt('သတင်းစာထဲ ကိုဟိန်းထက် ပါရင် "လူတစ်ယောက် ဖြတ်ပြေးသွား" တဲ့။', "If Ko Hein Htet made the paper, the headline would be 'Man Runs Past'."),
       mt('ကိုဟိန်းထက် ခြောက်လား ကိုးလား သိအောင် ပတ်ပြေးပြီး မူးသွားတယ်။', 'Ko Hein Htet ran round to tell a six from a nine, and got dizzy.', { job: 'pupil', when: { flag: 'd8.ch13Done' } }),
       mt('ကိုဟိန်းထက် "ဘယ်သူပြောလဲ" လို့ မေးတတ်လာပြီ။ ကောင်းတယ်။', "Ko Hein Htet has started asking 'who said so?' Good for him.", { when: { flag: 'd8.ch12Done' } }),
-      mt('တံတားမီး ထွန်းတော့ ကိုဟိန်းထက် ပထမ ဖြတ်ချင်တာ ဒုတိယ ဖြစ်သွားတယ်။', 'When the bridge lamps lit, Ko Hein Htet meant to cross first. He came second.', { when: { flag: 'd7.bridge' } }),
+      mt('တံတားမီး ထွန်းတော့ ကိုဟိန်းထက် အရင် ဖြတ်ချင်တာ ဒုတိယ ဖြစ်သွားတယ်။', 'When the bridge lamps lit, Ko Hein Htet meant to cross first. He came second.', { when: { flag: 'd7.bridge' } }),
     ],
     pairs: [
       pr('mn-jn-news', [
@@ -1035,8 +1035,8 @@ const mentions = {
   hearth: {
     lines: [
       mt('မုန့်နံ့ ရရင် ကိုဟိန်းထက် ရပ်သွားတယ်။ သူ့ ဘရိတ်က မုန့်ပဲတဲ့။', "Ko Hein Htet stops when he smells bread. Bread's his only brake.", { job: 'baker' }),
-      mt('ကိုဟိန်းထက် ပေါင်မုန့်ပူ ကိုက်ပြီး "ပူတယ်! ပူတယ်!" တဲ့။ ပြောသားပဲ။', "Ko Hein Htet bit the hot bread. 'Hot! Hot!' I did tell him.", { job: 'baker' }),
-      mt('ကိုဟိန်းထက် ခေါက်ဆွဲ ငါးမိနစ် ထိုင်စားသွားတယ်။ နာရီတောင် မေ့သွားတယ်။', 'Ko Hein Htet sat five whole minutes over noodles. Forgot his watch, even.', { job: 'vendor' }),
+      mt('ကိုဟိန်းထက် ပေါင်မုန့်ပူပူ ကိုက်ပြီး "ပူတယ်! ပူတယ်!" တဲ့။ ပြောသားပဲ။', "Ko Hein Htet bit the hot bread. 'Hot! Hot!' I did tell him.", { job: 'baker' }),
+      mt('ကိုဟိန်းထက် ခေါက်ဆွဲ ငါးမိနစ် ထိုင်စားသွားတယ်။ နာရီတောင် မေ့နေတယ်။', 'Ko Hein Htet sat five whole minutes over noodles. Forgot his watch, even.', { job: 'vendor' }),
       mt('ကိုဟိန်းထက် ခုံတန်းပေါ် နှစ်စက္ကန့် ထိုင်သွားတယ်။ ဘဝရဲ့ အကောင်းဆုံးတဲ့။', 'Ko Hein Htet sat on the bench for two seconds. Best of his life, he says.', { age: 'elder' }),
       mt('ညကျောင်းမှာ ကိုဟိန်းထက်ကို ဆရာ ထင်သွားတယ်။ အင်္ကျီနီကြောင့်။', 'At evening class I took Ko Hein Htet for Teacher. It\'s the red suit.', { job: 'kid' }),
       mt('ကိုဟိန်းထက် "နောက်ကျနည်း အဆင့်မြင့်" ဘာသာ သင်ချင်တယ်တဲ့။', "Ko Hein Htet wants to teach 'Running Late, Advanced'.", { job: 'teen' }),
@@ -1053,7 +1053,7 @@ const mentions = {
       ]),
       pr('mn-hr-holes', [
         [0, 'ကိုဟိန်းထက် ယက်ကန်း ရက်ကြည့်ချင်တယ်တဲ့။', 'Ko Hein Htet wants to try the loom.'],
-        [1, 'အပေါက်တွေ ထွက်မှာပေါ့။', "It'll be all holes."],
+        [1, 'အပေါက်တွေချည်း ထွက်မှာပေါ့။', "It'll be all holes."],
         [0, 'ခေတ်မီတယ်တဲ့။', 'He says holes are in fashion.'],
         [1, '(ရယ်) တစ်ထည် ရက်ပေးလိုက်ရမလား။', '(laughs) Shall we weave him one?'],
       ]),

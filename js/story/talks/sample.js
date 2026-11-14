@@ -13,7 +13,7 @@ export const SAMPLE_CARDS = [
     backfire: { they: { my: 'ကျွန်တော် ကိုယ်တိုင် မလုပ်နိုင်ဘူးလို့ ထင်လို့လား။', en: "You think I can't do it myself?" }, maya: { my: '(ကူညီတာ မဟုတ်ဘူး… သူ့ကို အထင်သေးလိုက်သလို ဖြစ်သွားပြီ။)', en: "(That wasn't help… it looked down on him.)" } } },
   { id: 'ignore', lookalike: true, name: { my: 'ဂရုမစိုက်နဲ့', en: 'Just ignore them' }, line: { my: 'ဘေးဆိုင်ကို ဂရုမစိုက်နဲ့။', en: 'Just ignore the stall next door.' }, shows: ['hot'], really: { my: 'အေးသလို ပိတ်ပယ်တာ', en: 'freezing out that passes for calm' },
     backfire: { they: { my: 'ဂရုမစိုက်ရအောင် ကျွန်တော့် ဖောက်သည်တွေပဲ!', en: "Ignore them? They're my customers!" }, maya: { my: '(ငြိမ်ခိုင်းတာက ပိုပူစေတယ်။)', en: '(Telling him to freeze them out made it hotter.)' } } },
-  { id: 'hold', lookalike: true, name: { my: 'တင်းတင်း ဆုပ်ထား', en: 'Hold on tight' }, line: { my: 'အဖေ့ဆိုင်ကို ဘာမှ မပြောင်းနဲ့၊ တင်းတင်း ဆုပ်ထား။', en: "Don't change a thing in your father's stall. Hold on tight." }, shows: ['cling'], really: { my: 'ချစ်သလို တွယ်တာတာ', en: 'clinging that passes for love' },
+  { id: 'hold', lookalike: true, name: { my: 'တင်းတင်း ဆုပ်ထား', en: 'Hold on tight' }, line: { my: 'အဖေ့ဆိုင်ကို ဘာမှ မပြောင်းနဲ့၊ တင်းတင်း ဆုပ်ကိုင်ထား။', en: "Don't change a thing in your father's stall. Hold on tight." }, shows: ['cling'], really: { my: 'ချစ်သလို တွယ်တာတာ', en: 'clinging that passes for love' },
     backfire: { they: { my: 'ဒါပေမဲ့… ဒီအတိုင်းဆို ဆိုင်ပိတ်ရမှာ…', en: "But… like this I'll have to close…" }, maya: { my: '(သူ ပိုတွယ်ကပ်သွားပြီ။)', en: '(He is clinging even harder now.)' } } },
 ];
 
@@ -38,7 +38,7 @@ export const TALK_SAMPLE = {
       { my: 'ဒီလမ်းမှာ ကျွန်တော့်ကို ဘယ်သူမှ မလိုတော့ဘူး။', en: 'Nobody on this street needs me now.', need: 'given', heard: true, face: 'sad', mood: 'down' },
     ] },
     { lines: [
-      { my: 'အရင်ကလို ပြန်ဖြစ်ချင်တယ်။ ဒီဆိုင်က အဖေ့ဆိုင်။', en: 'I want it the way it was. This was my father\'s stall.', need: 'cling', face: 'sad', heard: true },
+      { my: 'အရင်ကလို ပြန်ဖြစ်ချင်တယ်။ ဒီဆိုင်က အဖေ့ဆိုင်လေ။', en: 'I want it the way it was. This was my father\'s stall.', need: 'cling', face: 'sad', heard: true },
       { my: 'ဆိုင်ပိတ်ရမလား မသိဘူး။', en: "I don't know if I should close.", need: 'unknown', seems: 'given', face: 'worried',
         tell: { my: 'လက်လျှော့တာ မဟုတ်ဘူး။ ကောင်တာကို လက်နဲ့ သုတ်နေတယ်။ မဆုံးဖြတ်နိုင်သေးတာ။', en: "Not giving up: he's still wiping the counter. He just can't decide." } },
       { my: 'တစ်ခုခု ပြောင်းရင် အကုန် ပျက်သွားမှာ ကြောက်တယ်။', en: "I'm scared that if I change anything it'll all fall apart.", need: 'afraid', seems: 'cling', face: 'worried' },

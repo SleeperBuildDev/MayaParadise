@@ -933,7 +933,7 @@ export async function create(story) {
   }
   function station(id) {
     const map = {
-      'sn-scale': () => (person('toetoe') && F('ttDoorSaid') && !F('stopShop') ? stop1() : D.say('maya', [{ my: '(ချိန်ခွင်။ ကိုယ့်ဟာကိုယ် ချိန်ရတာ။)', en: '(The pan scale. You weigh for yourself here.)' }], { face: 'smile' })), // DRAFT(my)
+      'sn-scale': () => (person('toetoe') && F('ttDoorSaid') && !F('stopShop') ? stop1() : D.say('maya', [{ my: '(ချိန်ခွင်။ ကိုယ့်ဘာသာ ချိန်ရတာ။)', en: '(The pan scale. You weigh for yourself here.)' }], { face: 'smile' })), // DRAFT(my)
       'sn-note': async () => { await D.say('maya', L.shopNote, { face: 'surprised' }); proof('shop'); },
       'sn-prices': () => D.say('maya', L.shopPrices, { face: 'think' }),
       'sn-tin': () => D.say('maya', L.shopTin, { face: 'smile' }),
@@ -945,7 +945,7 @@ export async function create(story) {
       'ps-michowheel': () => D.say('maya', L.michoWheel, { face: 'think' }),
       'qt-counter': async () => { if (!F('tmSaid')) { F('tmSaid', true); await sayAs(L.tmName, L.tm); } else await sayAs(L.tmName, L.tmHello); },
       'qt-sunwe': () => talk.sunwe(),
-      'cl-posters': () => D.say('maya', [{ my: '(နံရံပေါ်က ပိုစတာလေးတွေ: ဂဏန်း၊ နေနဲ့ ဘောလုံး၊ မီးတိုင်၊ လမ်းပြမြေပုံ။)', en: '(Posters on the wall: numbers, the sun and a ball, a lamp, a route map.)' }], { face: 'smile' }), // DRAFT(my)
+      'cl-posters': () => D.say('maya', [{ my: '(နံရံပေါ်က ပိုစတာလေးတွေ - ဂဏန်း၊ နေနဲ့ ဘောလုံး၊ မီးတိုင်၊ လမ်းပြမြေပုံ။)', en: '(Posters on the wall: numbers, the sun and a ball, a lamp, a route map.)' }], { face: 'smile' }), // DRAFT(my)
       'cl-board': () => D.say('maya', [{ my: '(ကျောက်သင်ပုန်းပေါ်မှာ ပဲစိုက်ကဗျာ။)', en: '(The bean rhyme, in chalk on the board.)' }], { face: 'smile' }), // DRAFT(my)
     };
     const fn = map[id];

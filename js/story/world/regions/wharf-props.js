@@ -40,10 +40,9 @@ function wUmbrella(g, f, it) {
   const cols = [[C.red, C.cream], [C.teal, C.cream], [C.blue, C.mustard], [C.rust, C.ochre]][Math.floor(r() * 4)];
   f.flat(-1.2, -1.0, 1.3, 1.1, 0.005, C.shadow);
   g.box(0, 1.15, 0, 0.06, 2.3, 0.06, C.iron);
-  for (let k = 0; k < 8; k++) {
-    const a = (k / 8) * Math.PI * 2;
-    g.boxR(Math.cos(a) * 0.55, 2.2, Math.sin(a) * 0.55, 1.15, 0.05, 0.48, cols[k % 2], 0, -a, 0.28);
-  }
+  // eight striped wedges of a true cone (kit.js parasol: the old overlapping panels, all at one height and
+  // tipped up into a bowl, fought for the same pixels and flickered in stripes)
+  g.parasol(0, 2.4, 0, 1.12, 0.3, cols);
   g.box(0, 2.42, 0, 0.12, 0.12, 0.12, cols[0]);
   // the table and its tins and jars
   g.box(0, 0.5, 0.35, 1.1, 0.06, 0.62, C.woodL);

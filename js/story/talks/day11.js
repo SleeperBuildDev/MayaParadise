@@ -35,8 +35,8 @@ export const D11_NC_CARDS = [
     answers: ['afraid'], from: { my: 'ခုံတန်းလေး', en: 'the Two-Seat Bench' } },
   // ch 17 Sound-Asleep Cat, new today (pencil): a true page that fits nothing today (review: let true pages miss)
   { id: 'sleep', companion: 'cat', name: { my: 'မနက်ဖြန် ကြည့်ရဲမလား', en: 'Can you face yourself tomorrow?' },
-    line: { my: 'ဘယ်လိုပဲ လုပ်လုပ်၊ မနက်ဖြန် ကိုယ့်ကိုယ်ကို ကြည့်ရဲရင် ပြီးတာပဲ။', en: 'Whatever you do, as long as you can look at yourself tomorrow.' },
-    answers: [], miss: { my: '…မနက်ဖြန် မဟုတ်သေးဘူး အစ်မ။ ကျွန်မ ကြောက်နေတာက ဒီည နံရံကို။', en: "…It isn't tomorrow yet, sister. What scares me is the wall tonight." },
+    line: { my: 'ဘယ်လိုပဲ လုပ်လုပ်၊ မနက်ဖြန် ကိုယ့်ကိုယ်ကိုယ် ကြည့်ရဲရင် ပြီးတာပဲ။', en: 'Whatever you do, as long as you can look at yourself tomorrow.' },
+    answers: [], miss: { my: '…မနက်ဖြန် မဟုတ်သေးဘူး အစ်မ။ ကျွန်မ ကြောက်နေတာ ဒီည နံရံကို။', en: "…It isn't tomorrow yet, sister. What scares me is the wall tonight." },
     from: { my: 'အိပ်ပျော်ကြောင်', en: 'the Sound-Asleep Cat' } },
   { id: 'seven', companion: 'caterpillar', name: { my: 'မယုံနဲ့ဦး', en: "Don't believe it yet" }, // ch 12 Seven-Ring Caterpillar
     line: { my: 'ကြားရတိုင်း မယုံနဲ့ဦး။ ကိုယ်တိုင် စစ်ကြည့်ပါ။', en: "Don't believe it just because you heard it. Check it yourself." },
@@ -72,8 +72,8 @@ export const TALK_D11_NAYCHI = {
       { my: 'ဒီလောက် မှားတာ ဖဲကြိုး ထိုက်တယ်တဲ့။ ကိုဒိုး ပြောတာ။', en: 'A mistake that big deserves the ribbon, Ko Doe says.', need: 'hot', face: 'think', heard: true },
     ] },
     { lines: [
-      { my: 'ကိုဒိုးစာမှာ ပင် သုံးဆယ်။ လူသုံးဆယ်လုံး မှားနေမှာလား။', en: "Thirty pins on Ko Doe's note. Can thirty people all be wrong?", need: 'unknown', seems: 'envy', face: 'think',
-        tell: { my: 'ကိုဒိုးရဲ့ ပင်တွေကို မနာလိုတာ မဟုတ်ဘူး။ ပင်များတာနဲ့ မှန်သလား တကယ် မသိလို့ ရေတွက်နေတာ။', en: "Not envy of his pins. She's counting them because she truly doesn't know if many pins make it right." } },
+      { my: 'ကိုဒိုးစာမှာ ပင် သုံးဆယ်။ လူသုံးဆယ်လုံး မှားနေမလား။', en: "Thirty pins on Ko Doe's note. Can thirty people all be wrong?", need: 'unknown', seems: 'envy', face: 'think',
+        tell: { my: 'ကိုဒိုးရဲ့ ပင်တွေကို မနာလိုတာ မဟုတ်ဘူး။ ပင်များတာနဲ့ မှန်သလား တကယ် မသိလို့ ရေနေတာ။', en: "Not envy of his pins. She's counting them because she truly doesn't know if many pins make it right." } },
       { my: 'အမှားကို လူတိုင်းမြင်အောင် ကပ်ထားတာနဲ့ သူ့ကို ပြောတာနဲ့ အတူတူပဲလား။', en: 'Pinning a mistake up for everyone… is that the same as telling her?', need: 'unknown', face: 'think' },
     ] },
     { lines: [

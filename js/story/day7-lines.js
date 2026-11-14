@@ -10,17 +10,17 @@ export const L = {
     dawsanda: { my: '"စာရင်းရဲ့ နောက်ဆုံးမှာ ကြိမ်ဆိပ်က အဘိုးကြီး။ နောက်ဆုံးပဲ၊ ဒါပေမဲ့ စာရင်းထဲမှာ။" — ဒေါ်စန္ဒာ', en: '"Last on my list: the old man on Cane Jetty. Last, but on the list." — Daw Sanda' },
     maungnge: { my: '"လှည်းပုံလေးပါတဲ့ စာရွက် ရတယ်။ နာမည်ကိုလည်း ကိုယ်တိုင် ဖတ်တယ်။" — မောင်ငယ်', en: '"I got a note with my cart drawn on it. I read my name myself." — Maung Nge' },
     naychi: { my: '"ကြားပါစေ၊ နားမထောင်နဲ့… ပြုံးထားရင် ပိုလွယ်တယ်။" — နေခြည်', en: '"Let it reach the ear, don\'t listen… it\'s easier smiling." — Nay Chi' },
-    kophyo: { my: '"ဒီနေ့ ပထမဆုံးခွက်ကို ကိုယ့်ခွက် ကိုယ်ကိုင်တဲ့ ကလေးကို တိုက်ခဲ့တယ်။" — ကိုဖြိုး', en: '"Today\'s first cup went to the girl who carried her own." — Ko Phyo' },
+    kophyo: { my: '"ဒီနေ့ ပထမဆုံးခွက်ကို ကိုယ့်ခွက်ကိုယ်ကိုင်တဲ့ ကလေးကို တိုက်ခဲ့တယ်။" — ကိုဖြိုး', en: '"Today\'s first cup went to the girl who carried her own." — Ko Phyo' },
     ubolay: { my: '"ငါ့ကြိမ်ကို မနင်းနဲ့။" — ဦးဘိုလေး', en: '"Don\'t tread on my cane." — U Bo Lay' },
     khwarnyo: { my: '"တံဆိပ်ခေါင်းပုံထဲက ကျောက်သင်ပုန်းကို ကိုယ်တိုင် မကောက်ခဲ့ဘူး။ နောက်ဆို ကောက်ပေးမယ်။" — ခွာညို', en: '"I didn\'t pick up the slate in the stamp heap. Next time I will." — Khwar Nyo' },
     kolwin: { my: '"ဘောင်တစ်ခု ပြီးသွားပြီ။ ဘယ်သူ့အတွက်မှ မဟုတ်ဘူး။ ကောင်းတယ်။" — ကိုလွင်', en: '"Finished a border. For nobody. It\'s good." — Ko Lwin' },
-    wintwar: { my: '"ကိုယ့်စာ ကိုယ်ရေးဖို့ ဒီတစ်ပတ် အချိန်ရခဲ့တယ်။" — မဝင့်ဝါ', en: '"This week I found time to write my own letter." — Ma Wint War' }, // a host only Day 7 adds
+    wintwar: { my: '"ကိုယ့်စာကိုယ်ရေးဖို့ ဒီတစ်ပတ် အချိန်ရခဲ့တယ်။" — မဝင့်ဝါ', en: '"This week I found time to write my own letter." — Ma Wint War' }, // a host only Day 7 adds
   },
   ww2: [{ my: 'ဖောင်ကောင်လေးဆီကလည်း စာလေး ပါလာတယ်။', en: 'And a note from the raft boy.' }],
   thNote: { my: 'အစ်မ… ဒီမနက်လည်း ဦးဘိုလေးရဲ့ ဆိပ်မှာ ရပ်ခဲ့တယ်။\nလူတိုင်းကို နှုတ်ဆက်သလိုပဲ နှုတ်ဆက်တယ်။ သူ ခေါင်းညိတ်ရုံပဲ။\nဒါပဲ။ ဒါနဲ့ ရပါပြီ။', en: "Sister… I stopped at U Bo Lay's jetty again this morning.\nThe same greeting as everyone. He only nodded.\nThat's all. It's enough." },
   ttQ: { my: 'ဒီနေ့မေးခွန်း: စင်နာရီက ဘယ်သူမှ မကြည့်ရင်ရော လည်နေသေးလား။ — တိုးတိုး', en: "Today's question: does the stage clock keep going when nobody's looking? — Toe Toe" },
   earthCap: { my: 'မနေ့က စာမျက်နှာပေါ်ကနေ မြေကွက်လေး တစ်ကွက် ကြွတက်လာတယ်။ မြက်ပင်လေး နှစ်ပင်နဲ့။', en: "A little patch of earth lifts off yesterday's page, two blades of grass on top." },
-  earthMaya: [{ my: 'ချီးမွမ်းလည်း ဒီအတိုင်း၊ ပစ်ပေါက်လည်း ဒီအတိုင်း။ လိုက်ခဲ့မလား။', en: 'Praised, the same; pelted, the same. Coming along?' }],
+  earthMaya: [{ my: 'ချီးမွမ်းလည်း ဒီအတိုင်း၊ ကဲ့ရဲ့လည်း ဒီအတိုင်း။ လိုက်ခဲ့မလား။', en: 'Praised, the same; pelted, the same. Coming along?' }],
   ww3: [
     { my: 'ဘုတ်ပြားမှာ စာရွက် သုံးဆယ့်တစ်ရွက် ရှိနေပြီ။ ဒီမနက် အပေါ်ဆုံးမှာ ပြဇာတ်စာရွက် တစ်ရွက် လာကပ်သွားတယ်။', en: 'Thirty-one notes on the board now. And this morning a play programme pinned on top.' },
     { my: 'ဗလာစာအုပ်ရပ်ရဲ့ နှုတ်ဆက်ပွဲ ပြဇာတ်တဲ့။ ဒီည ခြောက်နာရီ၊ အောက်ဆုံးလမ်းက စင်မြင့်လေးမှာ။', en: "The Quarter's farewell play. Tonight at six, at the little stage on the last street." },
@@ -42,10 +42,10 @@ export const L = {
   wwDone: [{ my: 'ပြဇာတ်လည်း ပြီး၊ တံတားလည်း ပွင့်ပြီတဲ့။ စာရေးခန်းမှာ ဒီနေ့အကြောင်း ရေးဖို့ပဲ ကျန်တော့တယ်။', en: "The play's done and the bridge is open, they say. Only today's page left to write, in the Writing Room." }],
 
   // ---- the street outside the school (heard through the open windows)
-  recite: { my: '"…မာရာ ရောက်ပြီ! ပဲပင်တွေကို နေရောင်ထဲ ငါ ရွှေ့ပေးမယ်!…"', en: '"…Maya is here! I shall move your beans into the sun!…"' },
+  recite: { my: '"…မာရာ ရောက်ပြီ! ပဲပင်တွေကို နေရောင်ထဲ ရွှေ့ပေးမယ်!…"', en: '"…Maya is here! I shall move your beans into the sun!…"' },
 
   // ---- 5.1 the rehearsal and the prank
-  yy1: [{ my: '"မကြောက်ပါနဲ့ တိုးတိုး၊ မာရာ ရောက်ပြီ! ပဲပင်တွေကို နေရောင်ထဲ ငါ ရွှေ့ပေးမယ်!"', en: '"Fear not, Toe Toe, Maya is here! I shall move your beans into the sun!"' }],
+  yy1: [{ my: '"မကြောက်ပါနဲ့ တိုးတိုး၊ မာရာ ရောက်ပြီ! ပဲပင်တွေကို နေရောင်ထဲ ရွှေ့ပေးမယ်!"', en: '"Fear not, Toe Toe, Maya is here! I shall move your beans into the sun!"' }],
   ttStage: [{ my: '(တိုးတိုး တိုးတိုးလေး) ကျွန်တော် ကိုယ်တိုင် ရွှေ့ခဲ့တာပါ…', en: '(Toe Toe, quietly) I moved them myself…' }],
   kidsName: { my: 'ကလေး နှစ်ယောက်', en: 'Two chorus kids' },
   kids: [{ my: 'ရှူး… မမနေခြည်၊ လက်ခုပ်တီး! ရဲယဉ့် စာအုပ်မရှိရင် ဘာမှ ပြောတတ်မှာ မဟုတ်ဘူး!', en: "Shh… Nay Chi, clap! Without his book Ye Yint can't say a thing!" }],
@@ -72,19 +72,19 @@ export const L = {
     [{ my: 'ဒါ မနှစ်က ကျွန်တော် ထင်ခဲ့တာ။ စကားထဲမှာတော့ မပါဘူး။', en: "That's what I thought last year. It isn't in the words." }],
   ],
   wOk: [
-    { my: '(စာအုပ်မပါဘဲ) "ဒီကနေ ထွက်သွားတဲ့သူ တစ်ယောက်ချင်းစီ… ကိုယ့်လမ်းကို ဘယ်သူမှ လျှောက်မပေးနိုင်ဘူး။ ကိုယ့်ခြေထောက်နဲ့ ကိုယ် လျှောက်ကြပါ။"', en: '(No book) "Each one who leaves here… nobody can walk your road for you. Walk it on your own feet."' },
+    { my: '(စာအုပ်မပါဘဲ) "ဒီကနေ ထွက်သွားတဲ့သူ တစ်ယောက်ချင်းစီ… ကိုယ့်လမ်းကို ဘယ်သူမှ လျှောက်မပေးနိုင်ဘူး။ ကိုယ့်ခြေထောက်နဲ့ကိုယ် လျှောက်ကြပါ။"', en: '(No book) "Each one who leaves here… nobody can walk your road for you. Walk it on your own feet."' },
     { my: '…ပြောလို့ရသွားတယ်။ စာအုပ်ထဲက စကားလုံးနဲ့ မတူပေမဲ့ အဓိပ္ပာယ်က တူတယ်။', en: "…I could say it. Not the book's words, but the same meaning." },
     { my: 'ဒါဆို… ကျွန်တော့် ပြဇာတ်ထဲက "မာရာ" က လူတိုင်းရဲ့လမ်းကို လျှောက်ပေးနေတာပဲ။', en: 'But then… the "Maya" in my play walks everyone\'s road for them.' },
   ],
   // ---- 6.1 slate 8 (in the classroom, right after W)
-  nc8b: [{ my: 'ဒါ ငါ့ရဲ့ရှစ်ခုမြောက်။ ခုနက ကလေးတွေကို လက်ခုပ်မတီးလိုက်တာ… ဒါပဲလား။', en: 'My eighth. Not clapping for the kids just now… is that all it is?' }],
-  maya8: [{ my: 'ကိုယ်တိုင် မလုပ်ရုံ မကဘူး။ သူများလုပ်တာကိုလည်း အားမပေးတာ။ နေခြည် လုပ်ခဲ့ပြီလေ။', en: 'Not just not doing it. Not cheering it on, either. You just did.' }],
+  nc8b: [{ my: 'ဒါ ငါ့ရဲ့ရှစ်ခုမြောက်။ ခုနက ကလေးတွေကို လက်ခုပ်မတီးမိတာ… ဒါပဲလား။', en: 'My eighth. Not clapping for the kids just now… is that all it is?' }],
+  maya8: [{ my: 'ကိုယ်တိုင် မလုပ်ရုံမကဘူး၊ သူများလုပ်တာကိုလည်း အားမပေးတာ။ နေခြည် လုပ်ခဲ့ပြီလေ။', en: 'Not just not doing it. Not cheering it on, either. You just did.' }],
   ncToStage: [{ my: 'မောင်ငယ် စင်မြင့်မှာ လိုက်ကာ ချိတ်နေတယ်။ နောက်တစ်ချပ်လည်း အဲဒီနားမှာ။', en: "Maung Nge's down at the stage hanging the curtain. The next one is near there." }],
   mnGo: [{ my: 'လိုက်ကာ ချိတ်ရဦးမယ်! ကျွန်တော့်တာဝန်။', en: "I've got to hang the curtain! It's my job." }],
   // ---- 5.3 hooks
   hw1: [
     { my: 'ပြဇာတ်ကို ရဲယဉ့် ကိုယ်တိုင် ရေးတာ။ မြို့ကလူတွေ "မာရာ့ကို မေး" "မာရာ ပြောတယ်" နဲ့ပဲ ပြောနေကြတော့ မာရာကို ခန်းတိုင်းထည့်ရေးလိုက်တာတဲ့။', en: 'Ye Yint wrote the play himself. The whole town says "ask Maya", "Maya says", so he put Maya in every scene.' },
-    { my: 'ပြီးတော့ မာရာ အပိုင်းကို သူကိုယ်တိုင် ကတယ်။ ခန်းတိုင်းမှာ သူပဲ။', en: 'And he plays Maya himself. He is in every scene.' },
+    { my: 'ပြီးတော့ မာရာအပိုင်းကို သူကိုယ်တိုင် သရုပ်ဆောင်တယ်။ ခန်းတိုင်းမှာ သူပဲ။', en: 'And he plays Maya himself. He is in every scene.' },
     { my: 'နောက်ဆုံးတန်းက ခုံမှာ ထိုင်ကြည့်ပါလား။ အဲဒီကမှ အခန်းရှေ့ တစ်ခုလုံး မြင်ရတာ။', en: 'Try sitting at the back-row desk. Only from there do you see the whole front of the room.' },
   ],
   askPrize: [{ my: 'ဆရာမ… ဒီည အကောင်းဆုံး သရုပ်ဆောင်ဆု ရှိတယ်တဲ့။ ဟုတ်လား။', en: "Teacher… they say there's a best-actor prize tonight. Is that so?" }],
@@ -111,9 +111,9 @@ export const L = {
   lookDone: { my: 'ပြီးပြီ', en: 'Done' },
   headQ: { my: 'ဒီပြဇာတ်က တကယ်တော့ ဘယ်ကို ဦးတည်နေတာလဲ။', en: 'Where is this play really heading?' },
   headChoices: [
-    { my: 'မာရာက လူတိုင်းကို ကယ်တင်တဲ့ဆီ။', en: 'To Maya saving everyone.' },
+    { my: 'မာရာက လူတိုင်းကို ကယ်တဲ့ဆီ။', en: 'To Maya saving everyone.' },
     { my: 'မနှစ်က ဆုရ မိန့်ခွန်းဆီ။', en: "To last year's prize speech." },
-    { my: 'ထွက်သွားမယ့်သူ တစ်ယောက်ချင်း ကိုယ့်လမ်းပေါ် ကိုယ် တက်သွားတဲ့ဆီ။', en: 'To each one who leaves stepping onto their own road.' }, // true
+    { my: 'ထွက်သွားမယ့်သူ တစ်ယောက်ချင်း ကိုယ့်လမ်းပေါ် ကိုယ်တက်သွားတဲ့ဆီ။', en: 'To each one who leaves stepping onto their own road.' }, // true
   ],
   headWrong: { my: '(ဒါ စာရွက်ပေါ်မှာ ရေးထားတာ။ နောက်ခံကားကို ပြန်ကြည့်ပါဦး။)', en: "(That's what's written. Look at the backdrop again.)" },
   headOk: [{ my: '(လမ်းလေးတွေက အပြင်ကို ထွက်သွားကြတာ။ ဇာတ်လိုက်တစ်ယောက်ဆီ မဟုတ်ဘူး။)', en: '(The little roads all lead out. Not to one lead.)' }],
@@ -176,7 +176,7 @@ export const L = {
   mcBowl: [{ my: 'ဒီဇလုံက အိုးဖိုထဲက ကောင်းကောင်း ထွက်လာတဲ့ လေးလုံးထဲက တစ်လုံး။', en: 'This bowl is one of the four that came out of the kiln whole.' }],
   bowlTitle: { my: 'ဇလုံကို ရေမဖိတ်အောင် သယ်ပါ', en: 'Carry the bowl without spilling' },
   bowlHint: { my: 'ဇလုံကိုပဲ ကြည့်။ ဖိထားရင် လျှောက်၊ လွှတ်ရင် ရပ်', en: 'Watch the bowl. Hold to walk, let go to stop' },
-  bowlSpill: { my: 'ဖိတ်သွားပြီ။ ခြေလှမ်းကို စိတ်မထားမိဘူး။ နောက်တစ်ခါ။', en: "Spilled. My mind wasn't on my steps. Again." },
+  bowlSpill: { my: 'ဖိတ်သွားပြီ။ ခြေလှမ်းကို သတိမထားမိဘူး။ နောက်တစ်ခါ။', en: "Spilled. My mind wasn't on my steps. Again." },
   bowlOk: [{ my: 'နာရီက ဘယ်လိုပဲ လည်လည်… ဒီခြေလှမ်းကိုပဲ ကြည့်ရင် ရတယ်။', en: 'Whatever the clock does… it works if I just watch this step.' }],
   ttBowl: [{ my: 'ဘယ်သူမှ မကြည့်လည်း နာရီက လည်နေတာပဲ။ ဒါကြောင့် ခြေလှမ်းတိုင်းကို သတိထားပြီး လှမ်းရမှာပေါ့။', en: 'The clock goes on whether anyone watches or not. So every step is worth minding.' }],
   // ---- 5.10 the play (once) and the costume
@@ -205,7 +205,7 @@ export const L = {
 
   // ---- 6. chapter 11: Nay Chi's slates
   slates: {
-    1: { my: 'ကိုယ့်ကိုယ်ကို ကိုယ်ပဲ ထိန်းနိုင်တယ်။', en: 'Only I can keep myself in check.' },
+    1: { my: 'ကိုယ့်ကိုယ်ကိုယ် ကိုယ်ပဲ ထိန်းနိုင်တယ်။[cite: 1]', en: 'Only I can keep myself in check.' },
     2: { my: 'ကြားပါစေ၊ နားမထောင်နဲ့။ ပြုံးထား။', en: "Let it reach the ear; don't listen. Smile." },
     3: { my: 'စည်းကမ်းနဲ့ နေရတာ ထင်တာထက် ခက်တယ်။ တန်တယ်။', en: 'Living by a rule is harder than I thought. Worth it.' },
     4: { my: 'မှားရင် တောင်းပန်။ ပြီးရင် ပြင်။', en: "If I'm wrong, say sorry. Then put it right." },
@@ -229,7 +229,7 @@ export const L = {
   ncWaitStage: [{ my: 'ခုနစ်ခုမြောက်က လိုက်ကာတန်းပေါ်မှာ။ မောင်ငယ်နဲ့ အတူ ကြည့်ရအောင်။', en: "The seventh is up on the curtain beam. Let's see with Maung Nge." }],
   // 6.2 slate 9
   nc9: [
-    { my: 'ဒီစာအုပ်တွေ ဆယ်နှစ်လုံး ယူလာခဲ့တာ။ မနက်ဖြန်ကစပြီး မလိုတော့ဘူး။', en: "I carried these for ten years. From tomorrow I won't need them." },
+    { my: 'ဒီစာအုပ်တွေ ဆယ်နှစ်လုံး သယ်လာခဲ့တာ။ မနက်ဖြန်ကစပြီး မလိုတော့ဘူး။', en: "I carried these for ten years. From tomorrow I won't need them." },
     { my: 'ဒီမှာ ထားခဲ့မယ်။ ဘယ်သူယူမလဲ မကြည့်ဘူး။ ကျေးဇူးတင်စကားလည်း မစောင့်ဘူး။', en: "I'll leave them here. I won't watch who takes them. I won't wait for a thank-you." },
   ],
   ncDontLook: [{ my: 'အစ်မ… မကြည့်နဲ့လေ။ ပေးပြီးရင် ပြီးပြီ။', en: "Sister… don't look. Once it's given, it's given." }],
@@ -288,7 +288,7 @@ export const L = {
   ncMaya: [{ my: '(လက်ကို နောက်ဆုတ်ပြီး ကျွန်မကိုပဲ ကြည့်နေတယ်။)', en: '(She steps back, hands at her sides, watching me.)' }],
   ncMayaMaya: [{ my: '(ကျွန်မလက်က သူ့ဘုတ်ပြားပေါ် ရောက်နေပြီ။ မနက်တိုင်း ကျွန်မ စီတဲ့အတိုင်း ဖတ်ရတော့မှာ။)', en: "(My hand is on her board. Every morning she'd be reading my order.)" }],
   ncOwn: [
-    { my: 'သော့က ပထမ။ မနက်ဖြန် ကိုယ့်သေတ္တာကို ကိုယ်ဖွင့်ရမှာ။ ပြီးတော့ ကြောက်လို့ရတယ်… ကြောက်မှာ သေချာတယ်။', en: 'The key first: tomorrow I open my own locker. Then afraid-is-allowed… because I will be.' },
+    { my: 'သော့က ပထမ။ မနက်ဖြန် ကိုယ့်သေတ္တာကိုယ် ဖွင့်ရမှာ။ ပြီးတော့ ကြောက်လို့ရတယ်… ကြောက်မှာ သေချာတယ်။', en: 'The key first: tomorrow I open my own locker. Then afraid-is-allowed… because I will be.' },
     { my: 'ပြီးရင် မှားရင် တောင်းပန်။ ပြုံးထား… (ကျန်တာတွေကို တိုးတိုးလေး ဖတ်ရင်း ကိုယ်တိုင် စီတယ်။)', en: 'Then sorry-and-fix. Smile… (She orders the rest herself, reading each under her breath.)' },
   ],
   ncHang: [{ my: '(ဘုတ်ပေါ်မှာ သူ့အစီအစဉ်အတိုင်း တစ်ချပ်ချင်း ကိုယ်တိုင် ချိတ်တယ်။ မြေဖြူစာတွေက ခဲတံရောင် မှိန်မှိန်လေးပဲ ရှိသေးတယ်။)', en: '(She hangs them on the board one by one, in her own order. The chalk is still a faint pencil-grey.)' }],
@@ -299,7 +299,7 @@ export const L = {
     { my: 'တစ်ချောင်းက ကျွန်မအတွက်။ ပုံနှိပ်တိုက်မှာ ကိုယ့်သေတ္တာ။ ကျွန်မ နာမည် ကျွန်မ ရေးမယ်။', en: "One's for me: my own locker at the print shed. I'll write my name myself." },
     { my: 'နောက်တစ်ချောင်းက… အစ်မ ကိုယ်တိုင် နာမည်ရေးပါ။', en: 'The other… write your own name, sister.' },
   ],
-  mayaKey: [{ my: '(ကိုယ့်နာမည် ကိုယ်ရေးတဲ့ သော့။ ဘာကို ဖွင့်မလဲ မသိသေးဘူး။ သိမ်းထားမယ်။)', en: "(A key with my own name, written by me. I don't know what it opens yet. I'll keep it.)" }],
+  mayaKey: [{ my: '(ကိုယ့်နာမည်ကိုယ် ရေးတဲ့ သော့။ ဘာကို ဖွင့်မလဲ မသိသေးဘူး။ သိမ်းထားမယ်။)', en: "(A key with my own name, written by me. I don't know what it opens yet. I'll keep it.)" }],
   tagNay: 'နေခြည်',
   tagMaya: 'မာရာ',
   bhBoom: [{ my: 'ဆယ်ချပ် ပြည့်ပြီ! ဘားတန်း မတင်ကြစို့!', en: "All ten! Raise the boom!" }],
@@ -345,7 +345,7 @@ export const L = {
     { my: 'ကြိုးတံတားဟောင်း ပြတ်နေပြီတဲ့။ အဲဒီကောင်မလေး ကျောက်သင်ပုန်းနဲ့ ဘယ်လိုလုပ်မလဲ မသိဘူး။', en: "They say the old rope bridge snapped. Don't know what that girl with the slates will do." },
   ],
   thA: [{ my: 'ကျောက်သင်ပုန်းအိတ်နဲ့ ကောင်မလေး ခုနက အရှေ့ဘက် ဖြတ်သွားတယ်။ ပြန်မလှည့်ဘဲ။', en: "A girl with a bag of slates went east just now. Didn't look back." }],
-  ttnA: [{ my: 'ဒီနေ့ တံတားဖွင့်တဲ့နေ့။ ဒီခွက်က ဘယ်သူ့ဆီကမှ ပိုက်ဆံ မယူဘူး။ သောက်သွား။', en: "Bridge-opening day. I'm not taking money for this cup from anyone. Drink." }],
+  ttnA: [{ my: 'ဒီနေ့ တံတားဖွင့်တဲ့နေ့။ ဒီခွက်အတွက် ပိုက်ဆံ မယူဘူး။ သောက်သွား။', en: "Bridge-opening day. I'm not taking money for this cup from anyone. Drink." }],
   childName: { my: 'ကလေးလေး', en: 'A small child' },
   childShop: [{ my: '(စာအုပ်တစ်အုပ် ယူပြီး ရင်ခွင်ထဲ ဖက်ထားတယ်။)', en: '(She takes a book and hugs it to her chest.)' }],
 
@@ -362,7 +362,7 @@ export const L = {
   deskStage: [{ my: '(စင်ပေါ်က နာရီက လည်နေတယ်။ ကိုယ်တိုင် မြင်ရတယ်။)', en: '(The clock on the stage is running. I can see it myself.)' }],
 
   // ---- 8.3 the reply line
-  replyTitle: { my: 'စာကို ပြန်စာ', en: 'Reply to the letter' },
+  replyTitle: { my: 'စာပြန်ရန်', en: 'Reply to the letter' },
   reply: { my: 'သူတို့ စင်ပေါ်မှာ "မာရာ" မပါလည်း ပြဇာတ်က ပြီးသွားတယ်။', en: 'Without a "Maya" on their stages, the play still came to its end.' },
 
   // ---- 9. the night page
@@ -370,8 +370,8 @@ export const L = {
   nightQ: { my: 'ဒီနေ့အကြောင်း မှန်မှန်ကန်ကန် ဘယ်လို ရေးမလဲ။', en: 'How will she write today, truthfully?' },
   nightChoices: [
     { my: 'ကျွန်မ မရှိရင် ပြဇာတ်လည်း၊ တံတားလည်း ဖြစ်လာမှာ မဟုတ်ဘူး။', en: "Without me there'd have been no play and no bridge." },
-    { my: 'ရဲယဉ့်က ခန်းတိုင်းကို ပိုင်ရှင်တွေဆီ ပြန်ပေးပြီး ခုံအတူသယ်တယ်။ နေခြည်က ကျောက်သင်ပုန်းတွေကို ကိုယ့်အစီအစဉ်နဲ့ ချိတ်တယ်… ပြီးတော့ မနက်ဖြန်အတွက် ကျွန်မကို မေးတယ်။ ကျွန်မ ဖြေလိုက်တယ်။', en: 'Ye Yint gave every scene back to its owner and carried benches with everyone. Nay Chi hung her slates in her own order… then asked me about tomorrow, and I answered.' },
-    { my: 'ပြဇာတ်ထဲမှာ "မာရာ" မလိုတော့ဘူး။ ဘယ်သူမှ ကျွန်မကို မလိုတော့ဘူး။', en: 'The play didn\'t need "Maya". Nobody needs me any more.' },
+    { my: 'ရဲယဉ့်က အခန်းတိုင်းကို ပိုင်ရှင်တွေဆီ ပြန်ပေးပြီး ခုံအတူသယ်တယ်။ နေခြည်က ကျောက်သင်ပုန်းတွေကို ကိုယ့်အစီအစဉ်နဲ့ ချိတ်တယ်… ပြီးတော့ မနက်ဖြန်အတွက် မေးတယ်။ ကျွန်မ ဖြေလိုက်တယ်။', en: 'Ye Yint gave every scene back to its owner and carried benches with everyone. Nay Chi hung her slates in her own order… then asked me about tomorrow, and I answered.' },
+    { my: 'ပြဇာတ်ထဲမှာ "မာရာ" မလိုတော့ဘူး။ ကျွန်မကို ဘယ်သူမှ မလိုတော့ဘူး။', en: 'The play didn\'t need "Maya". Nobody needs me any more.' },
   ],
   nightWrong: [
     [{ my: '(မဟုတ်ဘူး… ဒါ ချော့ပြောတာ။ သူတို့ကိုယ်တိုင် လုပ်ခဲ့ကြတာ။)', en: '(No… that flatters. They did it themselves.)' }],

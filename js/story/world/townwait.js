@@ -16,7 +16,7 @@ function injectStyle() {
   const s = document.createElement('style');
   s.id = 'story-townwait-style';
   s.textContent = `
-  #story-townwait { position: absolute; inset: 0; z-index: 62; perspective: 1400px; overflow: hidden; touch-action: none; }
+  #story-townwait { position: absolute; inset: 0; z-index: 62 !important; perspective: 1400px; overflow: hidden; touch-action: none; }
   #story-townwait .leaf { position: absolute; inset: 0; transform-origin: 0 50%;
     background: linear-gradient(90deg, #EFE6D0 0%, #F7F1E1 12%, #FBF7EC 70%, #EDE3CB 100%); box-shadow: inset 0 0 60px rgba(120,90,40,.18); }
   #story-townwait .leaf::before { content: ''; position: absolute; inset: 0;
@@ -25,8 +25,9 @@ function injectStyle() {
   #story-townwait .curl { position: absolute; right: 0; bottom: 0; width: 120px; height: 120px; transform-origin: 100% 100%;
     background: linear-gradient(135deg, transparent 50%, #E6DABD 50%, #F4ECD8 70%, #FBF7EC 100%);
     box-shadow: -6px -6px 14px rgba(90,60,20,.12); border-top-left-radius: 8px; animation: rc-curl 1.6s ease-in-out infinite alternate; }
+  /* (!important: #game > * sets z-index 2, and the iris (#fader) sits at 7 over the room's load) */
   @keyframes rc-curl { from { transform: scale(.55); } to { transform: scale(1); } }
-  .story-townwait-note { position: absolute; left: 0; right: 0; top: 46%; text-align: center; z-index: 63; pointer-events: none;
+  .story-townwait-note { position: absolute; left: 0; right: 0; top: 46%; text-align: center; z-index: 63 !important; pointer-events: none;
     font: 600 20px/1.6 "Noto Sans Myanmar", system-ui, sans-serif; color: #6B4A1E; opacity: 0; transition: opacity .6s; }
   .story-townwait-note.on { opacity: .85; }
   .story-townwait-note i { display: inline-block; width: 7px; height: 7px; margin: 0 4px; border-radius: 50%; background: #A47A2C; animation: rc-dot 1.2s infinite; }

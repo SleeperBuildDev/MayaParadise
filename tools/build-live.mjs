@@ -4,8 +4,10 @@
 //
 //   node tools/build-live.mjs [--out=dist] [--core=<file.json>] [--no-preload] [--report=<file.json>] [--quiet]
 //
-// --core=<file.json>  first-load files for precache.json: a JSON array of site paths, or { core: [...] }.
-//                     Without it the core is index.html + its css/fonts + the boot chain found from the imports.
+// --core=<file.json>  first-load files for precache.json and the story-mode modulepreload list: a JSON array of
+//                     site paths (with the query the page asks for, e.g. js/boot.js?v=6), or { core: [...] }.
+//                     Default: tools/live-core.json (the lazy-town first-playable set, measured), if it exists;
+//                     --core=none: index.html + its css/fonts + the boot chain found from the imports.
 // --no-preload        do not add the story-mode modulepreload list to dist/index.html.
 //
 // Safety: the JS minifier is a real tokenizer (strings, template literals with nested ${...},
@@ -63,6 +65,7 @@ function walk(dir, rel = '') {
       out.push(...walk(full, r));
     } else {
       if (SKIP_FILE.some((re) => re.test(name))) { excluded.push(r); continue; }
+      if (!rel && /\.(txt|json|log)$/i.test(name) && name !== 'robots.txt') { excluded.push(r); continue; } // (test logs left at the site root)
       out.push(r);
     }
   }
@@ -557,16 +560,38 @@ const h = createHash('sha256');
 for (const f of [...outputs.keys()].sort()) { h.update(f); h.update('\0'); h.update(outputs.get(f)); }
 const version = h.digest('hex').slice(0, 10);
 
+// the lazy towns' outlines (regions/outlines.js) must match the towns' own files
+if (existsSync(join(ROOT, 'tools', 'town-outlines.mjs'))) {
+  const { spawnSync } = await import('node:child_process');
+  const r = spawnSync(process.execPath, [join(ROOT, 'tools', 'town-outlines.mjs'), '--check'], { cwd: ROOT, encoding: 'utf8' });
+  if (r.status !== 0) console.warn('WARNING: js/story/world/regions/outlines.js is out of date: run node tools/town-outlines.mjs, then build again\n' + (r.stdout || '') + (r.stderr || ''));
+}
+
 // first-load (core) list
 const PRECACHE_SKIP = new Set(['CNAME', '.nojekyll', 'robots.txt', 'sitemap.xml', '404.html', 'sw.js', 'precache.json']);
 const exists = (f) => outputs.has(f);
 let core;
 let coreSource;
 const preloadUrls = [];
+if (!flags.core && existsSync(join(ROOT, 'tools', 'live-core.json'))) flags.core = join(ROOT, 'tools', 'live-core.json');
+if (flags.core === 'none') flags.core = false;
+// (the page's own script tags load these: never preloaded twice)
+const pageScripts = new Set([...before.get('index.html').toString('utf8').matchAll(/<script\b[^>]*\bsrc\s*=\s*["']([^"']+)["']/gi)].map((m) => m[1].split('?')[0]));
 if (flags.core) {
   const j = JSON.parse(readFileSync(resolve(flags.core), 'utf8'));
-  core = (Array.isArray(j) ? j : j.core || []).map((s) => String(s).replace(/^\.?\//, '').split('?')[0]).filter(exists);
+  const urls = (Array.isArray(j) ? j : j.core || []).map((s) => String(s).replace(/^\.?\//, ''));
+  core = urls.map((u) => u.split('?')[0]).filter(exists);
   coreSource = 'from ' + flags.core;
+  // modulepreload: every core module, with the exact query the page imports it with (else it is fetched twice).
+  // Left out: the towns (townboot.js preloads the ones this save needs) and the day's own files (the inline
+  // script adds the saved day's module); they differ from save to save.
+  for (const u of urls) {
+    const f = u.split('?')[0];
+    if (!f.endsWith('.js') || !exists(f) || pageScripts.has(f)) continue;
+    if (/^js\/story\/world\/(regions\/(?!outlines\.js$|home\.js$)|art\/)/.test(f)) continue;
+    if (/^js\/story\/(day\d+[^/]*\.js|talks\/day\d+\.js|acts\/)/.test(f)) continue;
+    preloadUrls.push(u);
+  }
 } else {
   coreSource = 'index.html + css/fonts + boot chain (static imports, plus literal import() from boot.js, game/main.js)';
   const set = new Set(['index.html']);
@@ -605,7 +630,25 @@ if (flags.core) {
 }
 core = core.filter((f) => !PRECACHE_SKIP.has(f));
 const coreSet = new Set(core);
-const rest = [...outputs.keys()].filter((f) => !coreSet.has(f) && !PRECACHE_SKIP.has(f) && !/(^|\/)LICENSE$/.test(f)).sort();
+// rest: in the order the game wants them (the service worker fills its cache in this order): the towns (the
+// home book's neighbours first), the extras, the room files, the other days, the rest of the code, then images
+const TOWN_ORDER = ['quarter', 'blank', 'garden', 'market', 'hearth', 'wharf', 'junction'];
+const townOf = new Map();
+try {
+  const src = before.get('js/story/world/regions/outlines.js').toString('utf8');
+  const FILES = JSON.parse(src.match(/export const FILES = (\{.*\});/)[1]);
+  for (const [t, fs] of Object.entries(FILES)) for (const f of fs) townOf.set(f, t);
+} catch (e) { log('outlines.js FILES not read:', e.message); }
+const rank = (f) => {
+  if (townOf.has(f)) return [0, TOWN_ORDER.indexOf(townOf.get(f))];
+  if (/^js\/story\/(extras-|chatter\/|heinhtet\/|folknames|rooms\/generic|world\/minimap|world\/townintro)/.test(f)) return [1, 0];
+  if (/^js\/story\/(rooms\/|interiors\/|props\d*\.js)/.test(f)) return [2, 0];
+  if (/^js\/story\/(day\d+|talks\/|acts\/)/.test(f)) return [3, +(f.match(/day(\d+)/) || [0, 99])[1]];
+  if (f.endsWith('.js') || f.endsWith('.css')) return [4, 0];
+  return [5, 0];
+};
+const rest = [...outputs.keys()].filter((f) => !coreSet.has(f) && !PRECACHE_SKIP.has(f) && !/(^|\/)LICENSE$/.test(f) && !/^img\/og\./.test(f) && !/\.txt$/.test(f))
+  .sort((a, b) => { const x = rank(a), y = rank(b); return x[0] - y[0] || x[1] - y[1] || a.localeCompare(b, 'en', { numeric: true }); });
 
 // inject the live marker, version, service-worker registration and (story mode only) modulepreload
 {
@@ -614,7 +657,11 @@ const rest = [...outputs.keys()].filter((f) => !coreSet.has(f) && !PRECACHE_SKIP
   const pre = flags['no-preload'] ? [] : preloadUrls;
   let head = `<script>window.__LIVE=true;window.__BUILD=${JSON.stringify(version)};`;
   if (pre.length) {
+    // (+ the saved day's own module and lines, when they exist)
+    const days = [...Array(15)].map((_, i) => i + 1).filter((d) => exists(`js/story/day${d}.js`));
     head += `(function(){if(!/[?&]story(=|&|$)/.test(location.search))return;var l=${JSON.stringify(pre)};`
+      + `try{var q=location.search.match(/[?&]day=(\\d+)/),s=JSON.parse(localStorage.getItem('rc-story-v1')||'null'),d=+(q&&q[1])||(s&&s.day)||1;`
+      + `if(${JSON.stringify(days)}.indexOf(d)>=0){l.push('js/story/day'+d+'.js');${exists('js/story/talks/day1.js') ? `l.push('js/story/talks/day'+d+'.js');` : ''}}}catch(e){}`
       + `for(var i=0;i<l.length;i++){var e=document.createElement('link');e.rel='modulepreload';e.href=l[i];document.head.appendChild(e)}})();`;
   }
   head += '</script>';
@@ -636,7 +683,10 @@ for (const [f, buf] of outputs) {
   mkdirSync(dirname(p), { recursive: true });
   writeFileSync(p, buf);
 }
-const precache = { version, built: new Date().toISOString(), core: core.slice().sort(), rest };
+// hash: unchanged files are copied from the previous version's cache on an update (sw.js), not downloaded again
+const hash = {};
+for (const f of [...core, ...rest]) hash[f] = createHash('sha256').update(outputs.get(f)).digest('hex').slice(0, 16);
+const precache = { version, built: new Date().toISOString(), core: core.slice().sort(), rest, hash };
 writeFileSync(join(OUT, 'precache.json'), JSON.stringify(precache, null, 1) + '\n');
 
 // node --check every .js in dist (a few at a time)

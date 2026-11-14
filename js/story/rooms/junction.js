@@ -1219,7 +1219,7 @@ function drawCorrection(g, w, h) {
   g.fillRect(w * 0.06, h * 0.05, w * 0.88, h * 0.03);
   text(g, 'ပြင်ဆင်ချက်', w / 2, h * 0.17, { size: h * 0.1, color: '#8E2F2B', max: w * 0.9 });
   text(g, 'တံတားထိပ် စာတိုက်ပုံး', w / 2, h * 0.34, { size: h * 0.07, max: w * 0.9 });
-  text(g, 'မနက် 6:00 မှာ ထုတ်သည်။', w / 2, h * 0.47, { size: h * 0.07, max: w * 0.9 });
+  text(g, 'မနက် 6:00 မှာ ထုတ်တယ်။ |', w / 2, h * 0.47, { size: h * 0.07, max: w * 0.9 });
   printLines(g, w * 0.1, h * 0.58, w * 0.8, h * 0.2, { cols: 1, gap: h * 0.04, lw: Math.max(2, h * 0.012), seed: 12 });
   text(g, 'Correction: the bridge-box is cleared at 6:00 a.m.', w / 2, h * 0.88, { size: h * 0.04, family: FONT_SERIF, weight: 600, color: '#5A4A3A', max: w * 0.92 });
 }
@@ -1841,7 +1841,7 @@ async function buildSchoolroom(opts = {}) {
   ];
   return finish(room, v, A, life, {
     id: 'schoolroom',
-    name: { my: 'လမ်းဆုံ ကျောင်း', en: 'the Junction school' },
+    name: { my: 'လမ်းဆုံကျောင်း', en: 'the Junction school' },
     spots,
     stations,
     cast: [{ id: 'moemoe', spot: 'moemoe' }, { id: 'pupil1', spot: 'pupil1' }, { id: 'pupil2', spot: 'pupil2' }, { id: 'teacher', spot: 'teacher', when: 'after' }],
@@ -2407,13 +2407,13 @@ export const WALKON_NAMES = {
 export const ROOMS = {
   letterroom: { name: { my: 'မသီတာရဲ့ စာရေးခန်း', en: "Ma Thida's letter room" }, district: 'junction', build: buildLetterroom },
   junctiontea: { name: { my: 'ဒေါ်စိန်ရဲ့ လက်ဖက်ရည်ဆိုင်', en: "Daw Sein's tea shop" }, district: 'junction', build: buildJunctiontea },
-  schoolroom: { name: { my: 'လမ်းဆုံ ကျောင်း', en: 'the Junction school' }, district: 'junction', build: buildSchoolroom },
+  schoolroom: { name: { my: 'လမ်းဆုံကျောင်း', en: 'the Junction school' }, district: 'junction', build: buildSchoolroom },
   press: { name: { my: 'ရွှေမင် ပုံနှိပ်တိုက်', en: 'the Gold Ink Press' }, district: 'junction', build: buildPress },
   // the bridge hands' hut on the west bridgehead square (regions/junction.js has its door from Day 7 on).
   // One room, one builder: Day 7's own (day7-fold.js HUT_ROOM), loaded only when someone walks in; Day 7
   // registers the same spec itself (doors.registerRooms), so its dressing options keep working.
   bridgehut: {
-    name: { my: 'တံတားစောင့် တဲ', en: "The bridge hands' hut" }, district: 'junction',
+    name: { my: 'တံတားစောင့်တဲ', en: "The bridge hands' hut" }, district: 'junction',
     async build(opts = {}) { const m = await import('../day7-fold.js'); return m.HUT_ROOM.build(opts); },
   },
 };

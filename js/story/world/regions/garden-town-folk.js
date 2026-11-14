@@ -18,11 +18,11 @@
 const P = (id, my, en, roleMy, roleEn, look, more = {}) => ({ id, name: { my, en }, district: 'garden', role: { my: roleMy, en: roleEn }, look, ...more });
 
 export const TOWN_FOLK = [
-  P('gohn', 'ဒေါ်ခင်ထွေး', 'Daw Khin Htwe', 'လမ်း လှည်းသူ', 'sweeps the back lane',
+  P('gohn', 'ဒေါ်ခင်ထွေး', 'Daw Khin Htwe', 'နောက်ဖေးလမ်း လှည်းသူ', 'sweeps the back lane',
     { age: 'elder', build: 'mid', skin: 3, hair: 'bun', hairColor: 'grey', top: 'blouse', topColor: 'cream', bottom: 'htamein', bottomColor: 'brown', extras: ['thanaka'] }),
   P('gbakyi', 'ဦးဘကြည်', 'U Ba Kyi', 'လက်သမား', 'carpenter',
     { age: 'elder', build: 'wide', skin: 5, hair: 'short', hairColor: 'grey', top: 'vest', topColor: 'white', bottom: 'longyi', bottomColor: 'brown', check: true, extras: ['pencil'] }),
-  P('gkhaing', 'မခိုင်', 'Ma Khaing', 'ကုန်စုံဆိုင် ရှင်', 'keeps the general store',
+  P('gkhaing', 'မခိုင်', 'Ma Khaing', 'ကုန်စုံဆိုင်ရှင်', 'keeps the general store',
     { age: 'adult', build: 'mid', skin: 2, hair: 'bun', top: 'blouse', topColor: 'mustard', bottom: 'htamein', bottomColor: 'teal', extras: ['thanaka'] }),
   P('gtuntun', 'ထွန်းထွန်း', 'Tun Tun', 'ခြင်းလုံး ကစားတဲ့ ကလေး', 'a boy with a cane ball',
     { age: 'child', build: 'slim', skin: 4, hair: 'spiky', top: 'tee', topColor: 'sky', bottom: 'shorts', bottomColor: 'olive' }, { years: 9 }),
@@ -32,7 +32,7 @@ export const TOWN_FOLK = [
     { age: 'elder', build: 'slim', skin: 2, hair: 'bun', hairColor: 'white', top: 'eingyi', topColor: 'white', bottom: 'htamein', bottomColor: 'plum', extras: ['thanaka', 'glasses'] }),
   P('gthet', 'ကိုသက်', 'Ko Thet', 'စက်ဘီးပြင်သူ', 'mends bicycles',
     { age: 'adult', build: 'mid', skin: 4, hair: 'cap', top: 'tee', topColor: 'charcoal', bottom: 'longyi', bottomColor: 'olive', check: true, extras: ['towel'], extraColor: 'rose' }),
-  P('gei', 'မအိ', 'Ma Ei', 'လက်ဖက်ရည်ဆိုင်က ကူသူ', 'helps at the tea stall',
+  P('gei', 'မအိ', 'Ma Ei', 'လက်ဖက်ရည်ဆိုင်မှာ ကူသူ', 'helps at the tea stall',
     { age: 'teen', build: 'slim', skin: 3, hair: 'braid', top: 'blouse', topColor: 'rose', bottom: 'htamein', bottomColor: 'navy', extras: ['thanaka'] }, { years: 15 }),
 ];
 

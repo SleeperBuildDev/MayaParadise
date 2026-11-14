@@ -20,6 +20,7 @@
 //   wPuddle { w, d }               a pale wet patch (decal)
 //   wDeckLitter { w, d, kind, seed } straw, rice spill, fish scales, a wet trail, chalk tally, rope end (decal)
 import { shade, rng } from '../kit.js';
+import { folkArms, broom, stick } from '../folk-arms.js';
 
 const C = {
   wood: '#B98A5A', woodD: '#7E5A38', woodL: '#CDA577', woodG: '#A89A86', woodGD: '#8C7E6A', woodGL: '#C4B9A6',
@@ -216,36 +217,55 @@ function wWorker(g, f, it) {
   const lean = pose === 'sweep' ? 0.25 : squat || pose === 'plane' ? 0.3 : onMat ? 0.2 : pose === 'yoke' ? 0.08 : 0;
   g.boxR(0, ty, lean * 0.3, tw, th, 0.26 * s, top, lean, 0, 0);
   const ay = ty + th / 2 - 0.05, ax = tw / 2 + 0.06;
-  const arm = (sx, rx, rz = 0) => g.boxR(sx * ax, ay - 0.2 * s, 0.04 + Math.sin(rx) * 0.2, 0.11 * s, 0.42 * s, 0.11 * s, top, rx, 0, rz);
+  // arms turn about the shoulder and end in a hand; whatever the pose holds is drawn in that hand (folk-arms.js).
+  // sx = -1 is the worker's own right arm, +1 the left. (These arms used to swing the wrong way about their middles,
+  // so a raised or reaching arm hung off the body nowhere near the rod, broom or plane it held.)
+  const { arm, reach } = folkArms(g, f, { ax, ty, th, lean, s, top, skin, len: 0.38, w: 0.11 });
   const top2 = ty + th / 2;
   switch (pose) {
-    case 'carry': arm(-1, 0); arm(1, -2.6);
+    case 'carry': arm(-1, 0); reach(1, [ax, ay + 0.2, 0.22]); // the left hand steadies the sack on the left shoulder
       g.box(0.18, top2 + 0.16, -0.02, 0.52, 0.32, 0.38, it.load || C.jute); g.box(0.18, top2 + 0.33, -0.02, 0.2, 0.05, 0.2, C.juteD); break;
-    case 'yoke': arm(-1, -2.2); arm(1, -0.4);
-      g.boxR(0, top2 + 0.04, 0, 1.9, 0.05, 0.06, C.bambooD, 0, 0, 0.04); // the pole across the shoulder (along X)
-      for (const sx of [-0.88, 0.88]) {
-        for (const dz of [-0.12, 0.12]) g.box(sx, top2 - 0.32, dz, 0.015, 0.7, 0.015, C.jute);
-        g.box(sx, top2 - 0.75, 0, 0.5, 0.26, 0.5, C.bambooD); g.box(sx, top2 - 0.6, 0, 0.42, 0.06, 0.42, it.load || C.fish);
+    case 'yoke': { // the pole on the right shoulder, front to back, a basket at each end; the right hand on it in front
+      // (along X across both shoulders, the hand had to reach straight out sideways to it)
+      const px = -0.24;
+      reach(-1, [px, top2 + 0.04, 0.36]); arm(1, -0.3);
+      g.boxR(px, top2 + 0.04, 0, 0.06, 0.05, 1.9, C.bambooD, 0.04, 0, 0);
+      for (const sz of [-0.88, 0.88]) {
+        for (const dx of [-0.12, 0.12]) g.box(px + dx, top2 - 0.32, sz, 0.015, 0.7, 0.015, C.jute);
+        g.box(px, top2 - 0.75, sz, 0.5, 0.26, 0.5, C.bambooD); g.box(px, top2 - 0.6, sz, 0.42, 0.06, 0.42, it.load || C.fish);
       }
       break;
-    case 'mend': arm(-1, -1.1); arm(1, -1.0);
+    }
+    case 'mend': reach(-1, [-0.16, 0.24, 0.52]); reach(1, [0.16, 0.24, 0.56]); // both hands down in the net
       for (let k = 0; k < 5; k++) f.flatR(-0.1 + (k % 3) * 0.12, 0.55 + k * 0.08, 1.1 - k * 0.1, 0.12, 0.2 + k * 0.006, k % 2 ? '#7E8C7A' : '#94A28E', 0.1 * k);
       g.box(0.4, 0.06, 0.6, 0.3, 0.12, 0.3, C.bambooD); break; // the shuttle basket
-    case 'fish': arm(-1, -1.0); arm(1, -1.3);
-      g.boxR(0.12, top2 + 0.2, 0.9, 0.03, 0.03, 1.9, C.bambooD, -0.45, 0, 0); // the rod out over the water
-      g.box(0.12, top2 - 0.2, 1.75, 0.01, 1.2, 0.01, C.white); // the line
+    case 'fish': {
+      // the rod held in both hands, out over the water; the line hangs from its tip
+      const h1 = reach(-1, [-0.05, ty + 0.04, 0.36]), h2 = reach(1, [0.05, ty + 0.1, 0.44]);
+      const gx = (h1[0] + h2[0]) / 2, gy = (h1[1] + h2[1]) / 2, gz = (h1[2] + h2[2]) / 2, u = [0, 0.435, 0.9];
+      const tip = [gx + u[0] * 1.7, gy + u[1] * 1.7, gz + u[2] * 1.7];
+      stick(g, [gx - u[0] * 0.22, gy - u[1] * 0.22, gz - u[2] * 0.22], tip, 0.03, C.bambooD);
+      g.box(tip[0], tip[1] - 0.6, tip[2], 0.01, 1.2, 0.01, C.white); // the line
       g.box(-0.45, 0.08, -0.1, 0.32, 0.16, 0.32, C.bambooD); break; // the creel beside her
-    case 'sweep': arm(-1, -0.9); arm(1, -0.7);
-      g.boxR(0.05, 0.62, 0.42, 0.04, 1.2, 0.04, C.woodL, 0.55, 0, 0.1); g.boxR(0, 0.08, 0.78, 0.4, 0.16, 0.08, C.bambooD, 0.4, 0, 0); break;
-    case 'squat': arm(-1, -1.3); arm(1, -1.1);
+    }
+    case 'sweep': // the broom in the right hand, its head on the planks ahead; the left hand at the top of the handle
+      reach(1, broom(g, arm(-1, -0.55, 0.3), { handle: C.woodL, head: C.bambooD, headW: 0.4 })); break;
+    case 'squat': reach(-1, [-0.18, 0.3, 0.46]); reach(1, [0.18, 0.3, 0.46]); // both hands at the basin
       if (it.load !== false) { g.box(0, 0.08, 0.5, 0.6, 0.14, 0.42, C.zinc); f.flatR(0, 0.5, 0.5, 0.32, 0.155, it.load || '#C7D3D8', 0); } break;
-    case 'sit': arm(-1, -0.6); arm(1, -1.2); g.box(0.2, ay - 0.06, 0.28, 0.07, 0.1, 0.07, '#E9C9A0'); break;
-    case 'hang': arm(-1, -2.9); arm(1, -2.8); break;
-    case 'plane': arm(-1, -1.2); arm(1, -1.2);
-      for (const sx of [-0.7, 0.7]) g.box(sx, 0.3, 0.6, 0.12, 0.6, 0.36, C.woodD);
-      g.box(0, 0.64, 0.6, 1.9, 0.07, 0.3, C.woodL); g.box(0.1, 0.71, 0.6, 0.26, 0.08, 0.12, C.woodD);
+    case 'sit': {
+      arm(-1, -0.6);
+      const [hx, hy, hz] = arm(1, -1.2, -0.15); // a cup of tea in the left hand
+      g.box(hx, hy + 0.07, hz + 0.01, 0.07, 0.1, 0.07, '#E9C9A0'); break;
+    }
+    case 'hang': arm(-1, -2.9, -0.15); arm(1, -2.8, 0.15); break;
+    case 'plane': {
+      // the plank on two trestles at working height; both hands on the plane
+      for (const sx of [-0.7, 0.7]) g.box(sx, 0.38, 0.6, 0.12, 0.76, 0.36, C.woodD);
+      g.box(0, 0.8, 0.6, 1.9, 0.07, 0.3, C.woodL); g.box(0.08, 0.87, 0.52, 0.26, 0.08, 0.12, C.woodD);
+      reach(-1, [-0.02, 0.94, 0.5]); reach(1, [0.18, 0.94, 0.52]);
       for (let k = 0; k < 6; k++) f.box(-0.5 + r(), 0.02, 0.4 + r() * 0.6, 0.1, 0.02, 0.05, C.woodL); break;
-    case 'coil': arm(-1, -0.9); arm(1, -0.9);
+    }
+    case 'coil': reach(-1, [-0.16, ay - 0.2, 0.36]); reach(1, [0.16, ay - 0.2, 0.36]); // a hank of rope between the hands
       g.box(0, ay - 0.22, 0.36, 0.3, 0.06, 0.3, C.jute);
       for (let k = 0; k < 3; k++) g.box(0, 0.05 + k * 0.08, 0.7, 0.62 - k * 0.1, 0.07, 0.62 - k * 0.1, k % 2 ? C.jute : C.juteD); break;
     default: arm(-1, 0); arm(1, kid ? -0.5 : 0);

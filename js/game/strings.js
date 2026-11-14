@@ -10,7 +10,7 @@ export const LINES = {
   enter: {
     about: { my: 'ကျွန်မရဲ့ စာရေးခန်းလေးကို ကြိုဆိုပါတယ်ရှင့်!', en: 'Welcome to my writing room!' },
     templates: { my: 'Template လေးတွေ အတူတူ ရွေးကြည့်ကြရအောင်နော်!', en: "Let's pick a template together!" },
-    scripts: { my: 'Script စတူဒီယိုကို ရောက်ပါပြီ! ဘယ်လို Script မျိုး လိုချင်လဲ?', en: 'Welcome to the Script Studio! What kind of script do you need?' },
+    scripts: { my: 'Script စတူဒီယိုကို ရောက်ပါပြီရှင့်! ဘယ်လို Script မျိုး လိုချင်လဲ?', en: 'Welcome to the Script Studio! What kind of script do you need?' },
     content: { my: 'သင့် Brand လေး တောက်ပလာအောင် ကူညီပေးမယ်နော်!', en: "I'll help your brand shine!" },
     library: { my: 'ဒီမှာ ကျွန်မရဲ့ စာအုပ်လေး ရှိပါတယ်ရှင့်!', en: 'My book lives here!' },
     contact: { my: 'စကားပြောချင်ရင် ဒီကနေ ဆက်သွယ်လို့ ရပါတယ်ရှင့်!', en: 'You can reach me from here!' },
@@ -30,8 +30,8 @@ export const LINES = {
     { my: 'ဟီးဟီး… ယားတယ်နော်!', en: 'Hehe… that tickles!' },
     { my: 'ဘယ်ကို သွားကြမလဲ?', en: 'Where shall we go?' },
     { my: 'စာရေးရတာ အရမ်းပျော်တယ်!', en: 'I love writing!' },
-    { my: 'ဒီနေ့ ဘာရေးရမလဲလို့ စဉ်းစားနေတာ…', en: "I'm thinking about what to write today…" },
-    { my: 'ကျွန်မရဲ့ “အမှန်မြင်ခြင်း” စာအုပ်လေး ဖတ်ဖူးပြီလား?', en: 'Have you read my book “Reality Check” yet?' },
+    { my: 'ဒီနေ့ ဘာရေးရမလဲ စဉ်းစားနေတာ…', en: "I'm thinking about what to write today…" },
+    { my: 'ကျွန်မရဲ့ “အမှန်မြင်ခြင်း” စာအုပ်လေး ဖတ်ပြီးပြီလား?', en: 'Have you read my book “Reality Check” yet?' },
   ],
 };
 
@@ -40,7 +40,7 @@ export const TIPS = {
   drag: { my: 'ဖန်သားပြင်ကို ဖိဆွဲပြီး ကိုယ်တိုင်လည်း မောင်းလို့ရတယ်နော်', en: 'Drag on the screen to drive yourself' },
   enter: { my: '“အထဲ ဝင်မယ်” ကို နှိပ်ပါ', en: 'Tap “Go inside”' },
   walk: { my: 'ရွှေရောင် အဝိုင်းလေးတွေကို နှိပ်ပြီး ကြည့်ပါ', en: 'Tap the gold circles to look around' },
-  exit: { my: 'အပြင်ထွက်ရန် အောက်ခြေ တံခါးဝဆီ လျှောက်ပါ', en: 'Walk to the doorway to go outside' },
+  exit: { my: 'အပြင်ထွက်ချင်ရင် အောက်ခြေက တံခါးဝဆီ လျှောက်ပါ', en: 'Walk to the doorway to go outside' },
 };
 
 export const UI = {
@@ -134,8 +134,8 @@ export const BARKS = {
   ],
   driveLong: [
     { my: 'မောင်းရတာ ပျော်တယ်! {place} ဝင်ကြည့်မလား?', en: 'Driving is fun! Pop into {place}?' },
-    { my: 'လေလေး တဖြူးဖြူးနဲ့ ကောင်းလိုက်တာ!', en: 'What a lovely breeze!' },
-    { my: 'လမ်းလေးတွေ လှတယ်မဟုတ်လား? ရွှေမင်နဲ့ ဆွဲထားတာလေ', en: 'Pretty roads, right? Drawn in gold ink!' },
+    { my: 'လေလေး တဖြူးဖြူးနဲ့ နေလို့ကောင်းလိုက်တာ!', en: 'What a lovely breeze!' },
+    { my: 'လမ်းလေးတွေ လှတယ်မလား? ရွှေမင်နဲ့ ဆွဲထားတာလေ', en: 'Pretty roads, right? Drawn in gold ink!' },
   ],
   driveVeryLong: [
     { my: 'အကြာကြီး မောင်းနေပြီနော်! ခဏ ရပ်ကြမလား?', en: "We've driven for ages! Shall we stop?" },
@@ -150,7 +150,7 @@ export const BARKS = {
   speedy: [
     { my: 'ဝိုး! မြန်လိုက်တာ! ဆံပင်တွေ ပွကုန်ပြီ', en: 'Wheee! So fast! My hair is a mess!' },
     { my: 'ဖြည်းဖြည်းလေး မောင်းပါ… ကျွန်မ ကြောက်တယ် ဟီး', en: "Easy now… I'm a little scared, hehe!" },
-    { my: 'အရှိန်ပြင်းလိုက်တာ! သေချာ ကိုင်ထားပေါ့!', en: 'Full speed! Hold on tight!' },
+    { my: 'အရှိန်ပြင်းလိုက်တာ! သေချာ ကိုင်ထားနော်!', en: 'Full speed! Hold on tight!' },
   ],
   hardBrake: [
     { my: 'အိုး! ရုတ်တရက် ဘရိတ်အုပ်လိုက်တာ!', en: 'Oh! What a sudden stop!' },
@@ -187,7 +187,7 @@ export const BARKS = {
   ],
   roomLong: [
     { my: 'ဒီအခန်းလေးကို တကယ် ကြိုက်တာပဲ!', en: 'You really like this room!' },
-    { my: 'တခြားအခန်းတွေလည်း သွားကြမလား? {place} ကော?', en: 'Shall we see other rooms too? {place}?' },
+    { my: 'တခြားအခန်းတွေလည်း သွားကြမလား? {place} ရော?', en: 'Shall we see other rooms too? {place}?' },
   ],
   wall: [
     { my: 'ဟီး… နံရံကို ဖြတ်လျှောက်လို့ မရဘူးလေ', en: "Hehe… I can't walk through walls!" },
@@ -234,7 +234,7 @@ export const BARKS = {
     { my: 'မနက်စောစော လာလည်တာ ဝမ်းသာတယ်!', en: 'So happy you came by this early!' },
   ],
   lunch: [
-    { my: 'နေ့လယ်စာ စားပြီးပြီလား? ထမင်းနပ်မှန်အောင် စားနော်', en: "Had lunch yet? Don't skip your meals!" },
+    { my: 'နေ့လယ်စာ စားပြီးပြီလား? ထမင်းမှန်မှန် စားနော်', en: "Had lunch yet? Don't skip your meals!" },
     { my: 'ထမင်းစားချိန် ရောက်ပြီ! စားပြီးမှ ဆက်လည်နော်', en: 'Lunchtime! Eat first, then explore.' },
   ],
   evening: [

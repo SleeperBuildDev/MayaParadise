@@ -7,7 +7,8 @@
 //   0  she is within PREFETCH_R of a town's land (it jumps the queue)
 //   1  today's towns (DAY_TOWNS: where the page plays), at once when a day starts
 //   2  the neighbours of where she is, a few seconds after the story is ready
-//   3  every other town, half a minute into play
+//   3  every other town, a few seconds later (at once when the service worker already keeps the game on the
+//      phone, or on a fast connection: nothing to wait for)
 // Then the extras the towns feed (houses, chatter, Ko Hein Htet: they read the whole land once) and the room
 // files (doors.js fetches them ahead again once the towns are in).
 // Fallback: within WAIT_R of a town that is still not here, a page turns over the view (townwait.js) until it is
@@ -23,7 +24,8 @@ import { FILES, DAY_IMPORTS } from './regions/outlines.js';
 const PREFETCH_R = 110; // metres from a town's land: fetch it now (60 m in the first seconds, while the boot settles)
 const WAIT_R = 40; // metres: closer than this to a town that is not here, the page waits for it
 const GIVE_UP = 20; // seconds of waiting before she steps back
-const NEIGHBOURS_AT = 6, REST_AT = 30; // seconds after the story is ready (the rest: half a minute in, while she reads the opening)
+const NEIGHBOURS_AT = 3, REST_AT = 8; // seconds after the story is ready (one town at a time, so the opening never stalls)
+const BUSY_MAX = 300; // seconds: after this a town that will not come (offline) no longer counts as "still loading"
 const EXTRAS_MAX = 180; // seconds: the extras start then even if a town is still missing
 
 /** Where each day's page plays (beyond the towns its module imports): fetched first when the day starts. */
@@ -166,7 +168,10 @@ export function installTownLoader(game, story) {
     const base = mine ? rectsOf(mine) : [[-26, -18, 26, 18]];
     for (const t of NAMES) if (t !== mine && base.some((b) => rectsOf(t).some((r) => Math.hypot(Math.max(0, r[0] - b[2], b[0] - r[2]), Math.max(0, r[1] - b[3], b[1] - r[3])) < 30))) want(t, 2);
   }, NEIGHBOURS_AT * 1000);
-  const startRest = () => setTimeout(() => { for (const t of NAMES) want(t, 3); }, REST_AT * 1000);
+  // (a second visit: every file is already on the phone (sw.js), or a fast line: the rest at once)
+  const onPhone = !!navigator.serviceWorker?.controller;
+  const fastLine = () => { const c = navigator.connection; return !!c && !c.saveData && c.effectiveType === '4g' && !(c.rtt > 300); };
+  const startRest = () => setTimeout(() => { for (const t of NAMES) want(t, 3); }, (onPhone || fastLine() ? 1 : REST_AT) * 1000);
 
   // ---- the watcher (4 times a second): fetch what is ahead, wait for what she is about to reach
   let waiting = null, safe = null;
@@ -198,6 +203,7 @@ export function installTownLoader(game, story) {
       let r = await Promise.race([all, give]);
       while (r === 'late' && (story.talking || !safe)) r = await Promise.race([all, new Promise((q) => setTimeout(() => q('late'), 5000))]); // (mid-scene, or nowhere to step back to: keep waiting)
       if (r === 'late') { o.jump(safe.x, safe.z, safe.h); stepped = true; }
+      await o.settleTown?.();
       const p = focus();
       await o.streamer.ensureAsync(p.x, p.z);
     } catch (err) { console.error('town wait', err); }
@@ -227,13 +233,18 @@ export function installTownLoader(game, story) {
     prefetch: (t) => want(t, 1),
     readyAt,
     dayStarts,
-    busy: () => NAMES.some((t) => T[t].state !== 'ready') && now() - t0 < REST_AT + 120,
+    // (still bringing towns in: something queued or loading, or a town missing in the first minutes)
+    busy: () => !!current || NAMES.some((t) => T[t].state === 'queued' || T[t].state === 'loading') || (NAMES.some((t) => T[t].state !== 'ready') && now() - t0 < BUSY_MAX),
     extras: () => extrasGate,
     waiting: () => !!waiting,
     stats: () => ({
       t: +(now() - t0).toFixed(1),
       towns: Object.fromEntries(NAMES.map((t) => [t, { state: T[t].state, prio: T[t].prio, tries: T[t].tries, bytes: T[t].bytes, wire: T[t].wire, regMs: T[t].regMs, ms: T[t].t1 && T[t].t0 ? Math.round((T[t].t1 - T[t].t0) * 1000) : null, why: T[t].why || undefined }])),
       current,
+      loading: current ? 1 : 0,
+      pending: NAMES.filter((t) => T[t].state === 'queued' || T[t].state === 'failed').length,
+      left: NAMES.filter((t) => T[t].state !== 'ready').length,
+      onPhone,
       waiting: waiting ? { need: waiting.need, s: +(now() - waiting.t).toFixed(1) } : null,
       waits,
     }),

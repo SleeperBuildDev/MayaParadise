@@ -30,7 +30,7 @@ export const D1_CARDS = [
     really: { my: 'သူ့အစား ရွေးပေးတာ', en: 'choosing for him' }, // …but it is this
     backfire: {
       they: { my: 'ဟုတ်… ဟုတ်ကဲ့…', en: 'Oh… okay…' },
-      maya: { my: '(ကျွန်မ သူ့အစား ရွေးပေးနေမိပြီ။ ဒါ သူ့လမ်းပဲ။)', en: "(I'm choosing for him. It's his road.)" },
+      maya: { my: '(ကျွန်မ သူ့အစား ရွေးပေးနေမိပြီ။ ဒါ သူ့လမ်းပဲ။) |', en: "(I'm choosing for him. It's his road.)" },
     },
   },
 ];
@@ -47,7 +47,7 @@ export const TALK_D1_FAIR = {
     { at: 'path', my: 'ဖိုးသားက သူ့လမ်းညွှန်တိုင်ဆီ ကိုယ်တိုင် လျှောက်ရမယ်။ မာရာက ဘေးကနေ ကူပေးရုံပဲ။', en: 'Pho Thar walks to his own signpost himself. Maya only helps from beside him.' },
     { at: 'label', my: 'ခဲတံစာက အပြင်က မြင်ရတာ။ "ကြည့်" ရင် အမှန်ကို ရွှေမင်နဲ့ မြင်ရမယ်။ စိတ်အေး တစ်စက် ကုန်တယ်။', en: 'The pencil word is how it looks from outside. Look shows the truth in gold, for one calm.' },
     { at: 'hand', my: 'လေ့ကျင့်ရင်း ရခဲ့တဲ့ စကားတွေပါ။ ကိုက်ရင် တစ်လှမ်း တိုးမယ်။ မကိုက်ရင် စိတ်အေး တစ်စက် လျော့မယ်။', en: 'Words you earned in the practice. One that fits moves him a step; one that does not costs a calm.' },
-    { at: 'steam', my: 'ခွက်က ငွေ့ သုံးကြောင်း တက်ရင် စကား နားထဲ မဝင်တော့ဘူး။ အရင် နားထောင်ပေးပါ။', en: 'Three wisps from his cup and words stop entering the ear. Listen first.' },
+    { at: 'steam', my: 'ခွက်က ငွေ့ သုံးကြောင်း တက်ရင် စကား နားမဝင်တော့ဘူး။ အရင် နားထောင်ပေးပါ။ |', en: 'Three wisps from his cup and words stop entering the ear. Listen first.' },
   ],
   stones: [
     {
@@ -70,7 +70,7 @@ export const TALK_D1_FAIR = {
       lines: [
         { my: 'လေရဟတ်က ကလေးကစားစရာပဲတဲ့။ လူကြီးတွေ ပြောတာ။', en: 'Windmills are just toys, the grown-ups say.', need: 'given', seems: 'looksdown', face: 'sad', mood: 'down',
           tell: { my: 'လေရဟတ်ကို အထင်သေးတာ မဟုတ်ဘူး။ အိတ်ထဲက လေရဟတ်လေးကို တင်းတင်း ကိုင်ထားတယ်။ လက်လျှော့ချင်နေပြီ။', en: "He doesn't look down on windmills: he's holding the little one in his pocket tight. He's close to giving up on them." } },
-        { my: 'ချုပ်ရိုးတုန်းကလိုပဲ… ကျွန်တော် မတတ်ပါဘူးလို့ပဲ ထင်နေမိတယ်။', en: 'Like with the stitches… I keep thinking I just can\'t.', need: 'given', face: 'sad', mood: 'down',
+        { my: 'ချုပ်ရိုးတုန်းကလိုပဲ… ကျွန်တော် မတတ်ပါဘူးလို့ပဲ ထင်နေမိတယ်။ |', en: 'Like with the stitches… I keep thinking I just can\'t.', need: 'given', face: 'sad', mood: 'down',
           tell: { my: 'ချုပ်ရိုးမှာ "ပါရမီ မပါဘူး" လို့ ပြောခဲ့သလိုပဲ။', en: 'The same "I have no gift" he said about stitching.' } },
       ],
     },

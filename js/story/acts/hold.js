@@ -33,7 +33,7 @@ const T = {
   steady: { my: 'အပ် ငြိမ်နေတယ်…', en: 'The needle is still…' },
   swing: { my: 'ယိမ်းနေတယ် — ဖွဖွလေး ထိန်း', en: 'Swinging: steady it gently' },
   lift: { my: 'ဖိထားပြီး ချိန်ခွင်ကို မ', en: 'Press and hold to lift the scale' },
-  can: { my: '(ကျွန်မ ကိုင်ရမယ့်ဟာ မဟုတ်ဘူး။)', en: '(Not mine to pick up.)' },
+  can: { my: '(ဒါ ကျွန်မ ကိုင်ရမယ့်ဟာ မဟုတ်ဘူး။)', en: '(Not mine to pick up.)' },
   hot: { my: 'ပူလာပြီ…', en: 'Getting hot…' },
   down: { my: 'ချလိုက်ပြီ', en: 'Put down' },
   calm: { my: 'စိတ်အေး', en: 'calm' },

@@ -1401,6 +1401,28 @@ export function registerRegionKinds() {
 /** True when a kind is a building (tall: the cutaway may fade it, signs on it hide with it). */
 export const isArt = (k) => !!ART[k];
 
+/** A tall item's second builder (its flat panels and small boxes, drawn without an ink hull): all of it (yard, plinth,
+ * step, wall bands, windows, door, gable ends, rails) goes into its solid, bare of outline, so the cutaway clears it
+ * with the building (and fades what stands above the plinth). Left in the ground they stayed when the house was
+ * cleared from the near view or faded off her: bare floors, a flat yard slab and lintels hanging in the air. */
+function standUp(solid, ground) {
+  const bare = (k) => (...a) => { solid.bare = true; try { solid[k](...a); } finally { solid.bare = false; } return px; };
+  const box = bare('box'), boxR = bare('boxR'), boxMin = bare('boxMin'), quadS = bare('quad'), flatS = bare('flat'), flatRS = bare('flatR');
+  const px = new Proxy(ground, {
+    get(t, k) {
+      if (k === 'box') return box;
+      if (k === 'boxR') return boxR;
+      if (k === 'boxMin') return boxMin;
+      if (k === 'quad') return quadS;
+      if (k === 'flat') return flatS;
+      if (k === 'flatR') return flatRS;
+      const v = t[k];
+      return typeof v === 'function' ? v.bind(t) : v;
+    },
+  });
+  return px;
+}
+
 /** chunk: { i, j, x0, z0, x1, z1, items }; ctx: { net, edges, isOpen(edge), offPaper(x, z) } (edges: the open-world road edges). */
 export function* chunkJob(chunk, ctx) {
   const ground = new Geo({ outline: false, cap: 6000 });
@@ -1440,16 +1462,19 @@ export function* chunkJob(chunk, ctx) {
     const fn = ART[it.k] || PROP[it.k];
     if (!fn) continue;
     const solid = solidFor(it.x, it.z);
-    solid.at(it.x, it.z, it.ry || 0).item(it.x, it.z, ART[it.k] ? 1 : 0);
+    // tall: buildings, and low homes marked `cut` (a one-storey roof right under the walking camera fills half the
+    // screen): the cutaway may clear them from the near part of the view and fade them when they hide her
+    const tall = !!ART[it.k] || !!REG_PROP[it.k]?.cut;
+    solid.at(it.x, it.z, it.ry || 0).item(it.x, it.z, tall ? 1 : 0);
     ground.at(it.x, it.z, it.ry || 0);
     gk(ground, GK.item);
     local.glows.length = 0; local.signs.length = 0; local.smoke.length = 0;
-    fn(solid, ground, it, local);
+    fn(solid, tall ? standUp(solid, ground) : ground, it, local);
     for (let k = 0; k < local.glows.length; k += 3) out.glows.push(local.glows[k], local.glows[k + 1], local.glows[k + 2]); // (world space)
     for (const s of local.signs) {
       // sign positions are in the item's local space: turn them into world space
       const c = Math.cos(it.ry || 0), sn = Math.sin(it.ry || 0);
-      out.signs.push({ ...s, x: it.x + s.x * c + s.z * sn, z: it.z - s.x * sn + s.z * c, ry: (it.ry || 0) + (s.ry || 0), ax: it.x, az: it.z, tall: !!ART[it.k] });
+      out.signs.push({ ...s, x: it.x + s.x * c + s.z * sn, z: it.z - s.x * sn + s.z * c, ry: (it.ry || 0) + (s.ry || 0), ax: it.x, az: it.z, tall });
     }
     for (let k = 0; k < local.smoke.length; k += 3) out.smoke.push(local.smoke[k], local.smoke[k + 1], local.smoke[k + 2]);
     if (it.k !== 'fence' && it.k !== 'lamp' && it.k !== 'flowers') yield;

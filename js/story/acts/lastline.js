@@ -20,7 +20,7 @@ const T = {
   ends: { my: 'အဆုံး', en: 'Endings' },
   type: { my: 'ကိုယ့်စကားနဲ့ ရေးမယ်', en: 'Write in my own words' },
   blank: { my: 'ဗလာ ထားမယ်', en: 'Leave it blank' },
-  done: { my: 'ဒါ ကျွန်ုပ်ရဲ့ စာကြောင်း', en: 'This is my line' },
+  done: { my: 'ဒါ ကျွန်မရဲ့ စာကြောင်း', en: 'This is my line' },
   ph: { my: 'ဒီမှာ ရေးပါ…', en: 'Write here…' },
   back: { my: 'အကွက်တွေနဲ့ ရွေးမယ်', en: 'Pick from the tiles' },
 };

@@ -89,7 +89,7 @@ export const D5_TH_CARDS = [
     line: { my: 'အမေက တစ်နှစ် တစ်ဖာ ဖာပေးခဲ့တယ်။ ဘယ်လောက်ကုန်လဲ တစ်ခါမှ မပြောဘူး။ မင်း သွားနိုင်ဖို့ ဖာတာ။', en: 'She patched it once a year and never said what it cost. She patched it so you could go.' },
     answers: ['afraid'], from: { my: 'ဖောင်နဲ့ လှော်တက်မှာ မြင်ခဲ့တာ', en: 'seen on the raft and the pole' } },
   { id: 'shallow', name: { my: 'မင်းကို လိုနေတယ်', en: 'You are needed' },
-    line: { my: 'ဘဲဆိပ်နဲ့ ကြိမ်ဆိပ်ကို ကူးတို့ မရောက်နိုင်ဘူး။ ဖောင်ပဲ ရောက်နိုင်တယ်။ အထုပ်တွေ စောင့်နေတယ်။', en: "The ferry can't reach Duck Jetty or Cane Jetty. Only a raft can. The parcels are waiting." },
+    line: { my: 'ဘဲဆိပ်နဲ့ ကြိမ်ဆိပ်ကို ကူးတို့ မရောက်နိုင်ဘူး။ ဖောင်ပဲ ရောက်တာ။ အထုပ်တွေ စောင့်နေတယ်။', en: "The ferry can't reach Duck Jetty or Cane Jetty. Only a raft can. The parcels are waiting." },
     answers: ['unknown', 'given'], from: { my: 'မောင်ငယ် ပြောခဲ့တာ', en: 'from Maung Nge' } },
   { id: 'notyet', companion: 'seedling', name: { my: 'မရသေးဘူး', en: 'Not yet' }, // the Not-Yet Seedling
     line: { my: 'မရဘူး မဟုတ်ဘူး။ မရသေးတာ။', en: "Not 'can't'. Not yet." },

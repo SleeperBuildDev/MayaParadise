@@ -25,11 +25,11 @@ const T = {
   back: { my: 'နောက်ဆုတ်ပေး', en: 'Step back' },
   backSub: { my: 'ဖိထားပါ · သူ့ဘာသာ သင်ပါစေ', en: 'hold · let her teach' },
   holding: { my: 'ဖိထားဆဲ… သူ့ဘာသာ အေးသွားအောင် စောင့်', en: 'Still holding… let her cool down herself' },
-  stepped: { my: 'ကိုယ် ဝင်ပြောမိသွားပြီ။ ဒီတစ်ခါ ဆက်ဖိထား။', en: 'Maya stepped in. This time keep holding.' },
+  stepped: { my: 'မာရာ ဝင်ပြောမိသွားပြီ။ ဒီတစ်ခါ ဆက်ဖိထား။', en: 'Maya stepped in. This time keep holding.' },
   keep: { my: 'နောက်ဆုတ်ပေးကို ဆက်ဖိထား', en: 'Keep holding Step back' },
   done: { my: 'သင်တာ သူ့ဟာ ဖြစ်သွားပြီ', en: 'The teaching stayed hers' },
   maya: { my: 'ကျွန်မ ပြောပြမယ်…', en: 'Let me tell him…' },
-  they: { my: 'ဒါဆို မင်းပဲ သင်လိုက်တော့လေ။', en: 'Then you teach him.' },
+  they: { my: 'ဒါဆို နင်ပဲ သင်လိုက်တော့လေ။', en: 'Then you teach him.' },
 };
 const BACK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 5 7.5 12l7 7"/><path d="M19.5 5 12.5 12l7 7" opacity=".45"/></svg>';
 const RING_R = 36, RING_C = 2 * Math.PI * RING_R;

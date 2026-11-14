@@ -463,7 +463,7 @@ add({ k: 'wWorker', x: 74.2, z: 442.3, ry: -0.4, pose: 'sit', seed: 32 });
 // chalk price boards: each shop's own words (never directions)
 for (const [x, z, lines] of [
   [33.2, 446.2, [{ my: 'ငါးခြောက် · ပုစွန်ခြောက်', en: 'Dried fish · dried prawns' }]],
-  [44.6, 480.2, [{ my: 'ကြိုး လိုသလောက် ဖြတ်ပေး', en: 'Rope, cut to length' }]],
+  [44.6, 480.2, [{ my: 'ကြိုး လိုသလောက် ဖြတ်ပေးသည်', en: 'Rope, cut to length' }]],
   [72.0, 473.4, [{ my: 'လှေ ပြင်သည်', en: 'Boats mended' }]],
   [-38.2, 420.2, [{ my: 'ဆန်သစ် ရောက်ပြီ', en: 'New rice in' }]],
 ]) add({ k: 'wAFrame', x, z, ry: 0, lines });

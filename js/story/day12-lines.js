@@ -65,7 +65,7 @@ export const L = {
     T('အနှစ်လေးဆယ် ဒီခြံ စိုက်လာတာ။ ဘာလို့ ငါ့ကိုမှ ဒီလို ဖြစ်ရတာလဲ။', "Forty years I've kept this garden. Why does it have to be me?"),
     T('တံခါး? ဖွင့်ထားလိုက်တာပဲ။ ပိတ်လည်း မိုးက ဝင်လာမှာပဲလေ။', 'The gate? I left it open. Shut it and the rain comes in anyway.'),
   ],
-  htMaya: [T('(ကျွန်မ ပန်းခင်းလည်း ဒီမနက် လဲသွားတာပဲ။ ဘာမှ မပြောသေးဘဲ အရင် ကြည့်မယ်။)', "(My bed went flat this morning too. I'll look first, before I say anything.)")],
+  htMaya: [T('(ကျွန်မ ပန်းခင်းလည်း ဒီမနက် လဲသွားတာပဲ။ ဘာမှ မပြောသေးဘဲ အရင် ကြည့်ဦးမယ်။)', "(My bed went flat this morning too. I'll look first, before I say anything.)")],
   htWait: [T('ကြည့်ချင်ကြည့်။ ပြင်လို့ ရမှာ မဟုတ်ဘူး။', "Look if you like. It can't be put right.")],
   htIn: [T('မိုးထဲ ထိုင်နေလို့လည်း ပျိုးပင်တွေ ပြန်မထဘူး။', "Sitting in the rain won't stand the seedlings up.")],
   htDoor: [T('ဝင်ချင် ဝင်။ ရွှံ့ပေနေလည်း ရတယ်။', 'Come in if you like. Mud and all.')],
@@ -85,7 +85,7 @@ export const L = {
     beans: { pencil: T('(ကြားတာ: «ကျွန်မက မထိခိုက်ဘူး»)', '(Heard: «it didn\'t touch me»)'), gold: T('ဒီမနက် ကျွန်မ ပဲခင်းလိုပဲ လဲနေတယ်။ ဒီဟာကို ဘာမှ မခံစားရဘူး။ ကိုယ့်ဟာကျတော့ နာခဲ့တယ်။', 'Down, just like my bed this morning. This one I hardly feel; mine, I minded.') },
   },
   lookAgain: T('(ကိုယ့်မျက်စိနဲ့ ပြန်ကြည့်မယ်။)', "(I'll look with my own eyes.)"),
-  diaryBefore: [T('(သူ့ မှတ်တမ်းစာအုပ်။ သူ ဒီနားကို မရောက်သေးဘဲ မဖွင့်ချင်ဘူး။)', "(His diary. I won't open it before he's here.)")],
+  diaryBefore: [T('(သူ့ မှတ်တမ်းစာအုပ်။ သူ မရောက်သေးဘဲ မဖွင့်ချင်ဘူး။)', "(His diary. I won't open it before he's here.)")],
   lookedAll: [T('မိုးက လူတိုင်းဆီ ရောက်တာပဲ။ "ငါ့ဟာ" လို့ ခေါ်ထားတာမှ နာတာ။', 'The rain came to everyone. Only what we called "mine" hurts.')],
   lookedHt: [T('…(ဦးဖိုးထော် ဘာမှ မပြောဘူး။ နာမည်တုတ်တစ်ချောင်းကို လှန်ကြည့်တယ်။)', '…(U Hpo Htaw says nothing. He turns one name stick over.)')],
 
@@ -112,7 +112,7 @@ export const L = {
   },
   sortIntro: [T('မနက်ကတည်းက ခေါင်းထဲမှာ ရှုပ်နေတာ။ ခွဲကြည့်မယ်။ …ခြင်းတောင်းကို ကိုင်ထားပေး။', "It's been tangled in my head all morning. I'll sort it. …Hold the basket steady.")],
   sortDone: [T('ထိန်းလို့ မရတာ လေးခု။ ထိန်းလို့ရတာလည်း လေးခု။ …ငါ့လက်ထဲက လေးခုကိုပဲ ကိုင်မယ်။', "Four I can't steer. Four I can. …I'll hold the four in my hands.")],
-  sortWait: [T('(သူ့ ပန်းခင်းတွေကို အရင် ကိုယ်တိုင် ကြည့်ဦးမယ်။ လမ်းကြားထဲရော၊ ဒီအထဲရော။)', "(I'll look at it all myself first: the lane, and in here.)")],
+  sortWait: [T('(သူ့ ပန်းခင်းတွေကို အရင် ကိုယ်တိုင် ကြည့်ဦးမယ်။ လမ်းကြားထဲရော၊ ဒီထဲရော။)', "(I'll look at it all myself first: the lane, and in here.)")],
   mug: [T('(သူ့ စားပွဲအောက်က ခုံပုလေးမှာ ထိုင်ပြီး စာရေးဆရာ ခွက်လေးကို ချထားလိုက်တယ်။)', '(I take the low stool across his table and set down the Writer mug.)')],
 
   // ------------------------------------------------------------------ 5.5 ownwords: his diary line
@@ -135,7 +135,7 @@ export const L = {
     ],
   },
   owIntro: [T('ဒီနေ့ ရက်စွဲမှာ ဖွင့်မယ်။ ဘာရေးမလဲ…', "I'll open it at today's date. What to write…")],
-  owMaya: [T('(ကောင်းအောင် ချော့မရေးဘူး၊ ဆိုးအောင်လည်း မရေးဘူး။ ရှိတဲ့အတိုင်းပဲ။)', '(Not sweetened, not darkened. As it is.)')],
+  owMaya: [T('(ကောင်းအောင် မြှောက်မရေးဘူး၊ ဆိုးအောင်လည်း မရေးဘူး။ ရှိတဲ့အတိုင်းပဲ။)', '(Not sweetened, not darkened. As it is.)')],
   htGoes: [T('…(ဦးဖိုးထော် ထရပ်တယ်။ သံချောင်းပေါ်က ပေါက်တူးကို ဖြုတ်ယူတယ်။ သံဗူးကို ကောက်ယူတယ်။ ဘယ်သူ့ကိုမှ မစောင့်ဘဲ အပြင်ထွက်သွားတယ်။)', '…(U Hpo Htaw gets up, takes the trowel off its nail and the tin off the table, and walks out without waiting for anyone.)')],
 
   // ------------------------------------------------------------------ 5.6 the far bed, the gate scene
@@ -241,7 +241,7 @@ export const L = {
     T('အမှန်တွေပဲ ရေးထားတာ ကောင်းတယ်။ စာထဲ ဆဲစာ မပါတော့ ဖတ်ရ လွယ်တယ်။', 'Good, only facts. With no curses in it, it reads easily.'),
   ],
   mmCall: [T('ချိန်သီးသေတ္တာလေး အထဲ ယူခဲ့ပါဦး။', 'Bring your box of weights inside, please.')],
-  mmWeigh: [T('(ပိတ်ထားတဲ့ အခန်းထဲမှာ၊ ဈေးရှေ့မှာ မဟုတ်ဘဲ၊ ဒေါ်မြမြက ကုန်သည့်ချိန်သီးကို ကော်မတီရဲ့ ကိုယ်ပိုင် ချိန်သီးနဲ့ ယှဉ်ချိန်တယ်။)', "(Inside the closed room, not in front of the market, Daw Mya Mya weighs one of his against the committee's own set.)")],
+  mmWeigh: [T('(ပိတ်ထားတဲ့ အခန်းထဲမှာ၊ ဈေးရှေ့မှာ မဟုတ်ဘဲ၊ ဒေါ်မြမြက ကုန်သည့်ချိန်သီးကို ကော်မတီရဲ့ ကိုယ်ပိုင်ချိန်သီးနဲ့ ယှဉ်ချိန်တယ်။)', "(Inside the closed room, not in front of the market, Daw Mya Mya weighs one of his against the committee's own set.)")],
   notice: T('ဒီနေ့ ဈေးချိန်ခွင်ရဲ့ ချိန်သီးဟောင်းတွေ ပါးနေတာ ကော်မတီက စစ်တွေ့လို့ သိမ်းလိုက်ပြီ။ ချိန်သီးအသစ် ချိတ်ပြီးပါပြီ။ မနက်က ဝယ်ထားတာ ကော်မတီအခန်းမှာ ပြန်ချိန်ပေးပါမယ်။', 'The committee checked the market scale today and found its old weights light; they have been taken in and a new set hung. Anything bought this morning can be re-weighed in the committee room.'),
   noticeTitle: T('အသိပေးချက် · ဈေးကော်မတီ', 'Notice · Market Committee'),
   kyNew: [T('…ချိန်သီးအသစ်နဲ့ ချိန်မယ်။', "…I'll weigh with the new set.")],
@@ -259,7 +259,7 @@ export const L = {
   ga: [
     [T('ကျုပ်ဘူးစင်လည်း လဲတယ်။ ဦးဖိုးထော်ကတော့ သူ့ခြံပဲ ပျက်တယ် ထင်နေတာ။', 'My gourds are down too. U Hpo Htaw thinks only his plot got it.')],
     [T('နှစ်တိုင်း ဒီအချိန်ဆို မိုးကြီး ရွာတယ်တဲ့။ ကျုပ်က ဒီမှာ နှစ်နှစ်ပဲ ရှိသေးတော့ မသေချာဘူး။', "Every year about now the big rains come, they say. I've only been here two years, so I can't be sure.")],
-    [T('အိုးဖိုဈေးက လမ်းအဆုံး၊ မီးခိုးတက်နေတဲ့ဘက်။ ဒီနေ့ မိုးရွာလို့ အိုးလှမ်းဆောင်ထဲမှာ ရောင်းကြတယ်။', "The kiln market is at the lane's end, where the smoke is. With the rain they're selling inside the drying hall today.")],
+    [T('အိုးဖိုဈေးက လမ်းအဆုံး၊ မီးခိုးတက်နေတဲ့ဘက်။ ဒီနေ့ မိုးရွာလို့ အိုးလှန်းဆောင်ထဲမှာ ရောင်းကြတယ်။', "The kiln market is at the lane's end, where the smoke is. With the rain they're selling inside the drying hall today.")],
   ],
   gaAfter: [T('ကောင်မလေးက ပျိုးခင်းကို လာကူတယ်။ ဘယ်သူမှ မခေါ်ဘဲနဲ့။', 'That girl came to help with the seedbed. Nobody called her.')],
   gaName: T('ဘူးစင်အဒေါ်', 'the gourd aunty'),
@@ -282,13 +282,13 @@ export const L = {
   girlName: T('ကောင်မလေး', 'the girl'),
   girlBefore: [T('(ကောင်မလေးက ဆန်အိတ်ပါးပါးလေး ကိုင်ပြီး တန်းစီနေတယ်။)', '(The girl waits in the queue with a thin rice bag.)')],
   girlAfter: [T('ကော်မတီမှာ ပြန်ချိန်ပေးတယ်! ဆန် ပြည့်ပြည့် ရပြီ။', 'They re-weighed it at the committee! A full bag now.')],
-  stallSlate: [T('(ဒေါ်အုန်းရဲ့ ဆိုင်လွတ်ပေါ်က ကျောက်သင်ပုန်း: «ဒေါ်အုန်း · အိုး → အိုးလှမ်းဆောင်»)', '(The slate on Daw Ohn\'s empty stall: «Daw Ohn · pots → drying hall»)')],
+  stallSlate: [T('(ဒေါ်အုန်းရဲ့ ဆိုင်လွတ်ပေါ်က ကျောက်သင်ပုန်း: «ဒေါ်အုန်း · အိုး → အိုးလှန်းဆောင်»)', '(The slate on Daw Ohn\'s empty stall: «Daw Ohn · pots → drying hall»)')],
   hallSlate: [T('(တံခါးတိုင်က ကျောက်သင်ပုန်း: «ဈေး · မိုးရွာလို့ အထဲမှာ»)', '(The doorpost slate: «Market · inside, for the rain»)')],
   racks: [T('(မဖုတ်ရသေးတဲ့ အိုးစိမ်းတွေ စင်သုံးဆင့်ပေါ်မှာ။ မိုးရွာလို့ အထဲမှာ ခြောက်နေတယ်။)', '(Unfired green pots on three tiers, drying indoors out of the rain.)')],
   cupboard: [T('(မှန်ဗီရိုထဲမှာ ကော်မတီရဲ့ ကြေးချိန်သီး အစုံ။)', "(Behind the glass, the committee's own brass weights.)")],
   notices: [T('(ကြော်ငြာဟောင်းတွေ: ဈေးနေ့၊ ဆိုင်ခ၊ ချိန်ခွင် စစ်ဆေးရက်။)', '(Old notices: market days, stall fees, scale inspection days.)')],
   ledger: [T('(ကော်မတီ စာရင်းစာအုပ်။ တိုင်ကြားစာတိုင်း ရက်စွဲနဲ့ မှတ်ထားတယ်။)', "(The committee ledger. Every complaint written in with its date.)")],
-  boardOut: [T('(တံခါးဘေးက အများပြည် ကြော်ငြာဘုတ်။ ဝယ်သူတိုင်း မြင်ရတယ်။)', '(The public notice board by the door, where every buyer can see it.)')],
+  boardOut: [T('(တံခါးဘေးက အများပြည်သူ ကြော်ငြာဘုတ်။ ဝယ်သူတိုင်း မြင်ရတယ်။)', '(The public notice board by the door, where every buyer can see it.)')],
   kiln: [T('(အိုးဖိုကြီးရဲ့ မီးခိုးခေါင်းတိုင်က မိုးထဲမှာတောင် မီးခိုး တက်နေတယ်။ မငြိမ်းဘူး။)', "(The big kiln's chimney is smoking, even in the rain. It isn't out.)")],
   kilnAgain: [T('(မီးခိုး တက်နေတုန်းပဲ။)', '(Still smoking.)')],
   scaleLook: [T('(ဈေးချိန်ခွင်။ ကုန်သည့်လက်က ချိန်သီးသေတ္တာပေါ်မှာ။)', "(The market scale. The trader's hand rests on the box of weights.)")],
@@ -332,16 +332,16 @@ export const L = {
   reply: T('မိုးက မေးပြီးမှ မရွာဘူး။ ရွာလာရင် နောက်တစ်နာရီကို ကိုယ်တိုင် ရွေးပါ။ ကျွန်မ ရှေ့က မဟုတ်ဘဲ ဘေးက ရှိမယ်။', "Rain doesn't ask before it falls. When it comes, choose your next hour yourself. I'll be beside you, not in front."),
 
   // ------------------------------------------------------------------ 9. the night page
-  goHome: [T('(ဥယျာဉ်ရော ဈေးရော ကိုယ့်ဘာသာ ကိုယ် ဖြေရှင်းကြပြီ။ အိမ်ပြန်မယ်။)', '(The garden and the market are handling it themselves. Home.)')],
+  goHome: [T('(ဥယျာဉ်ရော ဈေးရော ကိုယ့်ဘာသာ ဖြေရှင်းကြပြီ။ အိမ်ပြန်မယ်။)', '(The garden and the market are handling it themselves. Home.)')],
   replant: [
     T('ပွင့်တွေ ပြန်မလာဘူး။ ဒါပေမဲ့ အစေ့ ရှိသေးတယ်။ ပြန်စိုက်မယ်။', "The flowers won't come back. But there's seed. I'll plant again."),
     T('မိုးက ပြန်လာဦးမှာပဲ။ ကျွန်မလည်း ပြန်စိုက်မှာပဲ။', 'The rain will come again. And I will plant again.'),
   ],
   nightQ: T('ဒီနေ့အကြောင်း မှန်မှန်ကန်ကန် ဘယ်လို ရေးမလဲ။', 'How will she write today, truthfully?'),
   nightChoices: [
-    T('မိုးက ဘာမှ မထိခိုက်ပါဘူး။ ကျွန်မ ညွှန်ပြလိုက်တော့ ဥယျာဉ်ရော ဈေးရော အကုန် ပြန်ကောင်းသွားတယ်။', 'The rain did no real harm. Maya gave directions, and the garden and the market were set right.'),
-    T('မိုးက ပန်းခင်းတွေကို လှဲသွားတယ်၊ ကျွန်မဟာပါ။ စာရွက်တချို့ ပြန်မရတော့ဘူး။ ဦးဖိုးထော်က ဘယ်သူမှ မရောက်ခင် ပေါက်တူး ကိုယ်တိုင် ကောက်ကိုင်တယ်။ ဒေါ်အုန်းက ကိုယ်တိုင် ချိန်ပြီး ကိုယ့်စာ ကိုယ်တိုင် တင်တယ်။ ကျွန်မ ဘေးမှာ ရှိခဲ့တယ်။', 'The rain flattened the beds, mine too, and some papers are gone for good. U Hpo Htaw picked up his trowel before anyone came. Daw Ohn weighed it herself and handed in her own report. I was beside them.'),
-    T('မိုးက အကုန် ဖျက်ဆီးသွားတယ်။ ဒုက္ခက အမြဲ တူတဲ့လူတွေကိုပဲ ရွေးလာတာ။', 'The rain ruined everything. Trouble always picks the same people.'),
+    T('မိုးက ဘာမှ မထိခိုက်ပါဘူး။ ကျွန်မ ညွှန်ပြလိုက်တော့ ဥယျာဉ်ရော ဈေးရော ပြန်ကောင်းသွားတယ်။', 'The rain did no real harm. Maya gave directions, and the garden and the market were set right.'),
+    T('မိုးက ပန်းခင်းတွေကို လှဲသွားတယ်၊ ကျွန်မဟာပါ။ စာရွက်တချို့ ပြန်မရတော့ဘူး။ ဦးဖိုးထော်က ဘယ်သူမှ မရောက်ခင် ပေါက်တူး ကိုယ်တိုင် ကောက်ကိုင်တယ်။ ဒေါ်အုန်းက ကိုယ်တိုင် ချိန်ပြီး ကိုယ့်စာ ကိုယ်တင်တယ်။ ကျွန်မ ဘေးမှာ ရှိခဲ့တယ်။', 'The rain flattened the beds, mine too, and some papers are gone for good. U Hpo Htaw picked up his trowel before anyone came. Daw Ohn weighed it herself and handed in her own report. I was beside them.'),
+    T('မိုးက အကုန် ဖျက်ဆီးသွားတယ်။ ဒုက္ခက အမြဲ လူတစ်စုတည်းကိုပဲ ရွေးလာတာ။', 'The rain ruined everything. Trouble always picks the same people.'),
   ],
   nightWrong: [
     [T('(မဟုတ်ဘူး… ဒါ ချော့ပြောတာ။ ပျောက်တာ တကယ်ပျောက်တယ်။ ကျွန်မ ညွှန်ပြတာလည်း မဟုတ်ဘူး။)', '(No… that flatters. What was lost is lost, and I gave no directions.)')],

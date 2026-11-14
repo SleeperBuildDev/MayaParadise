@@ -161,7 +161,7 @@ export function buildRow(story) {
   put(lampG, PL.lamp.x, PL.lamp.z, PL.lamp.ry);
   const lB = footprint(PL.lamp.x, PL.lamp.z, PL.lamp.ry, PL.lamp.w, PL.lamp.d, 0.05);
   keepOut([lB]); block(lampG, lB, 4.2);
-  const sign = shopSign({ text: { my: 'သံပြား မီးအိန်', en: 'Tin lamps' }, w: 1.6, h: 0.45, colors: { bg: '#2F5E63', fg: '#F6F0E2', sub: '#E9D9B8' } });
+  const sign = shopSign({ text: { my: 'သံပြား မီးအိမ်', en: 'Tin lamps' }, w: 1.6, h: 0.45, colors: { bg: '#2F5E63', fg: '#F6F0E2', sub: '#E9D9B8' } });
   sign.root.position.set(-0.9, 2.62, PL.lamp.d / 2 + 0.02);
   lampG.add(sign.root);
   own.push({ dispose: () => sign.dispose() });
@@ -210,10 +210,15 @@ export function buildRow(story) {
     const far = cam.distanceTo(head);
     ray.origin.copy(cam);
     ray.direction.copy(head).sub(cam).normalize();
+    // walking, the near part of the view goes too (as the open world's own buildings do, world/index.js): the class's
+    // roof south of the Note Wall filled the bottom half of the screen
+    const dx = head.x - cam.x, dz = head.z - cam.z, l2 = dx * dx + dz * dz || 1;
+    const nearCut = story.foot?.active && !story.talking ? Math.max(0.55, 1 - 1.6 / Math.max(Math.sqrt(l2), 1)) : 0;
     for (const b of blockers) {
       const inside = b.box.containsPoint(cam);
       const p = !inside && ray.intersectBox(b.box, hit);
-      b.root.visible = !(inside || (p && cam.distanceTo(hit) < far - 0.4));
+      const ti = (((b.box.min.x + b.box.max.x) / 2 - cam.x) * dx + ((b.box.min.z + b.box.max.z) / 2 - cam.z) * dz) / l2;
+      b.root.visible = !(inside || (p && cam.distanceTo(hit) < far - 0.4) || (nearCut > 0 && ti < nearCut - 0.05));
     }
   }
 

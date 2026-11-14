@@ -57,15 +57,15 @@ const market = {
     mk('ကိုယ့်အိမ်ရှေ့ အရင်လှည်း။ ပြီးမှ လမ်းကို လှည်း။', "Sweep your own step first. Then the lane."),
     // Day 4: the Painted Map, the gifts, the kite tied to a flag
     mk('ဆေးရေးမြေပုံ လှတော့ လှတယ်။ ကိုယ်တိုင်တော့ မလျှောက်ဖူးဘူး။', "That painted map is pretty. I've never walked it myself.", { days: [4] }),
-    mk('ကောင်မလေးရဲ့ စွန်က အလံ တက်မှ တက်တာတဲ့။ ဆန်းတယ်နော်။', "That girl's kite only goes up when a flag does, they say. Odd, isn't it?", { days: [4], notFlag: 'd4.ch7Done' }),
+    mk('ကောင်မလေးရဲ့ စွန်က အလံတင်မှ တက်တာတဲ့။ ဆန်းတယ်နော်။', "That girl's kite only goes up when a flag does, they say. Odd, isn't it?", { days: [4], notFlag: 'd4.ch7Done' }),
     // after Day 4
     mk('စွန်လေး အခု ကိုယ့်တိုင်နဲ့ကိုယ် ငြိမ်ငြိမ်လေး တက်နေတယ်။', "The kite flies steady now, from its own post.", { from: 5 }),
     mk('ခွေးလေးတွေ ရေခွက်နဲ့ ဖြစ်သွားပြီ။ ဘယ်သူ ချထားလဲ မသိဘူး။', "The dogs have water bowls now. Nobody knows who put them there.", { from: 5 }),
-    mk('ကိုဖြိုး အရင်က သူများ လှူတာ ကဲ့ရဲ့တယ်။ အခု ကိုယ်တိုင် ငှဲ့နေပြီ။', "Ko Phyo used to scoff at other people's giving. Now he pours himself.", { from: 5 }),
+    mk('ကိုဖြိုး အရင်က သူများ လှူတာ ကဲ့ရဲ့တယ်။ အခုတော့ ကိုယ်တိုင် ငှဲ့ပေးနေပြီ။', "Ko Phyo used to scoff at other people's giving. Now he pours himself.", { from: 5 }),
     mk('ဖြတ်လမ်းက ဆေးနဲ့ ခြယ်ထားတာပဲ။ သေတ္တာတွေနဲ့ ဆုံးတယ်တဲ့။', "That shortcut was only paint. Ends in crates, they say.", { from: 5 }),
     // Day 5: the carvers' row
     mk('ဆရာလွင် တုံး မထွင်းတာ ရက်ပိုင်း ရှိပြီ။', "Teacher Lwin hasn't carved a block in days.", { days: [5], notFlag: 'd5.ch10Done' }),
-    mk('ကိုလွင့် မီးခိုးတိုင်က မီးခိုး ပြန်ထွက်နေပြီ။ ဝမ်းသာစရာ။', "Smoke from Ko Lwin's chimney again. Lovely to see.", { flag: 'd5.ch10Done' }),
+    mk('ကိုလွင့် မီးခိုးတိုင်က မီးခိုး ပြန်ထွက်နေပြီ။ ဝမ်းသာစရာပဲ။', "Smoke from Ko Lwin's chimney again. Lovely to see.", { flag: 'd5.ch10Done' }),
     mk('ခွာညို နိုင်တာ စမ်းတုံး လေးဆယ်ကြောင့်။ ကံကောင်းလို့ မဟုတ်ဘူး။', "Khwar Nyo won on forty trial blocks. That's not luck.", { from: 6 }),
     mk('ဆရာလွင် တပည့်အတွက် ဝမ်းသာနေပြီ။ အရင်က မော့တောင် မကြည့်ဘူး။', "Teacher Lwin's glad for his pupil now. A while back he wouldn't even look up.", { from: 6 }),
     // Day 6: the noon wind and Nay Chi's slates
@@ -83,7 +83,7 @@ const market = {
     mk('မိုးကြီးလိုက်တာ။ အမိုးအောက် နေရာ ဖယ်ပေးကြ။', "What rain! Make room under the awnings.", RAIN),
     mk('မိုးရွာတာ ဘယ်သူ့အပြစ်မှ မဟုတ်ဘူး။ ကုန်တွေ ဖုံးလိုက်ရုံပဲ။', "Rain's nobody's fault. Just cover the goods.", RAIN),
     // Days 14-15: the launch
-    mk('ပွဲတံဆိပ် ဘောင်က ကိုလွင့်လက်ရာတဲ့။ ဖိတ်စာနောက်မှာ ရေးထားတယ်။', "Ko Lwin carved the launch postmark's border, they say. His name's on the back of the invitation.", { flag: 'd14.border' }),
+    mk('ပွဲတံဆိပ် ဘောင်က ကိုလွင့်လက်ရာတဲ့။ ဖိတ်စာနောက်ကျောမှာ ရေးထားတယ်။', "Ko Lwin carved the launch postmark's border, they say. His name's on the back of the invitation.", { flag: 'd14.border' }),
     mk('ဒီည စာအုပ်ပွဲ။ ဆိုင်ကို စောစော ပိတ်မယ်။', "Book launch tonight. I'm shutting early.", { days: [15], job: MK_SELL }),
   ],
 
@@ -95,7 +95,7 @@ const market = {
         mk('ပထမခွက်က ဘယ်သူ့အတွက်လဲ မရွေးဘူး။ ဝင်လာတဲ့သူပဲ။', "The first cup isn't chosen for anyone. Whoever walks in.", { from: 5 }),
         mk('ပန့်ရေ ကိုယ့်လက်နဲ့ ကိုယ် ငင်ရတယ်။ ဒါမှ အရသာရှိတာ။', "You pump your own water here. Tastes better that way.", { age: 'elder' }),
         mk('ကျွန်တော့် ရေဘူး ကိုယ်တိုင် ဖြည့်တတ်ပြီ!', "I can fill my own bottle now!", { age: 'child' }),
-        mk('ဖြည်းဖြည်း သောက်ပြီးမှ ပြော။ ပူနေရင် ဘာမှ မကောင်းဘူး။', "Sip first, then talk. Nothing good comes out hot."),
+        mk('ဖြည်းဖြည်းသောက်၊ ပြီးမှ ပြော။ ပူနေရင် ဘာမှ မကောင်းဘူး။', "Sip first, then talk. Nothing good comes out hot."),
         mk('ကိုဖြိုး မနက်တိုင်း ရေ သုံးပုံး ကိုယ်တိုင် ငင်တယ်။', "Ko Phyo pumps his three pails himself every morning now.", { from: 5 }),
         mk('ကိုဖြိုး ကိုယ့်လက်ဖက်၊ ကိုယ့်အိုးနဲ့။ အရင်က သူများဆီ တောင်းသောက်တာ။', "Ko Phyo has his own leaves and his own pot now. He used to cadge cups.", { from: 5 }),
         mk('ခွာညို ကူးတာတဲ့။ ကျွန်မလည်း ကြားရုံပဲ။ မမြင်ဘူး။', "Khwar Nyo copied, they say. I only heard it. Didn't see.", { days: [5] }),
@@ -126,12 +126,12 @@ const market = {
         mk('ဘေးခုံက မြန်တယ်။ ကျွန်တော်က ဖြောင့်တယ်။ နှစ်ယောက်လုံး ရောင်းရတယ်။', "The next bench is faster. I'm straighter. We both sell."),
         mk('ရင်ထဲ ပူလာရင် ဆောက်ကို ချထား။ ပူတုန်း ထွင်းရင် ကွဲတာပဲ။', "When your chest gets hot, put the gouge down. Carve hot and it splits."),
         mk('ဆရာ့ခုံ အေးနေတယ်။ မီးဖို မမွှေးတာ ကြာပြီ။', "Teacher's bench is cold. His brazier's not been lit for a while.", { days: [5], notFlag: 'd5.ch10Done' }),
-        mk('"ကံကောင်းလို့" တဲ့။ ပြောတဲ့သူ ကိုယ်တိုင် မြင်ခဲ့လို့လား။', "'Lucky', they say. Did whoever says it actually see?", { days: [5] }),
+        mk('"ကံကောင်းလို့" တဲ့။ ပြောတဲ့သူက ကိုယ်တိုင် မြင်ခဲ့လို့လား။', "'Lucky', they say. Did whoever says it actually see?", { days: [5] }),
         mk('ဆရာ့မီးဖို ပြန်မွှေးပြီ! တစ်တန်းလုံး နွေးသွားသလိုပဲ။', "Teacher's brazier is lit again! The whole row feels warmer.", { flag: 'd5.ch10Done' }),
         mk('တပည့်က ဆရာ့ကို ကျော်သွားတာ ဆရာ့ဂုဏ်ပဲ။', "A pupil passing her teacher is the teacher's pride.", { from: 5, age: 'elder' }),
         mk('ဆရာလွင် ဘယ်သူမှ မမှာဘဲ ဘောင်တွေ ထွင်းနေတယ်။ လက်ယားလို့တဲ့။', "Teacher Lwin's carving borders nobody ordered. Says his hands itch.", { from: 6 }),
         mk('ပွဲတံဆိပ်ပေါ်မှာ လက်ရာ နှစ်ခု။ ဒီဇိုင်းက တပည့်၊ ဘောင်က ဆရာ။', "Two hands on the launch postmark: the design the pupil's, the border the teacher's.", { flag: 'd14.border' }),
-        mk('မိုးစိုရင် သစ်သား ပွတယ်။ ဒီနေ့ စောင့်မယ်။ စောင့်တာလည်း အလုပ်ပဲ။', "Wet wood swells. Today we wait. Waiting is work too.", RAIN),
+        mk('မိုးစိုရင် သစ်သား ပွတယ်။ ဒီနေ့တော့ စောင့်ရမှာပဲ။ စောင့်တာလည်း အလုပ်တစ်ခုပဲလေ။', "Wet wood swells. Today we wait. Waiting is work too.", RAIN),
         maya('(မီးခိုးလေး တက်နေတယ်။ ဝမ်းသာတာကလည်း နွေးတယ်။)', "(A thin smoke rising. Gladness is warm too.)", { flag: 'd5.ch10Done' }),
       ],
     },
@@ -143,7 +143,7 @@ const market = {
         mk('ဆန်အိတ်ပေါ်မှာ လှူတဲ့သူ နာမည် ဘယ်တော့မှ မရေးဘူး။', "Nobody's name ever goes on the rice sacks."),
         mk('ကိုယ့်အိုး ပြည့်မှ သူများအိုး ဖြည့်နိုင်တာ။ ဒေါ်ရီ အမြဲ ပြောတယ်။', "Fill your own pot, then you can fill another's. Daw Yi always says so.", { age: 'elder' }),
         mk('အမေက အိမ်က ထမင်းအိုး အရင်တည်ပြီးမှ ဒီမှာ လာကူတာ။', "Mum puts our own rice on first, then comes to help here.", { age: 'child' }),
-        mk('ဆင်းရဲကြောင်း ပြရမယ်တဲ့။ ကျွန်မ စားဖူးတယ်။ ဘယ်သူမှ မမေးဘူး။', "They said you had to prove you were poor. I've eaten there. Nobody asked.", { from: 5 }),
+        mk('ဆင်းရဲကြောင်း ပြရမယ်တဲ့။ ကျွန်မ သွားစားဖူးတယ်။ ဘယ်သူမှ မမေးပါဘူး။', "They said you had to prove you were poor. I've eaten there. Nobody asked.", { from: 5 }),
         mk('ထမင်းအိုး ပြည့်နေတယ်။ ဘယ်သူ့ဆန်လဲ မသိဘူး။ မသိလည်း ရတယ်။', "The rice pot's full. Whose rice? Don't know. Doesn't matter.", { from: 5 }),
         mk('မိုးထဲက လူတွေ ဝင်လာလို့ ခုံ မလောက်ဘူး။ ထမင်းကတော့ လောက်တယ်။', "Folk keep coming in out of the rain. Not enough stools. Enough rice, though.", RAIN),
         maya('(ဘယ်သူ ပေးလဲ မသိရတဲ့ ထမင်းက ပိုမွှေးနေသလိုပဲ။)', "(Rice from nobody-knows-who smells even better.)"),
@@ -156,9 +156,9 @@ const market = {
         mk('ကြိုးကို တင်းတင်း မဆွဲနဲ့၊ ပြတ်သွားမယ်။', "Don't yank the string so tight, it'll snap."),
         mk('သူ့စွန် ပိုမြင့်လား။ လက်ခုပ်တီးလိုက်။ ကောင်းကင်က ကျယ်ပါတယ်။', "His kite's higher? Clap for it. The sky's big enough.", { age: 'elder' }),
         mk('စွန်ကြိုးကို သူများ အလံမှာ မချည်နဲ့။ ကိုယ့်လက်ထဲ ကိုင်ထား။', "Don't tie your string to someone else's flag. Keep it in your own hand."),
-        mk('ကျွန်တော့် စွန် အမြင့်ဆုံး မဟုတ်ဘူး။ ဒါပေမဲ့ ပျော်တယ်။', "Mine's not the highest. Still fun.", { age: 'child' }),
+        mk('ကျွန်တော့် စွန်က အမြင့်ဆုံး မဟုတ်ဘူး။ ဒါပေမဲ့ ပျော်တယ်။', "Mine's not the highest. Still fun.", { age: 'child' }),
         mk('ကြော်လေး ကလေးတိုင်းကို တစ်ခုစီ။ ဘယ်သူ့ကလေးလဲ မမေးဘူး။', "One fritter for every child. I don't ask whose."),
-        mk('ကောင်တာက အစ်မကြီးလည်း ကိုယ့်တိုင်နဲ့ စွန်လွှတ်တတ်သွားပြီ။', "The big sister from the counter flies hers from her own post now.", { from: 5 }),
+        mk('ကောင်တာက အစ်မကြီးလည်း ကိုယ့်တိုင်နဲ့ကိုယ် စွန်လွှတ်တတ်သွားပြီ။', "The big sister from the counter flies hers from her own post now.", { from: 5 }),
         mk('နေ့လယ်လေက စွန်တွေ ဆွဲသွားတော့မလို့။ ကြိုးလျှော့ပေးတော့ ငြိမ်သွားတယ်။', "The noon wind nearly took every kite. I let the string out and it settled.", { days: [6], flag: 'd6.gust' }),
         mk('ဒီနေ့ စွန် မလွှတ်ရဘူး။ မနက်ဖြန်လည်း ကောင်းကင် ရှိသေးတယ်။', "No kites today. The sky will still be there tomorrow.", RAIN),
         maya('(ကြိုးလျှော့ပေးမှ တက်တယ်။)', "(Let the string out, and it climbs.)", { from: 5 }),
@@ -173,7 +173,7 @@ const market = {
         mk('အလံကို တစ်နေကုန် မော့မကြည့်နဲ့။ လည်ပင်း နာမယ်။', "Don't stare up at that flag all day. You'll crick your neck."),
         mk('အဖွားက သနပ်ခါးကို လူတိုင်း လိမ်းပေးတယ်။ သိတဲ့သူရော မသိတဲ့သူရော။', "Grandma dabs thanaka on everyone. Known or not."),
         mk('မွန်းတည့် ပိတ်တယ်ဆိုတာ မြေပုံကပဲ ပြောတာ။ ဦးလူအေး ညနေထိ ရှိတယ်။', "Shut at noon? Only the map said so. U Lu Aye's there till evening.", { from: 5 }),
-        mk('အလံ ၁၄ ကို ဘယ်သူမှ မော့မကြည့်တော့ဘူး။ စွန်က ကိုယ့်ဘာသာ တက်နေတယ်။', "Nobody stares up at flag fourteen any more. The kite's up on its own.", { from: 5 }),
+        mk('အလံ ၁၄ ကို ဘယ်သူမှ မော့မကြည့်ကြတော့ဘူး။ စွန်က သူ့ဘာသာ တက်နေတယ်။', "Nobody stares up at flag fourteen any more. The kite's up on its own.", { from: 5 }),
         mk('ကောင်မလေး ရှက်နေတာ။ ဘယ်သူမှ မကြည့်မှန်း နောက်မှ သိတယ်။', "That girl was shy. Then she saw nobody was even looking.", { flag: 'd6.slate5' }),
         maya('(အလံ ၁၄ က အောက်မှာပဲ။ စွန်ကတော့ အပေါ်မှာ။)', "(Flag fourteen's still down. The kite is up.)", { from: 5 }),
       ],
@@ -188,9 +188,9 @@ const market = {
       by('tintin', 'ကိုဖြိုးရေ၊ အလကားခွက် သုံးခွက်၊ အပြစ်ပြောတာ သုံးခွန်း။', "Ko Phyo, three free cups and three complaints.", { days: [4], notFlag: 'd4.ch6Done' }),
       by('kophyo', 'ကိုယ့်လက်ဖက်၊ ကိုယ့်အိုးနဲ့ ငှဲ့ရတာ တစ်မျိုး ချိုတယ်။', "Pouring from my own leaves and pot tastes sweeter somehow.", { from: 5 }),
       by('kophyo', 'ဘယ်သူ သောက်သွားလဲ မကြည့်တော့ဘူး။ ငှဲ့ပြီးရင် ပြီးပြီ။', "I don't watch who drinks it now. Poured is done.", { from: 5 }),
-      by('tintin', 'ကောင်မလေး ကိုယ့်ခွက် ကိုယ်ကိုင်သွားတယ်။ ကူမယ့်လက်တွေ ရှိရဲ့သားနဲ့။', "That girl carried her own cup, with helping hands all round her.", { days: [6], flag: 'd6.slate1' }),
+      by('tintin', 'ကောင်မလေး ကိုယ့်ခွက် ကိုယ်ကိုင်သွားတယ်။ ကူပေးမယ့်သူတွေ ရှိရဲ့သားနဲ့။', "That girl carried her own cup, with helping hands all round her.", { days: [6], flag: 'd6.slate1' }),
       by('kophyo', 'စက္ကူဟောင်း ရောင်းပြီး လက်ဖက်ဖိုး ကိုယ်တိုင် ရှာတယ်။', "I sell old paper and earn my own tea money.", { from: 10 }),
-      by('tintin', 'မိုးခိုလာတဲ့သူ အကုန် ဝင်ထိုင်။ ခုံမလောက်ရင် ကပ်ထိုင်ကြ။', "Everyone in out of the rain, sit down. Not enough stools? Squeeze up.", RAIN),
+      by('tintin', 'မိုးခိုလာတဲ့သူတွေ အကုန် ဝင်ထိုင်ကြ။ ခုံမလောက်ရင် ကပ်ထိုင်ကြ။', "Everyone in out of the rain, sit down. Not enough stools? Squeeze up.", RAIN),
     ],
     // the Market post office's front room (U Lu Aye; Day 4 Ma Thiri and Grandmother Pwa Pwa on the bench)
     marketpost: [
@@ -207,7 +207,7 @@ const market = {
     postroom: [
       by('luaye', 'ပြန်ပို့ရတဲ့ တုံးတိုင်းကို ဂရုတစိုက် ထုပ်တယ်။ ရှုံးလည်း လက်ရာပဲ။', "I wrap every returned block with care. Lost or not, it's someone's work."),
       by('luaye', 'ဆုရတာ တစ်ယောက်တည်း။ ကြိုးစားခဲ့တာက အကုန်လုံး။', "Only one wins. Everyone tried."),
-      by('luaye', 'လိပ်စာတိုင်း ကိုယ်တိုင် ပြန်ဖတ်တယ်။ မှားရင် ကိုယ့်အမှားပဲ။', "I read every address again myself. A mistake would be mine."),
+      by('luaye', 'လိပ်စာတိုင်း ကိုယ်တိုင် ပြန်ဖတ်စစ်တယ်။ မှားရင် ကိုယ့်အမှားပဲ။', "I read every address again myself. A mistake would be mine."),
       by('khwarnyo', 'စမ်းတုံး လေးဆယ်။ ကံကောင်းလို့ မဟုတ်ဘူး… ဆရာကတော့ အဲလို ထင်တယ်။', "Forty trial blocks. Not luck… but Teacher thinks so.", { days: [5], notFlag: 'd5.ch10Done' }),
       by('luaye', 'တုံး အချိန်မီ ရောက်လာတယ်။ ဘောင်က ဖြောင့်လိုက်တာ။', "The block came in on time. What a straight border.", { flag: 'd5.carried' }),
       by('khwarnyo', 'ဆရာ ဘောင်ခတ်ပေးတယ်။ နာမည် မထိုးဘူး။ ကျွန်မ မှတ်ထားမယ်။', "Teacher framed it. Didn't sign it. I'll remember.", { flag: 'd5.carried' }),
@@ -217,7 +217,7 @@ const market = {
     riceshop: [
       by('yi', 'ထိုင်ပါ၊ စားပါ။ ဘယ်ကလာလဲ မမေးဘူး။', "Sit, eat. I won't ask where you're from."),
       by('yi', 'ကိုယ့်အိုး အရင်တည်မှ သူများအတွက် ချက်နိုင်တာ။', "You put your own pot on first. Then you can cook for others."),
-      by('yi', 'ပေးတဲ့သူ နာမည် ဘုတ်ပေါ် မရေးဘူး။ ရေးရင် ပေးတာ ပူလာတတ်တယ်။', "I don't write givers' names on a board. Written up, a gift starts to burn."),
+      by('yi', 'ပေးတဲ့သူ နာမည် ဘုတ်ပေါ် မရေးဘူး။ ရေးလိုက်ရင် ပေးရတာ ပူလာတတ်တယ်။', "I don't write givers' names on a board. Written up, a gift starts to burn."),
       by('yi', 'ကျွန်မလည်း တစ်ခါက ဒီလို ထိုင်စားခဲ့ဖူးတယ်။ အခု ကျွန်မ ချက်တယ်။', "I sat and ate like this myself once. Now I cook."),
       by('yi', 'ဆန်တစ်အိတ် ရောက်လာတယ်။ ဘယ်သူ့လဲ မသိဘူး။ အိုးပြည့်ရင် ပြီးတာပဲ။', "A sack came in. Whose? Don't know. A full pot is all that matters.", { from: 5 }),
       by('yi', 'မိုးခိုလာတဲ့သူ များတယ်။ ခုံ မလောက်ဘူး၊ ထမင်းကတော့ လောက်တယ်။', "Lots of people in from the rain. Not enough stools; enough rice.", RAIN),
@@ -225,7 +225,7 @@ const market = {
     // Ma Yu Yu's sundries shop
     sundries: [
       by('yuyu', 'ရေငတ်တာကတော့ လူရော ခွေးရော အတူတူပဲ။', "Thirst is thirst, dog or person."),
-      by('yuyu', 'ဒီဆိုင်က ဈေးတစ်ဈေးတည်း။ သိတဲ့သူလည်း၊ မသိတဲ့သူလည်း။', "One price in this shop. Known faces or not."),
+      by('yuyu', 'ဒီဆိုင်က ဈေးတစ်ဈေးတည်းပဲ။ သိတဲ့သူရော၊ မသိတဲ့သူရော အတူတူပဲ။', "One price in this shop. Known faces or not."),
       by('yuyu', 'မီးခြစ် ဝယ်မလား။ ကိုယ့်မီးဖို ကိုယ်မွှေးမှ နွေးတာ။', "Matches? You light your own stove, you get warm."),
       by('yuyu', 'ခွေးအိုကြီး နေ့လယ်ဆို ရေခွက်နားမှာ အိပ်နေပြီ။', "The old dog naps by the bowls at noon now.", { from: 5 }),
       by('yuyu', 'မိုးရွာရင် ခွေးတွေကို ဆိုင်ရှေ့ ခိုခွင့်ပေးတယ်။ ဆိုင်က ကျဉ်းပေမဲ့။', "When it rains I let the dogs shelter at my door. Small shop or not.", RAIN),
@@ -245,7 +245,7 @@ const market = {
     pair([MK_SELL, MK_SELL], [
       ['မင်းဆိုင် ဒီနေ့ ကုန်သွားပြီလား။', "Your stall sold out today?"],
       ['အင်း။ မင်းဆိုင်လည်း မနက်ဖြန် ကုန်မှာပါ။', "Yep. Yours'll sell out tomorrow."],
-      ['ကုန်ကုန် မကုန်ကုန်၊ ကုန်တာ မြင်ရတာ ဝမ်းသာစရာ။', "Either way, it's nice to see stock go."],
+      ['ကိုယ့်ဆိုင် ကုန်ကုန် သူ့ဆိုင် ကုန်ကုန်၊ ကုန်တာ မြင်ရတာ ဝမ်းသာစရာပဲ။', "Either way, it's nice to see stock go."],
     ]),
     pair([MK, MK], [
       ['ကိုယ့်ရေဘူး ကိုယ် အရင်ဖြည့်။', "Fill your own bottle first."],
@@ -255,7 +255,7 @@ const market = {
     pair([MK, MK], [
       ['ဆေးရေးမြေပုံ ဝယ်လိုက်ပြီ။ မာရာ့လမ်းတဲ့။', "Bought a painted map. Maya's Way."],
       ['ဟုတ်လား။ ကိုယ်တိုင် လျှောက်ကြည့်ပြီးပြီလား။', "Oh? Walked it yourself yet?"],
-      ['…မလျှောက်ရသေးဘူး။', "…Not yet."],
+      ['…မလျှောက်ကြည့်ရသေးဘူး။', "…Not yet."],
     ], { days: [4] }),
     pair(['porter', MK], [
       ['ကိုဖြိုး မနက်က လက်ဖက်ရည် ငှဲ့ပေးတယ်။', "Ko Phyo poured me tea this morning."],
@@ -264,7 +264,7 @@ const market = {
     ], { from: 5 }),
     pair([MK, MK], [
       ['ခွာညို ကူးတာတဲ့။ ကြားလား။', "Khwar Nyo copied, they say. Heard?"],
-      ['ကြားတယ်။ မင်း ကိုယ်တိုင် မြင်လား။', "Heard. Did you see it yourself?"],
+      ['ကြားတယ်။ မင်း ကိုယ်တိုင် မြင်ခဲ့လား။', "Heard. Did you see it yourself?"],
       ['ဟင့်အင်း… ညတိုင်း ထွင်းနေတာပဲ မြင်တယ်။', "No… I only saw her carving every night."],
       ['ဒါဆို အဲဒါပဲ ပြော။', "Then say that."],
     ], { days: [5] }),
@@ -279,7 +279,7 @@ const market = {
       ['အခု မင်းလက်ပဲ။ ဝမ်းသာတယ်။', "They're your hands now. I'm glad."],
     ], { from: 6 }),
     pair([MK_SELL, MK_SELL], [
-      ['လေကြီး လာတော့မယ်။ အမိုး ချည်ပြီးပြီလား။', "Wind's coming. Tied your awning?"],
+      ['လေကြီး လာတော့မယ်။ အမိုး ချည်ထားပြီးပြီလား။', "Wind's coming. Tied your awning?"],
       ['ချည်ပြီးပြီ။ လေကိုတော့ ငါ မတားနိုင်ဘူးလေ။', "Done. Can't stop the wind, can I."],
       ['ကိုယ့်ကြိုး ကိုယ်ချည်ရုံပဲ။', "Just tie your own ropes."],
     ], { days: [6], notFlag: 'd6.gust' }),
@@ -296,7 +296,7 @@ const market = {
     pair([MK, MK], [
       ['မင်အိုး ငါးအိုး ဝယ်ထားမိတယ်။ မာရာ ပြောတယ်ဆိုလို့။', "I bought five ink jars. 'Maya says', they said."],
       ['မာရာက နင့်ကို ပြောတာလား။', "Did Maya say it to you?"],
-      ['…ဟင့်အင်း။ တစ်ယောက်ယောက်ကို တစ်ခါ ပြောတာ။', "…No. To somebody, once."],
+      ['…ဟင့်အင်း။ တစ်ယောက်ယောက်ကို တစ်ခါ ပြောဖူးတာတဲ့။', "…No. To somebody, once."],
     ], { from: 9 }),
     pair([MK, MK], [
       ['ပွဲတံဆိပ်ကို တပည့် တစ်ယောက်တည်း ထွင်းတာ ထင်ခဲ့တာ။', "I thought the launch postmark was all the pupil's work."],
@@ -322,12 +322,12 @@ const wharf = {
   town: [
     wh('ရေစီးက ဘယ်သူ့ကိုမှ မစောင့်ဘူး။ လှော်မလား၊ မျောမလား။', "The current waits for nobody. Pole, or drift.", { from: 6 }),
     wh('လေးတာ လေးတာပဲ။ ညည်းနေရင် ပိုလေးတယ်။', "Heavy is heavy. Grumbling makes it heavier.", { job: 'porter' }),
-    wh('ကျွန်တော့် လှေ အဟောင်း။ ဒါပေမဲ့ ကျွန်တော့် လှေ။', "My boat's old. But it's mine.", { job: WH_WATER }),
+    wh('ကျွန်တော့် လှေက အဟောင်း။ ဒါပေမဲ့ ကိုယ်ပိုင်လှေ။', "My boat's old. But it's mine.", { job: WH_WATER }),
     wh('ဘယ်မှာ မွေးလဲ ငါ မရွေးခဲ့ဘူး။ ဘယ်လို နေမလဲတော့ ငါ ရွေးတယ်။', "I didn't choose where I was born. How I live, I choose.", { age: 'elder' }),
     wh('နှုတ်ဆက်တာ ပိုက်ဆံ မကုန်ဘူး။ ငါက လူတိုင်းကို အလကား ဝေတယ်။', "A greeting costs nothing. I hand them out free."),
     wh('မုန်းနေရင် ကိုယ့်ညစာပဲ ခါးတယ်။', "Hate someone and it's your own supper that tastes bitter.", { age: 'elder' }),
     wh('မြေကြီးက ဘာချချ မငြင်းဘူး။ ငါလည်း အဲလို နေချင်တယ်။', "The ground takes whatever falls on it. I'd like to be like that."),
-    wh('ကျွန်မ အဖေ လှေမရှိဘူး။ ဒါပေမဲ့ ရေကူးတတ်တယ်!', "My dad has no boat. But he can swim!", { age: 'child' }),
+    wh('ကျွန်မ အဖေမှာ လှေမရှိဘူး။ ဒါပေမဲ့ ရေကူးတတ်တယ်!', "My dad has no boat. But he can swim!", { age: 'child' }),
     wh('သူများ ဘာပြောပြော လေထဲ လွင့်ပါစေ။ ငါ့ဝန် ငါထမ်းတယ်။', "Whatever folk say, let it blow away. I carry my own load.", { job: 'porter' }),
     wh('ချော်လဲရင် ကိုယ့်အမှား ကိုယ်ဝန်ခံ၊ ပြီးရင် ပြန်ထ။', "Slip up? Own it, then get up."),
     wh('အမေတွေ ကုန်ကျစရိတ် ဘယ်တော့မှ မပြောဘူး။ ဖာရုံပဲ။', "Mothers never talk about the cost. They just patch.", { age: 'elder' }),
@@ -342,21 +342,21 @@ const wharf = {
     wh('အထုပ်သေးသေးလေးတွေ ဆိပ်တိုင်း ရောက်ပြီ။ အရင်က မရောက်ဘူး။', "The little parcels reach every jetty now. They never used to.", { from: 6 }),
     wh('ကျွန်တော်လည်း ကြီးရင် လှော်တက် ကိုင်မယ်။ မမျောဘူး။', "When I'm big I'll hold a pole. No drifting.", { from: 6, age: 'child' }),
     // Day 6: the greeting skipped, then given
-    wh('ကိုသီဟ လူတိုင်းကို နှုတ်ဆက်တယ်။ တစ်ယောက်ကလွဲလို့။', "Ko Thiha greets everyone. Everyone but one.", { days: [6], notFlag: 'd6.ch8Done' }),
+    wh('ကိုသီဟက လူတိုင်းကို နှုတ်ဆက်တယ်။ တစ်ယောက်ကလွဲလို့ပေါ့။', "Ko Thiha greets everyone. Everyone but one.", { days: [6], notFlag: 'd6.ch8Done' }),
     wh('နေ့လယ်လေက ကျောက်သင်ပုန်းလေးတွေ ဆိပ်ကမ်းပေါ် ပစ်ချသွားတယ်။', "The noon wind dropped little slates all over the quay.", { days: [6], flag: 'd6.gust' }),
     wh('ဒီနေ့ ကိုသီဟ ကြိမ်ဆိပ်ကို လှမ်းအော်တယ်။ အဘိုးကြီး ခေါင်းညိတ်တယ်တဲ့။', "Ko Thiha called out at Cane Jetty today. The old man nodded, they say.", { flag: 'd6.ch8Done' }),
-    wh('ကိုသီဟရဲ့ "နေကောင်းလား" က ဆိပ်ခုနစ်ခုလုံး ကြားရတယ်။', "Ko Thiha's 'keeping well!' carries down all seven jetties.", { from: 7 }),
+    wh('ကိုသီဟရဲ့ "နေကောင်းလား" ဆိုတဲ့အသံက ဆိပ်ခုနစ်ခုလုံး ကြားရတယ်။', "Ko Thiha's 'keeping well!' carries down all seven jetties.", { from: 7 }),
     wh('ဦးဘိုလေး ကြိမ်စည်းတိုင်း ပြည့်တယ်။ ကိုယ်တိုင် ရေကြည့်ပြီးပြီ။', "Every one of U Bo Lay's bundles is full. I counted myself.", { from: 7 }),
     // Day 8 on
     wh('တံတားပွင့်တော့ ဆိပ်ကမ်း ပိုစည်တယ်။ ဖောင်ရော ကူးတို့ရော အလုပ်ရှိတယ်။', "With the bridge open the quay's busier. Raft and ferry both have work.", { from: 8 }),
     wh('မီးဖိုတန်းက လူတွေ ချုပ်ထားတဲ့ ခေါက်ရိုးကနေ ကူးလာကြတယ်။', "Folk from Hearth Row are coming over the laced-up crease.", { flag: 'd9.crease' }),
     // Day 12: rain
     wh('မိုးရေနဲ့ မြစ်ရေ တက်လာပြီ။ ကြိုးတွေ ပြန်တင်းထား။', "The rain's raising the river. Tighten the lines.", RAIN),
-    wh('မိုးက ဘယ်သူ့လှေကိုမှ ရွေးပြီး မစိုဘူး။', "The rain doesn't pick whose boat to soak.", RAIN),
+    wh('မိုးက ဘယ်သူ့လှေကိုမှ ရွေးပြီး စိုစေတာ မဟုတ်ဘူး။', "The rain doesn't pick whose boat to soak.", RAIN),
     // Days 14-15
     wh('ဒီနေ့ ဖောင်ပေါ်က ဖိတ်စာ ကိုင်ထားတဲ့သူ ဆိပ်တိုင်းကို လက်ပြသွားတယ်။', "Today someone on the raft waved invitations at every jetty.", { flag: 'd14.ride' }),
     wh('ဦးဘိုလေးလည်း ဖိတ်စာ ရတယ်တဲ့။ မပြုံးဘူး။ အိတ်ထဲ ထည့်သွားတယ်။', "U Bo Lay got an invitation too. Didn't smile. Pocketed it.", { flag: 'd14.boLay' }),
-    wh('ဒီည ပွဲ သွားမှာ။ အင်္ကျီကောင်းလေး ဖာထားတယ်။', "Going to the launch tonight. I've patched my good shirt.", { days: [15] }),
+    wh('ဒီည ပွဲသွားမှာ။ အင်္ကျီကောင်းလေး ဖာထားတယ်။', "Going to the launch tonight. I've patched my good shirt.", { days: [15] }),
   ],
 
   areas: {
@@ -383,8 +383,8 @@ const wharf = {
         wh('ချိန်ခွင်ရုံထဲ စကားတွေ များတယ်။ လေထဲ လွင့်ပါစေ။', "Lots of talk on that bench inside. Let it blow away."),
         wh('ကျွန်မ အထုပ်သေးလေးကိုလည်း သေတ္တာကြီးတွေလို သေချာ ချိန်ပေးတယ်။', "They weigh my little parcel as carefully as the big crates.", { age: 'child' }),
         wh('ကောင်မလေး အထုပ်မှား ထည့်မိတယ်။ တောင်းပန်ပြီး ကိုယ်တိုင် ပြင်တယ်။', "A girl put a parcel in wrong. Said sorry and fixed it herself.", { flag: 'd6.slate4' }),
-        wh('စကားတွေကြားမှာ ကောင်မလေး ပြုံးပြီး ထိုင်နေတယ်။ ကျောက်တုံးလို။', "She sat smiling through all that talk. Like a rock.", { flag: 'd6.slate2' }),
-        wh('ဒေါ်စန္ဒာ ညတိုင်း လူတိုင်းကို ကောင်းစေချင်တယ်တဲ့။ ရယ်ခဲ့တဲ့သူကိုပါ။', "Every night Daw Sanda wishes everyone well, they say. Even the one who laughed at her.", { flag: 'd6.ch8Done' }),
+        wh('စကားတွေကြားမှာ ကောင်မလေး ပြုံးပြီး ထိုင်နေတယ်။ ကျောက်တုံးလိုပဲ ငြိမ်လို့။', "She sat smiling through all that talk. Like a rock.", { flag: 'd6.slate2' }),
+        wh('ဒေါ်စန္ဒာ ညတိုင်း လူတိုင်းကို ကောင်းစေချင်တယ်တဲ့။ သူ့ကို ရယ်ခဲ့တဲ့သူကိုပါ။', "Every night Daw Sanda wishes everyone well, they say. Even the one who laughed at her.", { flag: 'd6.ch8Done' }),
         wh('မိုးရွာလည်း ဒေါ်စန္ဒာ အလုပ်ချိန်အတိုင်း ရောက်တယ်။', "Rain or not, Daw Sanda's here on the dot.", RAIN),
         maya('(ချိန်ခွင်က နာမည် မသိဘူး။ ကျွန်မရော လူတွေကို အဲလို ချိန်နိုင်လား။)', "(The scale doesn't know names. Could I weigh people like that?)"),
       ],
@@ -408,7 +408,7 @@ const wharf = {
     caneShed: {
       at: { x: 86.5, z: 490.5, r: 7 },
       lines: [
-        by(['cutterA', 'cutterB'], 'ကြိမ်ကို နေထဲ သုံးရက် လှန်းပြီးမှ စည်းတယ်။ အဘ နည်း။', "Three days in the sun before we bundle. The old man's way."),
+        by(['cutterA', 'cutterB'], 'ကြိမ်ကို နေထဲ သုံးရက် လှန်းပြီးမှ စည်းတယ်။ အဘရဲ့ နည်းပဲ။', "Three days in the sun before we bundle. The old man's way."),
         by(['cutterA', 'cutterB'], 'အဘ စကား ကြမ်းတယ်။ ကြိမ်ကတော့ ချောတယ်။', "The old man's tongue is rough. His cane is smooth."),
         by(['cutterA', 'cutterB'], 'ကြိမ်ကို ဘယ်သူ ဝယ်ဝယ် တစ်ဈေးတည်း။ အဘ မကြိုက်တဲ့သူလည်း အတူတူ။', "One price, whoever buys. Even folk he doesn't like."),
         by(['cutterA', 'cutterB'], 'ဖောင်က ကောင်လေး ဒီရောက်ရင် တိတ်သွားတယ်။ ဘာဖြစ်လဲ မသိဘူး။', "The raft lad goes quiet when he gets here. Don't know why.", { days: [6], notFlag: 'd6.ch8Done' }),
@@ -477,7 +477,7 @@ const wharf = {
       by('cutterB', 'ဓားနဲ့ လက်ပေါက်သွားတယ်။ ကိုယ့်အမှား၊ ကိုယ်ပဲ ပတ်တီး စည်းတယ်။', "Nicked my hand on the knife. My own slip; I bandaged it myself."),
       by('cutterB', 'ဖောင်ကောင်လေးက ငါတို့ကိုတော့ နှုတ်ဆက်တယ်။ အဘကိုကျ တိတ်သွားတယ်။', "The raft lad greets us. Goes quiet at the old man.", { days: [6], notFlag: 'd6.ch8Done' }),
       by('cutterA', 'အဘ ဒီနေ့ "ဟွန်း" ပဲ ပြောတယ်။ ဒါပေမဲ့ ပြုံးချင်သလိုလို။', "The old man only said 'hmph' today. But he nearly smiled.", { flag: 'd6.ch8Done' }),
-      by('ubolay', '…ဖိတ်စာ မစိုအောင် ကြိမ်ကြား ညှပ်ထားတာ။ ဘာမှ မဟုတ်ဘူး။', "…Tucked the invitation in the cane so it stays dry. It's nothing.", { flag: 'd14.boLay' }),
+      by('ubolay', '…ဖိတ်စာ မစိုအောင် ကြိမ်ကြား ညှပ်ထားတာ။ ဘာမှ မဟုတ်ပါဘူး။', "…Tucked the invitation in the cane so it stays dry. It's nothing.", { flag: 'd14.boLay' }),
       by('cutterA', 'မိုးထဲမှာ အဘက ငါတို့ကို အရင် ပြန်ခိုင်းတယ်။ သူကတော့ နေခဲ့တယ်။', "In the rain the old man sent us home first. He stayed.", RAIN),
     ],
   },
@@ -503,7 +503,7 @@ const wharf = {
       ['မနက်ဖြန် ဘာလုပ်မလဲ။ အဲဒါ မင်းဟာ။', "What you do tomorrow. That's yours."],
     ]),
     pair(['porterA', 'porterB'], [
-      ['ကိုသီဟ ဦးဘိုလေးကို အငြိုးကြီးတယ်တဲ့။', "Ko Thiha's got a big grudge on U Bo Lay, they say."],
+      ['ကိုသီဟ ဦးဘိုလေးကို အငြိုးထားတယ်တဲ့။', "Ko Thiha's got a big grudge on U Bo Lay, they say."],
       ['မင်း သူ့မျက်နှာ ကိုယ်တိုင် ကြည့်ဖူးလား။', "Have you looked at his face yourself?"],
       ['…မကြည့်ဖူးဘူး။', "…No."],
     ], { room: 'weighhouse', days: [6], notFlag: 'd6.ch8Done' }),
@@ -535,7 +535,7 @@ const wharf = {
     pair(['cutterA', 'cutterB'], [
       ['အဘကို ဖိတ်စာ ပေးတာ မြင်လား။', "See them give the old man an invitation?"],
       ['အဘ ဘာပြောလဲ။', "What did he say?"],
-      ['"ဟွန်း" တဲ့။ ပြီးတော့ သေချာ သိမ်းထားတယ်။', "'Hmph.' Then he put it away carefully."],
+      ['"ဟွန်း" တဲ့။ ပြီးတော့ သေသေချာချာ သိမ်းထားတယ်။', "'Hmph.' Then he put it away carefully."],
     ], { room: 'caneshed', flag: 'd14.boLay' }),
   ],
 
@@ -622,7 +622,7 @@ const junction = {
         jn('ဆရာကြီးနဲ့ ကောင်လေး အတူ စာစီနေကြတယ်။ ကောင်လေး မေးတတ်လာပြီ။', "The old printer and the lad are setting type together. The lad's learned to ask.", { flag: 'd8.ch13Done' }),
         jn('ဆရာကြီးလည်း ဖြေတတ်လာတယ်တဲ့။ "ကြိုက်သလို လုပ်" မပြောတော့ဘူး။', "The old printer's learning to answer too. No more 'do what you like'.", { from: 9 }),
         jn('ကောင်မလေးအသစ်က ကိုယ့်သော့နဲ့ ကိုယ့်သေတ္တာ ဖွင့်တယ်။', "The new girl opens her own locker with her own key.", { from: 10 }),
-        jn('ကောင်မလေးက ကိုယ့်ဘာသာ ဆုံးဖြတ်လိုက်တယ်တဲ့။ ဘယ်သူမှ မပြောပေးရဘူး။', "She made up her own mind, they say. Nobody had to tell her.", { flag: 'd14.ncChoice' }),
+        jn('ကောင်မလေးက ကိုယ့်ဘာသာ ဆုံးဖြတ်လိုက်တယ်တဲ့။ ဘယ်သူမှ မပြောရဘူး။', "She made up her own mind, they say. Nobody had to tell her.", { flag: 'd14.ncChoice' }),
         jn('မိုးစိုရင် စက္ကူ ကောက်တယ်။ ဒီနေ့ ပုံမနှိပ်ဘဲ စာလုံး ပြန်စီတယ်။', "Damp paper cockles. No printing today; they're sorting type.", RAIN),
         maya('(ပုံနှိပ်စာက သေချာပုံ ပေါက်တယ်။ ပေါက်ရုံပဲ။)', "(Print looks certain. Only looks.)", { from: 8 }),
       ],
@@ -724,7 +724,7 @@ const junction = {
       by('teacher', 'အဖြေ မှတ်ရုံနဲ့ မပြီးဘူး။ ဘာကြောင့်လဲ သိရမယ်။', "Remembering the answer isn't enough. Know why."),
       by('teacher', 'တစ်ယောက်က ခြောက်၊ တစ်ယောက်က ကိုး။ နှစ်ယောက်လုံး နားထောင်ရတယ်။', "One reads six, one reads nine. I have to listen to both."),
       by('pupil1', 'မင်အိုး ဗလာ။ ဒီနေ့ မြေဖြူနဲ့ပဲ ရေးမယ်။', "Empty ink pot. Chalk today.", { days: [8], notFlag: 'd8.ch12Done' }),
-      by('pupil2', 'မိုးမိုး တွက်တဲ့ အဆင့်တွေ မှန်တယ်။ စတာကမှ မှားတာ။', "Moe Moe's steps were right. She started from a wrong idea.", { flag: 'd8.ch12Done' }),
+      by('pupil2', 'မိုးမိုး တွက်တဲ့ အဆင့်တွေ မှန်တယ်။ စတာက မှားတာ။', "Moe Moe's steps were right. She started from a wrong idea.", { flag: 'd8.ch12Done' }),
       by('pupil2', 'မင်အိုး ပြည့်ပြီ! ကိုယ်တိုင် တွင်းက ခပ်လာတာ။', "My ink pot's full! I dipped it at the well myself.", { from: 9 }),
       by('moemoe', 'ကိုယ့်ပေါင်းလဒ်ကိုလည်း စစ်ရတယ်။ အခု အမြဲ ပြန်စစ်တယ်။', "Even my own sums need checking. I always check now.", { from: 9 }),
       by('pupil1', 'အမိုး ဘယ်နားက ယိုလဲ ဆရာမ မသိဘူး။ ကျွန်တော်တို့ လိုက်ရှာပေးတယ်။', "Teacher didn't know where the roof leaked. We went looking.", RAIN),
@@ -758,7 +758,7 @@ const junction = {
       ['ကြိုးတံတား ပြတ်ပြီတဲ့။', "They say the rope bridge snapped."],
       ['မင်း ကိုယ်တိုင် ကြည့်ပြီးပြီလား။', "Did you look yourself?"],
       ['မကြည့်ရသေးဘူး။', "Not yet."],
-      ['ဒါဆို "တဲ့" ပဲ ကျန်တာပေါ့။', "Then all you've got is 'they say'."],
+      ['ဒါဆို "တဲ့" ပဲ ကျန်တော့တာပေါ့။', "Then all you've got is 'they say'."],
     ], { days: [7] }),
     pair(['drinker1', 'drinker2'], [
       ['တွင်း ခန်းတော့မယ်တဲ့။ ကြော်ငြာစာ ဖတ်ပြီးပြီလား။', "The well's drying up. Read the handbill?"],
@@ -781,7 +781,7 @@ const junction = {
       ['မာရာ ပြောတယ်ဆိုရင် ယုံရမှာပေါ့။', "If Maya says it, you believe it."],
       ['မာရာက ဘယ်သူ့ကို ပြောတာလဲ။ ဘာအတွက်လဲ။', "Who did Maya say it to? What for?"],
       ['…အဲဒါ မသိဘူး။', "…Don't know."],
-      ['ဒါဆို မာရာ့စကား ဖြစ်သေးတာ မဟုတ်ဘူး။', "Then it isn't really Maya's word yet."],
+      ['ဒါဆို မာရာ့စကား ဟုတ်သေးတာ မဟုတ်ဘူး။', "Then it isn't really Maya's word yet."],
     ], { from: 8 }),
     pair(['utint', 'kowunna'], [
       ['ဘာလုပ်ချင်လဲ။ ပြောပါဦး။', "What do you want to do? Tell me."],
@@ -805,7 +805,7 @@ const junction = {
     ], RAIN),
     pair([['jkopaing'], JN], [
       ['ကောင်မလေး ဘယ်သူ့ကို မေးပြီး ဆုံးဖြတ်တာလဲ။', "Who did the girl ask before she decided?"],
-      ['ဘယ်သူ့ကိုမှ မစောင့်ဘူး။ ကိုယ့်ဘာသာ။', "She didn't wait on anyone. Her own call."],
+      ['ဘယ်သူ့ကိုမှ မစောင့်ဘူး။ ကိုယ့်ဘာသာပဲ။', "She didn't wait on anyone. Her own call."],
       ['သူ့သော့က သူ့လက်ထဲ ရှိနေပြီပဲ။', "Her key's in her own hand now."],
     ], { flag: 'd14.ncChoice' }),
   ],
@@ -814,7 +814,7 @@ const junction = {
     first: maya('(သတင်းစာ စာမျက်နှာပေါ် ရောက်ပြီ။ ရေးထားတိုင်း မှန်လား။)', '(A newspaper page now. Is everything written here true?)'),
     again: [
       maya('(ခြောက်လား ကိုးလား။ ဘယ်ခုံမှာ ထိုင်လဲ ဆိုတာနဲ့ ဆိုင်တယ်။)', '(Six or nine. It depends which bench you sit on.)', { from: 8 }),
-      maya('(ပုံနှိပ်စာ သေချာပုံပေါက်တယ်။ သေချာတာနဲ့ မှန်တာ မတူဘူး။)', "(Print looks certain. Certain isn't the same as true.)", { from: 8 }),
+      maya('(ပုံနှိပ်စာက သေချာပုံပေါက်တယ်။ သေချာတာနဲ့ မှန်တာ မတူဘူး။)', "(Print looks certain. Certain isn't the same as true.)", { from: 8 }),
       maya('(ဒီဘုတ်အောက်မှာ တစ်ယောက် တစ်နေကုန် စောင့်ဖူးတယ်။ ကျွန်မစကားကို။)', '(Someone once waited a whole day under this board. For my words.)', { from: 9 }),
     ],
   },

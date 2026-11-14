@@ -52,12 +52,12 @@ const L = {
     { my: 'ဒါဆို ဒီမှတ်စုစာအုပ်နဲ့ ကလောင်လေး ယူသွား။ ကိုယ်တိုင်မြင်တာကိုပဲ ရွှေမင်နဲ့ ရေးနော်။', en: 'Then take this notebook and quill. Only write in gold what you have seen yourself.' },
     { my: 'ဒါနဲ့… ဦးကျော်ညွန့်တို့ ဒီနေ့ စာအုပ်ကျောရိုး ပြန်ချုပ်နေကြတယ်။ သူ့ကူညီပေးတဲ့ ဖိုးသားလေးကတော့ တစ်နေကုန် ပျောက်နေတယ်တဲ့။', en: "Oh, and U Kyaw Nyunt is re-stitching the book's spine today. Little Pho Thar, who helps him, has been gone all day." },
   ],
-  wwLater: [{ my: 'ဦးကျော်ညွန့်ကတော့ စာကြည့်တိုက်ရှေ့က မြက်ခင်းမှာ စာအုပ်ကျောရိုး ချုပ်နေတယ်။', en: "U Kyaw Nyunt? On the lawn in front of the Library, stitching the book's spine." }],
+  wwLater: [{ my: 'ဦးကျော်ညွန့်လား။ စာကြည့်တိုက်ရှေ့ မြက်ခင်းမှာ စာအုပ်ကျောရိုး ချုပ်နေတယ်။', en: "U Kyaw Nyunt? On the lawn in front of the Library, stitching the book's spine." }],
   // U Kyaw Nyunt
   uk1: [
-    { my: 'ချုပ်ရိုး တစ်ချောင်းချင်း ဖြောင့်မှ စာအုပ်က ကြာကြာခံတယ်ကွဲ့။', en: 'A book only lasts if every stitch runs straight.' },
-    { my: 'ဖိုးသားလား။ "ကျွန်တော့်မှာ ပါရမီ မပါဘူး" ဆိုပြီး ထွက်သွားတယ်။', en: 'Pho Thar? He said "I have no gift" and walked off.' },
-    { my: 'လေတိုက်တဲ့ဘက် သွားရှာကြည့်ပါလား။ သူ့ လေရဟတ်လေးတွေ မပါဘဲ ဘယ်မှ မသွားဘူး။', en: 'Try where the wind blows. He never goes anywhere without his little windmills.' },
+    { my: 'ချုပ်ရိုး တစ်ချောင်းချင်း ဖြောင့်မှ စာအုပ်က ကြာကြာခံတာကွဲ့။', en: 'A book only lasts if every stitch runs straight.' },
+    { my: 'ဖိုးသားလား။ "ကျွန်တော့်မှာ ပါရမီ မပါဘူး" ဆိုပြီး ထွက်သွားလေရဲ့။', en: 'Pho Thar? He said "I have no gift" and walked off.' },
+    { my: 'လေတိုက်တဲ့ဘက် သွားရှာကြည့်ပါလား။ သူ့လေရဟတ်လေးတွေ မပါဘဲ ဘယ်မှ မသွားဘူး။', en: 'Try where the wind blows. He never goes anywhere without his little windmills.' },
   ],
   ukWait: [{ my: 'ဖိုးသားကို တွေ့ရင် ပြန်ခေါ်ခဲ့ပါနော်။', en: 'If you find Pho Thar, bring him back, would you?' }],
   // Pho Thar
@@ -76,7 +76,7 @@ const L = {
   ptPressureMaya: [{ my: '(လူတွေ မျှော်လင့်ထားတာကို ကျွန်မပါ ထပ်ပြောမိပြီ။)', en: "(I just repeated what everyone expects of him.)" }],
   ptYes: [{ my: '…တစ်ခါပဲနော်။ ဦးကျော်ညွန့်ဆီ ပြန်သွားမယ်။', en: "…Just once, okay? I'll go back to U Kyaw Nyunt." }],
   ptGoing: [{ my: 'ဦးကျော်ညွန့်ဆီမှာ စောင့်နေမယ်။', en: "I'll wait with U Kyaw Nyunt." }],
-  ukComing: [{ my: 'ဖိုးသား ပြန်လာနေပြီလား။ ခဏ စောင့်ကြည့်ရအောင်။', en: "Is Pho Thar on his way back? Let's wait a moment." }],
+  ukComing: [{ my: 'ဖိုးသား ပြန်လာနေပြီလား မသိဘူး။ ခဏ စောင့်ကြည့်ရအောင်။', en: "Is Pho Thar on his way back? Let's wait a moment." }],
   // practice
   ukTeach: [
     { my: 'ဒီ အစက်လေးတွေအတိုင်း လိုက်ချုပ်။ မြန်ဖို့ မလိုဘူး။ ဖြောင့်ဖို့ပဲ လိုတယ်။', en: "Follow the dots. You don't need to be fast, only straight." },
@@ -108,7 +108,7 @@ const L = {
   ukFairLater: [{ my: 'ကောင်လေးကို ခဏ စဉ်းစားခွင့်ပေးလိုက်ပါဦး။', en: 'Give the boy a little while to think.' }],
   ptFairLater: [{ my: 'ခဏ စဉ်းစားပါရစေဦး…', en: 'Let me think a little longer…' }],
   // (his own decision at the fair is in talks/day1.js: it ends the talk)
-  ukSheep: [{ my: 'ချုပ်ရိုးဆရာ အိမ်ထဲက လေရဟတ်သမားလေးပေါ့။ သိုးမည်းလေးတစ်ကောင်ပဲ။ ကောင်းတဲ့ သိုးမည်းပါ။', en: "A windmill maker from a binder's house. A little black sheep. The good kind." }],
+  ukSheep: [{ my: 'ချုပ်ရိုးဆရာ အိမ်ထဲက လေရဟတ်သမားလေးပေါ့။ သိုးမည်းလေး တစ်ကောင်ပဲ။ ကောင်းတဲ့ သိုးမည်းပါ။', en: "A windmill maker from a binder's house. A little black sheep. The good kind." }],
   ptStuck: [{ my: 'ဒါပေမဲ့… ပွဲအတွက် လေရဟတ်အသစ်က မလည်ဘူး။', en: "But… my new windmill for the fair won't turn." }],
   foldTitle: { my: 'လေရဟတ် ခေါက်မယ်', en: 'Fold the windmill' },
   foldHint: { my: 'ထောင့်တိုင်းကနေ အလယ်ကို ဖြည်းဖြည်း ခေါက်ပါ', en: 'Fold each corner to the centre, slowly' },
@@ -117,9 +117,9 @@ const L = {
     { my: 'ဒါ မာရာ့အတွက်။ ကျေးဇူးပါ။', en: "This one's for you, Maya. Thank you." },
   ],
   mayaWrite: [{ my: 'ဒီနေ့အကြောင်း စာရေးခန်းမှာ ပြန်ရေးမှ ဖြစ်မယ်။', en: "I should write today down at my Writing Room." }],
-  ptAfter: [{ my: 'မနက်ဖြန် ပွဲတော်မှာ လေရဟတ်တွေ အများကြီး လည်နေမှာ။', en: "Tomorrow there'll be windmills turning all over the fair." }],
+  ptAfter: [{ my: 'မနက်ဖြန် ပွဲတော်မှာ လေရဟတ်တွေ အများကြီး လည်နေတော့မှာ။', en: "Tomorrow there'll be windmills turning all over the fair." }],
   ukAfter: [{ my: 'ကောင်လေး ကိုယ့်လမ်း ကိုယ်တွေ့ပြီ။', en: "The boy has found his own road." }],
-  wwAfter: [{ my: 'ဖိုးသားကို တွေ့ပြီလား။ ပြုံးပြုံးလေး ပြန်လာတာ မြင်တယ်။', en: 'Found Pho Thar? I saw him come back smiling.' }],
+  wwAfter: [{ my: 'ဖိုးသားကို တွေ့ပြီလား။ ပြုံးပြုံးလေး ပြန်လာတာ တွေ့လိုက်တယ်။', en: 'Found Pho Thar? I saw him come back smiling.' }],
   // night page
   nightQ: { my: 'ဒီနေ့အကြောင်း မှန်မှန်ကန်ကန် ဘယ်လို ရေးမလဲ။', en: 'How will she write today, truthfully?' },
   nightChoices: [
@@ -133,7 +133,7 @@ const L = {
     [{ my: '(မဟုတ်ဘူး… ဒါ အားလျှော့ပြောတာ။ ကိုယ်တိုင် မြင်ခဲ့တာက ဒီလို မဟုတ်ဘူး။)', en: "(No… that's too gloomy. It isn't what I saw.)" }],
   ],
   sleepQ: { my: 'ဒီည မှတ်စုစာမျက်နှာလေး ဘယ်သူ့အိမ်မှာ အိပ်မလဲ။', en: 'Whose house does tonight\'s notebook page sleep at?' },
-  stampText: { my: 'စာမျက်နှာ ၁ — ကျွန်မသည် သိုးမည်း\nတခြားသူ တစ်ယောက်အတွက်လည်း မှန်ကြောင်း ကိုယ်တိုင် တွေ့ခဲ့ပြီ။', en: 'Page 1 — I Am a Black Sheep\nShe saw for herself that it holds for someone else too.' },
+  stampText: { my: 'စာမျက်နှာ ၁ — ကျွန်မက သိုးမည်း\nတခြားသူ တစ်ယောက်အတွက်လည်း မှန်ကြောင်း ကိုယ်တိုင် တွေ့ခဲ့ပြီ။', en: 'Page 1 — I Am a Black Sheep\nShe saw for herself that it holds for someone else too.' },
   tomorrow: { my: 'နောက်တစ်နေ့ မနက် ရောက်ပြီ။ စာမျက်နှာ ၂ ဆက်သွားမယ်။', en: 'Morning comes. On to page 2.' },
 };
 

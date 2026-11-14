@@ -28,8 +28,9 @@
 // Chunks (CHUNK m square) are built only around the player, so a district costs nothing until visited.
 import * as home from './regions/home.js';
 
-/** Lazy towns (townloader.js): ?lazy=1 (or window.__LAZY_TOWNS = true; ?lazy=0 forces it off). OFF by default:
- * then every district file is merged at boot, as always. ON: every town's OUTLINE (rects, roads, desks, ground;
+/** Lazy towns (townloader.js): ON in the game (boot.js sets window.__LAZY_TOWNS = true unless ?lazy=0), OFF for
+ * anything that imports this module on its own (dev pages, node tools): then every district file is merged at
+ * boot, as before. ?lazy=1 / ?lazy=0 force it. ON: every town's OUTLINE (rects, roads, desks, ground;
  * regions/outlines.js) is merged at boot, and only the towns needed now bring their heavy part (art, items,
  * people); the rest arrive in the background (mergeTown). */
 export const LAZY = (() => {

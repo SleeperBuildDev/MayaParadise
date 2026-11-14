@@ -591,6 +591,9 @@ function buildGeometry(parts, outlineOnly) {
 // --------------------------------------------------------------------------------------------
 const _v = new THREE.Vector3();
 const _q = new THREE.Quaternion();
+/** Every live person: root -> { hips bone, its rest height, the body mesh }. world/feet.js stands them on the surface drawn
+ * under them (a road is 0.14 m above the paper) and tells a seated pose (hips lowered) from a standing one. */
+export const LIVE_PEOPLE = new Map();
 
 export function createPerson(spec = {}) {
   const B = buildParts(spec);
@@ -810,6 +813,7 @@ export function createPerson(spec = {}) {
      *  crowdBatch): it takes them off the camera's layer and skins a merged copy with the same bones. */
     parts: { mesh, outline, face, shadow, skeleton },
     dispose() {
+      LIVE_PEOPLE.delete(root);
       bodyGeo.dispose(); outGeo.dispose(); faceGeo.dispose(); skeleton.dispose();
       shadow.geometry?.dispose?.();
       releaseAtlas(atlas);
@@ -817,6 +821,7 @@ export function createPerson(spec = {}) {
     },
   };
   void _q;
+  LIVE_PEOPLE.set(root, { hips: bones.hips, hipY: B.hipY, mesh });
   return api;
 }
 

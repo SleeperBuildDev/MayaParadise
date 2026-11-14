@@ -24,7 +24,7 @@ import { paperStage, sayBox, runLoop, rr, fillStroke, bubble, sparkle, SKINS, MY
 const T = {
   him: 'maungnge', her: 'sunwe',
   again: { my: 'ဒီတံဆိပ် ပြန်စမယ်', en: 'This label again' },
-  waitFinger: { my: 'ခဲတံကို သူ့လက်ချောင်းဆီ ပြန်ယူခဲ့ပါ', en: 'Bring the pencil back to his finger' },
+  waitFinger: { my: 'ခဲတံကို သူ့လက်ချောင်းဆီ ပြန်ရွှေ့ပေးပါ', en: 'Bring the pencil back to his finger' },
   alone: { my: 'ဒီတစ်ခု သူ ကိုယ်တိုင် ဖတ်မယ် — လက်ကို ဘေးမှာ ထားပါ', en: 'He reads this one himself: keep your hands still' },
   next: { my: 'နောက်တစ်ထုပ်', en: 'Next parcel' },
 };
@@ -42,7 +42,7 @@ export function guide({ title = '', hint = '', labels = [], pace = 70, lag = 0.6
     btn.className = 'gd-readfor';
     btn.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l1.2-4.6L16.5 4.1a2 2 0 0 1 2.8 0l.6.6a2 2 0 0 1 0 2.8L8.6 18.8z"/><path d="M14.5 6l3.5 3.5"/></svg><span class="ak-bi gd-rf-t"></span>
       <b class="gd-cost" aria-hidden="true"><i class="gd-fing"></i><span class="ak-bi"></span></b>`;
-    bi(btn.querySelector('.gd-rf-t'), readFor || { my: 'ဖတ်ပေးလိုက်မယ်', en: 'Read it for him' });
+    bi(btn.querySelector('.gd-rf-t'), readFor || { my: 'သူ့အစား ဖတ်ပေးလိုက်မယ်', en: 'Read it for him' });
     // what it costs, shown on the button: his finger comes off the line and his turn starts over
     bi(btn.querySelector('.gd-cost span'), { my: 'သူ့အလှည့် −၁', en: 'his turn −1' });
     S.wrap.append(btn);

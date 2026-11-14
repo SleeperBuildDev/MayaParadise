@@ -1747,7 +1747,7 @@ function drawChalkboard(atlas, x0, y0, W, H) {
   atlasText(atlas, x0 + 212, y0 + 26, 600, 120, [{ text: 'မှာယူနည်း', size: 62, color: '#FBF3E2' }]);
   drawSparkle2D(g, x0 + 318, y0 + 86, 18, '#F2C75C');
   drawSparkle2D(g, x0 + 706, y0 + 86, 18, '#F2C75C');
-  const steps = ['ခလုတ်လေး နှိပ်ပါ', 'စာလေး ပို့ပါ', 'ငွေချေနည်း ပြန်ပြောပါမယ်', 'လက်ခံရယူပါ'];
+  const steps = ['ခလုတ်လေး နှိပ်ပါ', 'စာလေး ပို့ပါ', 'ငွေချေရမယ့်ပုံစံ ပြန်ပြောပေးပါမယ်', 'လက်ခံရယူပါ'];
   const nums = ['၁', '၂', '၃', '၄'];
   steps.forEach((text, i) => {
     const cy = y0 + CHALK_ROWS[i];

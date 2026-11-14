@@ -12,7 +12,7 @@
 // ART (tall: the cutaway fades them when they stand between the camera and Maya):
 //   mkHut { w, d, seed, style: 'plank' | 'brick' | 'stilt' | 'bamboo' | 'lime' | 'thatch', ridge?: 'z' }   a one-storey home
 //   mkRow { w, d, seed, style: 'brick' | 'timber' | 'lime', shop?, sign? }   a two-storey shophouse, gable to the street
-// PROP (low: never faded, so they keep the foreground full):
+// PROP (low: they keep the street camera's foreground full; mkLow is `cut`, so the closer walking camera may clear it):
 //   mkLow { w, d, seed, style }   a low one-storey home (ridge under 3.2 m): the south side of the east-west lanes,
 //        whose backs face the street camera (so its back wall has a window and a door too)
 //   tFence { len, style: 'screen' | 'rail' | 'wall' }   tShed { w }   tJars { n }   tWash { len }   tBike   tPots { n }
@@ -371,7 +371,9 @@ export const ART = {
   mkRow: { h: 7.2, map: true, draw: mkRow, obstacles: (it) => [box(it, (it.w || 4.8) + 0.1, (it.d || 6.4) + 0.1), ...(it.shop !== false ? [box(it, (it.w || 4.8) - 1.0, 0.6, 0, (it.d || 6.4) / 2 + 0.35)] : [])] },
 };
 export const PROP = {
-  mkLow: { draw: mkLow, obstacles: homeObs },
+  // (cut: the walking camera's low tilt looks down on its roof from close by: build.js lets the cutaway clear it
+  // from the near part of the view and fade it when it hides her, like the tall homes; h: its ridge, for that)
+  mkLow: { draw: mkLow, obstacles: homeObs, cut: true, h: 3.2 },
   tFence: { draw: tFence, obstacles: (it) => [box(it, it.len || 5, 0.2)] },
   tShed: { draw: tShed, obstacles: (it) => [box(it, (it.w || 2.6) + 0.2, 1.7)] },
   tJars: { draw: tJars, obstacles: (it) => [box(it, (it.n || 2) * 0.62, 0.6)] },

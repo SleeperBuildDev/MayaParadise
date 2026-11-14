@@ -22,7 +22,7 @@ export const D15_NC_CARDS = [
     line: { my: 'အစ်မ ဘေးမှာ ရှိနေမယ်။ ရှေ့မှာ မဟုတ်ဘူး။ ဘေးမှာ။', en: "I'll be beside you. Not in front. Beside." },
     answers: ['afraid'], from: { my: 'ခုံတန်းလေး', en: 'the Two-Seat Bench' } },
   { id: 'c:parrot', companion: 'parrot', name: { my: 'ဘာကြောင့်လဲ', en: 'Why?' },
-    line: { my: 'မြို့က ဘာကြောင့် နေခြည်ကို ရွေးတာလဲ။ ကိုယ့်ကိုယ်ကို အရင် မေးကြည့်။', en: 'Why did the town pick you? Ask yourself that first.' },
+    line: { my: 'မြို့က ဘာလို့ နေခြည်ကို ရွေးတာလဲ။ ကိုယ့်ကိုယ်ကိုယ် အရင် မေးကြည့်။', en: 'Why did the town pick you? Ask yourself that first.' },
     answers: ['unknown'], from: { my: 'ဘာကြောင့်ကြက်တူရွေး', en: 'the Why-Parrot' } },
   { id: 'c:star', companion: 'star', name: { my: 'ဘယ်သူ့စကားလဲ', en: 'Whose words?' },
     // ch 23: borrowed words go out with their owner's name; what you saw yourself goes out in your own
@@ -32,7 +32,7 @@ export const D15_NC_CARDS = [
     line: { my: 'သော့က နေခြည့်လက်ထဲမှာ ရှိပြီးသား။ ကျွန်မလက်ထဲမှာ မဟုတ်ဘူး။', en: "The key's already in your hand. Not in mine." },
     answers: ['cling'], from: { my: 'သော့လေး', en: 'the Little Key' } },
   { id: 'c:tendril', companion: 'tendril', name: { my: 'ဆက်ပါ၊ မနွယ်ပါနဲ့', en: "Connect, don't entwine" },
-    line: { my: 'အတူ ရှိမယ်။ ဒါပေမဲ့ နေခြည့်စကားကို ကျွန်မ မပတ်ဖွဲ့တော့ဘူး။', en: "We'll be together. But I won't wind myself round your words any more." },
+    line: { my: 'အတူ ရှိမယ်။ ဒါပေမဲ့ နေခြည့်စကားကို ကျွန်မ ဝင်မပတ်တော့ဘူး။', en: "We'll be together. But I won't wind myself round your words any more." },
     answers: ['cling'], from: { my: 'နွယ်ညွန့်လေး', en: 'the Tendril' } },
   { id: 'c:stage', companion: 'stage', name: { my: 'သူ့ဇာတ်ခုံ', en: "It's their stage" },
     line: { my: 'ဒီည ကြိုဆိုစကားက နေခြည့် ဇာတ်ခုံ။ ကျွန်မက ပရိသတ်ထဲမှာ။', en: "Tonight the welcome is your stage. I'm in the audience." },
@@ -46,7 +46,7 @@ export const D15_NC_CARDS = [
   { id: 'mayasays', lookalike: true, pencil: true, rumour: 'speech', name: { my: '"မာရာ ပြောမယ်"', en: '"Maya will say it"' },
     line: { my: 'ဒီည ကျွန်မက လူတိုင်းကို လမ်းညွှန် ပြောမှာလေ။ နေခြည်က တိုတိုလေးပဲ ပြောရင် ရပါတယ်။', en: "Tonight I'm giving everyone advice anyway. You only need to say a few words." },
     shows: ['afraid'], really: { my: 'မစစ်ရသေးတဲ့ ကောလာဟလ', en: 'a rumour nobody checked' },
-    backfire: { they: { my: 'ဒါဆို ကျွန်မစကား မလိုတော့ပါဘူး…', en: "Then my words aren't needed…" },
+    backfire: { they: { my: 'ဒါဆို ကျွန်မစကား မလိုတော့ဘူးပေါ့…', en: "Then my words aren't needed…" },
       maya: { my: '(ပွဲစဉ်ဘုတ်ကို ကိုယ်တိုင် မဖတ်ရသေးဘဲ ပြောလိုက်မိပြီ။)', en: '(I said it without reading the programme myself.)' } } },
 ];
 

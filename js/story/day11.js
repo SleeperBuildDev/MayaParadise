@@ -211,7 +211,7 @@ export async function create(story) {
   for (let i = 0; i < 7; i++) {
     addTap({ id: `note${i + 1}`, at: () => row.wallSlot(i), stand: () => ({ x: row.wallSlot(i).x, z: W.z + 1.15 }), when: () => !noteGone(i + 1), fn: () => readNote(i + 1) });
   }
-  addTap({ id: 'sign', at: () => ({ x: row.signAt.x, y: 2.6, z: row.signAt.z }), stand: () => ({ x: row.signAt.x + 1.6, z: row.signAt.z }), fn: () => stage(async () => { await say('maya', F('signFixed') ? [{ my: '(«မီးအိမ်»။ စာလုံး မှန်သွားပြီ။)', en: '(«မီးအိမ်». The letter is right now.)' }] : L.nyeinMaya, { face: 'think' }); F('signSeen', true); }) });
+  addTap({ id: 'sign', at: () => ({ x: row.signAt.x, y: 2.6, z: row.signAt.z }), stand: () => ({ x: row.signAt.x + 1.6, z: row.signAt.z }), fn: () => stage(async () => { await say('maya', F('signFixed') ? [{ my: '(«မီးအိမ်»။ စာလုံးပေါင်း မှန်သွားပြီ။)', en: '(«မီးအိမ်». The letter is right now.)' }] : L.nyeinMaya, { face: 'think' }); F('signSeen', true); }) });
   addTap({ id: 'bed', at: () => ({ x: home.bedAt.x, y: 0.6, z: home.bedAt.z }), stand: () => ({ x: home.bedAt.x + 0.2, z: home.bedAt.z + 1.0 }), fn: () => stage(bloom) });
   addTap({ id: 'board', at: () => story.board.target, stand: () => story.board.stand, fn: () => stage(board) });
   addTap({ id: 'sapling', at: () => ({ x: PL.patch.x, y: 0.3, z: PL.patch.z }), stand: () => ({ x: PL.patch.x, z: PL.patch.z + 1.0 }), when: () => !!F('p3'), fn: () => stage(() => say('maya', [{ my: '(မန်ကျည်းပင်လေး။ ဒီနေ့ မြေထဲ ရောက်သွားပြီ။)', en: '(The little tamarind. In the ground today.)' }], { face: 'smile' })) });

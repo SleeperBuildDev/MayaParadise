@@ -134,10 +134,11 @@ function blTeaCart(g, f, it, ctx) {
   // the sun umbrella: a pole, eight striped panels, a lantern hung from a rib
   g.box(0.1, 1.6, -0.4, 0.05, 1.3, 0.05, K.woodD);
   const UY = 2.3, UR = 1.15;
-  // eight overlapping striped panels sloping down from the crown (a low cone), the ribs' tips under the rim
+  // eight striped wedges of a true low cone (kit.js parasol: overlapping panels tore into stripes on phones), the
+  // ribs' tips under the rim
+  g.parasol(0.1, UY, -0.4, UR * 0.94, 0.26, [K.maroon, K.cream]);
   for (let k = 0; k < 8; k++) {
     const a = (k / 8) * Math.PI * 2;
-    g.boxR(0.1 + Math.cos(a) * UR * 0.46, UY - 0.13 + (k % 2) * 0.012, -0.4 + Math.sin(a) * UR * 0.46, UR * 0.96, 0.04, 0.84, k % 2 ? K.cream : K.maroon, 0, -a, -0.24);
     g.box(0.1 + Math.cos(a) * UR * 0.93, UY - 0.37, -0.4 + Math.sin(a) * UR * 0.93, 0.05, 0.05, 0.05, K.woodD);
   }
   g.box(0.1, UY + 0.05, -0.4, 0.14, 0.1, 0.14, K.maroon);

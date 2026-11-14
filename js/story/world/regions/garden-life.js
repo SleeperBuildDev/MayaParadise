@@ -387,7 +387,7 @@ export function fillLife(add, gates) {
   add({ k: 'gdPotRow', x: 181.6, z: 103.9, len: 2.4, seed: 1 });
   add({ k: 'gdDryMat', x: 190.6, z: 103.7, load: 'chilli', seed: 2 });
   add({ k: 'gdHopscotch', x: 209.2, z: 104.3 });
-  add({ k: 'gdVegTable', x: 216.6, z: 103.55, seed: 3, sign: ['ဟင်းသီးဟင်းရွက် လတ်လတ်', 'fresh vegetables'] });
+  add({ k: 'gdVegTable', x: 216.6, z: 103.55, seed: 3, sign: ['လတ်လတ်ဆတ်ဆတ် ဟင်းသီးဟင်းရွက်', 'fresh vegetables'] });
   add({ k: 'gdCrates', x: 218.6, z: 103.9, n: 3, seed: 4 });
   add({ k: 'gdBuckets', x: 223.8, z: 103.95, seed: 5 });
   add({ k: 'gdPotRow', x: 238.6, z: 104.0, len: 1.8, seed: 6 });

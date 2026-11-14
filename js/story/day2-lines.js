@@ -13,7 +13,7 @@ export const L = {
   ww2: [{ my: 'ဖိုးသားဆီကလည်း စာလေး ပါလာတယ်။', en: 'And a note from Pho Thar.' }],
   ptNote: { my: 'အစ်မ… ပွဲတော်မှာ လေရဟတ်စားပွဲ ရွေးခဲ့တယ်။\nပထမ ဆယ်ခုက ယိမ်းနေတယ်။ နေ့လယ်ရောက်တော့ လည်လာပြီ။ ကလေး နှစ်ယောက်ကို ခေါက်နည်း သင်ပေးခဲ့တယ်။\nသူတို့ ပထမဆုံးတစ်ခုက မလည်ဘူး။ "နောက်တစ်ခါ" လို့ ပြောလိုက်တယ်။', en: "Sister… I picked the windmill table at the fair.\nMy first ten wobbled; by noon they turned. I taught two kids to fold.\nTheir first one didn't turn. I told them: \"once more.\"" },
   sheep: { my: '(မနေ့က ရေးခဲ့တဲ့ စာမျက်နှာပေါ်က သိုးမည်းလေး ခုန်ထွက်လာတယ်။)', en: "(The little black sheep hops out of yesterday's page.)" },
-  sheepMaya: [{ my: 'နောက်တစ်ခါ… ပြီးတော့ ကိုယ်ချစ်တဲ့လမ်း။ နင်လည်း လိုက်ခဲ့မလား။', en: 'Once more… and the road you love. Coming with me?' }],
+  sheepMaya: [{ my: 'နောက်တစ်ခါ… ပြီးတော့ ကိုယ်ချစ်တဲ့လမ်း။ နင်လည်း လိုက်မလား။', en: 'Once more… and the road you love. Coming with me?' }],
   ww3: [
     { my: 'ပြီးတော့ ကြည့်ပါဦး။ စာအုပ်အစွန်းက ဖဲကြိုးကြီး ညက ဖြန့်ကျသွားတယ်။ တိမ်တွေပေါ်ကနေ တောင်ဘက်ကို လမ်းဖြစ်သွားပြီ။', en: "And look. The big ribbon over the book's edge unrolled in the night. It's a road now, south over the clouds." },
     { my: 'ဒီမနက် အဲဒီလမ်းက ကျောင်းဝတ်စုံနဲ့ ကလေးတွေ တက်လာကြတယ်။ ဗလာစာအုပ်ရပ်ကတဲ့။', en: 'Children in school uniform came up it this morning. From the Exercise-Book Quarter, they said.' },
@@ -62,7 +62,7 @@ export const L = {
   ],
   hwWait: [{ my: 'တိုးတိုး နားလည်သွားရင် လာပြောပါနော်။ ဇယားထက် အဲဒါ ပိုသိချင်တယ်။', en: "If Toe Toe comes to understand, come and tell me. I'd rather know that than the chart." }],
   hwMarking: [{ my: '(ဒေါ်နှင်းဝေ လေ့ကျင့်ခန်းစာအုပ်တွေ စစ်နေတယ်။ ခေါင်းမမော့ဘူး။)', en: "(Daw Hnin Wai is marking exercise books. She doesn't look up.)" }], // (added: during his work at the desk)
-  hwAfter: [{ my: 'သူ့စာကြောင်းကို ဇယားဘေးမှာ ကပ်ထားလိုက်ပြီ။ အမှတ်နဲ့ နားလည်တာ ဘေးချင်းကပ်လျက်ပေါ့။', en: 'His line is up beside the chart. Marks and understanding, side by side.' }], // (added)
+  hwAfter: [{ my: 'သူ့စာကြောင်းကို ဇယားဘေးမှာ ကပ်ထားလိုက်ပြီ။ အမှတ်နဲ့ နားလည်မှု ဘေးချင်းကပ်လျက်ပေါ့။', en: 'His line is up beside the chart. Marks and understanding, side by side.' }], // (added)
 
   // ---- 5.2 Toe Toe at his planter
   tt1: [
@@ -89,28 +89,28 @@ export const L = {
   ttCallIn: { my: 'အစ်မ! ဒီထဲမှာ!', en: 'Sister! In here!' },
   ttWaiting: [{ my: 'ကျွန်တော် ဒီမှာ စောင့်နေတာ။', en: "I'm waiting here." }], // (added: a tap on him at a stop)
   ttInShop: [{ my: 'ပဲစေ့ ချိန်ရမယ်။ ဆိုင်ရှင်က ဈေးသွားတယ်။', en: 'I have to weigh the beans. The keeper\'s gone to market.' }], // (added)
-  ttAtLamp: [{ my: 'ပြီးရင် ဒီမီးတိုင်။ ဘောလုံးကို နေထဲမှာ ကစားရင်း စောင့်နေကျ။', en: "Then this lamp. I always play with my ball in the sun here." }], // (added)
+  ttAtLamp: [{ my: 'ပြီးရင် ဒီမီးတိုင်။ နေပူထဲမှာ ဘောလုံးကစားရင်း စောင့်နေကျ။', en: "Then this lamp. I always play with my ball in the sun here." }], // (added)
 
   // ---- 5.3 the walk
   s1: [
-    { my: 'ဆိုင်ရှင် မရှိဘူး။ ဒီဆိုင်မှာ ကိုယ့်ဟာကိုယ် ချိန်၊ ကိုယ့်ဟာကိုယ် အမ်းယူရတယ်။', en: 'No shopkeeper. Here you weigh it yourself and take your own change.' },
+    { my: 'ဆိုင်ရှင် မရှိဘူး။ ဒီဆိုင်မှာ ကိုယ့်ဘာသာ ချိန်၊ ကိုယ့်ဘာသာ အမ်းယူရတယ်။', en: 'No shopkeeper. Here you weigh it yourself and take your own change.' },
     { my: 'ပဲစေ့ တစ်ခွက် နှစ်ရာ။ ကျွန်တော့်မှာ ငါးရာ ပါတယ်။ ပဲ ပြန်စိုက်ချင်တယ်။', en: "Beans are two hundred a cup. I've got five hundred. I want to plant again." },
   ],
-  s1Maya: [{ my: 'နှစ်ခွက်ယူရင် ဗူးထဲက ဘယ်လောက် ပြန်ယူရမလဲ။', en: 'If you take two cups, how much do you take back from the tin?' }],
+  s1Maya: [{ my: 'နှစ်ခွက်ယူရင် ဘူးထဲက ဘယ်လောက် ပြန်ယူရမလဲ။', en: 'If you take two cups, how much do you take back from the tin?' }],
   s1Tt: [
     { my: 'နှစ်ရာ… နှစ်ရာ… လေးရာ။ ငါးရာထဲက လေးရာ… တစ်ရာ!', en: 'Two hundred… two hundred… four hundred. Five hundred take away four… one hundred!' },
     { my: 'ဟယ်… ဒါ သင်္ချာစာအုပ်ထဲက ပုစ္ဆာပဲ။ စာအုပ်က ဒီဆိုင်အကြောင်း ပြောနေတာလား။', en: "Hey… that's the sum in my maths book. Was the book talking about this shop?" },
   ],
   s1Out: [{ my: 'နောက်တစ်နေရာ… မီးတိုင်!', en: 'Next stop… the lamp!' }], // (added: he names the next stop and runs out)
   shopNote: [
-    { my: '(ကောင်တာပေါ်က စာရွက်: «ဈေးသွားတယ်။ ကိုယ့်ဟာကိုယ် ချိန်ပါ။»)', en: '(The note on the counter: "Gone to market. Weigh it yourself.")' },
+    { my: '(ကောင်တာပေါ်က စာရွက်: «ဈေးသွားတယ်။ ကိုယ့်ဘာသာ ချိန်ပါ။»)', en: '(The note on the counter: "Gone to market. Weigh it yourself.")' },
     { my: 'ဆိုင်ရှင် တကယ် မရှိဘူး။ ကြားတာ မှန်တယ်။', en: 'There really is no keeper. What I heard was true.' },
   ],
   shopPrices: [{ my: '(ဆိုင်သေးသေးလေးတောင် တွက်တတ်မှ ရပ်တည်တယ်။ ဆိုင်ကြီးဆိုရင် ပညာ ပိုလိုမှာပေါ့။)', en: '(Even a shop this small stands on counting. A big one would need far more know-how.)' }],
   shopTin: [{ my: '(ပိုက်ဆံဘူး ဖွင့်ထားတယ်။ «အမ်းငွေ ကိုယ်တိုင်ယူ»)', en: '(The coin tin stands open. "Take your own change.")' }], // (added)
   shopBins: [{ my: '(ပဲစေ့၊ ပဲလှော်၊ မန်ကျည်းပြား။ ခွက်လေးတွေ တစ်ပုံးတစ်ခွက်။)', en: '(Bean seeds, roasted peas, tamarind flakes. A tin cup in each.)' }], // (added)
   s2aMaya: [{ my: 'ဘောလုံးကို နေထဲမှာ လှည့်ကြည့်။ ဘယ်ဘက်က မှောင်နေလဲ။', en: 'Turn your ball in the sun. Which side is dark?' }],
-  s2a: [{ my: 'နေနဲ့ ကျောပေးထားတဲ့ဘက်က မှောင်တယ်… ကမ္ဘာကြီးလည်း လှည့်နေတာဆို… ညဆိုတာ ကျွန်တော်တို့ဘက်က နေနဲ့ ကျောပေးသွားတာပဲ!', en: 'The side turned away from the sun is dark… and the world turns too… so night is just our side turning away!' }],
+  s2a: [{ my: 'နေနဲ့ ကျောပေးထားတဲ့ဘက်က မှောင်တယ်… ကမ္ဘာကြီးလည်း လှည့်နေတာဆိုတော့… ညဆိုတာ ကျွန်တော်တို့ဘက်က နေနဲ့ ကျောပေးသွားတာပဲ!', en: 'The side turned away from the sun is dark… and the world turns too… so night is just our side turning away!' }],
   plate: [{ my: '(ကြေးပြားလေး: «မီးတစ်လုံး လင်းဖို့ အကြိမ်ကြိမ် မအောင်မြင်ပြီး ဆက်ကြိုးစားခဲ့သူတွေကို အမှတ်တရ»)', en: '(The brass plate: "For the people who failed again and again and kept trying, so that a lamp could shine.")' }],
   s2bMaya: [{ my: 'ဒီမီး ဘယ်သူ့ကြောင့် ရလာတာလဲ။', en: 'Who do we have to thank for this light?' }],
   s2b: [
@@ -249,7 +249,7 @@ export const L = {
     masterWheel: { pencil: { my: '«ဆရာကြီး ဘီး» တဲ့…', en: '"The master\'s wheel," they say…' }, gold: { my: 'ပန်းကုံး အသစ်။ ဒီနေ့ပဲ တင်ထားတာ။ ကျေးဇူး မမေ့ဘူး။', en: "A fresh string, put there today. She hasn't forgotten what she owes him." } },
     rim: { pencil: { my: '«မိချို မတတ်လို့» တဲ့…', en: '"She can\'t," they say…' }, gold: { my: 'နှုတ်ခမ်းပါးလွန်းတယ်။ ဆယ့်နှစ်လုံးမီအောင် အမြန်ဆွဲထားတာ။', en: 'Rim too thin: pulled fast to make the twelve.' } },
     sun: { pencil: { my: '«ရွှံ့ ညံ့လို့» တဲ့…', en: '"Bad clay," they say…' }, gold: { my: 'နံရံပါးလို့ နေပူထဲမှာ ကွဲတာ။ ဒေါ်အုန်းရဲ့ နံရံထူတွေကတော့ နေတူတူမှာ မကွဲဘူး။', en: "Thin walls split in the sun; Daw Ohn's thick ones stand the same sun." } },
-    dent: { pencil: { my: '«ပေါ့ဆလို့» တဲ့…', en: '"Careless," they say…' }, gold: { my: 'ဆယ့်နှစ်လုံးမြောက်။ လက်ညောင်းပြီး ချော်သွားတဲ့ ရာ။', en: 'The twelfth pot. A tired hand slipped.' } },
+    dent: { pencil: { my: '«ပေါ့ဆလို့» တဲ့…', en: '"Careless," they say…' }, gold: { my: 'ဆယ့်နှစ်လုံးမြောက်။ လက်ညောင်းပြီး ချော်သွားတဲ့ အရာ။', en: 'The twelfth pot. A tired hand slipped.' } },
   },
   handprints: [{ my: '(ဒေါ်အုန်းလက်ရဲ့ တစ်ဝက်လောက်ပဲ။)', en: "(About half the size of Daw Ohn's.)" }],
   michoWheel: [{ my: '(ဘီးအစွန်းမှာ «မရ ဘူး»။ ရ နဲ့ ဘူး ကြားမှာ နေရာလွတ်လေး ကျန်နေတယ်။)', en: '(On the rim: «မရ ဘူး», "can\'t". A little gap left between the two words.)' }], // (added)
@@ -278,17 +278,17 @@ export const L = {
     { my: 'အိုးဖိုထဲက မီးက ဘယ်တော့မှ မငြိမ်းဘူးတဲ့။', en: 'They say the kiln fire never goes out.' },
   ],
   yy: [
-    { my: '"ဂုဏ်သရေရှိ ဧည့်သည်တော်များ…" မနှစ်က ဆုရခဲ့တဲ့ မိန့်ခွန်း။ တစ်လုံးမှ မမေ့ဘူး။', en: '"Honoured guests…" Last year\'s prize speech. I haven\'t forgotten a word.' },
-    { my: 'ညတိုင်း ပွဲ? မဟုတ်ပါဘူး။ ကျွန်တော် တစ်ယောက်တည်း လေ့ကျင့်နေတာ။ နှုတ်ဆက်ပွဲ ပြဇာတ်က ရက်အနည်းငယ် လိုသေးတယ်။', en: "A show every night? No. It's just me rehearsing. The farewell play is still days away." },
+    { my: '"ဂုဏ်သရေရှိ ဧည့်သည်တော်များ…" မနှစ်က ဆုရမိန့်ခွန်းလေ။ တစ်လုံးမှ မမေ့ဘူး။', en: '"Honoured guests…" Last year\'s prize speech. I haven\'t forgotten a word.' },
+    { my: 'ညတိုင်း ပွဲဟုတ်လား။ မဟုတ်ပါဘူး။ ကျွန်တော် တစ်ယောက်တည်း လေ့ကျင့်နေတာ။ နှုတ်ဆက်ပွဲ ပြဇာတ်က ရက်နည်းနည်း လိုသေးတယ်။', en: "A show every night? No. It's just me rehearsing. The farewell play is still days away." },
     { my: 'ဒီပေါ်ကဆို အရှေ့ဘက် အိုးဖိုမီးခိုးကို မြင်ရတယ်။ ဒီနေ့ မီးခိုး မတက်ဘူး။', en: 'From up here you can see the kiln smoke to the east. None today.' },
   ],
-  yyAfter3: [{ my: 'ကလေးတစ်ယောက်က မိန့်ခွန်းဘာလို့ အတူတူပဲ ပြောလဲ မေးတယ်။ …မဖြေတတ်ဘူး။', en: "A kid asked why I give the same speech every year. …I didn't have an answer." }],
+  yyAfter3: [{ my: 'ကလေးတစ်ယောက်က မိန့်ခွန်းဘာလို့ အတူတူပဲ ပြောတာလဲ မေးတယ်။ …မဖြေတတ်ဘူး။', en: "A kid asked why I give the same speech every year. …I didn't have an answer." }],
   ttReplant: [{ my: 'နေရောင်ရတဲ့ဘက်မှာ ပြန်စိုက်နေတယ်။ မပေါက်ရင် ဘာကြောင့်လဲ ထပ်မေးမယ်။', en: "I'm planting again on the sunny side. If they don't come up, I'll ask why again." }], // (added)
 
   // ---- 8.2 the "ask Maya" board
   board: [
     { from: { my: 'ပထမလမ်းက အမေတစ်ယောက်', en: 'a mother on the first street' }, my: 'မာရာ၊ သမီးကို ညနေတန်း ပို့သင့်လား။ ပြောပေးပါ။', en: 'Maya, should I send my girl to the evening class? Tell me.',
-      replies: [{ my: 'ပို့ပါ။', en: 'Send her.' }, { my: 'မပို့ပါနဲ့။ လမ်းမှာ သင်ပါစေ။', en: "Don't. Let her learn on the way." }, { my: 'ဆရာမကို မေးပါ။', en: 'Ask her teacher.' }] },
+      replies: [{ my: 'ပို့ပါ။', en: 'Send her.' }, { my: 'မပို့ပါနဲ့။ လမ်းမှာ သင်ယူပါစေ။', en: "Don't. Let her learn on the way." }, { my: 'ဆရာမကို မေးပါ။', en: 'Ask her teacher.' }] },
     { from: { my: 'အရှေ့လမ်းက အိုးသမား', en: 'a potter on the east street' }, my: 'တစ်နေ့ အိုးဘယ်နှလုံး လုပ်ရမလဲ။ မာရာ ပြောသလို လုပ်မယ်။', en: "How many pots should I make a day? I'll do what Maya says.",
       replies: [{ my: 'ခြောက်လုံး။', en: 'Six.' }, { my: 'ဆရာ ပြောသလောက်။', en: 'As many as your teacher says.' }, { my: 'မိချိုလို လေးလုံး။', en: 'Four, like Mi Cho.' }] },
     { from: { my: 'စ', en: 'S.' }, my: 'ဘယ်ဘာသာ အရင်ကျက်ရမလဲ။', en: 'Which subject should I learn first?',
@@ -304,7 +304,7 @@ export const L = {
   nightQ: { my: 'ဒီနေ့အကြောင်း မှန်မှန်ကန်ကန် ဘယ်လို ရေးမလဲ။', en: 'How will she write today, truthfully?' },
   nightChoices: [
     { my: 'တိုးတိုးက လမ်းလျှောက်ရုံနဲ့ အကုန် နားလည်သွားတယ်။ ဒေါ်အုန်းကလည်း ကျွန်မ မှန်တယ်လို့ လက်ခံလိုက်ပြီ။', en: 'One walk and Toe Toe understood everything. And Daw Ohn agreed I was right.' },
-    { my: 'တိုးတိုးက လမ်းတိုင်းမှာ "ဘာကြောင့်လဲ" မေးပြီး ကိုယ့်စကားနဲ့ တစ်ကြောင်း ရေးတယ်။ ဒေါ်အုန်းက မယုံသေးပေမဲ့ မိချိုကို ကိုယ့်အရေအတွက် ကိုယ်ရွေးပြီး စမ်းခွင့်ပေးတယ်။', en: 'Toe Toe asked "why?" at every stop and wrote one line in his own words. Daw Ohn isn\'t convinced, but she let Mi Cho try a load of her own.' },
+    { my: 'တိုးတိုးက လမ်းတိုင်းမှာ "ဘာကြောင့်လဲ" မေးပြီး ကိုယ့်စကားနဲ့ တစ်ကြောင်း ရေးတယ်။ ဒေါ်အုန်းက မယုံသေးပေမဲ့ မိချိုကို ကိုယ့်အရေအတွက် ကိုယ်ရွေးစမ်းခွင့်ပေးတယ်။', en: 'Toe Toe asked "why?" at every stop and wrote one line in his own words. Daw Ohn isn\'t convinced, but she let Mi Cho try a load of her own.' },
     { my: 'အတန်းမတက်နိုင်တဲ့ကလေး ဘယ်တော့မှ မတတ်ဘူး။ ဒေါ်အုန်းလည်း ဘယ်တော့မှ မပြောင်းဘူး။', en: "A child who can't go to class will never learn. And Daw Ohn will never change." },
   ],
   nightWrong: [
@@ -322,15 +322,15 @@ export const L = {
 
 /** The text on each proof slip (save.proofs[id]; bag id 'proof:<id>'). */
 export const PROOFS = {
-  pass: { my: 'ဗလာစာအုပ်ရပ် ဝင်ဖို့ ဘာလက်မှတ်မှ မလိုဘူး။ ကိုယ်တိုင် ဝင်ကြည့်ခဲ့ပြီ။', en: 'No pass is needed to enter the Quarter. Walked in myself.' },
-  shop: { my: 'မုန့်ဆိုင်မှာ ဆိုင်ရှင် မရှိဘူး။ ကိုယ့်ဟာကိုယ် ချိန်ပြီး အမ်းယူရတယ်။ မှန်တယ်။', en: 'The snack shop has no keeper; you weigh and change for yourself. True.' },
+  pass: { my: 'ဗလာစာအုပ်ရပ် ဝင်ဖို့ ဘာလက်မှတ်မှ မလိုဘူး။ ကိုယ်တိုင် ဝင်ကြည့်ပြီးပြီ။', en: 'No pass is needed to enter the Quarter. Walked in myself.' },
+  shop: { my: 'မုန့်ဆိုင်မှာ ဆိုင်ရှင် မရှိဘူး။ ကိုယ့်ဘာသာ ချိန်ပြီး အမ်းယူရတယ်။ မှန်တယ်။', en: 'The snack shop has no keeper; you weigh and change for yourself. True.' },
   kiln: { my: 'အိုးဖိုက ငြိမ်းနေတယ်။ မနက်ဖြန်မှ ဖွင့်မယ်။', en: 'The kiln is cold. It opens tomorrow.' },
   stage: { my: 'စင်မြင့်မှာ ညတိုင်း ပွဲမရှိဘူး။ ဇာတ်တိုက်နေတာပဲ။', en: 'No show every night at the stage; only rehearsals.' },
 };
 
 /** Day 3 morning lines from tonight's house (spec 9, for Day 3's script: save.notebook.sleptAt day 2). */
 export const SLEPT2 = {
-  toetoe: { my: '"ဒီနေ့မေးခွန်း: ကြယ်တွေက နေ့ခင်းဘက် ဘယ်ရောက်သွားလဲ။" — တိုးတိုး', en: '"Today\'s question: where do the stars go in the daytime?" — Toe Toe' },
+  toetoe: { my: '"ဒီနေ့မေးခွန်း - ကြယ်တွေက နေ့ခင်းဘက် ဘယ်ရောက်သွားလဲ။" — တိုးတိုး', en: '"Today\'s question: where do the stars go in the daytime?" — Toe Toe' },
   hninwai: { my: '"ကလေးတစ်ယောက် မေးတဲ့ ဘာကြောင့်လဲ တစ်ခုက အမှတ်ဇယားထက် ကျွန်မကို ပိုသင်ပေးတယ်။" — ဒေါ်နှင်းဝေ', en: '"One child\'s \'why?\' teaches me more than the marks chart." — Daw Hnin Wai' },
   dawohn: { my: '"အိုးကောင်းရဖို့ နာနာပုတ်တယ်။ ဆရာ့ကျေးဇူး မမေ့ဘူး။ …မနက်ဖြန် ကြည့်မယ်။" — ဒေါ်အုန်း', en: '"Good pots take a hard beating. I owe my master. …We\'ll see tomorrow." — Daw Ohn' },
   micho: { my: '"ဒေါ်ဒေါ်လည်း ဆရာလုပ်ရတာ ပထမဆုံးပဲ။" — မိချို', en: '"It\'s Aunty\'s first time teaching, too." — Mi Cho' },

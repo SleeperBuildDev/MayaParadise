@@ -30,7 +30,7 @@ export const PLACES = [
   },
   {
     id: 'content',
-    name: { my: 'Content နှင့် Copywriting', en: 'Content & Copywriting' },
+    name: { my: 'Content နဲ့ Copywriting', en: 'Content & Copywriting' },
     dock: { my: 'Content', en: 'Content' },
     icon: 'mug',
     stations: ['cc-trial', 'cc-essentials', 'cc-master', 'cc-compare'],

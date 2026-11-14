@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>hands</title>
+<link rel="stylesheet" href="dev.css">
+<style>
+  .lab { position: fixed; transform: translate(-50%, 0); font: 600 10px/1.1 sans-serif; color: #2A2118; background: #fff8; padding: 0 2px; white-space: nowrap; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script type="module">
+// Dev page: every still townsperson pose (the four region folk builders) and people.js job moods, to check that
+// each held thing sits in the hand that holds it. ?set=market|garden|junction|wharf|people  ?yaw=deg  ?t=sec
+window.addEventListener('error', (e) => { document.title = `ERR ${e.message} @${e.lineno}`; });
+window.addEventListener('unhandledrejection', (e) => { document.title = `ERR ${e.reason?.message || e.reason}`; });
+import * as THREE from '../js/game/three.js';
+import { PALETTE, addStandardLights } from '../js/game/toon.js';
+import { Geo } from '../js/story/world/kit.js';
+import { PROP as MARKET } from '../js/story/world/regions/market-life.js';
+import { TOWN_PROP as GARDEN } from '../js/story/world/regions/garden-town.js';
+import { PROP as JUNCTION } from '../js/story/world/regions/junction-folk.js';
+import { WHARF_YARD_PROP as WHARF } from '../js/story/world/regions/wharf-yards.js';
+import { createPerson } from '../js/story/people.js';
+import { startDevView } from './devview.js';
+
+const params = new URLSearchParams(location.search);
+const set = params.get('set') || 'market';
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#F2E6CC');
+addStandardLights(scene);
+const ground = new Geo();
+ground.flat(-8, -8, 8, 8, 0, PALETTE.paper);
+scene.add(ground.mesh());
+
+const SETS = {
+  market: { draw: MARKET.folk.draw, items: ['stand', 'sit', 'squat', 'sweep', 'carry', 'head', 'kid', ['kid', { hold: 'kite' }], 'read', 'pour'] },
+  garden: { draw: GARDEN.gfFolk.draw, items: ['stand', 'sweep', 'carry', 'head', 'play', ['stand', { kid: true }], ['sweep', { seed: 9 }]] },
+  junction: { draw: JUNCTION.jFolk.draw, items: ['stand', 'readStand', 'sell', 'sweep', 'carry', 'head', 'paste', 'hang', 'squat', 'sit', 'read', 'drink', 'kid', 'chalk', 'write'] },
+  wharf: { draw: WHARF.wWorker.draw, items: ['stand', 'carry', 'yoke', 'mend', 'fish', 'sweep', 'squat', 'sit', 'hang', 'plane', 'coil', 'kid'] },
+};
+const labels = [];
+const cols = 2, gapX = 1.5, gapZ = 1.6;
+const place = (i, n) => { const r = Math.floor(i / cols), c = i % cols, rows = Math.ceil(n / cols); return [(c - (cols - 1) / 2) * gapX, (r - (rows - 1) / 2) * gapZ]; };
+const people = [];
+if (set === 'people') {
+  const list = [['work'], ['sweep'], ['read'], ['play'], ['shy'], ['kick', { extras: ['chinlone'] }], ['cane', { age: 'elder', extras: ['cane'] }], ['wave'], ['think'], ['point'], ['talk'], ['walk']];
+  list.forEach(([m, spec = {}], i) => {
+    const p = createPerson({ seed: 40 + i, ...spec });
+    const [x, z] = place(i, list.length);
+    p.root.position.set(x, 0, z);
+    scene.add(p.root);
+    if (['work', 'sweep', 'read', 'play', 'shy', 'kick'].includes(m)) p.setMood(m);
+    if (['wave', 'think', 'point'].includes(m)) { p.emote(m); setInterval(() => p.emote(m), 2100); }
+    if (m === 'talk') setInterval(() => p.talk(2), 1000);
+    people.push({ p, walk: m === 'walk' || m === 'cane' });
+    labels.push([m, x, z]);
+  });
+} else {
+  const S = SETS[set];
+  const g = new Geo({ outline: true }), f = new Geo();
+  const ctx = { signs: [] };
+  S.items.forEach((it, i) => {
+    const [pose, more] = Array.isArray(it) ? it : [it, {}];
+    const [x, z] = place(i, S.items.length);
+    g.at(x, z, 0); f.at(x, z, 0);
+    S.draw(g, f, { x, z, pose, seed: 5 + i, ...more }, ctx);
+    labels.push([pose + (more.hold ? '+' + more.hold : more.kid ? '+kid' : ''), x, z]);
+  });
+  scene.add(g.mesh());
+  scene.add(f.mesh());
+  window.__tris = g.tris + f.tris;
+}
+let focused = false;
+const els = labels.map(([t]) => { const d = document.createElement('div'); d.className = 'lab'; d.textContent = t; document.body.appendChild(d); return d; });
+const rows = Math.ceil(labels.length / cols);
+startDevView({
+  scene, target: new THREE.Vector3(0, 0.5, 0.2), distance: 7 + rows * 1.45, tilt: 24, yaw: 18, fov: 35,
+  update(dt, t, { camera }) {
+    if (!window.__focus) {
+      // __focus(i, yawDeg): frame figure i alone (for step-by-step shots); labels hide
+      window.__focus = (i, yaw = 35, dist = 3.2) => {
+        const [, x, z] = labels[i], a = THREE.MathUtils.degToRad(yaw);
+        focused = true; for (const e of els) e.style.display = 'none';
+        camera.position.set(x + Math.sin(a) * dist, 1.5, z + Math.cos(a) * dist);
+        camera.lookAt(x, 0.75, z);
+      };
+      window.__count = labels.length; window.__names = labels.map((l) => l[0]);
+    }
+    for (const { p, walk } of people) p.update(dt, { speed: walk ? 1.2 : 0 });
+    labels.forEach(([, x, z], i) => {
+      const v = new THREE.Vector3(x, -0.02, z + 0.45).project(camera);
+      els[i].style.left = `${(v.x * 0.5 + 0.5) * innerWidth}px`; els[i].style.top = `${(-v.y * 0.5 + 0.5) * innerHeight}px`;
+    });
+  },
+});
+</script>
+</body>
+</html>

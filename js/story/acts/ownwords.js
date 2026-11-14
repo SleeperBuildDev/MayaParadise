@@ -114,7 +114,7 @@ export function ownwords({ title = '', hint = '', prompt = '', fragments = [], n
       finished = true;
       const ordered = p.slice().sort((a, b) => a.i - b.i);
       const line = { my: ordered.map((t) => t.f.my).join(' '), en: ordered.map((t) => t.f.en).join(' ') };
-      A.setHint({ my: 'ကိုယ့်စကားနဲ့ ကိုယ် ရေးလိုက်ပြီ', en: 'Written in his own words' }, 'good');
+      A.setHint({ my: 'သူ့စကားနဲ့ သူ ရေးလိုက်ပြီ', en: 'Written in his own words' }, 'good');
       lineEl.classList.add('melt');
       await wait(260);
       const text = tr(line);

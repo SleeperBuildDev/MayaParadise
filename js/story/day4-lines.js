@@ -28,10 +28,10 @@ export const SLEPT4 = {
 
 /** Proof slips (spec 2): the text on each slip. */
 export const PROOFS = {
-  shortcut: l('တံဆိပ်တဲတွေကြားက ဖြတ်လမ်း မရှိဘူး။ သေတ္တာတွေနဲ့ ဆုံးတယ်။', 'No shortcut through the stamp awnings. It ends in crates.'),
+  shortcut: l('တံဆိပ်တဲတွေကြား ဖြတ်လမ်းမရှိဘူး။ သေတ္တာတွေနဲ့ ဆုံးတယ်။', 'No shortcut through the stamp awnings. It ends in crates.'),
   freefood: l('ဒေါ်ရီ့ဆိုင်မှာ ဘယ်သူ့ကိုမှ ဘာမှ မမေးဘူး။ ထိုင်ရင် ကျွေးတယ်။', "Daw Yi asks nobody anything. Sit, and you're fed."),
   counter: l('စာတိုက်ကောင်တာ မွန်းတည့် မပိတ်ဘူး။ ဦးလူအေး ညနေထိ ရှိတယ်။', 'The letter counter does not shut at noon. U Lu Aye is there till evening.'),
-  firstcup: l('ဒေါ်တင်တင်က မနက်ဦး ပထမခွက်ကို ဖြတ်သွားတဲ့သူ တိုက်တယ်။ မှန်တယ်။', 'Daw Tin Tin pours the first cup of the morning for whoever passes. True.'),
+  firstcup: l('ဒေါ်တင်တင်က မနက်ဦး ပထမခွက်ကို ဖြတ်သွားသူတိုင်း တိုက်တယ်။ မှန်တယ်။', 'Daw Tin Tin pours the first cup of the morning for whoever passes. True.'),
   kite: l('ကောင်တာနားမှာ တစ်နေကုန် စွန်လွှတ်နေတဲ့သူ ရှိတယ်။ မှန်တယ်။', 'Someone flies a kite at the counter all day. True.'),
 };
 
@@ -39,20 +39,20 @@ export const L = {
   // ---- 4 · morning at home
   ww1: [l('မာရာရေ… မှတ်စုစာအုပ်လေး ပြန်ရောက်ပြီ။ ညက အိပ်ခဲ့တဲ့အိမ်က စာတစ်ကြောင်း ရေးပေးလိုက်တယ်။', 'Maya… your notebook is back. The house it slept at wrote you a line.')],
   ww2: [l('မောင်ငယ်ဆီကလည်း တစ်ခု ပါလာတယ်။ စုနွယ်က အိတ်ထဲ ထည့်ပေးလိုက်တာတဲ့။', 'And something from Maung Nge. Su Nwe slipped it into my bag.')],
-  mnNote: l('အစ်မ… မောင်ငယ် နောက်ဆုံးတံဆိပ်ကို တစ်ယောက်တည်း ဖတ်သွားတယ်။\nအောက်က နာမည်ကို သူကိုယ်တိုင် ရေးတာ။ ကျွန်မ ခဲတံ ကိုင်မပေးဘူး။ — စုနွယ်\n\nမောင်ငယ်', "Sister… Maung Nge read the last label on his own.\nHe wrote the name underneath himself. I didn't hold the pencil. — Su Nwe\n\nMaung Nge"),
+  mnNote: l('အစ်မ… မောင်ငယ် နောက်ဆုံးတံဆိပ်ကို တစ်ယောက်တည်း ဖတ်သွားတယ်။\nအောက်က နာမည်ကို သူကိုယ်တိုင် ရေးတာ။ ကျွန်မ ခဲတံ ကိုင်မပေးရဘူး။ — စုနွယ်\n\nမောင်ငယ်', "Sister… Maung Nge read the last label on his own.\nHe wrote the name underneath himself. I didn't hold the pencil. — Su Nwe\n\nMaung Nge"),
   ttQ: l('"ဒီနေ့မေးခွန်း: စာအိတ်တွေကို ဘာလို့ လေးထောင့် လုပ်ကြတာလဲ။" — တိုးတိုး', '"Today\'s question: why are envelopes made square-cornered?" — Toe Toe'),
   seedling: l('(မနေ့က စာမျက်နှာပေါ်က ပျိုးပင်လေး ထွက်လာတယ်။ အိုးကွဲလေး တစ်လုံးထဲမှာ ပေါက်နေတယ်။ "မရသေးဘူး" လို့ပဲ တိုးတိုးလေး ပြောတယ်။)', '(The seedling steps off yesterday\'s page, growing in a little cracked pot. All it whispers is "not yet".)'),
   ch9comp: l('(နောက်တစ်ကောင်က မာရာ့ လက်ပေါ်မှာ ခဏနားပြီး ပခုံးပေါ် တက်ထိုင်တယ်။)', "(The other rests on Maya's hand a moment, then settles on her shoulder.)"),
   compMaya: [l('မရသေးဘူး… ပြီးတော့ လမ်းပြပေးတာ။ နှစ်ယောက်လုံး လိုက်ခဲ့ကြမလား။', 'Not yet… and showing the way. Coming, both of you?')],
   ww3: [
-    l('ဒီမနက် စာအိတ်ဈေးက စာလှည်း ရပ်ကွက်ကို ဖြတ်ပြီး တက်လာတယ်။ ဈေးစာတိုက်က ဦးလူအေးဆီက စာလေး ပါတယ်။', "The post cart came up from the Envelope Market this morning, through the Quarter. There's a note from U Lu Aye at the Market post office."),
+    l('ဒီမနက် စာအိတ်ဈေးက စာလှည်း ရပ်ကွက်ကို ဖြတ်တက်လာတယ်။ ဈေးစာတိုက်က ဦးလူအေးဆီက စာလေး ပါတယ်။', "The post cart came up from the Envelope Market this morning, through the Quarter. There's a note from U Lu Aye at the Market post office."),
     l('"စာအုပ်တစ်သေတ္တာ သယ်ပေးနိုင်မလား" တဲ့။', '"Could you carry a crate of books for me?" he says.'),
-    l('ဈေးက ရပ်ကွက်ရဲ့ လမ်းမကြီးအတိုင်း တောင်ဘက် ဆုံးအောင် ဆင်း။ နယ်နိမိတ်ဆိုင်းဘုတ်ကျော်ရင် စာအိတ်စက္ကူလမ်း စတာပဲ။', "Take the Quarter's avenue south to the very end. Past the border sign, the envelope-paper road begins."),
+    l('ဈေးက ရပ်ကွက်လမ်းမကြီးအတိုင်း တောင်ဘက် ဆုံးအောင်ဆင်း။ နယ်နိမိတ်ဆိုင်းဘုတ်ကျော်ရင် စာအိတ်စက္ကူလမ်း စတာပဲ။', "Take the Quarter's avenue south to the very end. Past the border sign, the envelope-paper road begins."),
     l('ဒါနဲ့… ဈေးထဲမှာ "မာရာ့လမ်း" ဆိုတဲ့ မြေပုံတွေ ဝေနေကြတယ်တဲ့။ မာရာ ဆွဲထားတာလား။', 'Oh… they say someone at the market is handing out maps called "Maya\'s Way". Did you draw them?'),
   ],
   wwFirstcup: [l('စာလှည်းသမားက ပြောတယ်… ဈေးထဲက လက်ဖက်ရည်ဆိုင်မှာ မနက်ဦးခွက် အလကားတဲ့။', "The cart driver says the market tea shop gives the morning's first cup free.")],
   mayaMap: [l('ကျွန်မလား။ မြေပုံ တစ်ချပ်မှ မဆွဲဖူးပါဘူး။', "Me? I've never drawn a single map.")],
-  wwLater: [l('ဈေးလား။ ရပ်ကွက် လမ်းမကြီးအတိုင်း တောင်ဘက်ဆုံးထိ။ ဆိုင်းဘုတ်ကျော်ရင် စာအိတ်လမ်းပဲ။', "The market? Down the Quarter's avenue to the end. Past the sign, it's the envelope road.")],
+  wwLater: [l('ဈေးလား။ ရပ်ကွက်လမ်းမကြီးအတိုင်း တောင်ဘက်ဆုံးထိ။ ဆိုင်းဘုတ်ကျော်ရင် စာအိတ်လမ်းပဲ။', "The market? Down the Quarter's avenue to the end. Past the sign, it's the envelope road.")],
   wwEvening: [l('စာတိုက်နံရံက မှတ်စုတွေ ဆယ့်လေးစောင် ဖြစ်သွားပြီ မာရာ။ တချို့က ဈေးထဲကတောင် လာချိတ်တာ။', 'Fourteen notes on the Post Office wall now, Maya. Some came all the way from the market.')],
   wwBoardAfter: [l('စာတိုက်နံရံက မှတ်စုတွေ တစ်ရက်ထက် တစ်ရက် များလာတယ်နော်။', 'The notes on the Post Office wall grow every day, don\'t they.')], // (new)
 
@@ -80,7 +80,7 @@ export const L = {
   ],
 
   // ---- 5.2 Ko Phyo's sneers
-  kpBooks: [l('စာအုပ်? ကျောင်းမှာ စာအုပ် ရှိပြီးသားပဲ။ ညနေတန်းကို ပေးရင် ပိုအသုံးဝင်မှာ။ ပထမလမ်းမှာလေ။', 'Books? The school has books. The evening class would make more use of them. On the first street, there.')],
+  kpBooks: [l('စာအုပ်လား။ ကျောင်းမှာ ရှိပြီးသားပဲ။ ညနေတန်းကို ပေးရင် ပိုအသုံးဝင်မှာ။ ပထမလမ်းမှာလေ။', 'Books? The school has books. The evening class would make more use of them. On the first street, there.')],
   kpBowls: [l('ခွေးအတွက် ရေခွက်! လူတွေ စာတိုက်ထဲမှာ အိုက်အိုက်နဲ့ တန်းစီနေတာ။ အဲဒီမှာ ထားပေးရင် ပိုကောင်းမှာ။', "Water bowls for dogs! People are queueing in the heat inside the post office. Put them there; that'd be better.")],
   kpRice: [l('အဲဒီဆိုင်က ဘယ်သူ့ကိုမဆို ကျွေးတာ။ အလုပ်လုပ်နိုင်တဲ့လူတွေကိုပါ။ ဒီဆိုင်နောက်ဖေး မီးဖိုချောင် ပေးရင် တစ်ခုခု ဖြစ်လာမှာ။', 'That shop feeds anyone. People who could work, too. Give it to the kitchen back here; something would come of it.')],
   kpIdle: [l('ဒီလမ်းမှာ လူတိုင်း တစ်ခုခု ပေးနေကြတယ်။ ဘယ်နေရာ ပေးရမလဲတော့ ဘယ်သူမှ မသိကြဘူး။', 'Everyone on this street is giving something away. Nobody knows where it ought to go.')], // (new, the same complaint)
@@ -100,14 +100,14 @@ export const L = {
   forkBooks: [l('ဒီသေတ္တာပေါ်မှာ "ကျောင်းစင်အတွက်" လို့ ရေးထားတယ်။ ပေးတဲ့သူ ရွေးထားတဲ့နေရာ ပို့ပေးပါ။', 'This crate says "for the school shelf". Take it where the giver chose.')],
   forkBowls: [l('ဒါ ယုယုရဲ့ ခွက်တွေ မဟုတ်လား။ သူက ခွေးလေးတွေအတွက်လို့ ပြောထားတာ။', "Aren't these Yu Yu's bowls? She said they're for the dogs.")],
   forkRice: [l('ဒေါ်ကြာ့ ဆန်အိတ်လား။ ဒါ ဒေါ်ရီ့ဆိုင်အတွက်လေ။ ကျွန်မ မယူဘူး။', "Daw Kyar's rice? That's for Daw Yi's shop. I won't take it.")],
-  forkMaya: [l('(သူများ ပေးတာကို ကိုယ်က ပိုသိသလို ပြင်ချင်လိုက်တာ… ရင်ထဲ ပူသွားတယ်။)', "(Wanting to improve someone else's gift, as if I knew better… it went hot in my chest.)")],
+  forkMaya: [l('(သူများပေးတာကို ကိုယ်က ပိုသိသလို ပြင်ချင်လိုက်တာ… ရင်ထဲ ပူသွားတယ်။)', "(Wanting to improve someone else's gift, as if I knew better… it went hot in my chest.)")],
   evTeacher: l('ညနေတန်း ဆရာ', 'Evening-class teacher'), // a name label for the walk-on
 
   // ---- 5.4 Daw Tin Tin
   dtt1: [
     l('ကိုဖြိုးလား။ ဝန်တစ်ထုပ်နဲ့ တစ်ထုပ်ကြားမှာ ဒီမှာ ထိုင်ပြီး လူတိုင်း ဘာပေးလဲ ဝေဖန်နေတာ။ ဆိုးတဲ့လူ မဟုတ်ပါဘူး။', "Ko Phyo? Between loads he sits here and passes judgment on what everyone gives. He's not a bad man."),
-    l('ကျွန်မက မနက်ဦး ပထမခွက်ကို ဖြတ်သွားတဲ့သူ တိုက်တယ်။ ဘယ်သူလဲ မကြည့်ဘူး။', "Me, I pour the morning's first cup for whoever passes. I don't look who."),
-    l('သူများအိုး မဖြည့်ခင် ကိုယ့်အိုးထဲ ရွက်ရှိရမယ်၊ ဖျော်နည်း သိရမယ်၊ စေတနာ ရှိရမယ်။ ကျွန်မ အမေ ပြောခဲ့တာ။', "Before you fill another's pot, your own needs leaves, know-how and goodwill. My mother said so."),
+    l('ကျွန်မက မနက်ဦး ပထမခွက်ကို ဖြတ်သွားသူတိုင်း တိုက်တယ်။ ဘယ်သူလဲ မကြည့်ဘူး။', "Me, I pour the morning's first cup for whoever passes. I don't look who."),
+    l('သူများအိုး မဖြည့်ခင် ကိုယ့်အိုးထဲ ရွက်ရှိရမယ်၊ ဖျော်နည်း သိရမယ်၊ စေတနာ ရှိရမယ်။ ကျွန်မအမေ ပြောခဲ့တာ။', "Before you fill another's pot, your own needs leaves, know-how and goodwill. My mother said so."),
   ],
   dttAfter: [l('ကိုဖြိုး ကိုယ့်ကရားနဲ့ကိုယ် ဖျော်တာ မြင်ဖူးမယ်လို့ မထင်ခဲ့ဘူး။', "I never thought I'd see Ko Phyo brew in his own pot.")],
   menuSeen: [l('(ကိုယ့်မျက်စိနဲ့ ဖတ်လိုက်ရပြီ: "မနက်ဦးခွက် · ဖြတ်သွားသူအတွက်"။)', '(Read it with my own eyes: "The morning\'s first cup · for whoever passes".)')], // (new)
@@ -129,7 +129,7 @@ export const L = {
   ],
   brewDtt: [l('လုပ်တာတိုင်းမှာ အကြောင်းရှိတယ်။ တစ်ခုချင်း ကြည့်။', 'Every step has its reason. Look at them one by one.')], // (new)
   matchTitle: l('ဒေါ်တင်တင် ဖျော်နည်း', "Daw Tin Tin's way to brew"),
-  matchHint: l('သူ လုပ်တာနဲ့ ဘာကြောင့်လဲကို တွဲပါ', 'Pair what she does with why'),
+  matchHint: l('သူ လုပ်တာနဲ့ ဘာကြောင့်လဲ တွဲပါ', 'Pair what she does with why'),
   matchPairs: [
     { left: { my: 'ကရားကို ရေနွေးနဲ့ အရင်ဆေး', en: 'Rinse the pot with hot water first', icon: '🫖' }, right: l('လက်ဖက်ရည် မအေးသွားအောင်', "So the tea doesn't go cold") },
     { left: { my: 'ရွက် တစ်ဆုပ်ပဲ', en: 'Just one pinch of leaves', icon: '🍃' }, right: l('များရင် ခါးတယ်', 'Too much turns bitter') },
@@ -165,7 +165,7 @@ export const L = {
   pwAgain: [l('သနပ်ခါး လိမ်းသွား သမီး။ ဘယ်သူ့ကိုမဆို လိမ်းပေးတာပဲ။', 'Put on some thanaka, dear. I give it to anyone at all.')], // (new)
   pwAfter: [l('ရယ်သံလေး ပြန်ကြားရပြီ။', 'I can hear her laugh again.')],
   la2: [l('မသီရိလား။ ဖူးဖူးဆီ နေ့တိုင်း စာရေးတယ်။ ပြန်စာ ရောက်ရင် အပြင်က သူ့နံပါတ်အလံကို ကျွန်တော် ဒီကနေ ဆွဲတင်ပေးတယ်။ သုံးရက် ရှိပြီ။', 'Ma Thiri? She writes to Phoo Phoo every day. When a reply comes, I pull her number\'s flag up outside, from here. Three days now.')],
-  laHours: [l('မွန်းတည့် ပိတ်တယ်? ကျွန်တော် အနှစ်လေးဆယ် ဒီမှာ ညနေထိ ထိုင်နေတာ။', "Shut at noon? Forty years I've sat here till evening.")],
+  laHours: [l('မွန်းတည့် ပိတ်တယ်ဟုတ်လား။ ကျွန်တော် အနှစ်လေးဆယ် ဒီမှာ ညနေထိ ထိုင်နေတာ။', "Shut at noon? Forty years I've sat here till evening.")],
   laWish: [l('ပြန်စာ စောင့်တဲ့စာက လေးတယ်။ ဆုတောင်းရုံ စာက ပေါ့တယ်။ ဒီကောင်တာမှာ အနှစ်လေးဆယ် ကြည့်လာတာ။', "A letter that waits for an answer is heavy. A letter that only wishes well is light. Forty years I've watched at this counter.")],
   laAfter: [l('ဒီနေ့ အလံကို ဘယ်သူမှ မော့မကြည့်ဘူး။ ကောင်းတယ်။', 'Nobody stared up at a flag today. Good.')],
   th1: [
@@ -225,7 +225,7 @@ export const L = {
     l('ဘေးရန် ကင်းပါစေ။', 'May you be safe from harm.'),
     l('စိတ်ဆိုးစရာ ကင်းပါစေ။', 'May you be free of anger.'),
     l('ဆင်းရဲခြင်း ကင်းပါစေ။', 'May you be free of suffering.'),
-    l('ကိုယ့်ကိုယ်ကို ချမ်းချမ်းသာသာ ရွက်ဆောင်နိုင်ပါစေ။', 'May you carry yourself well and at ease.'),
+    l('ကိုယ့်ကိုယ်ကိုယ် ချမ်းချမ်းသာသာ ရွက်ဆောင်နိုင်ပါစေ။', 'May you carry yourself well and at ease.'),
   ],
   thWho: [
     l('တစ်စင်း ဖူးဖူးဆီ။ တစ်စင်း ဦးလူအေးဆီ။ အမြဲ အလံ လှည့်ပေးတဲ့သူ။', 'One to Phoo Phoo. One to U Lu Aye, who always turns the flag.'),
@@ -250,7 +250,7 @@ export const L = {
     l('တံတားအသစ်လား။ ဆိပ်ကမ်းဘက်မှာ ရှိတယ်လို့ ကြားတယ်။ ကျွန်တော် မရောက်ဖူးဘူး။', "The new bridge? I heard there's one by the wharf. Never been."),
     l('ကောင်တာက မွန်းတည့်ရင် ပိတ်တယ်။ မြေပုံမှာ ရေးထားတယ်လေ။', "The counter shuts at noon. It's written on the map."),
   ],
-  kyAfter: [l('ဖြတ်လမ်း ပိတ်နေတယ်? …ဆေးနဲ့ ပြန်ဖျက်ရမလား။ မဖျက်ချင်ဘူး၊ လှလို့။', "The shortcut's blocked? …Should I paint it out? I don't want to. It's pretty.")],
+  kyAfter: [l('ဖြတ်လမ်း ပိတ်နေတယ်ဟုတ်လား။ …ဆေးနဲ့ ပြန်ဖျက်ရမလား။ မဖျက်ချင်ဘူး၊ လှလို့။', "The shortcut's blocked? …Should I paint it out? I don't want to. It's pretty.")],
   py: [
     l('ဆိုင်ရှေ့ ပိတ်မရပ်နဲ့! စာအိတ် မရွေးရင် ဘေးဖယ်။', "Don't block my stall! Not choosing envelopes? Move aside."),
     l('စေတနာထမင်းဆိုင်မှာ ဆင်းရဲကြောင်း ထောက်ခံစာ ပြရတယ်တဲ့။ ငါ့ကို မမေးနဲ့။', "At the free-food shop you have to show a paper saying you're poor, they say. Don't ask me."),
@@ -310,7 +310,7 @@ export const L = {
 
   // ---- 8.4 the "ask Maya" board
   board4: [
-    { from: l('န', 'N.'), my: 'အစ်မ ပြောတဲ့လမ်းအတိုင်း သွားပြီ။ နောက် ဘာလုပ်ရမလဲ။', en: 'I went the way you said. What do I do next?',
+    { from: l('အစ်မ ပြောတဲ့လမ်းအတိုင်း သွားပြီ။ နောက် ဘာလုပ်ရမလဲ။', 'N.'), my: 'အစ်မ ပြောတဲ့လမ်းအတိုင်း သွားပြီ။ နောက် ဘာလုပ်ရမလဲ။', en: 'I went the way you said. What do I do next?',
       replies: [l('ဆက်လျှောက်ပါ။', 'Keep walking.'), l('ခဏ နားပါ။', 'Rest a while.'), l('မနက်ဖြန် လာမေးပါ။', 'Come and ask me tomorrow.')] },
     { from: l('ဈေးထဲက ဆိုင်ရှင်တစ်ယောက်', 'a stall-keeper at the market'), my: 'မာရာ့လမ်း မြေပုံ ရပြီ။ ဖြတ်လမ်းအတိုင်း သွားရင် ရပြီ မဟုတ်လား။', en: "I've got a Maya's Way map. If I follow the shortcuts I'm fine, right?",
       replies: [l('ရပါတယ်။', 'Yes, fine.'), l('ဆိပ်ကမ်းဘက် တံတားကို သုံးပါ။', 'Use the bridge by the wharf.'), l('တံဆိပ်တဲလမ်းကြားကိုတော့ ရှောင်ပါ။', 'Just avoid the gap in Stamp Lane.')] },

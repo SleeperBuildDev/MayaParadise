@@ -21,9 +21,10 @@ import { createStreamer } from './stream.js';
 import { createCutaway, BLOCKERS } from './cutaway.js';
 import { createSpace, createOpenWalker } from './walker.js';
 import { createDesks } from './desks.js';
+import { createFeet } from './feet.js';
 import { createSeen, openMap, pageTurn } from './map.js';
 import { itemObstacles, chunkOf, tearRect, homeBookBudget } from './build.js';
-import { ITEMS, REGIONS, ROAD_EDGES, PEOPLE, BRIDGE, EXTENT, GATES, OBSTACLES, ART as REG_ART, bookDist } from './region.js';
+import { ITEMS, REGIONS, ROAD_EDGES, PEOPLE, BRIDGE, EXTENT, GATES, OBSTACLES, ART as REG_ART, PROP as REG_PROP, bookDist } from './region.js';
 
 const call = (o, fn, ...a) => (o && typeof o[fn] === 'function' ? o[fn](...a) : undefined);
 
@@ -135,6 +136,9 @@ export async function createOpenWorld(game, story) {
   const deskGlows = [];
   const cut = createCutaway();
   const cutAt = new THREE.Vector3();
+  const NEAR_CLEAR = 1.6; // metres (see the near cut in update; with the shader.s 0.05 margin about 2.4 m on a phone. At 4.5 a low home whose back wall she stood at still laid its roof over the bottom of the screen)
+  const NEAR_OUT = 0.5; // the camera's near plane out on the land (see update)
+  let nearSaved = null;
   const streamer = createStreamer({
     scene: world.scene, net, edges, shadows: !!game.shadowsOn, low: game.tier === 'low', cut,
     extraGlows: () => desks.glows(deskGlows),
@@ -143,6 +147,8 @@ export async function createOpenWorld(game, story) {
     offPaper,
   });
   streamerRef = streamer;
+  // feet on the surface drawn under them: roads, footpaths, pads and kerbs stand above the paper (feet.js)
+  const feet = createFeet(game, { streamer, net });
   desks.onGlowChange = () => streamer.refreshGlows();
   streamer.refreshGlows();
   // the sun's shadow: main.js fits it to the camera's view, clamped to a box. On the book that box is
@@ -183,6 +189,7 @@ export async function createOpenWorld(game, story) {
   // ---- blockers: tall things that can stand between the camera and her (cutaway.js fades them out)
   const TALL_H = { house: 6.2, school: 9.8, snack: 5.2, potter: 3.8, stage: 5.6, bookSign: 3.2, borderSign: 3.2, pageEnd: 2.2 };
   for (const [k, v] of Object.entries(REG_ART)) if (v?.h) TALL_H[k] = v.h; // district buildings (regions/<id>.js ART)
+  for (const [k, v] of Object.entries(REG_PROP)) if (v?.cut && v.h) TALL_H[k] = v.h; // low homes the cutaway may clear (build.js `cut`)
   const tall = [];
   const addTall = (list) => { for (const it of list) {
     const H = TALL_H[it.k];
@@ -213,11 +220,19 @@ export async function createOpenWorld(game, story) {
     }
     return t0;
   }
-  const slots = Array.from({ length: BLOCKERS }, () => ({ key: null, x: 0, z: 0, keep: 0.45, fade: 0, want: false }));
+  const slots = Array.from({ length: BLOCKERS }, () => ({ key: null, x: 0, z: 0, keep: 0.45, fade: 0, want: false, seen: false, hold: 0 }));
+  // a blocker stays wanted a moment after the line of sight last crossed it: a moving camera (driving, the walk to
+  // the car, a cutscene's glide) grazes a box's edge on and off, and the fade used to stall half-way there, the
+  // building left as a cloud of grain (and its shadow with it) for as long as the graze lasted
+  const BLOCK_HOLD = 0.5;
   const found = [];
   function blocking(o, cam, p, h) {
     // her feet-to-head (or the car): either line of sight cut before it reaches her
-    for (const y of [0.45, h]) { const t = enters(cam.x, cam.y, cam.z, p.x, y, p.z, o); if (t >= 0 && t < 0.97) return t; }
+    // (a line that only enters the box in its last metre or so is her standing at the building's front, under its
+    // eaves or at its counter, with the building behind her: the whole front vanished round her, the clerk left
+    // standing in the air)
+    const L = Math.hypot(cam.x - p.x, cam.z - p.z);
+    for (const y of [0.45, h]) { const t = enters(cam.x, cam.y, cam.z, p.x, y, p.z, o); if (t >= 0 && t < 0.97 && (1 - t) * L > 1.3) return t; }
     return -1;
   }
   function findBlockers(cam, p, h) {
@@ -243,19 +258,23 @@ export async function createOpenWorld(game, story) {
     return found;
   }
   function updateBlockers(dt, on, cam, p, h) {
-    for (const sl of slots) sl.want = false;
+    for (const sl of slots) sl.seen = false;
     if (on) {
       for (const { o } of findBlockers(cam, p, h)) {
         let sl = slots.find((q) => q.key === o.key);
         if (!sl) sl = slots.find((q) => q.key === null) || slots.find((q) => q.fade <= 0.001 && !q.want);
         if (!sl) continue;
         if (sl.key !== o.key) { sl.key = o.key; sl.x = o.x; sl.z = o.z; sl.keep = o.keep; sl.fade = 0; }
-        sl.want = true;
+        sl.seen = true; sl.hold = BLOCK_HOLD;
       }
     }
     slots.forEach((sl, k) => {
       if (sl.key === null) return;
-      sl.fade = Math.max(0, Math.min(1, sl.fade + (sl.want ? 4 : -2.5) * dt));
+      if (!sl.seen) sl.hold = on ? sl.hold - dt : 0;
+      sl.want = sl.seen || sl.hold > 0;
+      // (quick through the grain: the dithered half-way is a passing moment, not a look)
+      // (in 0.1 s, out 0.2 s: the stall roofs' grain showed through the camera's move between car and foot views)
+      sl.fade = Math.max(0, Math.min(1, sl.fade + (sl.want ? 10 : -5) * dt));
       if (!sl.want && sl.fade <= 0) sl.key = null;
       cut.blocker(k, sl.x, sl.z, sl.key === null ? 0 : sl.fade, sl.keep);
     });
@@ -298,8 +317,9 @@ export async function createOpenWorld(game, story) {
   // ---- per frame
   const focus = new THREE.Vector3();
   let seenT = 0, smokeT = 0, gateT = 0;
+  const townRebuild = []; // (lazy towns: built chunks waiting to be rebuilt with a town that arrived)
   const ow = {
-    space, desks, seen, streamer, net, cut,
+    space, desks, seen, streamer, net, cut, feet, tall, // (tall: the cutaway's 3D building boxes, read by hints.js)
     cutOn: true, // tests turn the see-through hole off for overview shots
     createWalker: (spawn) => createOpenWalker(space, spawn),
     bounds: { minX: EXTENT.x0, maxX: EXTENT.x1, minZ: EXTENT.z0, maxZ: EXTENT.z1 },
@@ -308,12 +328,22 @@ export async function createOpenWorld(game, story) {
       return focus.copy(game.car.root.position);
     },
     update(dt, t) {
-      if (game.mode !== 'world') return;
+      if (game.mode !== 'world') {
+        // (off the land: the near plane goes back to what it was)
+        if (nearSaved !== null) { if (game.camera.near === NEAR_OUT) { game.camera.near = nearSaved; game.camera.updateProjectionMatrix(); } nearSaved = null; }
+        return;
+      }
       const p = ow.focus();
       const away = bookDist(p.x, p.z); // metres off the home book (the land lies south, east and north-east of it)
       gateT -= dt;
       if (gateT <= 0) { gateT = 1; for (const f of gateFlags) applyGate(f, !!save.flags[f]); }
       streamer.update(dt, t, p.x, p.z, game.camera, fog && !ow.overviewOn ? fog.far : 1e9);
+      if (townRebuild.length) { // (lazy towns: a town arrived over chunks already built)
+        townRebuild.sort((a, b) => Math.hypot((a.x0 + a.x1) / 2 - p.x, (a.z0 + a.z1) / 2 - p.z) - Math.hypot((b.x0 + b.x1) / 2 - p.x, (b.z0 + b.z1) / 2 - p.z));
+        const ch = townRebuild.shift();
+        streamer.refresh(ch.x0 + 0.5, ch.z0 + 0.5, ch.x1 - 0.5, ch.z1 - 0.5);
+        if (ch.state === 'ready') spawnFor(ch);
+      }
       if (shadowBox) {
         if (away > 2 && !ow.overviewOn) { shadowBox.min.set(p.x - 24, -2, p.z - 30); shadowBox.max.set(p.x + 24, 13, p.z + 12); }
         else shadowBox.copy(bookShadowBox);
@@ -324,15 +354,28 @@ export async function createOpenWorld(game, story) {
       const walking = story.foot?.active || game.worldWalk;
       // (not during a talk: the two-shot picks a clear side by itself, and a hole by the lens would show as grain)
       const cutting = ow.cutOn && away > 1 && !(story.talking && !ow.deskScene);
-      cut.set(game.camera.position, cutAt.set(p.x, walking ? 0.9 : 0.8, p.z), cutting ? 1 : 0, cutting && walking ? 0.55 : 0);
+      // the near part of the walking view: tall things anchored more than NEAR_CLEAR metres in front of her (towards
+      // the lens) go whole. A fixed fraction (0.55) of a phone's long portrait view left the low homes across the lane
+      // standing, their roofs a dark slab over the bottom half of the screen
+      const camL = Math.hypot(game.camera.position.x - p.x, game.camera.position.z - p.z);
+      const nearCut = cutting && walking ? Math.max(0.55, 1 - NEAR_CLEAR / Math.max(camL, 1)) : 0;
+      cut.set(game.camera.position, cutAt.set(p.x, walking ? 0.9 : 0.8, p.z), cutting ? 1 : 0, nearCut);
       // (blockers also during talks: the two-shot may still have a wall or a crown between it and her)
       updateBlockers(dt, ow.cutOn && away > 1, game.camera.position, p, walking ? 1.3 : 1.2);
-      updateSigns(game.camera.position, p, cutting && walking ? 0.55 : 0);
+      updateSigns(game.camera.position, p, nearCut);
+      // depth precision: the follow cameras stand 15-35 m off, and with the near plane at 10 cm the ground's decals
+      // (a few millimetres apart) fought for the same depth on a phone and flickered while the camera moved. Out here
+      // nothing is drawn that close to the lens (cutaway.js clears 3 m round it), so the near plane steps out to 0.5 m;
+      // close shots (a camera within 5 m of her) get their 10 cm back
+      const lensD = game.camera.position.distanceTo(p);
+      if (lensD > 6 && game.camera.near < NEAR_OUT) { nearSaved = game.camera.near; game.camera.near = NEAR_OUT; game.camera.updateProjectionMatrix(); }
+      else if (lensD < 5 && nearSaved !== null) { if (game.camera.near === NEAR_OUT) { game.camera.near = nearSaved; game.camera.updateProjectionMatrix(); } nearSaved = null; }
       desks.update(dt, t, p.x, p.z);
       homeBudget.update(p.x, p.z, ow.overviewOn);
       seenT -= dt;
       if (seenT <= 0) { seenT = 0.4; seen.mark(p.x, p.z); }
       seen.update(dt);
+      feet.settle(dt); // (last: everyone has moved this frame; lift them onto the road, footpath or kerb under them)
       // haze: the book keeps its wide view; out on the land the far chunks fade into the cloud colour
       const k = THREE.MathUtils.smoothstep(away, 0, 26);
       if (fog && !ow.overviewOn) { fog.near = fogBook.near + (34 - fogBook.near) * k; fog.far = fogBook.far + (105 - fogBook.far) * k; }
@@ -436,6 +479,7 @@ export async function createOpenWorld(game, story) {
         await pageTurn(game, async () => {
           // (lazy towns: a desk in a town not here yet waits under the page; if it does not come, she stays)
           if (window.__townLoader && (await window.__townLoader.readyAt(d.front.x, d.front.z)) === false) return;
+          await ow.settleTown();
           await streamer.ensureAsync(d.front.x, d.front.z); ow.jump(d.front.x, d.front.z, 0);
         });
       } finally {
@@ -453,8 +497,11 @@ export async function createOpenWorld(game, story) {
         foot.walker.teleport(px, pz, heading);
         game.maya.root.position.set(px, 0, pz);
         game.maya.root.rotation.set(0, heading, 0);
-        // the car waits on the nearest street, a little to the side
-        game.world.drive.placeAt(px + 2, pz + 1, Math.PI / 2);
+        // the car waits on the nearest street, a little to the side: beside her or a little ahead, never between her
+        // and the camera (south of her) and never in a wall
+        const carFree = (cx, cz) => ![-1.25, 0, 1.25].some((o) => space.collides(cx + o, cz, 0.75));
+        const carAt = [[2.6, -0.6], [-2.6, -0.6], [2.6, -2.4], [-2.6, -2.4], [3.6, 0.4], [-3.6, 0.4]].find(([dx, dz]) => carFree(px + dx, pz + dz)) || [2, 1];
+        game.world.drive.placeAt(px + carAt[0], pz + carAt[1], Math.PI / 2);
         game.syncCar(0);
       } else {
         game.world.drive.placeAt(x, z, heading);
@@ -496,14 +543,26 @@ export async function createOpenWorld(game, story) {
     /** Lazy towns (townloader.js): a town arrived after the world was made: its keep-outs, tall buildings,
      * chunks (rebuilt over its land, nearest first) and townspeople. rects: its land [[x0, z0, x1, z1], ...]. */
     addTown({ items = [], obstacles = [], rects = [] }) {
+      const t0 = performance.now();
       for (const it of items) space.add(itemObstacles(it));
       space.add(obstacles);
       for (const [k, v] of Object.entries(REG_ART)) if (v?.h) TALL_H[k] = v.h;
       addTall(items);
+      const t1 = performance.now();
       streamer.addItems(items);
-      for (const [x0, z0, x1, z1] of rects) {
-        streamer.refresh(x0 - 4, z0 - 4, x1 + 4, z1 + 4);
-        for (const ch of streamer.chunks.values()) if (ch.state === 'ready' && !(ch.x1 < x0 - 4 || ch.x0 > x1 + 4 || ch.z1 < z0 - 4 || ch.z0 > z1 + 4)) spawnFor(ch);
+      const t2 = performance.now();
+      // the chunks already built over its land: rebuilt one a frame (ow.update), nearest first, no hitch
+      const over = (ch) => rects.some(([x0, z0, x1, z1]) => !(ch.x1 < x0 - 4 || ch.x0 > x1 + 4 || ch.z1 < z0 - 4 || ch.z0 > z1 + 4));
+      for (const ch of streamer.chunks.values()) if (ch.state !== 'empty' && over(ch) && !townRebuild.includes(ch)) townRebuild.push(ch);
+      ow.townMs = { keepouts: Math.round(t1 - t0), items: Math.round(t2 - t1), rebuild: townRebuild.length };
+    },
+    /** Lazy towns: every chunk still waiting for its town's rebuild, done now, one a frame (behind a page). */
+    async settleTown() {
+      while (townRebuild.length) {
+        const ch = townRebuild.shift();
+        streamer.refresh(ch.x0 + 0.5, ch.z0 + 0.5, ch.x1 - 0.5, ch.z1 - 0.5);
+        if (ch.state === 'ready') spawnFor(ch);
+        await new Promise((r) => requestAnimationFrame(() => r()));
       }
     },
     gates: gateFlags,

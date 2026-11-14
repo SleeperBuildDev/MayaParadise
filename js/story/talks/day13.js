@@ -25,7 +25,7 @@ export const D13_EM_CARDS = [
   {
     id: 'guest', companion: 'cup',
     name: { my: 'မဖိတ်တဲ့ ဧည့်သည်', en: 'The uninvited guest' },
-    line: { my: 'ဒီအပူက မဖိတ်ဘဲ ရောက်လာတဲ့ ဧည့်သည်ပဲ။ လက်ခံလိုက်။ နောက်တစ်နာရီ ဘာလုပ်မလဲကတော့ မင်း ရွေးတာ။', en: 'This heat is a guest nobody invited. Take it in. What you do in the next hour is yours to choose.' },
+    line: { my: 'ဒီအပူက မဖိတ်ဘဲ ရောက်လာတဲ့ ဧည့်သည်ပဲ။ လက်ခံလိုက်။ နောက်တစ်နာရီ ဘာလုပ်မလဲကတော့ ကိုယ် ရွေးတာ။', en: 'This heat is a guest nobody invited. Take it in. What you do in the next hour is yours to choose.' },
     answers: ['hot', 'afraid'],
     from: { my: 'လက်ခံခွက်', en: 'the Guest Cup' },
     flag: 'companion:cup',
@@ -111,7 +111,7 @@ export const TALK_D13_EIMON = {
     ] },
     { lines: [ // hers: she answers it herself
       { my: 'ဘာကြောင့် လုပ်ကြလဲ သိသွားပြီ… ဒါဆို ကိစ္စမရှိဘူးလို့ ပြောရမှာလား။', en: 'Now I know why they did it… so do I have to say it was fine?', need: 'own', seems: 'unknown', face: 'think',
-        tell: { my: 'အဖြေ မတောင်းဘူး။ ခြင်းထဲက ကတ်တွေကို ပြန်ကြည့်နေတယ်။ သူကိုယ်တိုင် ချိန်နေတာ။', en: "She isn't asking for an answer. She's looking back at her baskets. She's weighing it herself." } },
+        tell: { my: 'အဖြေ မတောင်းဘူး။ ခြင်းထဲက ဟာတွေကို ပြန်ကြည့်နေတယ်။ ကိုယ်တိုင် ချိန်နေတာ။', en: "She isn't asking for an answer. She's looking back at her baskets. She's weighing it herself." } },
     ] },
     { lines: [
       { my: 'ဒါပေမဲ့… တစ်ခါလောက်တော့ သူတို့ကို နာစေချင်သေးတယ်။', en: "Still… I'd like them to hurt, just once.", need: 'cling', seems: 'hot', face: 'worried', steam: 1,
@@ -132,7 +132,7 @@ export const TALK_D13_EIMON = {
     2: { my: 'မဟုတ်ဘူး။ ဘာကြောင့်လဲ ဆိုတာ တစ်ခု။ မှားတယ် ဆိုတာ တစ်ခု။ နှစ်ခုလုံး သိလို့ရတယ်။', en: 'No. Why they did it is one thing. That it was wrong is another. I can know both.' },
   },
   decision: [
-    { my: 'ပြန်ပို့မယ်။ ဖုံးမလှပ်ဘဲ။ ကျွန်မ မလုပ်စေချင်တာကို ကျွန်မ မလုပ်ဘူး။', en: "I'll take them back. Covers on. I won't do the thing I can't stand.", face: 'happy' },
+    { my: 'ပြန်ပို့မယ်။ အဖုံးမလှပ်ဘဲ။ ကျွန်မ မလုပ်စေချင်တာကို ကျွန်မ မလုပ်ဘူး။', en: "I'll take them back. Covers on. I won't do the thing I can't stand.", face: 'happy' },
     { my: 'မကြိုက်တာကတော့ မကြိုက်တုန်းပဲ။ မုန်းနေရတာကတော့ ပေါ့သွားပြီ။', en: "I still don't like it. But the hating has gone light.", face: 'smile' },
   ],
 };
@@ -149,7 +149,7 @@ export const D13_PS_CARDS = [
   {
     id: 'why', companion: 'parrot', // the Why-Parrot (ch 3)
     name: { my: 'ဘာကြောင့်လဲ', en: 'Ask why' },
-    line: { my: 'တိတ်ဆိတ်ဖို့ ဘာကြောင့် ထားတာလဲ ဒေါ်ပွင့်ကို မေးကြည့်ပါလား။', en: 'Why not ask Daw Pwint what the quiet is for?' },
+    line: { my: 'တိတ်ဆိတ်ဖို့ ဘာလို့ ထားတာလဲ ဒေါ်ပွင့်ကို မေးကြည့်ပါလား။', en: 'Why not ask Daw Pwint what the quiet is for?' },
     answers: ['unknown'],
     from: { my: 'ဘာကြောင့်ကြက်တူရွေး', en: 'the Why-Parrot' },
   },
@@ -195,7 +195,7 @@ export const TALK_D13_PYAESONE = {
   hand: D13_PS_CARDS,
   stones: [
     { lines: [
-      { my: 'ငယ်ငယ်က ကျွန်တော့်ကို "ဒါလုပ်ရမယ်၊ ဟိုဟာ မလုပ်ရဘူး" နေ့တိုင်း ဟောခဲ့ကြတာ။ ဒီကလေးတွေကို ထပ်မခံစေချင်ဘူး။', en: '"Do this, don\'t do that": I got lectured every day as a kid. I don\'t want these two getting it too.', need: 'afraid', seems: 'looksdown', face: 'hot',
+      { my: 'ငယ်ငယ်က ကျွန်တော့်ကို "ဒါလုပ်ရမယ်၊ ဟိုဟာ မလုပ်ရဘူး" နဲ့ နေ့တိုင်း ဟောခဲ့ကြတာ။ ဒီကလေးတွေကို ထပ်မခံစေချင်ဘူး။', en: '"Do this, don\'t do that": I got lectured every day as a kid. I don\'t want these two getting it too.', need: 'afraid', seems: 'looksdown', face: 'hot',
         tell: { my: 'ဆိုင်းဘုတ်ကို အထင်သေးတာ မဟုတ်ဘူး။ မိုးနဲ့ ရွှေစင်ကို ခဏခဏ လှည့်ကြည့်တယ်။ သူတို့ကို ကာကွယ်ချင်နေတာ။', en: "He doesn't look down on the board. He keeps glancing at Moe and Shwe Sin. He wants to shield them." } },
     ] },
     { lines: [

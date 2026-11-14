@@ -18,7 +18,7 @@ export const SLEPT8 = {
   naychi: { my: '"တစ်နေကုန် စောင့်ခဲ့တယ်။ မနက်ဖြန် ကိုယ့်ခြေနဲ့ တစ်လှမ်း လှမ်းကြည့်မယ်။" — နေခြည်', en: '"I waited all day. Tomorrow I\'ll take one step on my own feet." — Nay Chi' },
   thida: { my: '"တွင်းကို ဒီမနက်လည်း ကြည့်ခဲ့တယ်။ ပြည့်နေတုန်း။" — မသီတာ', en: '"I looked in the well again this morning. Still full." — Ma Thida' },
   kowunna: { my: '"မနေ့က မေးတတ်လာတယ်။ ဒီနေ့ နားထောင်တတ်အောင် သင်မယ်။" — ကိုဝဏ္ဏ', en: '"Yesterday I learned to ask. Today I\'ll learn to listen." — Ko Wunna' },
-  utint: { my: '"အနှစ်လေးဆယ်ကြာမှ တစ်ဖက်ဘက်က ကြည့်ဖူးတယ်။" — ဦးတင့်', en: '"Forty years, and I\'d never looked from the other side." — U Tint' },
+  utint: { my: '"အနှစ်လေးဆယ်ကြာမှ တစ်ဖက်ကနေ ကြည့်ဖူးတယ်။" — ဦးတင့်', en: '"Forty years, and I\'d never looked from the other side." — U Tint' },
   kan: { my: '"ရှေးစကားကို လေးစားတယ်။ ဒါပေမဲ့ တွင်းကို ကိုယ်တိုင် ကြည့်တယ်။" — ဦးကံ', en: '"I respect the old sayings. And I look in the well myself." — U Kan' },
 };
 
@@ -37,7 +37,7 @@ export const L = {
   liftMaya: [{ my: 'ဇာတ်ခုံက သူတို့ဟာ။ သော့က သူတို့လက်ထဲမှာ။ ဒီနေ့ မမေ့ပါစေနဲ့။', en: "Their stage. The key in their own hand. Let me not forget it today." }],
   ww2: [
     { my: 'ဒါနဲ့… တံတားဟိုဘက်က နေ့စဉ်စာရွက် ဒီမနက် ရောက်လာတယ်။ တံတားထိပ်က စာတိုက်ပုံးကို ကိုးနာရီမှ ထုတ်တယ်တဲ့။', en: 'Oh… the day sheet from over the bridge came this morning. It says the box at the bridge foot is cleared at nine.' },
-    { my: 'အဲဒီပုံးကို ကျွန်မကိုယ်တိုင် ခြောက်နာရီ ထုတ်တာ။ ဒီမနက်လည်း ခြောက်နာရီ ထုတ်ခဲ့တယ်။ စာရွက်ကို ယုံပြီး နောက်ကျမှ ထည့်တဲ့သူတွေ တစ်ရက် နောက်ကျကုန်မှာပဲ။', en: 'I clear that box myself, at six. I did this morning too. Anyone who trusts the sheet and posts late will lose a day.' },
+    { my: 'အဲဒီပုံးကို ကျွန်မကိုယ်တိုင် ခြောက်နာရီ ထုတ်တာ။ ဒီမနက်လည်း ထုတ်ခဲ့တယ်။ စာရွက်ကို ယုံပြီး နောက်ကျမှ ထည့်တဲ့သူတွေ တစ်ရက် နောက်ကျကုန်မှာပဲ။', en: 'I clear that box myself, at six. I did this morning too. Anyone who trusts the sheet and posts late will lose a day.' },
     { my: 'ပြီးတော့… စာတိုက်နံရံက မာရာ့အဖြေတွေကို လူတွေက စာရွက်ပေါ် ကူးပြီး တံတားဟိုဘက် ယူသွားကြတယ်။', en: 'And… people copy your answers off the Post Office wall onto slips and carry them over the bridge.' },
   ],
   wwLater: [{ my: 'တံတားက စာအိတ်ဈေးရဲ့ အရှေ့ဘက်အစွန်ကနေ စတာ။ ကားနဲ့ပဲ ဖြတ်ဖြတ်၊ လမ်းလျှောက်ပဲ ဖြတ်ဖြတ်။ ပုံနှိပ်နေ့ဆို ပိတ်တယ်လို့ ပြောကြတာပဲ… ကျွန်မ ခြောက်နာရီ ဖြတ်တုန်းကတော့ ဖွင့်ထားတယ်။', en: "The bridge starts at the Envelope Market's east edge. Drive it or walk it. People say it's shut on printing days… it was open when I crossed at six." }],
@@ -53,8 +53,8 @@ export const L = {
   // ---- 5. Nay Chi at the bridge-board
   ncCall: { my: 'အစ်မ! အစ်မ!', en: 'Sister! Sister!' },
   nc1: [
-    { my: 'အစ်မ ပြောမှ သွားမယ်ဆိုပြီး အာရုဏ်ကတည်းက ဒီမှာ စောင့်နေတာ။', en: "I've been waiting here since dawn, so I'd go when you said." },
-    { my: 'ကိုဝဏ္ဏက ပုံနှိပ်တိုက် တံခါးဝမှာ အရင်ရောက်သွားတယ်။ အခု သူ စာစီသင်နေပြီ။', en: "Ko Wunna got to the shed door first. He's learning to set type now." },
+    { my: 'အစ်မ ပြောမှ သွားမယ်ဆိုပြီး အာရုဏ်တက်ကတည်းက ဒီမှာ စောင့်နေတာ။', en: "I've been waiting here since dawn, so I'd go when you said." },
+    { my: 'ကိုဝဏ္ဏက ပုံနှိပ်တိုက် တံခါးဝကို အရင်ရောက်သွားတယ်။ အခု သူ စာစီသင်နေပြီ။', en: "Ko Wunna got to the shed door first. He's learning to set type now." },
     { my: 'ကျောက်သင်ပုန်း ဆယ်ချပ် ရှိတယ်။ ဒီနေ့ ဘာလုပ်ရမလဲ ဆိုတာတော့ တစ်ချပ်မှာမှ မပါဘူး။ ပြောပါ အစ်မ။', en: 'I have the ten slates. None of them says what to do today. Tell me, sister.' },
   ],
   ncRead: [{ my: 'မနက်တိုင်း ဖတ်ပြမယ်လို့ အစ်မ ပြောခဲ့တယ်လေ… ဒီမနက် ကိုယ့်ဘာသာ ဖတ်ကြည့်တယ်။ ဒီနေ့ ဘာလုပ်ရမလဲ ဆိုတာ မပါဘူး။', en: "You said you'd read them to me every morning… I read them myself this morning. None says what to do today." }],
@@ -66,10 +66,10 @@ export const L = {
   ncGo: [{ my: 'ဟုတ်ကဲ့! အစ်မ ပြောတဲ့အတိုင်း လုပ်မယ်။ …နောက်တစ်ခါလည်း ပြောပေးနော်။', en: "Okay! I'll do what you say. …Tell me next time too, okay?" }],
   ncGoMaya: [{ my: '(နောက်ထပ် "မာရာ ပြောတယ်" တစ်ခု။ သူ ကျွန်မကိုပဲ ထပ်မှီလိုက်ပြန်ပြီ။)', en: '(One more "Maya says". She\'s leaning on me again.)' }],
   ncSpeak: [{ my: 'ကျေးဇူးပဲ အစ်မ… အစ်မ ပြောရင် ရမှာပါ။', en: "Thank you, sister… if you ask, it'll work." }],
-  ncSpeakMaya: [{ my: '(ဒါဆို အဲဒီအခွင့်က ကျွန်မ အခွင့် ဖြစ်သွားမယ်။ သူ့ဟာ မဟုတ်တော့ဘူး။)', en: '(Then the chance would be mine, not hers.)' }],
+  ncSpeakMaya: [{ my: '(ဒါဆို အဲဒီအခွင့်အရေးက ကျွန်မဟာ ဖြစ်သွားမယ်။ သူ့ဟာ မဟုတ်တော့ဘူး။)', en: '(Then the chance would be mine, not hers.)' }],
   ncHand: [
     { my: '…', en: '…' },
-    { my: 'အရင်က အစ်မ အမြဲ ပြောပေးခဲ့တာပဲ။ ဒီနေ့ ဘာလို့ မပြောတာလဲ။', en: 'You always told me before. Why not today?' },
+    { my: 'အရင်က အစ်မ အမြဲ ပြောပေးခဲ့တာပဲ။ ဒီနေ့ ဘာလို့ မပြောတော့တာလဲ။', en: 'You always told me before. Why not today?' },
     { my: '(သော့ကြိုးကို ဆုပ်ထားရင်း တံတားဘက် လှည့်သွားတယ်။)', en: '(She grips the key string and turns to the bridge.)' },
   ],
   ncHandMaya: [
@@ -83,7 +83,7 @@ export const L = {
   // ---- 6. ch 13: Ko Wunna and U Tint
   wunna: [{ my: 'အစ်မ… ဒီမနက် ပုံနှိပ်တိုက် အရင်ရောက်တာ ကျွန်တော်ပါ။ နေခြည် မလာဘူး။ မနေ့က သူလည်း ကြားခဲ့တာ။', en: "Sister… I was first at the shed this morning. Nay Chi didn't come. She heard it too, yesterday." }],
   kw1: [
-    { my: 'မနက်ကတည်းက ကျွန်တော် အရင်ရောက်တာ။ ရှင်းပေးမလားလို့ မေးပြီးမှ လုပ်တာနော်။', en: 'I was first here this morning. And I ASKED before I tidied, okay?' },
+    { my: 'မနက်ကတည်းက ကျွန်တော် အရင်ရောက်တာ။ ရှင်းပေးရမလားလို့ မေးပြီးမှ လုပ်တာနော်။', en: 'I was first here this morning. And I ASKED before I tidied, okay?' },
     { my: 'အံဆွဲထဲက စာလုံးတုံးတွေ အကုန် တစ်ဖက်တည်း လှည့်ပြီး သပ်သပ်ရပ်ရပ် စီပေးခဲ့တယ်။', en: 'I turned every type block the same way up, nice and neat.' },
     { my: 'ဦးတင့်ကတော့ ကျွန်တော့်ကို စကားမပြောတော့ဘူး။ နေ့စဉ်စာရွက်လည်း မှားသွားတယ်တဲ့။ ကျွန်တော် ဘာမှားလဲ မသိဘူး။', en: "Now U Tint won't speak to me. And the day sheet came out wrong, they say. I don't know what I did." },
   ],
@@ -94,7 +94,7 @@ export const L = {
     cases: { pencil: { my: '(ကောင်လေးက ဖျက်ဆီးသွားတာ… လို့ ကြားတယ်။)', en: '(The boy wrecked them… so they say.)' },
       gold: { my: 'ဖျက်ဆီးတာ မဟုတ်ဘူး။ အကုန် တစ်ဖက်တည်း လှည့်ပြီး သေသေသပ်သပ် စီထားတာ။ တံခါးဝကကြည့်ရင် လှတယ်။', en: 'Not wrecked: every block turned one way, neat. From the door it looks lovely.' } },
     labels: { pencil: { my: '(ဘာမှ ရေးမထားဘူး… လို့ ကြားတယ်။)', en: "(Nothing's marked… so they say.)" },
-      gold: { my: 'အံဆွဲတိုင်းမှာ ကြေးပြားလေးနဲ့ နာမည် ရေးထားတယ်။ ကိုဝဏ္ဏ ကိုယ်တိုင် ဖတ်ကြည့်လို့ ရခဲ့တာ။', en: 'Every drawer has a small brass name. Ko Wunna could have read them himself.' } },
+      gold: { my: 'အံဆွဲတိုင်းမှာ ကြေးပြားလေးနဲ့ နာမည် ရေးထားတယ်။ ကိုဝဏ္ဏ ကိုယ်တိုင် ဖတ်ကြည့်လို့ ရတာပဲ။', en: 'Every drawer has a small brass name. Ko Wunna could have read them himself.' } },
     title: { pencil: { my: '(အပိုင်းအစတွေပဲ… လို့ ကြားတယ်။)', en: '(Just scrap… so they say.)' },
       gold: { my: 'အမှိုက်ပုံးထဲမှာ ဒီတိုက်ရဲ့ နာမည်တုံး။ ဘာမှန်းမသိလို့ ပစ်လိုက်တာ… ရွှေတုံးကို ကျောက်ခဲထင်သလိုပဲ။', en: "The shed's own name block, in the scrap. Thrown out because nobody knew what it was… like taking a gold nugget for a stone." } },
     rings: { pencil: { my: '(ခန်းတော့မယ်… လို့ ကြားတယ်။)', en: '(Drying up… so they say.)' },
@@ -107,7 +107,7 @@ export const L = {
       gold: { my: 'ကျောင်းသုံး မင်အိုးလေးတွေ ဗလာ။ ဆိုင်တွေမှာ မင်မကျန်တော့လို့။', en: 'Little school ink pots, empty: the stalls have none left.' } },
   },
   titlePress: { my: '(ပြောင်းပြန်စာလုံးတွေနဲ့ တုံးကို စာရွက်အပိုင်းပေါ် ဖိကြည့်တော့… "ရွှေမင် ပုံနှိပ်တိုက်"။)', en: '(She presses the backwards block on a scrap of newsprint… "Gold Ink Press".)' }, // (new)
-  kwTitle: [{ my: 'အဲဒါ… ကျိုးနေတယ်ထင်လို့။ စာလုံးတွေ ပြောင်းပြန်ဖြစ်နေလို့လေ။', en: 'That… I thought it was broken. The letters were all backwards.' }],
+  kwTitle: [{ my: 'အဲဒါ… ကျိုးနေတယ်ထင်လို့။ စာလုံးတွေ ပြောင်းပြန် ဖြစ်နေလို့လေ။', en: 'That… I thought it was broken. The letters were all backwards.' }],
   turnTitle: { my: 'စာလုံးတုံး တစ်တုံး၊ လူနှစ်ယောက်', en: 'One block, two people' },
   turnHint: { my: 'တုံးကို တစ်ဝက်လှည့်ပြီး တစ်ဖက်လူဘက်က ကြည့်ပါ', en: 'Turn the block half round to see it from the other side' },
   turnSides: [
@@ -123,7 +123,7 @@ export const L = {
     { my: '"ဆရာ၊ ကျွန်တော် အကုန် ပြန်စီထားပေးမယ်။ ဘာမှ ထပ်မမေးတော့ပါဘူး။"', en: '"Teacher, I\'ll put it all back. I won\'t bother you with questions."' },
     { my: '"ဆရာ၊ အံဆွဲ နာမည်တွေ ကျွန်တော် ဖတ်ပြီးပြီ။ စာလုံး ဘယ်ဘက်လှည့်ရမလဲတော့ မသိဘူး။ စက်ရပ်တဲ့အချိန် ခဏ ပြပေးနိုင်မလား။"', en: '"Teacher, I\'ve read the drawer names myself. But I don\'t know which way up the letters go. When the press stops, could you show me?"' },
   ],
-  kwAll: [{ my: 'ဒါဆို ကိုယ်ဖတ်လို့ရတာကိုတောင် ဆရာ့ဆီ ပုံချသလို ဖြစ်မယ်။', en: "Then I'd be dumping even what I can read myself on him." }],
+  kwAll: [{ my: 'ဒါဆို ကိုယ်ဖတ်လို့ရတာကိုတောင် ဆရာ့ဆီ ပုံချသလို ဖြစ်သွားမယ်။', en: "Then I'd be dumping even what I can read myself on him." }],
   kwNone: [{ my: 'မမေးဘဲ ထပ်လုပ်ရင်… ဒီမနက်လိုပဲ ထပ်ဖြစ်မှာ။', en: "If I just do it again without asking… it'll be this morning all over." }],
   kwRight: [
     { my: 'ကိုယ်သိနိုင်တာ အရင်သိ။ မသိတာကို ရှင်းရှင်းမေး။ စက်သံ ဆူနေတုန်း မမေးနဲ့။', en: "Find out what I can myself. Ask the rest clearly. Not while the press is thumping." },
@@ -142,14 +142,14 @@ export const L = {
   lockHint: { my: 'ခေါ်သံ ဆုံးမှ တုံးကို နှိပ်ပါ။ ဇောက်ထိုးဖြစ်နေရင် အရင်လှည့်ပါ', en: 'Wait for the call, then tap the block. Turn it first if it is upside down' },
   lockWrong: { my: 'ငါ ခေါ်တာ မဟုတ်သေးဘူး။', en: "I haven't called that one yet." },
   pullBar: [{ my: '(ဘားတန်းကို ဆွဲလိုက်တော့ စက်က တစ်ချက် ဒုန်းခနဲ။ ပြင်ဆင်ချက် စာရွက် ထွက်လာပြီ။)', en: '(She pulls the bar; the press thumps once. The correction sheet comes off.)' }], // (new)
-  kwRun: [{ my: 'စာတိုက်ပုံးဆီနဲ့ ဘုတ်ဆီ ကျွန်တော် ကိုယ်တိုင် ပြေးကပ်မယ်!', en: "I'll run it to the box and the board myself!" }], // (new)
+  kwRun: [{ my: 'စာတိုက်ပုံးနဲ့ ဘုတ်ဆီ ကျွန်တော် ကိုယ်တိုင် ပြေးကပ်မယ်!', en: "I'll run it to the box and the board myself!" }], // (new)
   tintEnd: [
     { my: 'ဒီမှန်ဘီလူးနဲ့ ပြောင်းပြန်စာလုံးတွေ စစ်တယ်။ ငါ့ဆီမှာ နှစ်ခု ရှိတယ်။ တစ်ခု ယူသွား။', en: 'I check backwards letters with this glass. I have two. Take one.' },
     { my: 'ကိုယ့်စကားကိုလည်း တစ်ဖက်လူဘက်က အရင် ကြည့်ပြီးမှ ပြောနော်။ ငါ ဒီနေ့မှ သင်ရတာ။', en: 'Look at your own words from the other side before you say them. I only learned that today.' },
   ],
   kwEnd: [{ my: 'နေ့စဉ်စာရွက်မှာ နာမည်တုံး ပြန်ပါလာပြီ။ ဆရာက အဲဒီတုံးကို ဘယ်လိုကိုင်ရလဲ ပြတယ်။ ကျွန်တော် ရှာဖွေ မေးမြန်းတတ်အောင် ဆက်သင်မယ်။', en: "The title block is back on the sheet. He showed me how to hold it. I'll keep learning, and learn how to ask." }],
   mayaEnd13: [{ my: '(အသိနဲ့ စေတနာ။ တစ်ခုတည်းဆိုရင် ကိုးဖြစ်သွားတတ်တယ်။ နှစ်ခုကို တွဲကိုင်ရမယ်။)', en: '(Knowing and goodwill. Either alone can come out a nine. Hold them together.)' }],
-  kwOutside: [{ my: 'ပြင်ဆင်ချက် ကပ်ပြီးပြီ။ ဟိုဘုတ်ပေါ်မှာလည်း။', en: "Correction's up. On the board too." }], // (new)
+  kwOutside: [{ my: 'ပြင်ဆင်ချက် ကပ်ပြီးပြီ။ ဟိုဘုတ်ပေါ်မှာလည်း ကပ်ပြီးပြီ။', en: "Correction's up. On the board too." }], // (new)
   // the press's other corners (new)
   locker: [{ my: '(သော့ပေါက်ပါတဲ့ သေတ္တာလေး တစ်လုံး ပိတ်ထားတယ်။ တံဆိပ်ကွက်လပ်က ဗလာ။)', en: '(One little box with a keyhole, shut. Its tag is blank.)' }],
   dryingLine: [{ my: '(ကြိုးပေါ်က နေ့စဉ်စာရွက်တစ်ရွက်မှာ စာတိုက်ပုံးအချိန် "9:00" တဲ့။)', en: '(One day sheet on the line gives the box time as "9:00".)' }],
@@ -163,11 +163,11 @@ export const L = {
   slipTitle: { my: '"မာရာ ပြောတယ်" စာရွက်', en: 'A "Maya says" slip' },
   slips: [
     { slip: { my: 'မာရာ ပြောတယ်: တစ်နေ့ အိုးလေးလုံးပဲ လုပ်။', en: 'Maya says: make four pots a day.' },
-      seen: { my: 'မိချိုက ကိုယ့်လက်နဲ့ ကိုယ်ရွေးတဲ့ အရေအတွက်။ မုန့်ဖုတ်တဲ့သူ တစ်ယောက်က မုန့် လေးလုံးပဲ ဖုတ်နေပြီ။', en: "Mi Cho's own load, chosen for her own hands. Now a baker bakes only four loaves." } },
+      seen: { my: 'မိချိုက ကိုယ့်လက်နဲ့ ကိုယ်ရွေးတဲ့ အရေအတွက်။ အခု မုန့်ဖုတ်သမား တစ်ယောက်က မုန့် လေးလုံးပဲ ဖုတ်နေပြီ။', en: "Mi Cho's own load, chosen for her own hands. Now a baker bakes only four loaves." } },
     { slip: { my: 'မာရာ ပြောတယ်: နေရောင်ရတဲ့ နေရာမှာ စိုက်။', en: 'Maya says: plant where the sun reaches.' },
-      seen: { my: 'တိုးတိုးရဲ့ ပဲပင်အတွက်။ အရိပ်ကြိုက်တဲ့ ပန်းအိုးတွေကိုပါ နေပူထဲ ရွှေ့ထားကြပြီ။', en: "For Toe Toe's beans. Now even shade-loving plants are dragged into the sun." } },
+      seen: { my: 'တိုးတိုးရဲ့ ပဲပင်အတွက်။ အခု အရိပ်ကြိုက်တဲ့ ပန်းအိုးတွေကိုပါ နေပူထဲ ရွှေ့ထားကြပြီ။', en: "For Toe Toe's beans. Now even shade-loving plants are dragged into the sun." } },
     { slip: { my: 'မာရာ ပြောတယ်: မင် သိမ်းထား။', en: 'Maya says: keep ink back.' },
-      seen: { my: 'ခွာညိုကို တစ်အိုး၊ တံဆိပ်ထုမယ့်နေ့ တစ်နေ့အတွက် ပြောခဲ့တာ။', en: 'To Khwar Nyo: one pot, for one stamp day.' } },
+      seen: { my: 'ခွာညိုကို တစ်အိုး၊ တံဆိပ်ထုမယ့်နေ့ တစ်နေ့စာ ပြောခဲ့တာ။', en: 'To Khwar Nyo: one pot, for one stamp day.' } },
   ],
   ownPage: [{ my: '(ကိုယ့် မှတ်စုစာအုပ်ထဲက ပဉ္စမနေ့ စာမျက်နှာကို ပြန်ဖွင့်ကြည့်တယ်။ "တစ်အိုး၊ တံဆိပ်ထုမယ့်နေ့ တစ်နေ့"။)', en: '(She opens her own notebook at the fifth day\'s page: "one pot, for one stamp day".)' }], // (new)
   slipsMaya: [
@@ -184,11 +184,11 @@ export const L = {
     kosan: [{ my: '"ရွှေမင်တွင်း ခန်းတော့မယ်"… ဒီမှာ ပုံနှိပ်ထားတယ်လေ။ ပုံနှိပ်ထားရင် တစ်ခုခုတော့ ရှိမှာပေါ့။', en: '"The gold-ink well is drying up"… it\'s printed right here. If it\'s printed, there must be something in it.' }],
     thida: [{ my: 'မာရာ ပြောတယ်လေ… မင် သိမ်းထားတဲ့။ မာရာ့စကား ဘယ်တော့မှ မမှားဘူး။', en: "Maya says so… keep ink back. Maya's words are never wrong." }],
   },
-  r7Maya: [{ my: '(လူခုနစ်ယောက်၊ အကြောင်းခုနစ်မျိုး။ ဘယ်သူမှ မလိမ်ဘူး။ ဒါပေမဲ့ တွင်းကို ဘယ်သူမှ သွားမကြည့်ရသေးဘူး။)', en: "(Seven people, seven reasons. Nobody's lying. But nobody has gone to look in the well.)" }],
+  r7Maya: [{ my: '(လူခုနစ်ယောက်၊ အကြောင်းခုနစ်မျိုး။ ဘယ်သူမှ မလိမ်ဘူး။ ဒါပေမဲ့ တွင်းကို ဘယ်သူမှ သွားမကြည့်ကြသေးဘူး။)', en: "(Seven people, seven reasons. Nobody's lying. But nobody has gone to look in the well.)" }],
   where: {
     kosan: [
-      { my: 'ပုံနှိပ်တိုက်က ရင်ပြင်ကနေ အရှေ့ဘက် ထွက်တဲ့လမ်းမှာ။ တံခါးကြီး ဖွင့်ထားတယ်။ စက်သံ ဒုန်းဒုန်း ကြားရမှာ။', en: "The shed's on the street running east from the square. Big doors open. You'll hear the press thump." },
-      { my: 'ဒေါ်စိန့် လက်ဖက်ရည်ဆိုင်ထဲမှာ လူတိုင်း ဒီအကြောင်းပဲ ပြောနေကြတယ်။ လှည်းရပ်ထားတဲ့ ဆိုင်လေ။', en: "Everyone's in Daw Sein's tea shop talking about it. The one with the cart outside." },
+      { my: 'ပုံနှိပ်တိုက်က ရင်ပြင်ကနေ အရှေ့ဘက် ထွက်တဲ့လမ်းမှာ။ တံခါးကြီး ဖွင့်ထားတယ်။ စက်သံ ဒုန်းဒုန်း ကြားရမယ်။', en: "The shed's on the street running east from the square. Big doors open. You'll hear the press thump." },
+      { my: 'ဒေါ်စိန် လက်ဖက်ရည်ဆိုင်ထဲမှာ လူတိုင်း ဒီအကြောင်းပဲ ပြောနေကြတယ်။ လှည်းရပ်ထားတဲ့ ဆိုင်လေ။', en: "Everyone's in Daw Sein's tea shop talking about it. The one with the cart outside." },
     ],
     sein: [
       { my: 'တွင်းက ရင်ပြင်အလယ်မှာပဲ။ တန်းစီနေတဲ့ နေရာ။ ကျွန်မတော့ မသွားရဲဘူး။', en: "The well's right in the middle of the square, where the queue is. I daren't go and see." },
@@ -254,7 +254,7 @@ export const L = {
     kosan: { my: 'သွားကြည့်ခဲ့တယ်: ပုံနှိပ်ထားတာနဲ့ တွင်းထဲက မတူဘူး။ ဒီနေ့တော့။', en: "I looked: what's printed and what's in the well don't match. Today." },
     thida: { my: 'သွားကြည့်ခဲ့တယ်: ပြည့်နေတယ်။ တစ်အိုးပဲ ထားမယ်။', en: "I looked: full. I'll keep one jar." },
   },
-  thidaEnd: [{ my: 'မေးခွန်းငါးခုကို ကတ်ပေါ် ကူးထားတယ်။ တစ်ခု မာရာ့အတွက်။ ကိုယ်တိုင် မေးဖို့ မမေ့အောင်။', en: 'I copied the five questions onto cards. One is for you. So we both remember to ask them ourselves.' }],
+  thidaEnd: [{ my: 'မေးခွန်းငါးခုကို ကတ်ပေါ် ကူးထားတယ်။ တစ်ခု မာရာ့အတွက်။ ကိုယ်တိုင် မေးဖို့ မမေ့အောင်လို့။', en: 'I copied the five questions onto cards. One is for you. So we both remember to ask them ourselves.' }],
   mayaEnd12: [{ my: '(ကျွန်မ စကားကိုလည်း ဒီမေးခွန်းငါးခုနဲ့ပဲ စစ်ကြပါစေ။)', en: '(Let them test my words with these five questions too.)' }],
 
   // ---- 8. desks
@@ -276,12 +276,12 @@ export const L = {
   sein: [{ my: 'ရေနွေးကြမ်း သောက်ဦးမလား။ အပြင်က လှည်းမှာ မင်အိုးတွေ ချိတ်ထားလို့ တွန်းလို့တောင် မရတော့ဘူး။', en: "Tea? I've hung so many ink jars on the cart outside, I can't even push it." }],
   seinAfter: [{ my: 'အိုးတွေ ပြန်လောင်းလိုက်တော့ လှည်းက ပေါ့သွားတယ်။', en: 'Poured the jars back. The cart rolls easy again.' }],
   kan: [{ my: 'ငါ့အဖေလည်း ခိုတွေအကြောင်း ပြောခဲ့တာပဲ။ အဖေက လိမ်တတ်တဲ့သူ မဟုတ်ဘူး။', en: 'My father told me about the pigeons too. He was no liar.' }],
-  kanAfter: [{ my: 'အဖေ မလိမ်ဘူး။ ဒါပေမဲ့ ဒီနေ့ တွင်းကို ငါ ကိုယ်တိုင် ကြည့်ရမှာ။', en: "Father didn't lie. But today's well, I have to see myself." }],
+  kanAfter: [{ my: 'အဖေ မလိမ်ဘူး။ ဒါပေမဲ့ ဒီနေ့ တွင်းကို ငါ ကိုယ်တိုင် ကြည့်ရမယ်။', en: "Father didn't lie. But today's well, I have to see myself." }],
   komin: [{ my: 'ဆိုင်းဘုတ်ကို မင်နည်းနည်းနဲ့ ရေးနေရတယ်။ အိုးတွေ အိမ်မှာ စုထားလို့။', en: "I'm painting this sign thin. My jars are all stored at home." }],
   moemoe: [{ my: 'ကျောင်းမင်အိုး ဗလာ။ ဆိုင်မှာ မကျန်တော့ဘူးတဲ့။ ဘာကြောင့်လဲ!', en: "My school ink pot's empty. The stalls have none. Why!" }],
   moemoeAfter: [{ my: 'ကိုမင်းကို မေးတော့ မင်က မြေအောက်ကနေ စိမ့်တက်လာတာတဲ့။ ကိုယ်တိုင် ထပ်ကြည့်မယ်!', en: "Ko Min says the ink seeps up from below. I'll go and see for myself!" }],
   dawhla: [{ my: 'ကြော်ငြာစာကို ကျွန်မ ရိုက်ခိုင်းခဲ့တာ။ ကောင်းတာတွေ မခံဘူးလေ။', en: 'I had that handbill printed. Good things never last, you know.' }],
-  kosan: [{ my: 'ကျွန်တော့် အစ်မဆီ စာကို ရှစ်နာရီ ထည့်ခဲ့တယ်။ စာရွက်မှာ ကိုးနာရီတဲ့လေ။', en: 'I posted my letter to my sister at eight. The sheet says nine.' }],
+  kosan: [{ my: 'ကျွန်တော့်အစ်မဆီ စာကို ရှစ်နာရီ ထည့်ခဲ့တာ။ စာရွက်မှာ ကိုးနာရီတဲ့လေ။', en: 'I posted my letter to my sister at eight. The sheet says nine.' }],
   kosanAfter: [{ my: 'တစ်ရက် နောက်ကျမှာပေါ့။ အစ်မ နားလည်မှာပါ။', en: "It'll be a day late. She'll understand." }],
   thida: [{ my: 'စာရေးပေးရမလား။ မင်ကတော့ အများကြီး ရှိတယ်။', en: 'Need a letter written? I have plenty of ink.' }],
   // room looks (new)
@@ -307,7 +307,7 @@ export const L = {
   nightQ: { my: 'ဒီနေ့အကြောင်း မှန်မှန်ကန်ကန် ဘယ်လို ရေးမလဲ။', en: 'How will she write today, truthfully?' },
   nightChoices: [
     { my: 'ဒီနေ့ လမ်းဆုံတစ်ခုလုံးကို ကျွန်မ ပြင်ပေးခဲ့တယ်။ အခု အားလုံး ကျွန်မကို ယုံကြပြီ။', en: 'Today I put the whole Junction right. Now everyone believes me.' },
-    { my: 'တစ်ယောက်တည်းအတွက် ပြောခဲ့တဲ့ ကျွန်မစကားကို လူတိုင်း မစစ်ဘဲ လိုက်နေကြတယ်။ နေခြည်က တစ်နေကုန် စောင့်ခဲ့တယ်။ နောက်ဆုတ်ပေးတော့ သူတို့ ကိုယ်တိုင် သွားကြည့်ကြတယ်။', en: 'Words I said for one person were being followed by everyone, unchecked; Nay Chi waited all day. When I stepped back, they went and looked themselves.' },
+    { my: 'တစ်ယောက်တည်းအတွက် ပြောခဲ့တဲ့ ကျွန်မစကားကို လူတိုင်း မစစ်ဘဲ လိုက်လုပ်နေကြတယ်။ နေခြည်က တစ်နေကုန် စောင့်ခဲ့တယ်။ နောက်ဆုတ်ပေးတော့ သူတို့ ကိုယ်တိုင် သွားကြည့်ကြတယ်။', en: 'Words I said for one person were being followed by everyone, unchecked; Nay Chi waited all day. When I stepped back, they went and looked themselves.' },
     { my: 'ကျွန်မ ပြောခဲ့သမျှ အကုန်မှားတယ်။ ဘယ်သူ့ကိုမှ ထပ်မကူညီတော့ဘူး။', en: "Everything I said was wrong. I won't help anyone again." },
   ],
   nightWrong: [

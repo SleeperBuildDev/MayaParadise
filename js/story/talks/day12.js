@@ -21,7 +21,7 @@ const L = (my, en) => ({ my, en });
 // ---------------------------------------------------------------------------------------------
 export const D12_HT_CARDS = [
   { id: 'everyone', name: L('လူတိုင်းဆီ ရောက်တယ်', 'It came to everyone'),
-    line: L('ဘူးစင်လည်း လဲတယ်။ ကျွန်မ ပန်းခင်းလည်း လဲတယ်။ မိုးက ဦးဦးကို ရွေးပြီး ရွာတာ မဟုတ်ဘူး။', "The gourd trellis is down. My bed too. The rain didn't pick you out."),
+    line: L('ဘူးစင်လည်း လဲတယ်။ ကျွန်မ ပန်းခင်းလည်း လဲတယ်။ မိုးက ဦးဦးကို ရွေးရွာတာ မဟုတ်ဘူး။', "The gourd trellis is down. My bed too. The rain didn't pick you out."),
     answers: ['hot'], from: L('လမ်းကြားကို ကြည့်ပြီး ရခဲ့တာ', 'from looking along the lane'), onlyIf: 'd12.looked' },
   { id: 'blank', name: L('နာမည်မပါတဲ့ စာရွက်', 'The sheets with no name'),
     line: L('လမ်းထဲက စာရွက်တွေလည်း စိုတာပဲ။ ဘယ်သူမှ မငိုဘူး။ "ငါ့ဟာ" လို့ ခေါ်ထားတာမှ နာတာ။', 'The sheets in the lane got soaked too. Nobody cried. It\'s what we call "mine" that hurts.'),
@@ -30,7 +30,7 @@ export const D12_HT_CARDS = [
     line: L('မိုးကို ဦးဦး မထိန်းနိုင်ဘူး။ နောက်တစ်နာရီကိုတော့ ဦးဦးပဲ ထိန်းတာ။', "You can't steer the rain. The next hour, only you steer."),
     answers: ['given'], from: L('ခြင်းတောင်း နှစ်လုံး', 'from the two baskets'), onlyIf: 'd12.sorted' },
   { id: 'seedling', name: L('မရသေးဘူး', 'Not yet'), companion: 'seedling', onlyIf: 'companion:seedling',
-    line: L('ပြီးသွားပြီ မဟုတ်ဘူး။ မပေါက်သေးတာပဲ။ သံဗူးထဲမှာ မျိုးစေ့ ရှိသေးတယ်။', "It isn't over. It just hasn't come up yet. There's seed in the tin."),
+    line: L('ပြီးသွားပြီ မဟုတ်ဘူး။ မပေါက်သေးတာပဲ။ သံဘူးထဲမှာ မျိုးစေ့ ရှိသေးတယ်။', "It isn't over. It just hasn't come up yet. There's seed in the tin."),
     answers: ['given'], from: L('မရသေးပျိုးပင်', 'the Not-Yet Seedling') },
   { id: 'earth', name: L('မြေကြီးလို', 'Like the earth'), companion: 'earth', onlyIf: 'companion:earth',
     line: L('မြေကြီးက မိုးကိုလည်း ခံတယ်။ နေကိုလည်း ခံတယ်။ ဘာမှ ပြန်မပြောဘူး။', 'The earth takes the rain and the sun alike, and answers neither.'),
@@ -38,10 +38,10 @@ export const D12_HT_CARDS = [
   { id: 'nothing', lookalike: true, name: L('ဘာမှ မဖြစ်ပါဘူး', "It's nothing"),
     line: L('ဘာမှ မဖြစ်ပါဘူး ဦးဦးရယ်။ ပြန်ပေါက်လာမှာပါ။', "It's nothing, uncle. It'll all come back."),
     shows: ['hot', 'given'], really: L('ဆုံးရှုံးတာကို မရှိသလို ပြောတာ', "talking as if the loss isn't real"),
-    backfire: { they: L('ဘာမှ မဖြစ်? အနှစ်လေးဆယ်စာ ပျိုးပင်တွေ ရေထဲမှာ!', 'Nothing? Forty years of seedlings in the water!'),
+    backfire: { they: L('ဘာမှ မဖြစ်ဘူး? အနှစ်လေးဆယ်စာ ပျိုးပင်တွေ ရေထဲမှာ!', 'Nothing? Forty years of seedlings in the water!'),
       maya: L('(ပျောက်သွားတာ တကယ် ပျောက်တာ။ မရှိသလို ပြောလို့ မရဘူး။)', "(What's gone is really gone. I can't talk it away.)") } },
   { id: 'unlucky', lookalike: true, name: L('ကံဆိုးလိုက်တာ', 'Poor unlucky you'),
-    line: L('ဦးဦးက တကယ် ကံဆိုးတာပဲ။ ဒုက္ခတွေ ဦးဦးဆီပဲ လာတာ။', 'You really are unlucky. Trouble always finds you.'),
+    line: L('ဦးဦးက တကယ် ကံဆိုးတာပဲ။ ဒုက္ခတွေ ဦးဦးဆီပဲ လာနေတာ။', 'You really are unlucky. Trouble always finds you.'),
     shows: ['hot'], really: L('"ငါ့မှ" ဆိုတဲ့ အတွေးကို ထပ်ထည့်ပေးတာ', 'feeding the "only me"'),
     backfire: { they: L('ဟုတ်တယ်… အမြဲ ငါ့ကိုပဲ…', 'Yes… always me…'),
       maya: L('(သနားတယ်လို့ ထင်ပြီး "ငါ့ကိုပဲ" ကို ပိုခိုင်အောင် လုပ်လိုက်မိပြီ။)', '(Meaning to be kind, I made "only me" stronger.)') } },
@@ -75,15 +75,15 @@ export const TALK_D12_HPOHTAW = {
     { lines: [
       { my: 'ဒါ ငါ့ ပျိုးပင်တွေ။ တုတ်ချောင်းတိုင်းမှာ ငါ့နာမည် ကိုယ်တိုင် ရေးထားတာ။', en: 'Those are MY seedlings. I wrote my name on every stick myself.', need: 'cling', seems: 'given', face: 'sad',
         tell: L('လက်လျှော့တာ မဟုတ်ဘူး။ နာမည်တုတ်ကို လက်ထဲမှာ လှည့်နေတယ်။ တံခါးအောက်က လွင့်ဝင်လာတဲ့ စိုစိုစာရွက်တွေကိုတော့ ကျော်နင်းသွားတာပဲ။', "Not giving up: he's turning a name stick in his fingers. The soaked sheets blown in under his door he just steps over.") },
-      { my: 'လမ်းထဲက စာရွက်တွေ? ငါ့ဟာ မဟုတ်ဘူး။ ဘယ်သူ ဂရုစိုက်လို့လဲ။', en: 'The sheets in the lane? Not mine. Who cares about those.', need: 'cling', face: 'think', heard: true },
+      { my: 'လမ်းထဲက စာရွက်တွေ? ငါ့ဟာ မဟုတ်ဘူး။ ဘယ်သူ ဂရုစိုက်မှာလဲ။', en: 'The sheets in the lane? Not mine. Who cares about those.', need: 'cling', face: 'think', heard: true },
     ] },
     { lines: [
       { my: '…ဒါဆို အခု ဘာလုပ်ရမလဲ။', en: '…So what do I do now?', need: 'own', seems: 'unknown', face: 'think',
-        tell: L('မာရာ့ကို မေးတာ မဟုတ်ဘူး။ သံဗူးကို ကြည့်ပြီး ကိုယ့်ကိုယ်ကို မေးနေတာ။', "He isn't asking Maya. He's looking at the seed tin, asking himself.") },
+        tell: L('မာရာ့ကို မေးတာ မဟုတ်ဘူး။ သံဘူးကို ကြည့်ပြီး ကိုယ့်ကိုယ်ကိုယ် မေးနေတာ။', "He isn't asking Maya. He's looking at the seed tin, asking himself.") },
     ] },
     { lines: [
       { my: 'ပြန်စိုက်လည်း နောက်နှစ် မိုးက ပြန်လာဦးမှာပဲ။ ဘာအသုံးကျလို့လဲ။', en: "Plant again and next year's rain comes anyway. What's the use?", need: 'given', seems: 'hot', face: 'sad', mood: 'down',
-        tell: L('ဒေါသ မဟုတ်ဘူး။ စင်ပေါ်က မနှစ်က မှတ်တမ်းစာအုပ်ကို ဆွဲချပြီး ဖွင့်ထားတယ်: မိုးကြီး၊ ပြီးတော့ ပန်းခင်းတွေ ပြန်ပွင့်ခဲ့တယ်။', "Not anger. He has pulled last year's diary off the shelf and it lies open: heavy rain; and after it the beds bloomed again.") },
+        tell: L('ဒေါသ မဟုတ်ဘူး။ စင်ပေါ်က မနှစ်က မှတ်တမ်းစာအုပ်ကို ဆွဲချပြီး ဖွင့်ထားတယ် - မိုးကြီး၊ ပြီးတော့ ပန်းခင်းတွေ ပြန်ပွင့်ခဲ့တယ်။', "Not anger. He has pulled last year's diary off the shelf and it lies open: heavy rain; and after it the beds bloomed again.") },
       { my: 'မိုးက နှစ်တိုင်း လာမှာပဲ။ နှစ်တိုင်း။', en: 'The rain will come every year. Every year.', need: 'given', face: 'think', heard: true },
     ] },
     { lines: [
@@ -134,7 +134,7 @@ export const D12_OHN_CARDS = [
   { id: 'tellhim', lookalike: true, name: L('သွားပြောလိုက်', 'Go tell him off'),
     line: L('သွား! ဘယ်လိုလူလဲဆိုတာ လူအများရှေ့မှာ ပြောလိုက်!', 'Go on! Tell him what he is, in front of everyone!'),
     shows: ['given'], really: L('ပါးစပ် ညစ်ပတ်ခံတာ', 'dirtying your own mouth'),
-    backfire: { they: L('(ဒေါ်အုန်း ထရပ်တယ်။ အိုးဖုံး ဒေါင်းခနဲ ခုန်တယ်။) …အဲဒီလိုလူအတွက် ကျွန်မ ပါးစပ် မညစ်ချင်ဘူး။', "(Daw Ohn half rises; the lid bangs.) …I won't dirty my mouth over a man like that."),
+    backfire: { they: L('(ဒေါ်အုန်း ထရပ်တယ်။ အိုးဖုံး ဒေါင်းခနဲ ခုန်တယ်။) …အဲဒီလိုလူအတွက် ကျွန်မ ပါးစပ် အညစ်မခံဘူး။', "(Daw Ohn half rises; the lid bangs.) …I won't dirty my mouth over a man like that."),
       maya: L('(အပူကို ပိုထည့်ပေးလိုက်မိပြီ။)', '(I just added heat.)') } },
 ];
 
@@ -150,7 +150,7 @@ export const TALK_D12_DAWOHN = {
   hand: ['notice', 'bepatient', 'firefly', 'today', 'glad', 'nextbuyer', 'tellhim', 'quiet'].map(ohnCard),
   stones: [
     { lines: [
-      { my: 'ဒီကလေးတွေ! အဘွားကြီးကို တုတ်နဲ့ ခေါက်ပြီး ရယ်နေကြတယ်။', en: "Those kids! Knocking an old woman's pot and laughing.", need: 'hot', seems: 'looksdown', face: 'hot', steam: 1,
+      { my: 'ဒီကလေးတွေ! အဘွားကြီးအိုးကို တုတ်နဲ့ ခေါက်ပြီး ရယ်နေကြတယ်။', en: "Those kids! Knocking an old woman's pot and laughing.", need: 'hot', seems: 'looksdown', face: 'hot', steam: 1,
         tell: L('ကလေးတွေကို အထင်သေးတာ မဟုတ်ဘူး။ သူတို့ ပြေးသွားတာကို လိုက်ကြည့်နေတယ်။ ရင်ထဲ ပူနေတာ။', "Not looking down on them: she watches them run off. It's heat inside.") },
       { my: 'ဒေါသအိုးတဲ့… ဟုတ်ချင်လည်း ဟုတ်မှာပေါ့။ ကျွန်မက အဲဒီလို မွေးလာတာ။', en: '"Anger pot"… maybe they\'re right. Maybe I was born that way.', need: 'afraid', seems: 'hot', face: 'sad',
         tell: L('ဒေါသ မဟုတ်ဘူး။ မိချိုရဲ့ အိုးလေးလုံးကို လှမ်းကြည့်နေတယ်။ "မရဘူး" လို့ တစ်ခါ ရေးခဲ့ဖူးတဲ့ ကလေး။ ကိုယ်လည်း တစ်သက်လုံး ဒီလိုပဲ ဖြစ်နေမှာ ကြောက်နေတာ။', "Not anger. She glances at Mi Cho's four pots: the girl she once chalked \"can't\" for. She's afraid she'll be this way for life.") },
@@ -170,7 +170,7 @@ export const TALK_D12_DAWOHN = {
     ] },
   ],
   react: {
-    miss: L('…အဲဒါက ဆန်နဲ့ မဆိုင်ဘူး သမီး။', "…That's nothing to do with the rice, dear."),
+    miss: L('…အဲဒါ ဆန်နဲ့ မဆိုင်ဘူး သမီး။', "…That's nothing to do with the rice, dear."),
     hot: L('(ဒေါ်အုန်း မီးဖိုကို ယပ်နဲ့ ခပ်ပြင်းပြင်း ခတ်နေတယ်။ ဘာမှ မကြားဘူး။)', '(Daw Ohn fans the coals hard. Nothing gets through.)'),
     lean: L('ဒါဆို သမီးပဲ သွားချိန်ပေးပါတော့…', 'Then you go and weigh it for me, dear…'),
   },

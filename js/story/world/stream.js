@@ -133,9 +133,56 @@ export function createStreamer({ scene, net, edges, shadows = false, low = false
       for (const c of ch.cells) {
         const dc = Math.hypot(Math.max(c.x0 - camAt.x, 0, camAt.x - c.x1), Math.max(c.z0 - camAt.z, 0, camAt.z - c.z1));
         // (view depth is at most ~10% shorter than the distance inside a phone's narrow view)
-        c.mesh.visible = dc * 0.9 < fogFar + 2;
+        c.near = dc * 0.9 < fogFar + 2;
+        c.mesh.visible = c.near && c.inView !== false;
         if (c.outline) c.outline.visible = dc < OUTLINE_R;
         if (c.cast) c.mesh.castShadow = Math.hypot(Math.max(c.x0 - fx, 0, fx - c.x1), Math.max(c.z0 - fz, 0, fz - c.z1)) < SHADOW_R;
+      }
+    }
+  }
+  // Per frame: a block (and its outline) or a piece of ground the camera cannot see is not drawn at all (three.js'
+  // own test uses a loose sphere, so blocks behind the lens or past the top of a phone screen were still drawn).
+  // A block that casts the sun's shadow stays while that shadow can fall into view (its box swept along the sun).
+  const vFr = new THREE.Frustum(), vM = new THREE.Matrix4(), vBox = new THREE.Box3(), vSun = new THREE.Vector3(), vTgt = new THREE.Vector3();
+  let sun = null, sunScan = 0;
+  function showAll() {
+    for (const ch of chunks.values()) {
+      if (ch.state !== 'ready' || !ch.cells) continue;
+      for (const c of ch.cells) { c.inView = true; c.mesh.visible = c.near !== false; }
+      for (const o of ch.group.children) if (o.name === 'ground') o.visible = true;
+    }
+  }
+  function viewCells(camera) {
+    if ((sunScan -= 1) <= 0) { sunScan = 120; sun = null; scene.traverse((o) => { if (!sun && o.isDirectionalLight && o.castShadow) sun = o; }); }
+    let sx = 0, sz = 0; // shadow offset on the ground per metre of height
+    if (sun) {
+      sun.getWorldPosition(vSun); sun.target.getWorldPosition(vTgt);
+      vTgt.sub(vSun);
+      const dn = Math.max(0.12, -vTgt.y);
+      sx = vTgt.x / dn; sz = vTgt.z / dn;
+    }
+    vFr.setFromProjectionMatrix(vM.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
+    const M = 1.5; // (the camera may still move a little after this, this frame)
+    for (const ch of chunks.values()) {
+      if (ch.state !== 'ready' || !ch.cells) continue;
+      for (const c of ch.cells) {
+        if (!c.box) { const g = c.mesh.geometry; if (!g.boundingBox) g.computeBoundingBox(); c.box = g.boundingBox.clone().applyMatrix4(c.mesh.matrixWorld); }
+        vBox.copy(c.box).expandByScalar(M);
+        let seen = vFr.intersectsBox(vBox);
+        if (!seen && c.mesh.castShadow) {
+          const h = Math.min(c.box.max.y, 30), ox = sx * h, oz = sz * h;
+          vBox.min.x = Math.min(c.box.min.x, c.box.min.x + ox) - M; vBox.max.x = Math.max(c.box.max.x, c.box.max.x + ox) + M;
+          vBox.min.z = Math.min(c.box.min.z, c.box.min.z + oz) - M; vBox.max.z = Math.max(c.box.max.z, c.box.max.z + oz) + M;
+          vBox.min.y = -0.5; vBox.max.y = c.box.max.y + M;
+          seen = vFr.intersectsBox(vBox);
+        }
+        c.inView = seen;
+        c.mesh.visible = c.near !== false && seen;
+      }
+      for (const o of ch.group.children) {
+        if (o.name !== 'ground') continue;
+        if (!o.userData.vbox) { const g = o.geometry; if (!g.boundingBox) g.computeBoundingBox(); o.userData.vbox = g.boundingBox.clone().applyMatrix4(o.matrixWorld); }
+        o.visible = vFr.intersectsBox(vBox.copy(o.userData.vbox).expandByScalar(M));
       }
     }
   }
@@ -234,6 +281,7 @@ export function createStreamer({ scene, net, edges, shadows = false, low = false
     root,
     chunks,
     pools,
+    viewCull: true, // (false: blocks off screen are drawn again; for a same-frame comparison)
     /** Builds every chunk near (x, z) right now (used behind a page-turn, e.g. a desk teleport). */
     ensure(x, z) {
       // only what is right round her now (a few tens of ms); update() streams the rest in, nearest first
@@ -309,6 +357,7 @@ export function createStreamer({ scene, net, edges, shadows = false, low = false
           cullTrees();
           cullCells(x, z, fogFar);
         } else viewOk = false;
+        if (!camera || hold || !api.viewCull) showAll();
         for (const ch of chunks.values()) {
           if (!ch.useful) continue;
           ch.dist = rectDist(ch, fx, fz);
@@ -317,6 +366,7 @@ export function createStreamer({ scene, net, edges, shadows = false, low = false
         }
         queue.sort((a, b) => a.dist - b.dist);
       }
+      if (camera && !hold && api.viewCull) { camera.updateMatrixWorld(); viewCells(camera); }
       if (current && current.state === 'ready') current = null; // (finished by ensure)
       if (!current && queue.length) current = queue.shift();
       if (current && current.state === 'ready') current = null;

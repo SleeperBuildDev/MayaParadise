@@ -149,7 +149,7 @@ const BLOT = `<svg class="so-blot" viewBox="0 0 120 40" aria-hidden="true"><path
 const T = {
   next: { my: 'နောက်တစ်ရွက်', en: 'Next slip' },
   left: (n, all) => ({ my: `${myNum(all - n)} / ${myNum(all)} ထည့်ပြီး`, en: `${all - n} of ${all} placed` }),
-  wrong: { my: 'ဟင့်အင်း… ဒီထဲ မဟုတ်ဘူး။', en: "No… not in this one." },
+  wrong: { my: 'ဟင့်အင်း… ဒီထဲမှာ မဟုတ်ဘူး။', en: "No… not in this one." },
   closed: { my: 'ဒီခြင်း မဖွင့်ရသေးဘူး', en: 'This basket is not open yet' },
   all: { my: 'အားလုံး နေရာကျပြီ', en: 'Every slip is in its place' },
 };

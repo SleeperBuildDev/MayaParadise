@@ -579,7 +579,7 @@ export const PEOPLE = [
     job: { area: { x: 15, z: 65.8, r: 2.6 }, spot: { x: 14.2, z: 60.3, h: 0 }, mood: 'work', workChance: 0.7, workFor: [6, 12] } },
   { id: 'hninwai', x: -11.5, z: 88.4, heading: 0, hello: { my: 'ကလေးတွေ ဒီနေ့ အရမ်းဆော့ကြတယ်။', en: 'The children are very lively today.' },
     job: { area: { x: -12, z: 94.6, r: 3.6 }, spot: { x: -12.5, z: 93.4, h: Math.PI }, mood: 'read', workChance: 0.5, workFor: [5, 9] } },
-  { id: 'toetoe', x: -17.5, z: 97.6, heading: 0, hello: { my: 'အစ်မ၊ ဒန်းစီးမလား။', en: 'Want a go on the swing, sister?' },
+  { id: 'toetoe', x: -17.5, z: 97.6, heading: 0, hello: { my: 'အစ်မ၊ ဒန်းစီးဦးမလား။', en: 'Want a go on the swing, sister?' },
     job: { area: { x: -12, z: 97.4, r: 5 }, spot: { x: -19, z: 97.6, h: 0 }, mood: 'play', workChance: 0.6, speed: 1.2 } },
   { id: 'sunwe', x: -4.5, z: 99.6, heading: -0.4, hello: { my: 'စာမေးပွဲ နီးလာပြီ။ စိုးရိမ်တယ်။', en: 'Exams are coming. I am nervous.' },
     job: { area: { x: -6, z: 100, r: 3 }, spot: { x: -3.2, z: 99.8, h: -0.6 }, mood: 'read', workChance: 0.6, workFor: [6, 10] } },

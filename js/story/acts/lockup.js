@@ -22,7 +22,7 @@ const T = {
   wait: { my: 'ခေါ်သံ ဆုံးအောင် စောင့်ပါ', en: 'Wait for the whole call' },
   quoin: { my: 'ဖိထားပြီး ကျပ်ပါ · ရွှေကွက်ထဲမှာ လွှတ်ပါ', en: 'Hold to tighten · let go in the gold' },
   hold: { my: 'ဖိထား', en: 'Hold' },
-  loose: { my: 'ချောင်နေသေးတယ် — စာကြောင်းတစ်ကြောင်း လှုပ်နေတယ်', en: 'Still loose: a row rattles' },
+  loose: { my: 'ချောင်နေသေးတယ် — တစ်တန်း လှုပ်နေတယ်', en: 'Still loose: a row rattles' },
   tight: { my: 'တင်းလွန်းတယ် — ဘောင် ကွေးသွားပြီ', en: 'Too tight: the frame bows' },
   locked: { my: 'ဘောင် ကျပ်ပြီ', en: 'Locked up tight' },
   turned: { my: 'ဇောက်ထိုး ပြန်လှည့်ပြီ', en: 'Turned the right way up' },

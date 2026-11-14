@@ -120,7 +120,7 @@ export function openMap({ game, seen, desks, net, places = [], onTravel }) {
   const wrap = document.createElement('div');
   wrap.id = 'story-map';
   wrap.innerHTML = `<div class="nb"><div class="nb-head"><span>${tr({ my: 'မာရာ့ မှတ်စုစာအုပ် မြေပုံ', en: "Maya's notebook map" })}</span><button type="button" class="x" aria-label="close">✕</button></div><canvas></canvas><div class="nb-foot"></div></div>`;
-  wrap.querySelector('.nb-foot').textContent = tr({ my: 'ရွှေမင်နဲ့ ရေးထားတာ ကိုယ်တိုင် မြင်ဖူးတဲ့ နေရာတွေပဲ။ ဖဲကြိုးလေးကို နှိပ်ရင် အဲဒီစာမျက်နှာကို လှန်လို့ရတယ်။', en: 'Only places she has seen are inked in gold. Tap a ribbon to turn to that page.' });
+  wrap.querySelector('.nb-foot').textContent = tr({ my: 'ရွှေမင်နဲ့ ရေးထားတာ ကိုယ်တိုင် မြင်ဖူးတဲ့ နေရာတွေပဲ။ ဖဲကြိုးကို နှိပ်ရင် အဲဒီစာမျက်နှာ လှန်လို့ရတယ်။', en: 'Only places she has seen are inked in gold. Tap a ribbon to turn to that page.' });
   document.getElementById('game').appendChild(wrap);
   const canvas = wrap.querySelector('canvas');
 

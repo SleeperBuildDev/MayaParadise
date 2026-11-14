@@ -155,9 +155,11 @@ self.addEventListener('activate', (event) => {
 });
 
 // Background check of the page on the network: a different build means a new version exists.
-async function checkLatest() {
+// It asks by the address the player opened, which the browser's HTTP cache knows, so an
+// unchanged page costs a tiny "not modified" answer instead of the whole page.
+async function checkLatest(url) {
   try {
-    const r = await fetch(keyOf('index.html'), { cache: 'no-cache', credentials: 'same-origin' });
+    const r = await fetch(url, { cache: 'no-cache', credentials: 'same-origin' });
     if (!r.ok) return;
     const m = /__BUILD\s*=\s*["']([^"']+)["']/.exec(await r.text());
     if (!m || m[1] === VERSION || m[1] === latest) return;
@@ -179,7 +181,7 @@ self.addEventListener('fetch', (event) => {
       cache = await caches.open(CACHE);
       const hit = await cache.match(keyOf(p));
       if (hit) {
-        if (nav) event.waitUntil(checkLatest());
+        if (nav) event.waitUntil(checkLatest(req.url));
         return hit;
       }
     } catch { /* storage unavailable: network only */ }

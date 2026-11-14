@@ -106,6 +106,9 @@ export async function createStory(game) {
         // daily life: roam their own patch and do their job (paused while Maya is close or a scene runs)
         const mpos = game.maya.root.getWorldPosition(v);
         const near = Math.hypot(mpos.x - e.p.root.position.x, mpos.z - e.p.root.position.z) < 2.8 && (foot.active || story.talking);
+        // (while Maya talks, the far ones carry on: the town does not freeze for a conversation)
+        const farTalk = story.talking && Math.hypot(mpos.x - e.p.root.position.x, mpos.z - e.p.root.position.z) > 8;
+        if (e.roam && (!story.talking || farTalk) && e !== story.talkWith && e.roam(dt, near)) continue; // roam.js: free townsfolk walk their streets
         if (e.job && !near && !story.talking && !e.paused) { lifeStep(e, dt); continue; }
         if (e.job && near && e.life?.mood) { e.p.setMood(e.baseMood ?? null); e.life.mood = null; e.life.state = 'idle'; e.life.t = 1 + Math.random() * 2; }
         // notice Maya when she comes close on foot
@@ -246,6 +249,10 @@ export async function createStory(game) {
   // Pick a camera for two people talking: across their line (so both faces show), the side nearer the
   // usual south camera first, raised if something stands in between.
   const camRay = new THREE.Raycaster();
+  // (every layer: the Home Book's houses are drawn from batched copies, world/homebatch.js, and the originals that
+  // hold their shape sit on a layer no camera draws; on layer 0 alone the ray never met them, and the Day 1
+  // opening's camera stood inside a house, the screen one yellow wall)
+  camRay.layers.enableAll();
   function twoShot(a, b) {
     const portrait = game.viewW < game.viewH;
     const mid = new THREE.Vector3((a.x + b.x) / 2, 0.75, (a.z + b.z) / 2);
@@ -440,6 +447,7 @@ export async function createStory(game) {
   story.openWorld = openWorld;
   const foot = createFoot(game, { open: openWorld });
   story.foot = foot;
+  if (openWorld) import('./roam.js').then(({ installRoam }) => installRoam(game, story, openWorld)).catch((e) => console.error('roam', e)); // townsfolk roam their own streets
   story.dialog = createDialog(game, story);
   story.talk = createTalk(game, story, { twoShot }); // the turn-based talk (talk.js)
   story.twoShot = twoShot; // (a day may frame a scripted exchange the same way: story.twoShot(mayaPos, theirPos) -> azimuth)
@@ -524,6 +532,8 @@ export async function createStory(game) {
     } catch (err) { console.error('resume place', err); }
   }
   import('./extras-ui.js').then(({ installUI }) => installUI(game, story, openWorld)).catch((e) => console.error('extras ui', e)); // corner map + town intros
+  import('./hints.js').then(({ installHints }) => installHints(game, story)).catch((e) => console.error('hints', e)); // the small "what next" line under the place label
+  import('./world/blobpool.js').then(({ installBlobPool }) => installBlobPool(game)).catch((e) => console.error('blob pool', e)); // every soft contact shadow in one draw call
   // (lazy towns: the houses, chatter and Ko Hein Htet read the whole land once, so they wait for every town)
   const whole = () => (townLoader ? townLoader.then((tl) => tl?.extras()) : Promise.resolve());
   whole().then(() => import('./extras-houses.js')).then(({ installHouses }) => installHouses(game, story)).catch((e) => console.error('extras houses', e)); // everyday houses to walk into

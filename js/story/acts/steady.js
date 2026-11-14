@@ -503,11 +503,11 @@ const T = {
   dive: { my: 'တင်းလွန်းတယ် — စွန် ထိုးကျနေပြီ', en: 'Too tight: the kite is diving' },
   sag: { my: 'လျော့လွန်းတယ် — စွန် နိမ့်ကျလာပြီ', en: 'Too slack: the kite is sinking' },
   flagDown: { my: 'အလံ ကျသွားပြီ… စွန်လည်း လိုက်ကျတယ်', en: 'The flag dropped… and the kite with it' },
-  looked: { my: 'မော့ကြည့်မိတယ် — ရေစီး လွဲသွားပြီ', en: 'Looked up: the stream went wide' },
+  looked: { my: 'မော့ကြည့်မိလို့ ရေစီး လွဲသွားပြီ', en: 'Looked up: the stream went wide' },
   missCup: { my: 'ခွက်ထဲ မကျဘူး — ဘေးနည်းနည်း ရွှေ့ပါ', en: 'Missing the cup: move it a little sideways' },
   full: { my: 'ခွက် ပြည့်ပြီ', en: 'The cup is full' },
   settle: { my: 'ရပ်ပြီး ငြိမ်အောင် စောင့်', en: 'Stop, and wait for it to settle' },
-  freeze: { my: 'လွှဲလွန်းလို့ ကြိုးကို ဆုပ်ထားရတယ်… ငြိမ်အောင် စောင့်', en: 'Swaying too much: she grips the rope… wait till it settles' },
+  freeze: { my: 'လွှဲလွန်းလို့ ကြိုးကို ဆုပ်ထားရတယ်… ငြိမ်အောင် စောင့်ဦး', en: 'Swaying too much: she grips the rope… wait till it settles' },
   spilled: { my: 'ဖိတ်သွားပြီ', en: 'Spilled' },
   declined: { my: 'ရပ်ပြီး ယဉ်ယဉ်လေး ငြင်းလိုက်တယ်', en: 'Stopped, and kindly said no' },
   again: { my: 'ပြန်စမယ်', en: 'Again' },
@@ -1198,7 +1198,7 @@ export function steady(o = {}) {
         stats.slips++;
         buzz(30);
         const line = kind === 'clench' ? react.clench : kind === 'down' ? react.bowed : react.tossed;
-        A.setHint({ my: 'ပြန်ငြိမ်ပြီး ထပ်စမယ်', en: 'Settle, and the same words come again' }, 'warn');
+        A.setHint({ my: 'ပြန်ငြိမ်ပြီး ဒီစကားပဲ ထပ်စမယ်', en: 'Settle, and the same words come again' }, 'warn');
         await say.say(who0, line || { my: '…', en: '…' });
         say.clear();
         stats.tries++;

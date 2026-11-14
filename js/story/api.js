@@ -70,10 +70,10 @@ const L = {
   tabItems: { my: 'ပစ္စည်း', en: 'Things' },
   tabComp: { my: 'အဖော်လေးတွေ', en: 'Companions' },
   empty: { my: 'ဘာမှ မရှိသေးဘူး', en: 'Nothing yet' },
-  noComp: { my: 'စာမျက်နှာ တစ်မျက်နှာ ပြီးတိုင်း အဖော်လေး တစ်ကောင် ထွက်လာမယ်။', en: 'Each finished page lets one companion out.' },
+  noComp: { my: 'စာမျက်နှာ တစ်မျက်နှာ ပြီးတိုင်း အဖော်လေး တစ်ကောင် ထွက်လာလိမ့်မယ်။', en: 'Each finished page lets one companion out.' },
   stamps: { my: 'လက်တွေ့ စစ်ပြီး', en: 'Checked for real' },
   pot: { my: 'အိုးထဲ', en: 'in the pot' },
-  notWritten: (n) => ({ my: `စာမျက်နှာ ${myNum(n)} ကို မရေးရသေးဘူး။ မြို့ထဲ လှည့်လည်ကြည့်နေမယ်နော်။`, en: `Page ${n} isn't written yet. I'll wander the town for now.` }),
+  notWritten: (n) => ({ my: `စာမျက်နှာ ${myNum(n)} ကို မရေးရသေးဘူး။ လောလောဆယ် မြို့ထဲ လှည့်လည်ကြည့်နေမယ်နော်။`, en: `Page ${n} isn't written yet. I'll wander the town for now.` }),
   rubbed: { my: 'ကိုယ်တိုင် စစ်ကြည့်တော့ မရှိဘူး။ ကလောင်နဲ့ ဖျက်လိုက်ပြီ။', en: "I checked it myself: it isn't there. Rubbed out with the quill." },
 };
 

@@ -531,7 +531,7 @@ function jSchool(g, f, it, ctx) {
   face(f, -2.1, 0.62, fz + 0.035, 0.3, 0.04, J.white); face(f, -2.1, 0.7, fz + 0.035, 0.3, 0.04, J.white);
   for (let k = 0; k < 6; k++) f.boxR(2.4, 0.66, fz + 0.035, 0.32, 0.03, 0.01, J.mustard, 0, 0, (k * Math.PI) / 6);
   // the sign on the gable
-  ctx.signs.push({ x: 0, y: H + 0.62, z: fz + 0.12, w: 2.8, h: 0.6, lines: [{ text: 'လမ်းဆုံ ကျောင်း', size: 54, color: '#3A6345' }], bg: '#FFFDF8', border: '#3A6345', width: 448, height: 96 });
+  ctx.signs.push({ x: 0, y: H + 0.62, z: fz + 0.12, w: 2.8, h: 0.6, lines: [{ text: 'လမ်းဆုံကျောင်း', size: 54, color: '#3A6345' }], bg: '#FFFDF8', border: '#3A6345', width: 448, height: 96 });
   g.box(0, H + 0.62, fz + 0.05, 3.0, 0.76, 0.1, J.greenD);
   // a slate rack and two leaning slates by the west wall, a small flag
   g.box(-W / 2 + 0.6, 0.65, fz + 0.4, 0.9, 0.06, 0.3, J.woodL);
@@ -1047,7 +1047,7 @@ export const PROP = {
   jEasel: { draw: jEasel, r: 0.3 },
   jPier: { draw: jPier },
   jRope: { draw: jRope, obstacles: (it) => [circ(it, 0.12, 0.1, -0.55), circ(it, 0.12, 0.1, 0.55)] },
-  jPaving: { draw: jPaving },
+  jPaving: { draw: jPaving, obstacles: () => [] }, // (flat paving: walkable; the w/d default made a 24 x 16 m keep-out over the road)
   jLip: { draw: jLip, obstacles: (it) => [rotBox(it, it.len || 8, 0.25)] },
   jBundles: { draw: jBundles, obstacles: (it) => [rotBox(it, 1.6, 0.5)] },
   jSheets: { draw: jSheets, obstacles: (it) => [circ(it, 0.12, -(it.len || 3.6) / 2, 0), circ(it, 0.12, (it.len || 3.6) / 2, 0)] },

@@ -606,7 +606,8 @@ export const ART = {
   riceShop: { h: 4.6, map: true, draw: riceShop, obstacles: (it) => [box(it, it.w, it.d + 0.1, 0, 0.05), box(it, 1.7, 0.45, -2.4, it.d / 2 + 0.45), box(it, 1.7, 0.45, 2.4, it.d / 2 + 0.45)] },
   sundries: { h: 4.0, map: true, draw: sundries, obstacles: (it) => [box(it, it.w, it.d, 0, 0), box(it, 0.6, 0.5, -2.4, it.d / 2 + 0.5)] },
   carverRow: { h: 4.6, map: true, draw: carverRow, obstacles: (it) => [box(it, it.w, it.d - 1.4, 0, -0.7), box(it, 1.5, 0.62, -it.w / 3 - 0.2, it.d / 2 - 0.6), box(it, 1.5, 0.62, -0.2, it.d / 2 - 0.6), box(it, 0.45, 0.45, it.w / 3 + 1.0, it.d / 2 - 1.0)] },
-  stampStall: { h: 2.4, draw: stampStall, obstacles: (it) => [box(it, (it.w || 3.0) - 0.2, 0.7, 0, 0.5), box(it, (it.w || 3.0), 0.3, 0, -0.75)] },
+  stampStall: { h: 2.4, draw: stampStall, obstacles: (it) => [box(it, (it.w || 3.0) - 0.2, 0.7, 0, 0.5), box(it, (it.w || 3.0), 0.3, 0, -0.75),
+    box(it, 0.5, 0.4, -(it.w || 3.0) / 2 + 0.45, -0.3), box(it, 0.32, 0.32, 0.5, -0.25)] }, // (and the keeper's crate and stool: Ko Yaung walked into the crate, 0.4 m deep)
   gateSign: { h: 2.8, draw: gateSign, obstacles: (it) => [circ(it, -1.5, 0, 0.2), circ(it, 1.5, 0, 0.2)] },
 };
 
@@ -852,7 +853,10 @@ function scribe(g, f) {
   f.box(0.38, 0.8, -0.2, 0.08, 0.1, 0.08, K.ink);
   for (const [z, c] of [[-0.55, K.blue], [0.6, K.red]]) { g.box(0, 0.42, z, 0.32, 0.05, 0.32, c); g.box(0, 0.2, z, 0.24, 0.4, 0.24, shade(c, 0.8)); }
   g.box(0.75, 1.0, 0.0, 0.05, 2.0, 0.05, K.woodD);
-  for (let k = 0; k < 8; k++) g.box(0.75 + Math.cos(k * Math.PI / 4) * 0.55, 2.0 - 0.06, Math.sin(k * Math.PI / 4) * 0.55, 0.6, 0.05, 0.6, k % 2 ? K.cream : K.red, k * Math.PI / 4);
+  // the parasol: eight striped wedges of a true low cone (kit.js parasol: overlapping tilted panels tore into
+  // stripes and holes on phones while the camera moved), a cap on top
+  g.parasol(0.75, 2.02, 0, 0.86, 0.2, [K.red, K.cream]);
+  g.box(0.75, 2.04, 0.0, 0.12, 0.08, 0.12, K.red);
 }
 function handcart(g, f, it) {
   // a two-wheeled handcart of parcels and a basket of stamps' wrapping paper

@@ -38,7 +38,7 @@ const T = {
   stop: { my: 'ရပ်မယ်', en: 'Stop' },
   tap: { my: 'ထိုး', en: 'Pole' },
   good: { my: 'ဟုတ်ပြီ', en: 'Good' },
-  slip: { my: 'လှော်တက် မထိဘူး… ရေစီးက ဆွဲသွားပြီ', en: 'The pole is not set… the current takes you past' },
+  slip: { my: 'ဝါးလုံး မထိဘူး… ရေစီးက ဆွဲသွားပြီ', en: 'The pole is not set… the current takes you past' },
   docked: { my: 'ဆိပ်မှာ ရပ်ထားတယ်', en: 'Held at the jetty' },
   home: { my: 'ဆိပ်ငယ်ကို ပြန်ရောက်ပြီ', en: 'Back at Little Jetty' },
   greet: { my: 'လူကို ထိပြီး နှုတ်ဆက်ပါ', en: 'Tap them to say hello' },
@@ -185,7 +185,7 @@ export function attachPoleStrip(host, R, { stopLabel = T.stop, onTap, onStop, fl
     }
     if (n !== ariaHold) {
       ariaHold = n;
-      cv.setAttribute('aria-label', `လှော်တက် ထောက်ရန် နှိပ်ပါ · ကိုင်ထားမှု ${n}/3 · Tap to plant the pole; grip ${n} of 3`);
+      cv.setAttribute('aria-label', `ဝါးလုံး ထောက်ရန် နှိပ်ပါ · ကိုင်ထားမှု ${n}/3 · Tap to plant the pole; grip ${n} of 3`);
     }
   }
   return {

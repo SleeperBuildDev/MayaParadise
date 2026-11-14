@@ -467,7 +467,7 @@ export const PEOPLE = [
     job(146.2, 215.6, -HP, 'work', 0.8)),
   folk('sanshar', [11], 149.9, 230.4, HP, { my: 'ခေါက်ရိုး မှန်မှ ဘူးက ပိတ်တယ်။ စိတ်လောရင် စက္ကူပဲ ပြဲတယ်။', en: 'A box only closes if the folds are true. Rush it and the paper tears.' },
     job(149.9, 230.4, HP, 'work', 0.8)),
-  folk('maungpan', [11], 161.2, 205.6, 0, { my: 'ဒီအကွက်ကို မနင်းနဲ့နော်၊ ကျွန်တော့်အကွက်! …အရင် မေးရင်တော့ နင်းခွင့်ပေးမယ်။', en: "Don't step on this square, it's mine! …If you ask first, I'll let you." },
+  folk('maungpan', [11], 161.2, 205.6, 0, { my: 'ဒီအကွက်ကို မနင်းနဲ့နော်၊ ကျွန်တော့်အကွက်! …အရင် မေးရင်တော့ နင်းခိုင်းမယ်။', en: "Don't step on this square, it's mine! …If you ask first, I'll let you." },
     job(161.2, 206.0, 0, 'play', 1.6, { speed: 1.2 })),
   folk('upu', [11], 133.1, 206.6, HP, { my: 'ခေါက်ဆွဲ ခြောက်ချင်ရင် နေထဲ ချိတ်ထား။ စကားလည်း ဒီလိုပဲ၊ မပြောခင် ခဏ အေးပါစေ။', en: 'Want noodles to dry? Hang them in the sun. Words too: let them cool a moment before you say them.' },
     job(133.1, 206.6, HP, 'work', 0.8)),
@@ -477,9 +477,9 @@ export const PEOPLE = [
     job(241.4, 198.8, 0, 'read', 1.0)),
   folk('nyinyi', [11], 245.0, 198.9, -0.3, { my: 'သူငယ်ချင်းကောင်းက ကြိုးညှိပေးသလိုပဲ။ မပြောခင် သိပြီး ကူတယ်။', en: 'A good friend is like someone tuning your strings: they notice before you say, and help.' },
     job(245.0, 198.9, -0.3, 'work', 0.8)),
-  folk('sithu', [13], 168.4, 197.2, Math.PI, { my: 'ရတနာ့ ချည်ကို ဆွဲရင် သူ စိတ်ဆိုးတတ်တယ်။ ဒါကြောင့် မကိုင်ခင် မေးတယ်။', en: "Yadanar gets cross if her thread is pulled. So I ask before I touch it." },
+  folk('sithu', [13], 168.4, 197.2, Math.PI, { my: 'ရတနာ့ချည်ကို ဆွဲရင် သူ စိတ်ဆိုးတတ်တယ်။ ဒါကြောင့် မကိုင်ခင် မေးတယ်။', en: "Yadanar gets cross if her thread is pulled. So I ask before I touch it." },
     job(168.4, 197.4, Math.PI, 'work', 0.9)),
-  folk('yadanar', [13], 161.4, 198.4, 0, { my: 'ကိုယ် ဘာကို အမုန်းဆုံးလဲ ကိုယ်သိရင် တခြားသူကို ကြိုပြောထားလို့ ရတယ်။', en: 'If you know what you hate most, you can tell people beforehand.' },
+  folk('yadanar', [13], 161.4, 198.4, 0, { my: 'ကိုယ် ဘာကို အမုန်းဆုံးလဲ သိရင် တခြားသူကို ကြိုပြောထားလို့ ရတယ်။', en: 'If you know what you hate most, you can tell people beforehand.' },
     job(161.4, 198.4, 0, 'read', 1.0)),
 ];
 export const SIGNS = [];

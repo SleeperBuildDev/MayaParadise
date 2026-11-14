@@ -10,14 +10,14 @@ export const L = {
     naychi: { my: '"တစ်နေကုန် စောင့်ခဲ့တယ်။ မနက်ဖြန် ကိုယ့်ခြေနဲ့ တစ်လှမ်း လှမ်းကြည့်မယ်။" — နေခြည်', en: '"I waited all day. Tomorrow I\'ll take one step on my own feet." — Nay Chi' },
     thida: { my: '"တွင်းကို ဒီမနက်လည်း ကြည့်ခဲ့တယ်။ ပြည့်နေတုန်း။" — မသီတာ', en: '"I looked in the well again this morning. Still full." — Ma Thida' },
     kowunna: { my: '"မနေ့က မေးတတ်လာတယ်။ ဒီနေ့ နားထောင်တတ်အောင် သင်မယ်။" — ကိုဝဏ္ဏ', en: '"Yesterday I learned to ask. Today I\'ll learn to listen." — Ko Wunna' },
-    utint: { my: '"အနှစ်လေးဆယ်ကြာမှ တစ်ဖက်ဘက်က ကြည့်ဖူးတယ်။" — ဦးတင့်', en: '"Forty years, and I\'d never looked from the other side." — U Tint' },
+    utint: { my: '"အနှစ်လေးဆယ်ကြာမှ တစ်ဖက်ကနေ ကြည့်ဖူးတယ်။" — ဦးတင့်', en: '"Forty years, and I\'d never looked from the other side." — U Tint' },
     kan: { my: '"ရှေးစကားကို လေးစားတယ်။ ဒါပေမဲ့ တွင်းကို ကိုယ်တိုင် ကြည့်တယ်။" — ဦးကံ', en: '"I respect the old sayings. And I look in the well myself." — U Kan' },
   },
   ww2: [{ my: 'ကိုဝဏ္ဏဆီကလည်း စာလေး ပါလာတယ်။', en: 'And a note from Ko Wunna.' }],
   kwNote: { my: 'အစ်မ… ဆရာကြီးကို အရင်ခွင့်တောင်းပြီးမှ ခေါင်းစီးတုံးကို အတူတူ ပြန်ဆင်ခဲ့တယ်။\nနာရီ မှန်တဲ့ စာရွက် ဒီမနက် ထွက်သွားပြီ။\nဆရာကြီး မရယ်တော့ဘူး။ ကျွန်တော်လည်း မမေးဘဲ ဘာမှ မလုပ်တော့ဘူး။', en: "Sister… I asked the old printer first, then we set the title block back together.\nThe sheet with the right hour went out this morning.\nHe didn't scoff. And I don't do anything without asking now." },
   ttQ: { my: '"ဒီနေ့မေးခွန်း: ပေါင်မုန့်က မီးဖိုထဲမှာ ဘာလို့ ဖောင်းလာတာလဲ။" — တိုးတိုး', en: '"Today\'s question: why does bread puff up in the oven?" — Toe Toe' },
   cat: { my: '(မနေ့က စာမျက်နှာပေါ်ကနေ ပိုးကောင်လေး တစ်ကောင် တွန့်လိမ်ပြီး ထွက်လာတယ်။ ကွင်း ခုနစ်ကွင်း။)', en: "(A little caterpillar wriggles off yesterday's page. Seven rings.)" },
-  beetle: { my: '(နောက်ပြီး ပိုးတောင်မာလေး။ ကျောပေါ်မှာ ၆… ပတ်လှည့်လိုက်တော့ ၉။)', en: '(Then a little beetle. A 6 on its back… it turns round: a 9.)' },
+  beetle: { my: '(နောက်ပြီး ပိုးတောင်မာလေး။ ကျောပေါ်မှာ ၆… လှည့်လိုက်တော့ ၉။)', en: '(Then a little beetle. A 6 on its back… it turns round: a 9.)' },
   mayaPets: [{ my: 'ကြားရုံနဲ့ မယုံဘူး။ ဟိုဘက်ကနေလည်း ကြည့်မယ်။ လိုက်ခဲ့ကြ။', en: 'Not believing just what I hear. Looking from the other side too. Come on, both of you.' }],
   ww3: [
     // WORLD: "north of the Junction" (the spec said east; in the open world the Row is up the road north)
@@ -111,7 +111,7 @@ export const L = {
     { cue: { my: '(မုန့်တစ်လုံး အပေါ်က ကွဲသွားတယ်။)', en: '(One loaf splits on top.)' }, steamTo: 2, ms: 2600,
       then: { my: 'ကွဲတာ ဘာကြောင့်လို့ မင်း ထင်လဲ။', en: 'Why do you think it split?' } },
   ],
-  hbEarly: { maya: { my: 'ကျွန်မ ပြောပြမယ်…', en: 'Let me tell him…' }, they: { my: 'ဒါဆို မင်းပဲ သင်လိုက်တော့လေ။', en: 'Then you teach him.' } },
+  hbEarly: { maya: { my: 'ကျွန်မ ပြောပြမယ်…', en: 'Let me tell him…' }, they: { my: 'ဒါဆို နင်ပဲ သင်လိုက်တော့လေ။', en: 'Then you teach him.' } },
   hbEnd: { my: 'အပေါ်က ဓားနဲ့ မခြစ်ခဲ့လို့… နောက်ဗန်းကျ ခြစ်မယ်။', en: "I didn't score the top… next tray I will." },
   // 5.6 the two trays
   kmTrays: [{ my: 'စင်ပေါ်က ဗန်းနှစ်ဗန်း ကြည့်ပါဦး။', en: 'Have a look at the two trays on the rack.' }], // new: said, not pointed
@@ -285,7 +285,7 @@ export const L = {
   ],
   deskWrong: [{ my: '(ဒါ ကြားခဲ့တာ။ မျက်လုံးနဲ့ ပြန်ကြည့်ပါဦး။)', en: "(That's what I heard. Look again.)" }],
   noteWallNotes: [
-    { my: 'ပေါင်မုန့် ချက်နည်း — ဂျုံ၊ ရေ၊ တဆေး၊ ဆား၊ စောင့်ချိန်', en: 'Bread: flour, water, yeast, salt, and time' },
+    { my: 'ပေါင်မုန့် လုပ်နည်း — ဂျုံ၊ ရေ၊ တဆေး၊ ဆား၊ စောင့်ချိန်', en: 'Bread: flour, water, yeast, salt, and time' },
     { my: 'ကြောင်ဖြူလေး ပျောက်နေတယ် — တွေ့ရင် ခေါက်ဆွဲဆိုင်ကို ပြောပါ', en: 'Lost: a little white cat. Tell the noodle shop' },
   ],
 
@@ -295,7 +295,7 @@ export const L = {
   nightQ: { my: 'ဒီနေ့အကြောင်း မှန်မှန်ကန်ကန် ဘယ်လို ရေးမလဲ။', en: 'How will she write today, truthfully?' },
   nightChoices: [
     { my: 'ဒေါ်ခင်မေကို ကျွန်မ ပြင်ပေးလိုက်တယ်။ မောင်အာကာ့ကိုလည်း သူငယ်ချင်း ရှာပေးလိုက်တယ်။', en: 'I fixed Daw Khin May, and I found Maung Arkar a friend.' },
-    { my: 'ဒေါ်ခင်မေက ဆင်ခြေမပါဘဲ ကိုယ့်အမှား ကိုယ်ပြင်တယ်။ အော်သံမပါတဲ့ ဗန်းက မုန့်လည်း အတူတူပဲ။ အိမွန်က မောင်အာကာ့ကို အရင်နားထောင်ပြီးမှ လမ်းပြတယ်။ ကတောက်ကဆတ် ဖြစ်တော့ ကိုယ့်အသံ ကိုယ်ပြင်ကြတယ်။', en: 'Daw Khin May put her own fault right, no excuses; the quiet tray\'s bread was the same. Ei Mon listened to Maung Arkar first, then showed him the way. When they squabbled, each mended their own tone.' },
+    { my: 'ဒေါ်ခင်မေက ဆင်ခြေမပေးဘဲ ကိုယ့်အမှား ကိုယ်ပြင်တယ်။ အော်သံမပါတဲ့ ဗန်းက မုန့်လည်း အတူတူပဲ။ အိမွန်က မောင်အာကာ့ကို အရင်နားထောင်ပြီးမှ လမ်းပြတယ်။ ကတောက်ကဆတ် ဖြစ်တော့ ကိုယ့်အသံ ကိုယ်ပြင်ကြတယ်။', en: 'Daw Khin May put her own fault right, no excuses; the quiet tray\'s bread was the same. Ei Mon listened to Maung Arkar first, then showed him the way. When they squabbled, each mended their own tone.' },
     { my: 'အော်တတ်တဲ့လူက ဘယ်တော့မှ မပြောင်းဘူး။ ရွာလွမ်းတဲ့ ကောင်လေးလည်း တစ်ယောက်တည်းပဲ ကျန်မှာ။', en: 'People who shout never change. And a homesick boy stays alone.' },
   ],
   nightWrong: [

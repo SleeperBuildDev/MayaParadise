@@ -1411,7 +1411,7 @@ function buildSnackshop(opts = {}) {
       paperBg(g, w, h, '#FFFBF0', 6);
       g.fillStyle = 'rgba(200,50,60,0.85)'; g.fillRect(0, 0, w, 7);
       txt(g, 'ဈေးသွားတယ်။', w / 2, h * 0.34, 30, C.ink, { maxW: w - 12 }); // DRAFT(my): the keeper's note
-      txt(g, 'ကိုယ့်ဟာကိုယ် ချိန်ပါ။', w / 2, h * 0.72, 23, C.maroon, { maxW: w - 12 }); // DRAFT(my)
+      txt(g, 'ကိုယ့်ဘာသာ ချိန်ပါ။ |', w / 2, h * 0.72, 23, C.maroon, { maxW: w - 12 }); // DRAFT(my)
     }, 500);
     st.sign(0.42, 0.28, M(0.9, H + 0.19, -1.64, -0.3, 0, 0), (g, w, h) => { slateBg(g, w, h, 33); chalkText(g, 'အမ်းငွေ', w / 2, h * 0.3, 30, '#F7E7A6'); chalkText(g, 'ကိုယ်တိုင်ယူ', w / 2, h * 0.7, 28); }, 320); // DRAFT(my): change slate
     S.boxMin(0.67, H, -1.74, 1.13, H + 0.34, -1.71, C.woodL);
@@ -1464,7 +1464,7 @@ function buildSnackshop(opts = {}) {
     rows.forEach(([a, b], i) => { chalkText(g, a, w * 0.38, h * (0.22 + i * 0.28), 30); chalkText(g, `${b} ကျပ်`, w * 0.8, h * (0.22 + i * 0.28), 30, '#F7E7A6'); });
   }, 220);
   st.tap('sn-prices', -1.8, -0.74, 0.5, { x: 0, z: -2.9 }, { my: 'ဈေးနှုန်းဘုတ်', en: 'the price board' }); // DRAFT(my)
-  st.wallSign('back', -1.95, 2.68, 1.9, 0.32, (g, w, h) => { rr(g, 3, 3, w - 6, h - 6, 12, C.maroon, C.gold, 5); txt(g, 'ကိုယ့်ဟာကိုယ် ချိန်၊ ကိုယ့်ဟာကိုယ် အမ်းယူ', w / 2, h / 2 + 2, Math.round(h * 0.34), '#F7E7A6'); }, 260); // DRAFT(my)
+  st.wallSign('back', -1.95, 2.68, 1.9, 0.32, (g, w, h) => { rr(g, 3, 3, w - 6, h - 6, 12, C.maroon, C.gold, 5); txt(g, 'ကိုယ့်ဘာသာ ချိန်၊ ကိုယ့်ဘာသာ အမ်းယူ |', w / 2, h / 2 + 2, Math.round(h * 0.34), '#F7E7A6'); }, 260); // DRAFT(my)
 
   // --- the three open bins before the counter (bean seeds, roasted peas, tamarind flakes)
   const binFills = [['#7A3A2A', '#9A4A34', 'ပဲစေ့'], ['#D9A94A', '#E8BE62', 'ပဲလှော်'], ['#6B3A22', '#8A5432', 'မန်ကျည်း']]; // DRAFT(my)

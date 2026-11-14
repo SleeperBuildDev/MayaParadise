@@ -1073,6 +1073,11 @@ export async function create(story) {
       // ---- 8.9 the page, in the player's hands (keep it, optional)
       await keepPage(true);
       setHour(19.2);
+      // the third who go into the Café go while the page is still white (the crowd mesh is rebuilt out of sight,
+      // and nobody vanishes in front of the player as the white lifts)
+      for (const id of CAFE_AFTER) { if (mine.has(id)) { dropLight(id); story.remove(id); mine.delete(id); } }
+      crowdSync();
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
       await white.off(); white = null;
     } catch (err) {
       console.error('day15 launch', err);

@@ -48,7 +48,7 @@ export const FOLK_PEOPLE = [
     hello: { my: 'လေနည်းနည်းချင်း ယိုတဲ့ဘီးက အပြင်က မမြင်ရဘူး။ သူငယ်ချင်းကောင်းက မပြောခင် သတိထားမိတယ်။', en: "A slow leak doesn't show from outside. A good friend notices you're riding flat before you say a word." },
     job: job(188.4, 206.2, 0, 'work', 0.7) },
   { id: 'hngwe', x: 196.9, z: 206.1, heading: 0,
-    hello: { my: 'ကြိုးကို ဒီဘက် ရွှေ့ချိတ်ထားတယ်။ ငါ့အဝတ်က ရေစက်တွေ ဘေးအိမ်က ထမင်းပေါ် မကျစေချင်လို့။', en: "I moved my line over this way. I don't want my drips landing on next door's rice." },
+    hello: { my: 'ကြိုးကို ဒီဘက် ရွှေ့ချိတ်ထားတယ်။ ငါ့အဝတ်က ရေစက်တွေ ဘေးအိမ်ထမင်းပေါ် မကျစေချင်လို့။', en: "I moved my line over this way. I don't want my drips landing on next door's rice." },
     job: job(196.9, 206.1, 0, 'work', 0.8) },
   { id: 'hupe', x: 221.2, z: 207.2, heading: HP,
     hello: { my: 'လက်ဖက်ရည်ဝိုင်းကို ကြည့်။ အတူထိုင်တဲ့သူတွေ စကားပြောပုံ တူလာတယ်။ ဝိုင်းကို ရွေးထိုင်ပေါ့။', en: 'Look round a tea table: people who sit together start to talk alike. Choose your table.' },

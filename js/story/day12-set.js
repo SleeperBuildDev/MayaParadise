@@ -645,7 +645,7 @@ export function buildSet(story) {
   }
   // the outdoor stalls stand empty today; Daw Ohn's slate says where the market went
   h.stalls = P.stalls.map((s, i) => {
-    const st = put(marketStall({ w: 1.6, striped: i % 2 === 0, slate: true, text: i === P.ohnStall ? 'ဒေါ်အုန်း · အိုး → အိုးလှမ်းဆောင်' : '' }), garden, s.x, s.z);
+    const st = put(marketStall({ w: 1.6, striped: i % 2 === 0, slate: true, text: i === P.ohnStall ? 'ဒေါ်အုန်း · အိုး → အိုးလှန်းဆောင်' : '' }), garden, s.x, s.z);
     box(s.x - 0.85, s.x + 0.85, s.z - 0.5, s.z + 0.5);
     return st;
   });

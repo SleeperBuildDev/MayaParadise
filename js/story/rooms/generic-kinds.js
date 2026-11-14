@@ -357,7 +357,7 @@ function elderA(c) {
 function workshop(c) {
   const { R, hw, hd } = c;
   const trade = c.trade;
-  const title = { carver: 'တံဆိပ်တုံး ထွင်းသည်', potter: 'မြေအိုး လုပ်ငန်း', printer: 'ပုံနှိပ်တိုက်', weaver: 'ယက်ကန်း', netmender: 'ပိုက်ကွန် ပြင်သည်', carpenter: 'လက်သမား' }[trade] || 'အလုပ်ရုံ'; // DRAFT(my)
+  const title = { carver: 'တံဆိပ်တုံး ထွင်းသည်', potter: 'မြေအိုး လုပ်ငန်း', printer: 'ပုံနှိပ်တိုက်', weaver: 'ရက်ကန်း |', netmender: 'ပိုက်ကွန် ပြင်သည်', carpenter: 'လက်သမား' }[trade] || 'အလုပ်ရုံ'; // DRAFT(my)
   const signW = R.range(1.5, 2.0), signX = R.pick([-0.45, 0, 0.45]);
   c.sign('back', signX, 2.64, signW, 0.36, (g, w, h) => ART.boardSign(g, w, h, title, { bg: R.chance(0.5) ? c.pal.sign : R.pick(['#6E1F2A', '#2A2118', '#8E4A2C', '#2F5C5A']) }), 240);
   const winX = trade === 'printer' ? null : ['potter', 'weaver', 'carpenter'].includes(trade) ? -1.65 : 1.65;

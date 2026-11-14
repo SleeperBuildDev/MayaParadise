@@ -18,7 +18,7 @@ export const D7_YY_CARDS = [
     line: { my: 'နောက်ခံကားကို တံတားအထိ မင်း ဆွဲခဲ့တာ။ ပြဇာတ် ဘယ်ကိုသွားလဲ မင်း သိပြီးသား။', en: 'You painted the road to the bridge. You already know where the play goes.' },
     answers: ['unknown', 'given'], from: { my: 'နောက်ဆုံးတန်းက ရခဲ့တာ', en: 'from the back row' } },
   { id: 'owners', name: { my: 'ခန်းတိုင်းမှာ ကိုယ်ပိုင် ဇာတ်လိုက်', en: 'Each scene its own lead' },
-    line: { my: 'ခန်းတိုင်းမှာ ကိုယ့်ဇာတ်လိုက် ကိုယ်ရှိတယ်။ ခန်းအားလုံးကို တစ်ယောက်တည်း ဦးဆောင်တာ မရှိဘူး။ "မာရာ" တောင် မဟုတ်ဘူး။', en: 'Every scene has its own lead. Nobody leads them all. Not even "Maya".' },
+    line: { my: 'ခန်းတိုင်းမှာ ကိုယ့်ဇာတ်လိုက် ကိုယ်ရှိတယ်။ ခန်းအားလုံး တစ်ယောက်တည်း ဦးဆောင်တာ မရှိဘူး။ "မာရာ" တောင် မဟုတ်ဘူး။', en: 'Every scene has its own lead. Nobody leads them all. Not even "Maya".' },
     answers: ['afraid'], from: { my: 'ဇာတ်ကောင်စာရင်းက ရခဲ့တာ', en: 'from the cast list' } },
   { id: 'tonight', name: { my: 'ဒီညဟာ', en: "Tonight's" },
     line: { my: 'မနှစ်ကဟာ ပြီးသွားပြီ။ နောက်နှစ်ဟာ မရောက်သေးဘူး။ ဒီည ကိုင်ထားတာပဲ လုပ်လို့ရတာ။', en: "Last year's is gone. Next year's isn't here. Tonight's is the one you can work on." },
@@ -32,7 +32,7 @@ export const D7_YY_CARDS = [
     line: { my: 'နောက်တစ်ခါ ကိုယ့်စကားနဲ့ ပြောကြည့်။ ခုနကလည်း ရခဲ့တာပဲ။', en: 'Once more, in your own words. You managed it just now.' }, // the Sheep's own word (ch 1)
     answers: ['given', 'afraid'], from: { my: 'သိုးမည်းလေး', en: 'the Black Sheep' } },
   { id: 'special', lookalike: true, name: { my: 'မင်းက ထူးခြားတယ်', en: "You're special" },
-    line: { my: 'မင်းက တကယ် ထူးခြားတယ်။ ပြဇာတ်က ခန်းတိုင်းမှာ မင်းကို လိုတယ်။', en: 'You really are special. The play needs you in every scene.' },
+    line: { my: 'မင်းက တကယ် ထူးခြားတယ်။ ပြဇာတ် ခန်းတိုင်းမှာ မင်းကို လိုတယ်။', en: 'You really are special. The play needs you in every scene.' },
     shows: ['afraid'], really: { my: 'ဇာတ်လိုက်ဖြစ်ချင်စိတ်ကို မြှောက်ပေးတာ', en: 'flattery that feeds the wish to be the lead' },
     backfire: { they: { my: 'ဟုတ်တယ်မလား! ဒါဆို ခန်းတိုင်းမှာ မနှစ်က မိန့်ခွန်း ပြန်ပြောမယ်!', en: "Right?! Then I'll say last year's speech in every scene!" },
                 maya: { my: '(သူ့ကို ဖိထားတဲ့အရာကိုပဲ ကျွန်မ ထပ်ကျွေးလိုက်မိပြီ။)', en: '(I just fed the very thing that weighs on him.)' } } },
@@ -66,11 +66,11 @@ export const TALK_D7_YEYINT = {
     ] },
     { lines: [
       { my: 'ခုံသယ်တာ တခြားသူတွေ အလုပ်။ ကျွန်တော်က မတူဘူး။', en: "Carrying benches is for the others. I'm different.", need: 'afraid', seems: 'looksdown', face: 'hot', steam: 1,
-        tell: { my: 'သူတို့ကို အထင်သေးတာ မဟုတ်ဘူး။ အတူတူ ရယ်ပြီး ခုံသယ်နေတဲ့ တန်းကို ခဏခဏ လှည့်ကြည့်တယ်။ သူလည်း သယ်ရင် သူတို့ထဲက တစ်ယောက်ပဲ ဖြစ်သွားမှာ ကြောက်နေတာ။', en: "He doesn't look down on them. He keeps glancing at the line laughing as they carry. If he carried too, he'd be just one of them, and that scares him." } },
+        tell: { my: 'သူတို့ကို အထင်သေးတာ မဟုတ်ဘူး။ အတူ ရယ်ပြီး ခုံသယ်နေတဲ့ တန်းကို ခဏခဏ လှည့်ကြည့်တယ်။ သူပါ သယ်ရင် သူတို့ထဲက တစ်ယောက်ပဲ ဖြစ်သွားမှာ ကြောက်နေတာ။', en: "He doesn't look down on them. He keeps glancing at the line laughing as they carry. If he carried too, he'd be just one of them, and that scares him." } },
       { my: 'ဇာတ်လိုက်က ခုံမသယ်ဘူး။ လူတိုင်း သိတယ်။', en: "The lead doesn't carry benches. Everyone knows that.", need: 'afraid', seems: 'looksdown', face: 'hot' },
     ] },
     { lines: [
-      { my: 'ခန်းတိုင်းမှာ "မာရာ" မပါရင်… ကျွန်တော် မပါရင်… စင်ပေါ်မှာ ကျွန်တော်က ဘယ်သူမှ မဟုတ်တော့ဘူး။', en: 'If "Maya" isn\'t in every scene… if I\'m not… then up there I\'m nobody.', need: 'afraid', face: 'sad', heard: true,
+      { my: 'ခန်းတိုင်းမှာ "မာရာ" မပါရင်… ကျွန်တော် မပါရင်… စင်ပေါ်မှာ ကျွန်တော် ဘယ်သူမှ မဟုတ်တော့ဘူး။', en: 'If "Maya" isn\'t in every scene… if I\'m not… then up there I\'m nobody.', need: 'afraid', face: 'sad', heard: true,
         tell: { my: 'စိတ်ကောက်နေတာ မဟုတ်ဘူး။ "ဘယ်သူမှ မဟုတ်" ဆိုတဲ့စကားကို တကယ်ဖြစ်မှာ စိုးသလို တိုးတိုးလေး ပြောတယ်။', en: 'Not sulking. He says "nobody" very quietly, as if it might be true.' } },
     ] },
     { lines: [
@@ -89,6 +89,6 @@ export const TALK_D7_YEYINT = {
   },
   decision: [
     { my: 'ဘယ်သူမှ ဇာတ်လိုက် မဟုတ်ဘူးဆိုတော့… ပေါ့သွားတယ်။ လူတိုင်းက ကျွန်တော့်ကိုပဲ ကြည့်နေစရာ မလိုတော့ဘူး။', en: "If nobody's the lead… that's lighter. Nobody has to watch only me.", face: 'surprised' },
-    { my: 'ဒီည တိုးတိုးရဲ့ခန်းမှာ ရေဇလုံသယ်တဲ့ကောင်လေး လုပ်မယ်။ ပြီးတော့ ကျွန်တော့်ခန်း တစ်ခန်းတည်း: မိန့်ခွန်းတစ်ခုတည်း သုံးနှစ်ပြောခဲ့တဲ့ ကောင်လေး။ ဒီညရဲ့ စကားနဲ့ ပြောမယ်။', en: "Tonight I'll be the boy with the water bowl in Toe Toe's scene. And one scene of my own: the boy who gave the same speech three years. In tonight's words.", face: 'happy' },
+    { my: 'ဒီည တိုးတိုးရဲ့ခန်းမှာ ရေဇလုံသယ်တဲ့ကောင်လေး လုပ်မယ်။ ပြီးတော့ ကျွန်တော့်ခန်း တစ်ခန်းတည်း: မိန့်ခွန်းတစ်ခုတည်း သုံးနှစ်ပြောခဲ့တဲ့ ကောင်လေး။ ဒီည စကားနဲ့ ပြောမယ်။', en: "Tonight I'll be the boy with the water bowl in Toe Toe's scene. And one scene of my own: the boy who gave the same speech three years. In tonight's words.", face: 'happy' },
   ],
 };

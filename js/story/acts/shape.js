@@ -17,7 +17,7 @@ const C = { hi: '#E6A673', mid: '#C47A45', lo: '#9A5531', dark: '#6A361C', inner
 const T = {
   centre: { my: 'ဖိပြီး ဆွဲ — အစက်ကို ကွင်းထဲ ထိန်းထား', en: 'Hold and drag: keep the dot inside the ring' },
   centreOut: { my: 'ရွှံ့ ယိမ်းနေတယ် — အလယ်ကို ပြန်ဆွဲ', en: 'The clay is wobbling: bring it back to the middle' },
-  pull: { my: 'အောက်ကနေ အပေါ်ကို ဖြည်းဖြည်း ဆွဲတင်ပါ', en: 'Drag upward, slowly and smoothly' },
+  pull: { my: 'အောက်ကနေ အပေါ်ကို ဖြည်းဖြည်းချင်း ဆွဲတင်ပါ', en: 'Drag upward, slowly and smoothly' },
   pullFast: { my: 'ဖြည်းဖြည်း… မြန်လွန်းရင် နံရံ လှိုင်းထတယ်', en: 'Gently… too fast and the wall ripples' },
   hurry: { my: 'နေ စောင်းလာပြီ — အမြန် လုပ်ရတော့မယ်', en: 'The sun is sinking: no time, hurry' },
   potDone: { my: 'အိုး တစ်လုံး ပြီးပြီ', en: 'One pot done' },
@@ -605,7 +605,7 @@ export function shape({ title = '', hint = '', loads = [2, 3, 5], best = 2, roun
       bi(endEl, cracked
         ? { my: `အိုး ${myNum(S.load)} လုံးထဲက ${myNum(cracked)} လုံး အက်ကွဲသွားတယ်။ အချိန်မလောက်လို့ အမြန် ခြောက်သွားတာ။`, en: `${cracked} of ${S.load} pots cracked. They dried too fast.` }
         : ok ? { my: `အိုး ${myNum(S.load)} လုံးလုံး မကွဲမအက်ဘဲ ကောင်းကောင်း ကျန်တယ်။`, en: `All ${S.load} pots came out whole.` }
-          : { my: `အိုးတွေ မကွဲပေမဲ့ ပုံမညီဘူး၊ စောင်းနေတယ်။ အေးအေးဆေးဆေး ပြန်ပုံသွင်းရမယ်။`, en: 'No pot cracked, but they came out lopsided. Shape them again, slowly.' }); // DRAFT(my)
+          : { my: `အိုးတွေ မကွဲပေမဲ့ ပုံမကျဘူး၊ စောင်းနေတယ်။ ဖြည်းဖြည်းချင်း ပြန်ပုံသွင်းရမယ်။`, en: 'No pot cracked, but they came out lopsided. Shape them again, slowly.' }); // DRAFT(my)
       endEl.dataset.tone = ok ? 'good' : 'warn';
       endEl.hidden = false;
       A.setHint({ my: 'နောက်တစ်နေ့ မနက် — အိုးတွေကို ကြည့်ရအောင်', en: 'Next morning: look at the pots' });

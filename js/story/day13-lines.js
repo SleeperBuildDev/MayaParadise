@@ -35,7 +35,7 @@ export const L = {
     { my: 'မပြီးသေးတဲ့ အရာက ဖုံးထားခွင့် ရှိတယ်လေ။ ပိုင်ရှင် ပြချင်မှ ပြတာ။', en: "Unfinished things are allowed to stay covered. The owner shows them when she's ready." },
   ],
   kmAgain: [{ my: 'အိမွန်လား။ နောက်ဖေး လှေကားထစ်မှာ။ မီးဖိုလေပူ ထွက်တဲ့နေရာ။ ဂျုံအိတ်တွေ ပုံထားတဲ့ ဘေးလမ်းကြားကနေ ပတ်သွား။', en: 'Ei Mon? On the back step, where the oven air comes out. Go round by the side lane, where the flour sacks are.' }],
-  kmAfter: [{ my: 'ဒီနေ့ အာကာက ကျွန်မ မုန့်စိမ်းပေါ်က အဝတ်ကို မလှပ်ခင် "လှပ်လို့ရလား" တဲ့။ ရုံက တက်ဂ်တွေ ကူးလာပြီ။', en: 'Today Arkar asked "may I?" before lifting the cloth off my dough. The shed\'s tags are catching on.' }],
+  kmAfter: [{ my: 'ဒီနေ့ အာကာက ကျွန်မ မုန့်စိမ်းပေါ်က အဝတ်ကို မလှပ်ခင် "လှပ်လို့ရလား" တဲ့။ ရုံက တဂ်တွေ ကူးလာပြီ။', en: 'Today Arkar asked "may I?" before lifting the cloth off my dough. The shed\'s tags are catching on.' }],
   arkar1: [{ my: 'စာနံရံမှာ ရေးတာ ဘယ်သူမှ မဖြေဘူး။ ဒါနဲ့ ကိုယ်တိုင် ရှာတော့ နောက်ဖေးမှာ တွေ့တယ်။ ကျွန်တော်နဲ့ မပြောချင်ဘူး။ အစ်မနဲ့ဆို ပြောမလား မသိဘူး။', en: "Nobody answered my note on the wall, so I went and looked myself. Found her out back. She won't talk to me. Maybe she will to you." }],
   arkarMore: [
     [{ my: 'မနေ့က ရက်ကန်းရုံ ဖြတ်လာတော့ လူတွေ ရယ်နေကြတယ်။ အိမွန်ကိုတော့ မမြင်လိုက်ဘူး။', en: "Passing the shed yesterday, people were laughing. I didn't see Ei Mon." }],
@@ -59,7 +59,7 @@ export const L = {
   ],
   emOpen: [{ my: '…(လက်က အထုပ်ပေါ် ပိုဖိထားလိုက်တယ်။) မဟုတ်ဘူး။ ကျွန်မ… မသေချာဘူး။', en: "…(Her hands press down harder on the bundles.) No. I'm… not sure." }],
   emOpenMaya: [{ my: '(သူမလုပ်ချင်တာကို ကျွန်မက ဆွဲခေါ်နေမိတယ်။)', en: "(I was pulling her toward something she doesn't want.)" }],
-  emSmall: [{ my: 'အစ်မအတွက် လေးလေးလား။ ကျွန်မအတွက် ပူတယ်။', en: 'Small for you, maybe. It burns for me.' }],
+  emSmall: [{ my: 'အစ်မအတွက် သေးသေးလေးလား။ ကျွန်မအတွက် ပူတယ်။', en: 'Small for you, maybe. It burns for me.' }],
   emSmallMaya: [{ my: '(မကြိုက်တာကို မကြိုက်ရဘူးလို့ ပြောလိုက်သလို ဖြစ်သွားပြီ။)', en: '(I just told her not to dislike what she dislikes.)' }],
   emYes: [{ my: '…သုံးခါ ရှိတယ်။ သတိထားမိတဲ့ သုံးခါ။', en: '…Three times. Three that I noticed.' }],
   emInside: [{ my: 'ဒီမှာတော့ မပြောချင်ဘူး။ လူတွေ ဖြတ်သွားတယ်။ အထဲ လာ။ ဒေါ်ခင်မေက နောက်ဖေးခန်းမှာ ထိုင်ခွင့်ပေးထားတယ်။', en: 'Not out here. People go past. Come inside. Daw Khin May lets me sit in the back room.' }],
@@ -126,7 +126,7 @@ export const L = {
   stAfterShed: [{ my: 'ပြောတဲ့အတိုင်းပဲ ပြောပြနော်။', en: 'Tell her just what we said.' }],
   ydAfter: [{ my: 'အိမွန့်ဖုံးကို ကြည့်ချင်တုန်းပဲ။ ဒါပေမဲ့ မေးမယ်။ "မရသေးဘူး" ဆိုလည်း ရတယ်။', en: 'I still want to see under her cover. But I\'ll ask. "Not yet" is fine.' }],
   stAfter: [{ my: 'ကြည့်ချင်ရင် မေးမယ်။ ရိုးရိုးလေးပဲ။', en: "If I want to look, I'll ask. Simple." }], // (draft: from his slept13 line)
-  weaverName: { my: 'ယက်ကန်းသမား', en: 'A weaver' },
+  weaverName: { my: 'ရက်ကန်းသမား', en: 'A weaver' },
 
   // ------------------------------------------------------------------ C1 carry their words
   carryQ: { my: 'သူတို့ ပြောတာကို ဘယ်လို ပြန်ပြောမလဲ။', en: 'How will she pass on what they said?' },
@@ -198,7 +198,7 @@ export const L = {
   ds1: [
     { my: 'လာ သမီး။ ညနေစာ ကျက်ခါနီးပြီ။ ဒီရွက်ပေါ်မှာ ဒီအမိုး တစ်ခုပဲ ရှိတာ။', en: "Come, dear. Supper's nearly ready. This is the only roof on the leaf." },
     { my: 'ကလေးသုံးယောက် ဒီမနက် ရောက်လာကြတယ်။ ဆိုင်းဘုတ်ကို "ဟောပြောနေတာ" တဲ့။ မှောင်ရင် တိတ်တိတ်နေတဲ့ ဓလေ့ကိုလည်း "အစွန်းရောက်တယ်" တဲ့။', en: 'Three young ones came this morning. They call the board "preaching". And the custom of quiet after dark, "extreme".' },
-    { my: 'ဥယျာဉ်ဘက်က လူတွေကတော့ သူတို့ ဆိုင်းဘုတ်ကို ဖျက်ပစ်ပြီတဲ့။ ကိုယ်တိုင် ကြည့်ပါလား။', en: 'The garden folk say they scrubbed my board. Have a look for yourself.' },
+    { my: 'ဥယျာဉ်ဘက်က လူတွေကတော့ ကျုပ် ဆိုင်းဘုတ်ကို ဖျက်ပစ်ပြီတဲ့။ ကိုယ်တိုင် ကြည့်ပါလား။', en: 'The garden folk say they scrubbed my board. Have a look for yourself.' },
     { my: 'ဒီက မြောက်ဘက်ကို ဘယ်သူမှ မလျှောက်ဖူးဘူး။ နောက်ဆုံးရွက်ကနေ ပြန်လမ်း မရှိဘူးတဲ့။ လာတဲ့လမ်းအတိုင်း ပြန်ကြရတာ။', en: "Nobody has ever walked north from here. They say there's no road back from the last leaf; you go back the way you came." },
   ],
   dsIn: [{ my: 'ဖိနပ် ချွတ်ပြီး ဝင်ခဲ့။', en: 'Slip your sandals off and come in.' }],
@@ -219,7 +219,7 @@ export const L = {
   psRespectMaya: [{ my: '(ကိုယ်တိုင် စမ်းခွင့် မပေးဘဲ ခေါင်းညိတ်ခိုင်းလိုက်မိတယ်။)', en: '(I told them to bow to it instead of letting them look for themselves.)' }],
   psDown: [{ my: 'ဖြုတ်မှာလား? …ဒါ အစ်မဟာ မဟုတ်ဘူးလေ။ အဒေါ့်ဟာ။', en: "Take it down? …It isn't yours. It's hers." }],
   psDownMaya: [{ my: '(သူတို့ သဘောကျအောင် တခြားသူ့ဟာကို ဖယ်ပေးလိုက်မလို့။)', en: "(I'd have removed someone else's board to please them.)" }],
-  mayaPlain: [{ my: 'ခေါင်းစဉ်ပဲ ဖုံးထားတယ်။ စာကြောင်းတွေကို မပြင်ဘူး။ ဖွင့်မဖွင့်ကတော့ ကိုယ်တို့ ရွေးပါ။', en: "Only the title's covered. The lines are as they were. Whether to lift it is up to you." }],
+  mayaPlain: [{ my: 'ခေါင်းစဉ်ပဲ ဖုံးထားတာ။ စာကြောင်းတွေကို မပြင်ဘူး။ ဖွင့်မဖွင့်ကတော့ ကိုယ်တို့ ရွေးပါ။', en: "Only the title's covered. The lines are as they were. Whether to lift it is up to you." }],
   psNotYet: [{ my: 'ဖဲ တစ်ပွဲ ပြီးမှ ပြောမယ်။', en: "Let's talk after this hand of cards." }],
   boardTitle: { my: 'ငါးပါးသီလ', en: 'The Five Precepts' },
   boardLines: [
@@ -231,27 +231,27 @@ export const L = {
   ],
   testQ: { my: 'ဒီမှာ အတူအိပ်တဲ့သူက ကိုယ့်ကို ဒီလို လုပ်ရင် ကြိုက်မလား။', en: 'If someone sleeping in this room did this to you, would you want it?' },
   testA: [{ my: 'ကြိုက်တယ်', en: 'Yes, I would' }, { my: 'မကြိုက်ဘူး', en: "No, I wouldn't" }],
-  testYes: { my: '(ကိုယ့်ဘက်က ပြန်တွေးကြည့်ပါဦး။)', en: '(Think of it from your own side.)' },
+  testYes: { my: '(ကိုယ့်ဘက်ကနေ ပြန်တွေးကြည့်ပါဦး။)', en: '(Think of it from your own side.)' },
   dsPoint: { my: 'ဒီတစ်ကြောင်း။', en: 'This line.' }, // (draft: Daw Pwint points at each line)
   scenes: [
     { line: 1, spot: 'sceneGecko',
       play: { my: '(မိုးက နံရံပေါ်က အိမ်မြှောင်လေးကို ကျောက်စရစ်ခဲလေးတွေနဲ့ ပစ်ပြီး ပြေးအောင် လုပ်နေတယ်။)', en: '(Moe is flicking pebbles at the little gecko on the wall to make it run.)' },
       yes: { who: 'shwesin', my: 'ငါ့ကိုလည်း ပျင်းလို့ဆိုပြီး လာပစ်ရင်ရော။', en: 'And if someone flicked things at me because they were bored?' },
-      keep: { who: 'moe', my: '(ကျောက်ခဲတွေ ချလိုက်တယ်။) …သေးတဲ့အကောင်ကို မနှောင့်ယှက်တော့ဘူး။ လက်မှတ်ထိုးမယ်။', en: "(He drops the pebbles.) …I'll leave the small ones alone. I'll sign." },
+      keep: { who: 'moe', my: '(ကျောက်ခဲတွေ ချလိုက်တယ်။) …အကောင်သေးလေးတွေကို မနှောင့်ယှက်တော့ဘူး။ လက်မှတ်ထိုးမယ်။', en: "(He drops the pebbles.) …I'll leave the small ones alone. I'll sign." },
       prop: 'gecko:settles' },
     { line: 2, spot: 'sceneTorch',
-      play: { my: '(ရွှေစင်ရဲ့ လက်နှိပ်ဓာတ်မီး ချိတ်မှာ မရှိဘူး။ မိုး မေးမနေဘဲ ယူသွားပြီး အိမ်အောက် ကြည့်နေတာ။)', en: "(Shwe Sin's torch is gone from its peg. Moe took it without asking to look under the floor.)" },
-      yes: { who: 'shwesin', my: 'ညလယ် နိုးလာပြီး ကိုယ့်ပစ္စည်း ရှိသေးလားလို့ စမ်းနေရမှာလား။', en: 'Wake in the night and feel around to check my things are still there?' },
+      play: { my: '(ရွှေစင်ရဲ့ လက်နှိပ်ဓာတ်မီး ချိတ်မှာ မရှိဘူး။ မိုး မမေးဘဲ ယူသွားပြီး အိမ်အောက် ကြည့်နေတာ။)', en: "(Shwe Sin's torch is gone from its peg. Moe took it without asking to look under the floor.)" },
+      yes: { who: 'shwesin', my: 'ညလယ် နိုးလာပြီး ကိုယ့်ပစ္စည်း ရှိသေးလား စမ်းနေရမှာလား။', en: 'Wake in the night and feel around to check my things are still there?' },
       keep: { who: 'shwesin', my: 'ကျွန်မလည်း မမေးဘဲ ယူတတ်တယ်။ ဒီတစ်ကြောင်း ခဏ မထိုးသေးဘူး။ ဖြတ်နိုင်ပြီဆိုမှ ထိုးမယ်။', en: "I borrow without asking too. I won't sign this one yet. I'll sign when I've stopped." },
       prop: 'torch:onPeg' },
     { line: 3, spot: 'sceneMats',
-      play: { my: '(ပြည့်စုံ ရှေ့မှာ မိုးက "အစ်ကို အစီအစဉ် အကောင်းဆုံး" တဲ့။ ကျောပေးလိုက်တော့ ရွှေစင်ကို မျက်စိမှိတ်ပြတယ်။)', en: '(To Pyae Sone\'s face Moe says "best plan ever". When he turns away, Moe rolls his eyes at Shwe Sin.)' },
-      yes: { who: 'pyaesone', my: '…မြင်တယ်နော်။ ကိုယ့်ရှေ့မှာ တစ်မျိုး၊ နောက်ကွယ်မှာ တစ်မျိုးဆိုရင် ဘယ်သူ့ကို ယုံရမလဲ။', en: '…I saw that. One face in front, another behind: who do I trust then?' },
+      play: { my: '(ပြည့်စုံ ရှေ့မှာ မိုးက "အစ်ကို့ အစီအစဉ် အကောင်းဆုံး" တဲ့။ ကျောပေးလိုက်တော့ ရွှေစင်ကို မျက်စိမှိတ်ပြတယ်။)', en: '(To Pyae Sone\'s face Moe says "best plan ever". When he turns away, Moe rolls his eyes at Shwe Sin.)' },
+      yes: { who: 'pyaesone', my: '…မြင်တယ်နော်။ ရှေ့တစ်မျိုး နောက်တစ်မျိုးဆို ဘယ်သူ့ကို ယုံရမလဲ။', en: '…I saw that. One face in front, another behind: who do I trust then?' },
       keep: { who: 'moe', my: 'တောင်းပန်တယ်။ မကြိုက်ရင် မျက်နှာချင်းဆိုင် ပြောမယ်။ ထိုးမယ်။', en: "Sorry. If I don't like something, I'll say it to your face. I'll sign." },
       prop: 'mats:together' },
     { line: 4, spot: 'scenePost',
       play: { my: '(ပြည့်စုံရဲ့ မြေပုံပေါ်မှာ "အိမ်ပြန်လမ်း၊ အရှေ့ဘက်" လို့ ခဲတံနဲ့ ဆွဲထားတယ်။ "ငါ အရင်ရောက်ဖူးတယ်" တဲ့။ မရောက်ဖူးဘူး။)', en: '(On Pyae Sone\'s map, a pencil line: "road home, east". "I\'ve been here before," he told them. He hasn\'t.)' },
-      yes: { who: 'shwesin', my: 'လမ်းမသိဘဲ သိသလို ပြောတဲ့သူ နောက်က လိုက်ရရင် ဘယ်ရောက်မလဲ။', en: 'Follow someone who pretends to know the way, and where do you end up?' },
+      yes: { who: 'shwesin', my: 'လမ်းမသိဘဲ သိသလို ပြောတဲ့သူနောက် လိုက်ရင် ဘယ်ရောက်မလဲ။', en: 'Follow someone who pretends to know the way, and where do you end up?' },
       keep: { who: 'pyaesone', my: '(ခဲတံလိုင်းကို ကိုယ်တိုင် ဖြတ်ပစ်တယ်။) မရောက်ဖူးပါဘူး။ ခေါင်းဆောင်လို ပေါ်ချင်လို့။ ရိုးသားတာ ကြိုက်ရင် ကိုယ်တိုင် မလိမ်ရဘူး။ ထိုးမယ်။', en: "(He crosses out his own line.) I've never been. I wanted to look like a leader. If I like honesty, I can't lie myself. I'll sign." },
       prop: 'map:crossed' },
     { line: 5, spot: 'sceneScorch',
@@ -276,7 +276,7 @@ export const L = {
   notMine: { my: '(ဒါ သူတို့ လှပ်ရမှာ။)', en: '(This one is theirs to lift.)' },
   psLift: [
     { my: 'ဘာသာရေးကလာတာ ဟုတ်တယ်။ ကျွန်တော်တို့ ပြောတာ မမှားဘူး။', en: "So it is from a religion. We weren't wrong about that." },
-    { my: 'ဒါပေမဲ့ ခေါင်းစဉ် ဖုံးထားလည်း၊ ဖွင့်ထားလည်း… ဒီမှာ အတူနေမယ့်သူဆီက ဒီငါးကြောင်းကို လိုချင်တာ အတူတူပဲ။', en: "But label on or off… I'd want these five from anyone staying here. Same either way." },
+    { my: 'ဒါပေမဲ့ ခေါင်းစဉ် ဖုံးထားထား၊ ဖွင့်ထားထား… ဒီမှာ အတူနေမယ့်သူဆီက ဒီငါးကြောင်းကို လိုချင်တာ အတူတူပဲ။', en: "But label on or off… I'd want these five from anyone staying here. Same either way." },
   ],
   moeLift: [{ my: 'ရေဒီယို မနက်ကျမှ ပြန်ဖွင့်မယ်။ ကျွန်တော် ကိုယ်တိုင် ရွေးတာနော်။', en: 'Radio back on in the morning. My own choice, okay?' }],
   dsEnd: [{ my: 'ဆိုင်းဘုတ်က တစ်လုံးမှ မပြောင်းဘူး။ ကြည့်တဲ့ မျက်လုံးကပဲ ပြောင်းတာ။', en: "The board didn't change a letter. Only the eyes looking at it." }],
@@ -284,11 +284,11 @@ export const L = {
 
   // ------------------------------------------------------------------ 7.2 / 7.3 ambient
   dsAfter: [{ my: 'ဒီည ဧည့်သည်တွေ အရင်ဆုံး တိတ်သွားကြတယ်။ ကျွန်မ မပြောရဘဲနဲ့။', en: 'Tonight the guests went quiet first, without me saying a word.' }],
-  ssBefore: [{ my: 'ဆိုင်းဘုတ် ဖျက်တယ်တဲ့လား။ ကျွန်မတို့ ဖတ်တောင် မဖတ်ရသေးဘူး။', en: "Scrubbed the board? We haven't even read it." }],
+  ssBefore: [{ my: 'ဆိုင်းဘုတ် ဖျက်လိုက်တယ်တဲ့လား။ ကျွန်မတို့ ဖတ်တောင် မဖတ်ရသေးဘူး။', en: "Scrubbed the board? We haven't even read it." }],
   ssAfter: [{ my: 'ဓာတ်မီး မေးပြီးမှ ငှားတယ်။ တစ်ခါ ရပြီ။ နှစ်ကြောင်းမြောက် လက်မှတ် မထိုးရသေးဘူး။', en: "I asked before borrowing the torch. Once so far. Line two still isn't signed." }],
-  moeBefore: [{ my: 'ရေဒီယို ပိတ်ရင် ပျင်းသေမှာ။ တိတ်တိတ်နေရင် ဘာလုပ်ရမှန်းတောင် မသိဘူး။', en: "Radio off and I'll die of boredom. I don't even know what you do in the quiet." }],
+  moeBefore: [{ my: 'ရေဒီယို ပိတ်ရင် ပျင်းသေမှာပေါ့။ တိတ်တိတ်နေရင် ဘာလုပ်ရမှန်းတောင် မသိဘူး။', en: "Radio off and I'll die of boredom. I don't even know what you do in the quiet." }],
   moeAfter: [{ my: 'တိတ်တဲ့ ညမှာ အိမ်မြှောင် တွန်သံ ကြားဖူးလား။ ကျွန်တော် ပထမဆုံး ကြားဖူးတာ။', en: 'Ever heard a gecko chirp on a quiet night? First time for me.' }],
-  psAfter: [{ my: 'မြေပုံပေါ်က အရှေ့လမ်းကို ဖြတ်လိုက်ပြီ။ အခု ဘယ်လမ်းနဲ့ ပြန်ရမလဲ မသိဘူး။ မသိတာကို မသိဘူး ပြောရတာ ပေါ့ပါးတယ်။', en: "I crossed the east road off my map. Now I don't know the way home. Saying I don't know feels lighter." }],
+  psAfter: [{ my: 'မြေပုံပေါ်က အရှေ့လမ်းကို ဖြတ်လိုက်ပြီ။ အခု ဘယ်လမ်းက ပြန်ရမလဲ မသိဘူး။ မသိတာကို မသိဘူး ပြောရတာ ပေါ့ပါးတယ်။', en: "I crossed the east road off my map. Now I don't know the way home. Saying I don't know feels lighter." }],
   hpt: [
     [{ my: 'ခရီးသည်တွေလား။ ကျုပ်ရဲ့ နောက်ဆုံး ခြံစည်းရိုးကနေ ထွက်သွားတယ်။ ကျောက်စရစ်လမ်း ကုန်တဲ့နေရာ။', en: 'The travellers? Out through my last hedge, where the gravel path runs out.' }],
     [{ my: 'သူတို့ ဆိုင်းဘုတ်တစ်ခု ဖျက်ပစ်လိုက်တယ်လို့ ကြားတယ်။ ကျုပ် မမြင်ဘူး။', en: "Heard they scrubbed some board. I didn't see it." }],
@@ -311,7 +311,7 @@ export const L = {
   psLook: [{ my: '(ဆိုင်းဘုတ်… တံခါးဘေးမှာ။ ကိုယ်တိုင် အရင် ကြည့်လိုက်ဦးမယ်။)', en: '(The board… by the door. Let me look at it myself first.)' }],
   knock: [{ my: '(တံခါးကို တစ်ယောက်ယောက် ခေါက်နေတယ်။)', en: '(Someone knocks at the door.)' }], // (draft)
   nc1: [
-    { my: 'မမ! အလုပ်က မီးစာ ပို့ခိုင်းလို့။ လမ်းကို ဘယ်သူ့မှ မမေးဘဲ လာခဲ့တာ။ ခြံစည်းရိုး ကုန်တဲ့နေရာက ခဲတံလိုင်းလေးတွေ လိုက်လာတာ။', en: "Sister! Work sent me with lamp wicks. I didn't ask anyone the way: I followed the pencil lines from the end of the hedge." },
+    { my: 'မမ! အလုပ်က မီးစာ ပို့ခိုင်းလို့။ လမ်းကို ဘယ်သူ့မှ မမေးဘဲ လာခဲ့တာ။ ခြံစည်းရိုးဆုံးတဲ့နေရာက ခဲတံလိုင်းလေးတွေ လိုက်လာတာ။', en: "Sister! Work sent me with lamp wicks. I didn't ask anyone the way: I followed the pencil lines from the end of the hedge." },
     { my: 'ဒါနဲ့… ဒီကနေ အိမ်ကို တခြားလမ်း မရှိဘူးတဲ့လား။ ဟိုး မြောက်ဘက်က အမည်းရောင် မျဉ်းကြီးက ဘာလဲ။', en: "And… they say there's no other way home from here? What's that dark line far off to the north?" },
   ],
   pyaeNorth: [{ my: 'ကျွန်တော့် မြေပုံမှာ မပါဘူး။ မသိဘူး။', en: "It's not on my map. I don't know." }],
@@ -326,7 +326,7 @@ export const L = {
     { my: '(ရွှေမင်က ကိုယ်တိုင် မြင်ပြီးသားကိုပဲ ရေးတာ။ ဒီလမ်းကို ကျွန်မ မမြင်ဖူးသေးဘူး။)', en: "(Gold ink only writes what I've seen. I haven't seen this road.)" },
   ],
   ncDecide: [
-    { my: '…ဘယ်သူမှ မသိရင် လျှောက်ကြည့်ပြီး သိကြတာပေါ့။ အတူတူ။ မမလည်း လိုက်ခဲ့။', en: "…If nobody knows, we walk it and find out. Together. You come too, sister." },
+    { my: '…ဘယ်သူမှ မသိရင် လျှောက်ကြည့်ပြီး သိအောင်လုပ်တာပေါ့။ အတူတူ။ မမလည်း လိုက်ခဲ့။', en: "…If nobody knows, we walk it and find out. Together. You come too, sister." },
     { my: 'ရှေ့ဆုံးကတော့ ကျွန်မ မဟုတ်ဘူး။ ဘေးချင်းယှဉ်ပြီး။', en: 'Not me in front. Side by side.' },
   ],
   walk1: [{ my: 'နောက်လှည့်ကြည့်… ငါတို့ ခြေရာတွေ။', en: 'Look back… our footprints.' }],
@@ -335,7 +335,7 @@ export const L = {
   inkQ: { my: 'ဒီလမ်းကို ကိုယ်တိုင် လျှောက်ပြီးပြီ။', en: 'She has walked this road herself.' },
   inkHold: { hold: true, ms: 1600, my: 'ကလောင်နဲ့ ခြေရာလိုင်းတစ်လျှောက် ဖိဆွဲမယ်', en: 'Hold the quill along the line of footprints', sub: { my: 'ဖိထားပါ', en: 'hold' } },
   inkDone: [{ my: 'ကျွန်မ ဆွဲပေးလို့ ပေါ်လာတဲ့ လမ်း မဟုတ်ဘူး။ အားလုံး လျှောက်လို့ ပေါ်လာတာ။', en: "It isn't a road because I drew it. It's a road because we all walked it." }],
-  ncEnd: [{ my: 'မနက်ဖြန် အလုပ်က ဒီလမ်းအတိုင်း ပြန်မယ်။ မေးစရာ မလိုတော့ဘူး။', en: "Tomorrow I'll go back to work this way. No need to ask anyone." }],
+  ncEnd: [{ my: 'မနက်ဖြန် အလုပ်ကနေ ဒီလမ်းအတိုင်း ပြန်မယ်။ မေးစရာ မလိုတော့ဘူး။', en: "Tomorrow I'll go back to work this way. No need to ask anyone." }],
   psEnd: [{ my: 'ကျွန်တော့် မြေပုံမှာ ထည့်ဆွဲမယ်။ ကိုယ်တိုင် လျှောက်ခဲ့တဲ့ လမ်းဆိုတော့ မင်နဲ့။', en: "I'll put it on my map. In ink: we walked it ourselves." }],
   replyLine: { my: 'မြေပုံက လမ်းကို ပြရုံပဲ။ လျှောက်တဲ့ ခြေထောက်က ကိုယ့်ခြေထောက်။', en: 'A map only shows the road. The feet that walk it are your own.' },
 
@@ -352,7 +352,7 @@ export const L = {
   nightChoices: [
     { my: 'အိမွန် မကြိုက်တာ လုံးဝ ပျောက်သွားပြီ။ ခရီးသည်တွေလည်း ကျွန်မ ရှင်းပြလို့ ဆိုင်းဘုတ်ကို လက်ခံသွားကြတယ်။ အိမ်ပြန်လမ်းကို ကျွန်မ ရှာတွေ့တယ်။', en: "Ei Mon doesn't mind any more at all. The travellers accepted the board because I explained it. I found the road home." },
     { my: 'အိမွန်က သူ့ဆတ်ဆတ်ထိမခံတဲ့နေရာကို ကိုယ်တိုင်တွေ့ပြီး သူတို့ဟာကို မဖွင့်ဘဲ ပြန်ပေးတယ်။ မကြိုက်တာ ကျန်ပေမဲ့ မုန်းတာ ပေါ့သွားတယ်။ ခရီးသည်တွေက ခေါင်းစဉ်ဖုံးပြီး ကိုယ်တိုင်စမ်း၊ ကိုယ်တိုင် ပြန်လှပ်တယ်။ အိမ်ပြန်လမ်းက အားလုံး လျှောက်လို့ ပေါ်လာတာ။', en: 'Ei Mon found her own sore spot and gave their work back unopened; the dislike stays, the hating has gone light. The travellers covered the title, tested the lines themselves and lifted it back. The road home appeared because we all walked it.' },
-    { my: 'အိမွန် ဘယ်တော့မှ မပြောင်းဘူး။ လူငယ်တွေက ဘာမဆို ဟောပြောတယ်ပဲ ထင်ကြတာ။ နောက်ဆုံးရွက်ကနေ ပြန်လမ်း မရှိဘူး။', en: "Ei Mon will never change. The young think everything is preaching. There's no road back from the last leaf." },
+    { my: 'အိမွန် ဘယ်တော့မှ မပြောင်းဘူး။ လူငယ်တွေက ဘာမဆို ဆုံးမနေတယ်ပဲ ထင်ကြတာ။ နောက်ဆုံးရွက်ကနေ ပြန်လမ်း မရှိဘူး။', en: "Ei Mon will never change. The young think everything is preaching. There's no road back from the last leaf." },
   ],
   nightWrong: [
     [{ my: '(မဟုတ်ဘူး… ဒါ ချော့ပြောတာ။ မကြိုက်တာ ကျန်သေးတယ်။ ဆိုင်းဘုတ်ကို သူတို့ ကိုယ်တိုင် စမ်းခဲ့တာ။)', en: '(No… that flatters. The dislike stays, and they tested the board themselves.)' }],

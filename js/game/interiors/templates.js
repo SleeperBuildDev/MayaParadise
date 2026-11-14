@@ -54,9 +54,9 @@ const GEM = { y: 2.56, z: -3.0, bob: 0.05 };
 const COVER_Z = BOX.z + BOX.d / 2 + ART_OFF; // world z of the big covers' plane
 const PRODUCTS = [
   {
-    id: 'tpl-short', color: PALETTE.boxBlue, niche: '#D9E3F3', name: 'For Short Videos', price: '50,000 Ks', my: 'Hook (၁၀) မျိုး',
+    id: 'tpl-short', color: PALETTE.boxBlue, niche: '#D9E3F3', name: 'For Short Videos', price: '50,000 Ks', my: 'Hook (၁၀) ခု',
     emote: 'cheer', face: 'star',
-    line: { my: 'TikTok နဲ့ Reels အတွက် Hook (၁၀) မျိုးပါနော်', en: '10 hooks for TikTok and Reels!' },
+    line: { my: 'TikTok နဲ့ Reels အတွက် Hook (၁၀) ခုပါနော်', en: '10 hooks for TikTok and Reels!' },
   },
   {
     id: 'tpl-creator', color: PALETTE.boxRed, niche: '#F4DCD8', name: 'For Creators', price: '50,000 Ks', my: 'Script ပုံစံ (၁၀) မျိုး',

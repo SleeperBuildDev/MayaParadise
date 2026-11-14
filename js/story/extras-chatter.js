@@ -40,8 +40,8 @@ const ROOMT = { first: [4, 7], gap: [16, 30] }; // an everyday house's residents
 const MAX_FOLK = 4, MAX_FOLK_LOW = 2, PER_AREA = 2;
 const SPAWN_NEAR = 16; // she is within area.r + this: its folk appear
 const DROP_FAR = 42, DROP_ALWAYS = 70; // gone once she is this far (off screen) / this far (anyway)
-const CALL_CAP = 72, CALL_DROP = 84; // no new folk while the frame draws more than CALL_CAP calls; over CALL_DROP for a while, one goes
-// (the towns alone draw ~55-80 calls on foot: the folk may add at most a person or two on top, never a crowd)
+const CALL_CAP = 58, CALL_DROP = 64, PER_CALLS = 3; // no new folk while the frame draws more than CALL_CAP calls; over CALL_DROP for a while, one goes (a person: ~3 calls, the blob shadows share one)
+// (the towns alone draw ~45-60 calls on foot: the folk may add at most a person or two on top, never a crowd)
 const KEEP = { road: 2.4, door: 3.6, spot: 2.6, person: 2.8, maya: 4 };
 const TOWN_FAR = [23, 29], TOWN_R = 22, TOWN_MIN = 11; // no area near: a pair of the town's own folk, first up the street
 // in front of the camera (TOWN_FAR m: far enough to come into view without popping up), else out of view round her
@@ -78,10 +78,10 @@ const HOUSE_LINES = {
   tea: [
     { my: 'ပေါ့ဆိမ့်လား၊ ချိုဆိမ့်လား။', en: 'Light and creamy, or sweet and creamy?' },
     { my: 'ရေနွေးကြမ်းက အလကားပါ။', en: 'The plain tea is free.' },
-    { my: 'ဒီခုံက အကောင်းဆုံး။ လေလည်တယ်။', en: 'Best stool in the place. Catches the breeze.' },
+    { my: 'ဒီခုံက အကောင်းဆုံး။ လေတဖြူးဖြူးနဲ့။', en: 'Best stool in the place. Catches the breeze.' },
   ],
   baker: [
-    { my: 'မုန့်ညက်က အချိန်ပေးရတယ်။ စောင့်ရတယ်။', en: 'Dough takes time. You wait for it.' },
+    { my: 'မုန့်သားက အချိန်ပေးရတယ်။ စောင့်ရတယ်။', en: 'Dough takes time. You wait for it.' },
     { my: 'မီးဖိုနားမှာ နွေးတယ်နော်။', en: "Warm by the oven, isn't it?" },
     { my: 'မနက် လေးနာရီကတည်းက ထနေတာ။', en: "I've been up since four." },
   ],
@@ -133,7 +133,7 @@ const ROLES = {
   market: [['stall seller', 'ဈေးသည်'], ['customer', 'ဈေးဝယ်'], ['porter', 'အထမ်းသမား']],
   wharf: [['fisher', 'တံငါ'], ['porter', 'အထမ်းသမား'], ['net mender', 'ပိုက်ဖာသူ']],
   junction: [['news seller', 'သတင်းစာရောင်းသူ'], ['traveller', 'ခရီးသွား'], ['neighbour', 'အိမ်နီးချင်း']],
-  hearth: [['baker', 'မုန့်ဖုတ်သူ'], ['weaver', 'ယက်ကန်းသမား'], ['neighbour', 'အိမ်နီးချင်း']],
+  hearth: [['baker', 'မုန့်ဖုတ်သူ'], ['weaver', 'ရက်ကန်းသမား'], ['neighbour', 'အိမ်နီးချင်း']],
   garden: [['gardener', 'ဥယျာဉ်မှူး'], ['potter', 'အိုးထိန်း'], ['neighbour', 'အိမ်နီးချင်း']],
   blank: [['traveller', 'ခရီးသွား'], ['lodge keeper', 'တည်းခိုခန်းစောင့်']],
 };
@@ -701,7 +701,7 @@ export function installChatter(game, story, ow) {
       if (!out) break;
       dropFolk(out.id); stats.dropped++; stats.recycled = (stats.recycled || 0) + 1;
     }
-    need = Math.min(need, cap() - folk.size, Math.floor((CALL_DROP - callsNow()) / 4)); // (never over the frame's budget: ~4 calls a person)
+    need = Math.min(need, cap() - folk.size, Math.floor((CALL_DROP - callsNow()) / PER_CALLS)); // (never over the frame's budget)
     if (need <= 0) return false;
     // one already in sight and standing: the new one comes to stand with them (a pair makes small talk)
     // (beside one of the folk: a step or two; beside a townsperson of the district: past the 2.8 m they keep clear)

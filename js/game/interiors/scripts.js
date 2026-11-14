@@ -508,7 +508,7 @@ const BOOKS = [
   {
     key: 'long', id: 'scr-long', x: 2.1, w: 1.34, h: 1.74, d: 0.76, tilt: -0.03, open: 0.85, seed: 3,
     cover: '#7A4A2B', spine: '#5A341D',
-    art: { bg: '#7A4A2B', edge: '#673D22', frame: PALETTE.gold, ink: '#F6E6C4', lines: ['LONG', 'FORM', 'SCRIPT'], sizes: [46, 46, 44], band: '၆ မိနစ်နှင့်အထက်', bandBg: PALETTE.cream, bandInk: '#5A341D' },
+    art: { bg: '#7A4A2B', edge: '#673D22', frame: PALETTE.gold, ink: '#F6E6C4', lines: ['LONG', 'FORM', 'SCRIPT'], sizes: [46, 46, 44], band: '၆ မိနစ်နဲ့အထက်', bandBg: PALETTE.cream, bandInk: '#5A341D' },
   },
 ];
 

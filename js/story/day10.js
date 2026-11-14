@@ -442,7 +442,7 @@ export async function create(story) {
           { id: 'bulbs', goes: 'take', my: '"ဦးရေ… ဒီနှစ် ပန်းဥ ရှိသေးလား"', en: '"Uncle… any bulbs this year?"' },
           { id: 'beans', goes: 'take', my: '"ဦးပဲနွယ် ကျုပ်ဘူးစင်ပေါ် တက်လာပြန်ပြီနော်"', en: '"Uncle, your beans are up my gourds again!"' },
         ],
-        wrong: l('အဲဒါ ငါ ဘာလုပ်ပေးနိုင်လို့လဲ… အာကာ့သွားပါစေ။', 'What could I do about that… let it blow past.'),
+        wrong: l('အဲဒါ ငါ ဘာလုပ်ပေးနိုင်လို့လဲ… ပါသွားပါစေ။', 'What could I do about that… let it blow past.'),
       });
       if (!r.ok) return undefined;
       await D.say('hpohtaw', L.beansCall, { face: 'smile', emote: 'wave' });

@@ -38,7 +38,7 @@ export const D8_TINT_CARDS = [
   { id: 'once', name: { my: 'နောက်တစ်ခါ', en: 'Once more' }, // Black Sheep (ch 1), gold by now
     line: { my: 'စာလုံးတွေ နောက်တစ်ခါ စီလို့ရပါတယ်။ အခါခါ စီဖူးတာပဲ။', en: "The letters can be set once more. You've set them a thousand times." },
     answers: ['given'], from: { my: 'သိုးမည်းလေး', en: 'the Black Sheep' } },
-  { id: 'blame', lookalike: true, name: { my: 'ဦး့အပြစ်ပဲ', en: 'Your own fault' },
+  { id: 'blame', lookalike: true, name: { my: 'ဦးအပြစ်ပဲ', en: 'Your own fault' },
     line: { my: 'ဦး ရှင်းရှင်း မပြောခဲ့လို့ ဖြစ်တာပဲလေ။', en: "It happened because you didn't tell him clearly." },
     shows: ['looksdown'], really: { my: 'အပြစ်ရှာတာ', en: 'finding fault' },
     backfire: { they: { my: 'ငါ့အပြစ်? ငါ့တိုက်ထဲမှာ ငါ့အပြစ်?', en: 'MY fault? In my own shed?' },
@@ -64,7 +64,7 @@ export const TALK_D8_TINT = {
         tell: { my: 'ကောင်လေးကို မုန်းတာ မဟုတ်ဘူး။ လက်က အံဆွဲကို လိုက်စမ်းနေတယ်။ သူ့အလုပ်ကို နာနေတာ။', en: "Not hatred of the boy. His hand keeps feeling along the drawers. His work hurts." } },
     ] },
     { lines: [
-      { my: 'ငါ့ကို အရှက်ခွဲချင်လို့ လုပ်တာ။ ဒီအဖိုးကြီး တိုက်မသပ်တတ်ဘူး ထင်လို့။', en: "He did it to show me up. Thinks this old man can't keep a tidy shed.", need: 'unknown', seems: 'looksdown', face: 'hot',
+      { my: 'ငါ့ကို အရှက်ခွဲချင်လို့ လုပ်တာ။ ဒီအဘိုးကြီး တိုက်မသပ်တတ်ဘူး ထင်လို့။', en: "He did it to show me up. Thinks this old man can't keep a tidy shed.", need: 'unknown', seems: 'looksdown', face: 'hot',
         tell: { my: 'အထင်သေးတာ မဟုတ်ဘူး။ ဘာကြောင့် လုပ်လဲ တကယ် မသိဘူး။ ဒီတုံးကို တစ်ဖက်တည်းက ကြည့်နေတာ။', en: "Not contempt. He truly doesn't know why. He's looking at the block from one side only." } },
       { my: 'ဒီမနက် ငါ ပြောခဲ့တာ "ကြိုက်သလို လုပ်" တဲ့။ ဒါ "မနှောင့်ယှက်နဲ့" ဆိုတဲ့ အဓိပ္ပာယ်လေ။ ဒါလေးတောင် နားမလည်ဘူး။', en: 'I told him "do what you like". That means "don\'t bother me". He couldn\'t even tell that.', need: 'unknown', face: 'think',
         tell: { my: 'သူ့စကား ကောင်လေးဘက်က ဘယ်လို ကြားရလဲ မစဉ်းစားဖူးဘူး။', en: "He never thought how his words sounded from the boy's side." } },
@@ -74,7 +74,7 @@ export const TALK_D8_TINT = {
         tell: { my: 'ပျင်းလို့ မဟုတ်ဘူး။ တစ်ယောက်တည်း သင်ခဲ့ရလို့ အဲဒါ တစ်နည်းတည်းလို့ ထင်နေတာ။ အသိက ပြည့်ပြီး စေတနာက ခပ်ပါးပါး။', en: "Not lazy. He learned alone, so he thinks that's the only way. Full of knowing, thin on goodwill." } },
     ] },
     { lines: [
-      { my: 'နာမည်တုံးလည်း ပျောက်ပြီ။ နှစ်ငါးဆယ် ဒီတိုက်နာမည်ကို ရိုက်ခဲ့တဲ့ တုံး။ အမှိုက်ပဲ ဖြစ်သွားပြီ။', en: "And the title block's gone. Fifty years it printed this shed's name. Scrap now.", need: 'given', face: 'sad', mood: 'down',
+      { my: 'နာမည်တုံးလည်း ပျောက်ပြီ။ နှစ်ငါးဆယ် ဒီတိုက်နာမည် ရိုက်ခဲ့တဲ့ တုံး။ အမှိုက် ဖြစ်သွားပြီ။', en: "And the title block's gone. Fifty years it printed this shed's name. Scrap now.", need: 'given', face: 'sad', mood: 'down',
         tell: { my: 'ဒေါသ ကုန်သွားပြီ။ စားပွဲထောင့်ကို ငေးနေတယ်။ နာမည်တုံး ထားခဲ့တဲ့ နေရာ။', en: "The anger is spent. He's staring at the corner of the stone where the block used to sit." } },
     ] },
     { lines: [
@@ -89,7 +89,7 @@ export const TALK_D8_TINT = {
     lean: { my: 'ဒါဆို မင်းပြောသလို ပြောလိုက်မယ်… (သူ့စကား မဟုတ်တော့ဘူး။)', en: "Then I'll say what you said… (They aren't his words any more.)" },
   },
   decision: [
-    { my: 'ဒီမှာ လာ ကောင်လေး။ ရှင်းရှင်း မေး။ အံဆွဲတိုင်း တစ်ခါ ပြမယ်။ ပြီးရင် မင်း မှတ်။', en: "Come here, boy. Ask me properly and I'll show you every drawer, once. Then they're yours to remember.", face: 'think' },
+    { my: 'ဒီလာ ကောင်လေး။ ရှင်းရှင်း မေး။ အံဆွဲတိုင်း တစ်ခါ ပြမယ်။ ပြီးရင် မှတ်ထား။', en: "Come here, boy. Ask me properly and I'll show you every drawer, once. Then they're yours to remember.", face: 'think' },
     { my: 'ပြီးတော့ မင်းလည်း ငါ့ကို ပြ။ ဒီလောက် ညီညီညာညာ ဘယ်လို စီလိုက်တာလဲ။', en: 'And you show me something too. How did you get them so even?', face: 'happy' },
   ],
 };
@@ -130,7 +130,7 @@ export const D8_THIDA_CARDS = [
     answers: ['hot'], from: { my: 'တိမ်အေးလေး', en: 'the Cool Cloud' } },
   { id: 'mayasays', lookalike: true, name: { my: 'မာရာ ပြောတယ်: ပြန်ပေး', en: 'Maya says: give it back' },
     line: { my: 'ကျွန်မ ပြောမယ်… အိုးတွေ ပြန်ပေးလိုက်။', en: "I'll tell you… give the jars back." },
-    shows: ['cling', 'unknown'], really: { my: 'မှီစရာ "မာရာ ပြောတယ်" နောက်တစ်ခု', en: 'one more "Maya says" to lean on' },
+    shows: ['cling', 'unknown'], really: { my: 'မှီစရာ "မာရာ ပြောတယ်" တစ်ခု ထပ်တိုးပြန်ပြီ', en: 'one more "Maya says" to lean on' },
     backfire: { they: { my: 'ဟုတ်… မာရာ ပြောရင်တော့… (ဘာကြောင့်လဲ မသိဘဲ အိုးတစ်လုံး ချလိုက်တယ်။)', en: 'Okay… if Maya says… (She sets one jar down without knowing why.)' },
                 maya: { my: '(စကားက မှန်တယ်။ ဒါပေမဲ့ ဒါလည်း ကျွန်မ နာမည်နဲ့ ယုံခိုင်းတာပဲ။)', en: "(The words are right. But it's still asking her to believe my name.)" } } },
 ];
@@ -144,7 +144,7 @@ export const TALK_D8_THIDA = {
   hand: D8_THIDA_CARDS, // first hand in data order: self, proofsays, key, stage -> then the deck
   tutorial: [
     { at: 'acts', my: 'ဒီနေ့ကစပြီး နောက်ဆုံး ကျောက်တုံးက သူ့ဟာ ဖြစ်နိုင်တယ်။ ကတ်တစ်ကတ်မှ မကိုက်ဘူး။ "နောက်ဆုတ်ပေး" ကို ဖိထားပြီး သူ့ဘာသာ ဆုံးဖြတ်ခွင့် ပေးပါ။', en: 'From today the last stone can be theirs. No card fits it. Hold Step back and let them decide.' },
-    { at: 'label', my: 'ကြည့်ရင် "ကိုယ်တိုင် ရွေးမယ်" လို့ ရွှေမင်နဲ့ ပေါ်လာမယ်။ အဲဒါ သူ့ကျောက်တုံး။', en: 'Look shows "their own choice" in gold. That stone is theirs.' },
+    { at: 'label', my: 'ကြည့်လိုက်ရင် "ကိုယ်တိုင် ရွေးမယ်" လို့ ရွှေမင်နဲ့ ပေါ်လာမယ်။ အဲဒါ သူ့ကျောက်တုံးပဲ။', en: 'Look shows "their own choice" in gold. That stone is theirs.' },
   ],
   stones: [
     { lines: [
@@ -158,12 +158,12 @@ export const TALK_D8_THIDA = {
       { my: 'အိုးတစ်လုံးဆို အလုပ်လုပ်ရမယ့် ရက်တစ်ရက်ပဲ။', en: 'Every jar is one more day I can work.', need: 'afraid', face: 'worried' },
     ] },
     { lines: [
-      { my: 'ကလေးတွေ မင်လာတောင်းတယ်။ မရှိဘူး ပြောလိုက်တယ်။ ကိုယ့်ဘာသာ ရှာကြပါစေ။', en: 'The children came asking for ink. I said there was none. Let them find their own.', need: 'unknown', seems: 'looksdown', face: 'think',
+      { my: 'ကလေးတွေ မင်လာတောင်းတယ်။ မရှိဘူး ပြောလိုက်တာ။ ကိုယ့်ဘာသာ ရှာကြပါစေ။', en: 'The children came asking for ink. I said there was none. Let them find their own.', need: 'unknown', seems: 'looksdown', face: 'think',
         tell: { my: 'ကလေးတွေကို အထင်သေးတာ မဟုတ်ဘူး။ တံခါးဝက မိုးမိုးရဲ့ ဗလာအိုးလေးကို ခဏခဏ လှမ်းကြည့်ပြီး မျက်နှာလွှဲတယ်။ မစဉ်းစားဖူးသေးတာ။', en: "Not contempt. She keeps glancing at Moe Moe's empty pot in the doorway, then away. She hasn't thought it through." } },
       { my: 'ကိုယ့်စင်ပေါ်က အိုးက ဘယ်သူ့ကိုမှ မထိခိုက်ပါဘူး။', en: 'A jar on my own shelf hurts nobody.', need: 'unknown', face: 'think' },
     ] },
     { lines: [
-      { my: 'အခု လူတွေက ကျွန်မကို လောဘကြီးတယ် ပြောနေပြီ! ကျွန်မ မာရာ ပြောတာကိုပဲ လုပ်ခဲ့တာ!', en: 'Now people are calling ME greedy! I only did what Maya said!', need: 'hot', face: 'hot', steam: 1, heard: true,
+      { my: 'အခု လူတွေက ကျွန်မကို လောဘကြီးတယ် ပြောနေပြီ! မာရာ ပြောတာကိုပဲ လုပ်ခဲ့တာ!', en: 'Now people are calling ME greedy! I only did what Maya said!', need: 'hot', face: 'hot', steam: 1, heard: true,
         tell: { my: 'မာရာ့ကို စိတ်ဆိုးတာ မဟုတ်ဘူး။ ရှက်နေတာ။ ပါးတွေ နီနေတယ်။', en: "She isn't angry at Maya. She's ashamed. Her cheeks are red." } },
     ] },
     { lines: [

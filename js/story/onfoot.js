@@ -6,9 +6,11 @@
 //   foot.update(dt, t)          called from main.js updateWorld() while active
 //   foot.walkTo(x, z, cb)       tap-to-walk (path around buildings and trees)
 //   foot.pos                    Vector2 (x, z)
+//   foot.landAt(x, z)           the nearest free, open ground to (x, z) (not in the parked car): { x, z }
 import * as THREE from '../game/three.js';
 import { createWalker, collides } from '../game/nav.js';
 import { BOOK, FOUNTAIN } from '../game/world/world.js';
+import { freeSpot, boxedIn } from './world/walker.js';
 
 export const FOOT_VIEW = { tilt: 30, width: 7, widthLandscape: 14, height: 0.9, stiffness: 5 }; // closer: people read on foot
 export const CAR_VIEW = { tilt: 52, width: 12, widthLandscape: 22, height: 0.6, stiffness: 5 };
@@ -69,6 +71,36 @@ export function createFoot(game, opts = {}) {
   const lead = new THREE.Vector3();
   let prevHeading = 0;
   let prevSpeed = 0;
+  // the safety net: the stick held ~1.5 s and she has got nowhere -> if she is boxed in, out to open ground
+  let pushT = 0;
+  const pushFrom = new THREE.Vector2();
+  const offCar = (x, z) => {
+    const c = game.car?.root;
+    if (!c) return true;
+    const dx = x - c.position.x, dz = z - c.position.z, h = c.rotation.y, cs = Math.cos(h), sn = Math.sin(h);
+    const lx = dx * cs - dz * sn, lz = dx * sn + dz * cs; // (into the car's frame)
+    return Math.abs(lx) > 1.15 || Math.abs(lz) > 1.6;
+  };
+  // the door spots out in the open world: a step further out than the car's own (1.0 m from its middle, her hair
+  // brushed the 1.3 m wide body), and on the side facing the camera when the car runs across the screen (on the far
+  // side she landed behind the car, only her hair showing over it, as if she stood inside it)
+  const DOOR_X = 1.42;
+  const doorSides = (car, ep0, toward = null) => {
+    car.root.updateMatrixWorld(true);
+    const sx = Math.sign(ep0.x) || 1;
+    const side = (s) => car.root.localToWorld(new THREE.Vector3(s * DOOR_X, 0, ep0.z));
+    let a = side(sx), b = side(-sx);
+    const cam = game.camera.position;
+    const dA = Math.hypot(a.x - cam.x, a.z - cam.z), dB = Math.hypot(b.x - cam.x, b.z - cam.z);
+    let swap = dB < dA - 0.6; // (driver's door unless the other is clearly nearer the lens)
+    if (toward) {
+      // getting in: the door on the side she stands (when she is clearly on one side)
+      const l = car.root.worldToLocal(new THREE.Vector3(toward.x, 0, toward.z));
+      if (Math.abs(l.x) > 0.5) swap = Math.sign(l.x) !== sx;
+    }
+    if (swap) [a, b] = [b, a];
+    return [a, b];
+  };
 
   const foot = {
     active: false,
@@ -88,21 +120,56 @@ export function createFoot(game, opts = {}) {
       for (let i = 0; i < 60 && Math.abs(drive.state.speed) > 0.25; i++) await new Promise((r) => setTimeout(r, 30));
       call(game.audio, 'engine', 0);
       game.ui.hideCard?.();
-      await game.hopOut();
-      const p = game.maya.root.position;
-      // land on free ground: nudge out of anything she would stand inside
-      let x = p.x, z = p.z;
-      for (let k = 0; k < 24 && blocked(x, z, 0.3); k++) { x += Math.sin(k) * 0.25; z += Math.cos(k) * 0.25; }
-      if (blocked(x, z, 0.3)) { x = p.x; z = p.z; } // nowhere better: stay where she landed
-      walker.teleport(x, z, game.mayaHeading());
-      game.maya.root.position.set(x, 0, z);
-      game.maya.setMode('walk');
-      prevHeading = walker.heading;
-      game.rig.setFollow(FOOT_VIEW);
-      foot.active = true;
-      game.busy = false;
-      game.arrivedAt = null;
+      // where she lands: beside the driver's door, or the other door, or the nearest open ground round the
+      // car (a kerb fence, a stall or a lamp right at the door had her land inside it, unable to walk)
+      const car = game.car, ep0 = car.exitPoint;
+      let hopTo = null;
+      if (open && ep0) {
+        const [a, b] = doorSides(car, ep0);
+        const roomy = (q) => !blocked(q.x, q.z, 0.28) && !boxedIn(open.space, q.x, q.z);
+        if (roomy(a)) hopTo = a;
+        else if (roomy(b)) hopTo = b;
+        else {
+          const s = foot.landAt(a.x, a.z);
+          if (s && Math.hypot(s.x - a.x, s.z - a.z) < 2.5) hopTo = new THREE.Vector3(s.x, 0, s.z);
+        }
+        if (hopTo) car.exitPoint = car.root.worldToLocal(hopTo.clone()).setY(0);
+      }
+      try { await game.hopOut(); } catch (err) { console.warn('hop out', err); game.worldWalk = null; } finally { if (car.exitPoint !== ep0) car.exitPoint = ep0; }
+      try {
+        const p = game.maya.root.position;
+        // land on free ground: out of anything she would stand inside, and not in a pocket
+        let x = p.x, z = p.z;
+        if (open) {
+          const s = foot.landAt(x, z);
+          if (s) { x = s.x; z = s.z; }
+        } else {
+          for (let k = 0; k < 24 && blocked(x, z, 0.3); k++) { x += Math.sin(k) * 0.25; z += Math.cos(k) * 0.25; }
+          if (blocked(x, z, 0.3)) { x = p.x; z = p.z; } // nowhere better: stay where she landed
+        }
+        walker.teleport(x, z, game.mayaHeading());
+        game.maya.root.position.set(x, 0, z);
+        game.maya.setMode('walk');
+        prevHeading = walker.heading;
+        game.rig.setFollow(FOOT_VIEW);
+      } finally {
+        // (whatever happened above, she is on foot and free to walk)
+        game.worldWalk = null;
+        foot.active = true;
+        game.busy = false;
+        game.arrivedAt = null;
+        pushT = 0;
+      }
       return true;
+    },
+
+    /** The nearest free ground to (x, z) where she can walk away (not a pocket), off the parked car. */
+    landAt(x, z) {
+      if (!open) return blocked(x, z, 0.3) ? null : { x, z };
+      const s = freeSpot(open.space, x, z, { r: 0.28, maxR: 10, roomy: true, open: true, ok: offCar })
+        || freeSpot(open.space, x, z, { r: 0.27, maxR: 16, open: true })
+        || freeSpot(open.space, x, z, { r: 0.26, maxR: 20 });
+      return s ? { x: s.x, z: s.z } : null;
     },
 
     async toCar() {
@@ -116,14 +183,41 @@ export function createFoot(game, opts = {}) {
         await quickFade(game, true);
         game.world.drive.placeAt(p.x, p.z, game.mayaHeading());
         game.syncCar(0);
+        // (she stood on the road: the car pulled up on top of her, its bumper at her feet. It stops a little
+        // ahead instead, and she walks round to the door)
+        if (open) {
+          const c = game.car.root, h = c.rotation.y;
+          const l = c.worldToLocal(v3.set(p.x, 0, p.z));
+          if (Math.abs(l.x) < 1.35 && Math.abs(l.z) < 2.0) {
+            const d = l.z + 2.5;
+            game.world.drive.placeAt(c.position.x + Math.sin(h) * d, c.position.z + Math.cos(h) * d, h);
+            game.syncCar(0);
+          }
+        }
         await quickFade(game, false);
         call(game.audio, 'play', 'honk');
         call(game.car, 'honk');
       }
       foot.active = false; // hand updates back to main.js (hopIn walks with game.worldWalk)
       game.rig.setFollow(CAR_VIEW);
-      await game.hopIn();
-      game.busy = false;
+      // the door she walks to: on her side of the car, a step out from the body (see doorSides)
+      const cr = game.car, ep0 = cr.exitPoint;
+      if (open && ep0) {
+        const [a, b] = doorSides(cr, ep0, p);
+        const q = !blocked(a.x, a.z, 0.26) ? a : !blocked(b.x, b.z, 0.26) ? b : null;
+        if (q) cr.exitPoint = cr.root.worldToLocal(q.clone()).setY(0);
+      }
+      try { await game.hopIn(); } catch (err) {
+        // (never leave her frozen half way: back on her feet where she stands)
+        console.warn('hop in', err);
+        game.worldWalk = null;
+        if (game.maya.root.parent !== game.car.seat) {
+          const q = game.maya.root.getWorldPosition(v3);
+          walker.teleport(q.x, q.z, game.mayaHeading());
+          game.rig.setFollow(FOOT_VIEW);
+          foot.active = true;
+        }
+      } finally { game.busy = false; if (ep0 && cr.exitPoint !== ep0) cr.exitPoint = ep0; }
       return true;
     },
 
@@ -135,6 +229,18 @@ export function createFoot(game, opts = {}) {
       const blocked = game.busy || game.ui.sheetOpen || game.ui.dialogOpen || game.story?.talking;
       const stick = blocked ? null : game.input.stick();
       const speed = walker.update(dt, stick, WALK * (foot.speedScale ?? 1)); // (story.carry: 0.7)
+      if (open && stick && stick.lengthSq() > 0.04) {
+        if (pushT === 0) pushFrom.copy(walker.pos);
+        pushT += dt;
+        if (walker.pos.distanceTo(pushFrom) > 0.5) pushT = 0; // (getting somewhere)
+        else if (pushT > 1.5) {
+          pushT = 0;
+          if (open.space.collides(walker.pos.x, walker.pos.y, 0.26) || boxedIn(open.space, walker.pos.x, walker.pos.y)) {
+            const s = foot.landAt(walker.pos.x, walker.pos.y);
+            if (s) { walker.teleport(s.x, s.z, walker.heading); foot.unstuck = (foot.unstuck || 0) + 1; }
+          }
+        }
+      } else pushT = 0;
       game.maya.root.position.set(walker.pos.x, 0, walker.pos.y);
       game.maya.root.rotation.set(0, walker.heading, 0);
       let dh = walker.heading - prevHeading;

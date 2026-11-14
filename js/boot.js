@@ -83,8 +83,10 @@ async function start({ autoplay = false } = {}) {
   try {
     sessionStorage.setItem('mw-running', '1');
     const story = params.has('story'); // the Reality Check story game (not linked yet)
-    // lazy towns (?lazy=1): the story's code downloads alongside the game's, not after it (one wait, not two)
-    const lazy = params.get('lazy') === '1' || (params.get('lazy') !== '0' && window.__LAZY_TOWNS === true);
+    // lazy towns (on by default; ?lazy=0 turns them off): the story's code downloads alongside the game's, not
+    // after it (one wait, not two)
+    const lazy = params.get('lazy') === '1' || (params.get('lazy') !== '0' && window.__LAZY_TOWNS !== false);
+    if (story) window.__LAZY_TOWNS = lazy; // (region.js reads it: the game's default, before anything imports it)
     if (story && lazy) import('./story/world/townboot.js').catch(() => {}); // (the starting towns, first of all)
     const storyEarly = story && lazy ? import('./story/story.js?v=1') : null;
     storyEarly?.catch(() => {});
@@ -104,7 +106,7 @@ async function start({ autoplay = false } = {}) {
     starting = false;
     playBtn.disabled = false;
     playBtn.style.setProperty('--p', 0);
-    window.MayaSite?.toast('3D ကမ္ဘာ ဖွင့်မရသေးပါ — ရိုးရိုးစာမျက်နှာနဲ့ ကြည့်ပေးပါနော်', 'The 3D world could not load — please use the simple page');
+    window.MayaSite?.toast('3D ကမ္ဘာ ဖွင့်မရသေးလို့ ရိုးရိုးစာမျက်နှာနဲ့ပဲ ကြည့်ပေးပါနော်', 'The 3D world could not load — please use the simple page');
   }
 }
 

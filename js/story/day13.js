@@ -376,15 +376,18 @@ export async function create(story) {
     layPhase = true;
   }
   async function layGreen() { // Maya lays the green-tied bundle on Yadanar's bare loom
-    if (F('greenLaid')) return;
+    if (F('ch21Done')) return;
     layPhase = false;
-    dropGreen();
     const R = story.room;
-    // (Ei Mon's blue-tied one is on Sithu's loom first; a resumed page may not have shown her walk)
-    if (!F('blueLaid')) { R?.props?.setBundle?.('sithu', true); F('blueLaid', true); }
-    F('greenLaid', true);
-    R?.props?.setBundle?.('yadanar', true);
-    call(game.audio, 'play', 'thud');
+    // (a reload after the bundle went down but before the talk ended: the talk runs again, the laying does not)
+    if (!F('greenLaid')) {
+      dropGreen();
+      // (Ei Mon's blue-tied one is on Sithu's loom first; a resumed page may not have shown her walk)
+      if (!F('blueLaid')) { R?.props?.setBundle?.('sithu', true); F('blueLaid', true); }
+      F('greenLaid', true);
+      R?.props?.setBundle?.('yadanar', true);
+      call(game.audio, 'play', 'thud');
+    }
     await talkNow('eimon', async () => {
       await D.say('eimon', L.emShed, { face: 'think' });
       await D.say('yadanar', L.ydShed, { face: 'sad' });
@@ -918,6 +921,7 @@ export async function create(story) {
       p.setTags?.(F('returned') ? 6 : 0);
       p.setCover?.('eimon', true); // her cover stays on (the Day 14 dressing lifts it; not today)
       if (F('c2') && !F('greenLaid')) { if (!story.carrying) carryGreen(); queue(shedReturn); }
+      else if (F('greenLaid') && !F('ch21Done')) queue(layGreen); // (the talk after the laying, cut off by a reload)
     }
     if (id === 'lodge') {
       call(room, 'setCover', !!(F('plain') && !F('lifted')));

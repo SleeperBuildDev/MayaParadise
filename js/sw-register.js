@@ -14,7 +14,8 @@ async function removeAll() {
 }
 
 // Ask the active worker something; resolves null if there is none or it does not answer.
-function ask(msg, target = sw.controller, ms = 60000) {
+let activeWorker = null;
+function ask(msg, target = sw.controller || activeWorker, ms = 60000) {
   if (!target) return Promise.resolve(null);
   return new Promise((res) => {
     const ch = new MessageChannel();
@@ -35,7 +36,8 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 function busy() {
   if (!window.__mwGame) return true;
   if (performance.now() - lastNet < 2500) return true;
-  try { const s = window.__townLoader?.stats?.(); if (s && (s.loading > 0 || s.pending > 0 || s.busy)) return true; } catch { /* no loader */ }
+  // (the town loader still bringing towns in: its own downloads go first)
+  try { const tl = window.__townLoader; if (tl && (tl.busy?.() || tl.waiting?.())) return true; } catch { /* no loader */ }
   return false;
 }
 async function quiet() {
@@ -48,12 +50,16 @@ let filling = false;
 async function fill() {
   if (filling || saveData()) return;
   filling = true;
+  let fails = 0;
   await sleep(20000); // the first seconds of play belong to the game's own loading
   for (;;) {
     await quiet();
     if (!navigator.onLine) { await sleep(15000); continue; }
     const r = await ask({ type: 'fill', n: 3 });
-    if (!r || r.full || r.error || !(r.left > 0)) break;
+    // (no answer in time, e.g. a slow line: try again later, not give up for the whole visit)
+    if (!r || r.error) { if (++fails > 8) break; await sleep(30000); continue; }
+    fails = 0;
+    if (r.full || !(r.left > 0)) break;
     await sleep(r.got ? 1500 : 20000); // nothing came: the connection is down, wait longer
   }
   filling = false;
@@ -98,9 +104,10 @@ async function start() {
   }
   try {
     await sw.register('sw.js?v=' + encodeURIComponent(BUILD), { scope: './', updateViaCache: 'none' });
-    await sw.ready;
+    activeWorker = (await sw.ready).active;
   } catch (e) { st('failed ' + (e && e.message)); return; } // private mode, storage off: the game just uses the network
-  if (!sw.controller) await new Promise((r) => sw.addEventListener('controllerchange', r, { once: true }));
+  // (a page opened with a hard reload is never controlled; the active worker still answers)
+  if (!sw.controller) await Promise.race([new Promise((r) => sw.addEventListener('controllerchange', r, { once: true })), sleep(10000)]);
   st('controlled');
   const hello = await ask({ type: 'hello' });
   if (hello?.latest) upgrade(hello.latest);

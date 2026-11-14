@@ -32,8 +32,8 @@ const call = (o, fn, ...a) => (o && typeof o[fn] === 'function' ? o[fn](...a) : 
 
 // The car's footprint in its own space (x = width, z = length), grown by Maya's radius, and the
 // corner points she walks through to get around it instead of through it.
-const CAR_BLOCK = { hx: 0.8, hz: 1.35 };
-const CAR_ROUND = { hx: 0.98, hz: 1.52 };
+const CAR_BLOCK = { hx: 0.95, hz: 1.45 }; // (her hair is wider than her body: at 0.8 it brushed the doors)
+const CAR_ROUND = { hx: 1.15, hz: 1.65 };
 
 /** Does the segment a-b cross the box |x| <= hx, |z| <= hz? (slab test) */
 function segHitsBox(a, b, hx, hz) {

@@ -391,4 +391,4 @@ function buildHut(opts = {}) {
   };
 }
 
-export const HUT_ROOM = { name: { my: 'တံတားစောင့် တဲ', en: "The bridge hands' hut" }, district: 'junction', days: [7, 8], build: buildHut };
+export const HUT_ROOM = { name: { my: 'တံတားစောင့်တဲ', en: "The bridge hands' hut" }, district: 'junction', days: [7, 8], build: buildHut };

@@ -20,6 +20,7 @@
 //   --netlog=<file.json>          write every request (url, status, bytes on the wire, start/end ms, from cache/SW)
 //   --profile=<dir>               reuse a browser profile (cache, service worker) between runs; it is kept
 //   --port=8124                   load from another local port (e.g. the live build served from dist/)
+//   --https                       load over https (an HTTP/2 test server with a self-signed certificate: its errors are ignored)
 import { spawn, spawnSync } from 'node:child_process';
 import { mkdtempSync, rmSync, writeFileSync, readFileSync, existsSync, mkdirSync, readdirSync, openSync, writeSync, closeSync } from 'node:fs';
 import { tmpdir, cpus, freemem } from 'node:os';
@@ -30,7 +31,7 @@ const flags = Object.fromEntries(process.argv.slice(2).filter((a) => a.startsWit
 const [path, prefix, size = '412x915', stepsFile] = args;
 const [W, H] = size.split('x').map(Number);
 const dsf = Number(flags.dsf || 2);
-const url = `http://127.0.0.1:${Number(flags.port) || 8123}/` + path.replace(/^\//, '');
+const url = `${'https' in flags ? 'https' : 'http'}://127.0.0.1:${Number(flags.port) || 8123}/` + path.replace(/^\//, '');
 // DevTools throttling presets (latency ms, bytes/s down, bytes/s up)
 const NETS = { none: [0, -1, -1], slow3g: [2000, 50000, 50000], fast3g: [562.5, 180000, 84375] };
 const steps = stepsFile
@@ -99,13 +100,16 @@ process.on('exit', () => { if (slotFile) rmSync(slotFile, { force: true }); });
 
 // GL: 'sw' = software WebGL (SwiftShader, always works); 'hw' = the PC's graphics chip (faster)
 const GL = flags.gl || process.env.PHONE_GL || 'hw'; // 2026-11-14: Intel UHD 770 via D3D11 is ~6x faster than SwiftShader (30 vs 4.9 fps); --gl=sw if a run ever renders black
-const port = 9400 + Math.floor(Math.random() * 500);
+// (the browser picks a free DevTools port itself and writes it to <profile>/DevToolsActivePort: a random port
+// could collide with another run's browser, and this run would then drive that browser's page)
+let port = 0;
 const exe = ['C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', 'C:/Program Files/Google/Chrome/Application/chrome.exe',
   '/usr/bin/google-chrome', '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'].find(existsSync);
 const runDir = mkdtempSync(join(tmpdir(), 'phone-'));
 const profile = flags.profile ? (mkdirSync(flags.profile, { recursive: true }), flags.profile) : runDir;
-const proc = spawn(exe, ['--headless=new', `--remote-debugging-port=${port}`, `--user-data-dir=${profile}`, '--no-first-run', '--no-default-browser-check',
-  '--disable-extensions', '--hide-scrollbars', ...(GL === 'hw' ? ['--use-angle=d3d11', '--enable-gpu', '--enable-gpu-rasterization'] : ['--use-angle=swiftshader', '--enable-unsafe-swiftshader']), '--ignore-gpu-blocklist', '--autoplay-policy=no-user-gesture-required',
+rmSync(join(profile, 'DevToolsActivePort'), { force: true });
+const proc = spawn(exe, ['--headless=new', '--remote-debugging-port=0', `--user-data-dir=${profile}`, '--no-first-run', '--no-default-browser-check',
+  '--disable-extensions', '--hide-scrollbars', ...('https' in flags ? ['--ignore-certificate-errors'] : []), ...(GL === 'hw' ? ['--use-angle=d3d11', '--enable-gpu', '--enable-gpu-rasterization'] : ['--use-angle=swiftshader', '--enable-unsafe-swiftshader']), '--ignore-gpu-blocklist', '--autoplay-policy=no-user-gesture-required',
   '--window-size=1280,1000', 'about:blank'], { stdio: 'ignore' });
 writeFileSync(join(runDir, 'owner.json'), JSON.stringify({ owner: process.pid, browser: proc.pid }));
 const netReqs = new Map(); // requestId -> record (only filled with --net / --netlog)
@@ -118,7 +122,10 @@ try {
   let targets = null;
   for (let i = 0; i < 80 && !targets; i++) {
     await sleep(250);
-    try { targets = await (await fetch(`http://127.0.0.1:${port}/json/list`)).json(); } catch { /* not up yet */ }
+    try {
+      port ||= Number(readFileSync(join(profile, 'DevToolsActivePort'), 'utf8').split('\n')[0].trim()) || 0;
+      if (port) targets = await (await fetch(`http://127.0.0.1:${port}/json/list`)).json();
+    } catch { /* not up yet */ }
   }
   ws = new WebSocket(targets.find((t) => t.type === 'page').webSocketDebuggerUrl);
   await new Promise((r) => (ws.onopen = r));

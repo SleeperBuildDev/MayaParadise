@@ -66,7 +66,7 @@ export const TALK_D2_TOETOE = {
     ] },
     { lines: [
       { my: 'အတန်းမရှိလည်း… ကျွန်တော် နေ့တိုင်း "ဘာကြောင့်လဲ" မေးရင် ရနိုင်မလား။', en: 'Even without the class… could I learn if I ask "why?" every day?', need: 'given', seems: 'unknown', face: 'think',
-        tell: { my: 'အဖြေ မလိုတော့ဘူး။ ကိုယ့်ကိုယ်ကို ယုံကြည်ချင်နေတာ။ ဘောလုံးကို နေထဲမှာ ပြန်လှည့်နေတယ်။', en: "He doesn't need an answer. He wants to believe in himself. He's turning the ball in the sun again." } },
+        tell: { my: 'အဖြေ မလိုတော့ဘူး။ ကိုယ့်ကိုယ်ကိုယ် ယုံကြည်ချင်နေတာ။ ဘောလုံးကို နေထဲမှာ ပြန်လှည့်နေတယ်။', en: "He doesn't need an answer. He wants to believe in himself. He's turning the ball in the sun again." } },
     ] },
   ],
   react: {

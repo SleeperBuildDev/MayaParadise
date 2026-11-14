@@ -356,7 +356,13 @@ export function installTownIntro(game, story, opts = {}) {
       tap.remove();
       // (cut by a scene that has taken the camera: it is theirs now, no move back)
       // (cut by a scene of our own world: a straight cut back to her, no glide under a dialogue or an act)
-      if (!foreign) { if (cut) { ours('release'); ours('snap'); } else await ours('shot', home.pos, home.look, T.back); }
+      if (!foreign) {
+        if (cut) { ours('release'); ours('snap'); } else {
+          // (a scene starting on the way down cuts it too: straight to her, no glide under its first line)
+          await Promise.race([ours('shot', home.pos, home.look, T.back), new Promise((res) => wake.push(res))]);
+          if (cut && !foreign) { ours('release'); ours('snap'); }
+        }
+      }
     } finally {
       clearInterval(clock);
       fogK = 0;

@@ -17,6 +17,7 @@
 //   jABoard { lines: [{ my }], ry }   a propped chalk board on the footpath: prices, today's paper, a saying; never a way.
 import { rng, shade } from '../kit.js';
 import { J, face } from '../art/junction.js';
+import { folkArms, broom, stick } from '../folk-arms.js';
 
 const SKIN = ['#F3CBAA', '#E8B48E', '#D9A077', '#C68A63', '#B47A55'];
 const HAIR = ['#1F1B1B', '#1F1B1B', '#2B211C', '#3E2A20', '#B9B3A8'];
@@ -57,61 +58,73 @@ function jFolk(g, f, it) {
   g.boxR(0, ty, lean * 0.3, tw, th, 0.26 * s, top, lean, 0, 0);
   if (woman && !kid && !sit && !squat) f.box(0, hipY + 0.02, 0, tw + 0.02, 0.06, 0.28, shade(top, 0.85)); // a blouse hem
   const ay = ty + th / 2 - 0.05, ax = tw / 2 + 0.06;
-  const arm = (sx, rx, rz = 0) => g.boxR(sx * ax, ay - 0.2 * s, 0.04 + Math.sin(-rx) * 0.2 * s, 0.11 * s, 0.42 * s, 0.11 * s, top, rx, 0, rz);
-  const hand = (x, y, z) => f.box(x, y, z, 0.1 * s, 0.1 * s, 0.1 * s, skin);
+  // arms turn about the shoulder and end in a hand; whatever the pose holds is drawn in that hand (folk-arms.js).
+  // sx = -1 is the figure's own right arm, +1 its left.
+  const { arm, reach } = folkArms(g, f, { ax, ty, th, lean, s, top, skin, len: 0.38, w: 0.11 });
   const paper = (x, y, z, w, h, rx = -0.6, c = J.newsL) => { g.boxR(x, y, z, w, h, 0.02, c, rx, 0, 0); f.box(x, y + h * 0.3, z + 0.02, w * 0.7, 0.03, 0.01, J.red); };
   switch (pose) {
     case 'sweep':
-      arm(-1, -0.9); arm(1, -0.7);
-      g.boxR(0.06, 0.62, 0.44, 0.04, 1.2, 0.04, J.woodL, 0.55, 0, 0.1);
-      g.boxR(0.0, 0.08, 0.8, 0.38, 0.16, 0.08, J.rope, 0.4, 0, 0); // a coconut-rib broom head
+      // the broom in the right hand, its coconut-rib head on the paving ahead; the left hand at the top of the handle
+      reach(1, broom(g, arm(-1, -0.55, 0.3), { handle: J.woodL, head: J.rope, headW: 0.38 }));
       break;
     case 'carry':
-      arm(-1, 0); arm(1, -2.6);
+      arm(-1, 0); reach(1, [ax, ay + 0.2, 0.22]); // the left hand steadies the bundle on the left shoulder
       g.box(0.2, ty + th / 2 + 0.14, -0.02, 0.52, 0.28, 0.38, it.load || J.newsL); // a tied bundle of papers
       g.box(0.2, ty + th / 2 + 0.29, -0.02, 0.54, 0.02, 0.06, J.rope);
       g.box(0.2, ty + th / 2 + 0.14, 0.175, 0.06, 0.3, 0.02, J.rope);
       break;
     case 'head': {
-      arm(-1, -2.9); arm(1, 0);
+      reach(-1, [-0.34, ay + 0.42, 0.02]); arm(1, 0); // the right hand up at the basket's rim
       const c = it.load || J.mustard;
       g.box(0, ty + th / 2 + 0.36, 0, 0.64, 0.12, 0.64, J.ropeD);
       for (let k = 0; k < 4; k++) f.box(-0.14 + (k % 2) * 0.28, ty + th / 2 + 0.47, -0.14 + (k >> 1) * 0.28, 0.2, 0.12, 0.2, k % 2 ? c : shade(c, 0.85));
       break;
     }
-    case 'paste':
-      arm(-1, 0); arm(1, -2.8, 0.15);
-      g.boxR(ax + 0.02, ay + 0.42, 0.12, 0.05, 0.4, 0.05, J.woodL, -0.3, 0, 0); // the brush
-      g.box(ax + 0.02, ay + 0.64, 0.2, 0.2, 0.08, 0.1, J.newsD);
+    case 'paste': {
+      arm(-1, 0);
+      const [hx, hy, hz] = arm(1, -2.75, 0.12); // the paste brush up in the left hand
+      stick(g, [hx, hy - 0.06, hz - 0.02], [hx, hy + 0.3, hz + 0.1], 0.05, J.woodL);
+      g.box(hx, hy + 0.34, hz + 0.12, 0.2, 0.08, 0.1, J.newsD);
       g.box(-0.34, 0.18, 0.18, 0.26, 0.32, 0.26, J.tin); // the paste bucket at the feet
       break;
+    }
     case 'hang':
-      arm(-1, -2.9, -0.15); arm(1, -2.9, 0.15);
-      hand(-ax, ay + 0.46, 0.1); hand(ax, ay + 0.46, 0.1);
+      arm(-1, -2.9, -0.15); arm(1, -2.9, 0.15); // both hands up at the line
       break;
     case 'readStand':
-      arm(-1, -1.1); arm(1, -1.1);
+      reach(-1, [-0.25, ty + 0.06, 0.34]); reach(1, [0.25, ty + 0.06, 0.34]); // a hand at each side of the paper
       paper(0, ty + 0.12, 0.34, 0.56, 0.38, -0.25);
       break;
-    case 'sell':
-      arm(-1, -0.5); arm(1, -2.7);
-      paper(ax + 0.02, ay + 0.55, 0.12, 0.36, 0.44, 0.1, J.white);
-      g.box(-0.3, ty - 0.1, 0.2, 0.18, 0.34, 0.3, J.newsL); // the stack under the other arm
+    case 'sell': {
+      arm(-1, -0.3); // the right arm keeps the stack against the body
+      const [hx, hy, hz] = arm(1, -2.7, 0.1); // today's paper held up in the left hand
+      paper(hx, hy + 0.18, hz + 0.02, 0.36, 0.44, 0.1, J.white);
+      g.box(-0.3, ty - 0.1, 0.2, 0.18, 0.34, 0.3, J.newsL);
       break;
+    }
     case 'read':
-    case 'write':
-      arm(-1, -1.0); arm(1, -1.0);
-      if (pose === 'read') paper(0, ty + 0.02, 0.38, 0.5, 0.34, -0.7);
-      else { g.boxR(0, hipY + 0.16, 0.26, 0.5, 0.03, 0.36, J.woodL, 0.1, 0, 0); f.box(0.05, hipY + 0.19, 0.26, 0.32, 0.01, 0.24, J.white); g.box(0.18, hipY + 0.24, 0.3, 0.02, 0.02, 0.18, J.blueD); }
+      reach(-1, [-0.22, ty - 0.04, 0.38]); reach(1, [0.22, ty - 0.04, 0.38]);
+      paper(0, ty + 0.02, 0.38, 0.5, 0.34, -0.7);
       break;
-    case 'drink':
-      arm(-1, -0.5); arm(1, -1.6);
-      f.box(ax, ay + 0.06, 0.32, 0.08, 0.11, 0.08, '#E9C79A'); // a glass of tea, milky
+    case 'write': {
+      g.boxR(0, hipY + 0.16, 0.26, 0.5, 0.03, 0.36, J.woodL, 0.1, 0, 0); f.box(0.05, hipY + 0.19, 0.26, 0.32, 0.01, 0.24, J.white);
+      reach(1, [0.16, hipY + 0.22, 0.24]); // the left hand steadies the board
+      const [hx, hy, hz] = reach(-1, [-0.12, hipY + 0.26, 0.3]); // the pen in the right hand
+      g.box(hx + 0.02, hy - 0.02, hz + 0.06, 0.02, 0.02, 0.18, J.blueD);
       break;
-    case 'chalk':
-      arm(-1, -0.4); arm(1, -1.2);
-      f.box(ax, 0.08, 0.36, 0.05, 0.05, 0.05, J.white);
+    }
+    case 'drink': {
+      arm(-1, -0.5);
+      const [hx, hy, hz] = reach(1, [0.1, ay - 0.25, 0.36]); // a glass of milky tea in the left hand, over the lap
+      f.box(hx, hy + 0.08, hz + 0.02, 0.08, 0.11, 0.08, '#E9C79A');
       break;
+    }
+    case 'chalk': {
+      arm(-1, -0.4);
+      const [hx, hy, hz] = reach(1, [0.16, 0.08, 0.36]); // the chalk in the left hand, down at the paving
+      f.box(hx, hy - 0.06, hz + 0.02, 0.05, 0.05, 0.05, J.white);
+      break;
+    }
     default:
       arm(-1, sit ? -0.6 : 0); arm(1, sit ? -0.6 : 0);
   }

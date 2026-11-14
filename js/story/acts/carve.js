@@ -169,7 +169,7 @@ export function carve({ title = '', hint = '', heat = [], nickStays = true, tole
       if (S.done) return;
       S.done = true;
       S.down = false;
-      A.setHint(lines.done || { my: 'အနားကွပ် ပြီးပြီ', en: 'The border is cut' }, 'good');
+      A.setHint(lines.done || { my: 'အနားကွပ် ဖြတ်ပြီးပြီ', en: 'The border is cut' }, 'good');
       await wait(700);
       await A.seal(true);
       A.done({ ok: true, nicks, lifts });

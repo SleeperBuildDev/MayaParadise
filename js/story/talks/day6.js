@@ -13,7 +13,7 @@
 // Checked against talk-rules.js (seeded): count fit → fish fit → Breathe → fish fit → Listen = won in 5 of 7.
 
 export const D6_TH_CARDS = [
-  { id: 'count', onlyIf: 'd6.rideSeen', name: { my: 'လူတိုင်း၊ တစ်ယောက်မှလွဲ', en: 'Everyone but one' },
+  { id: 'count', onlyIf: 'd6.rideSeen', name: { my: 'လူတိုင်း၊ တစ်ယောက်ကလွဲလို့', en: 'Everyone but one' },
     line: { my: 'ဒီခေါက်မှာ လူတိုင်းကို "နေကောင်းလား" အော်တယ်နော်။ ကြိမ်ဆိပ်က အဘိုးကြီး တစ်ယောက်ပဲ ဘာမှ မရဘူး။', en: 'On this run you called "keeping well!" to everyone. Only the old man on Cane Jetty got nothing.' },
     answers: ['unknown'], from: { my: 'ဖောင်ပေါ်ကနေ ကိုယ်တိုင် မြင်ခဲ့တာ', en: 'seen from the raft' } },
   { id: 'cloud', onlyIf: 'companion:cloud', companion: 'cloud', name: { my: 'တိမ်အေး', en: 'Cool Cloud' }, // ch 7's companion: fits nothing today
@@ -54,7 +54,7 @@ export const TALK_D6_THIHA = {
       { my: 'တစ်ယောက် ကျော်တာ ဘာဖြစ်လဲ။ ကျန်တဲ့သူ အကုန် နှုတ်ဆက်တာပဲ။', en: "What's one person? I greet all the rest.", need: 'unknown', face: 'think', heard: true },
     ] },
     { lines: [
-      { my: 'ခုနစ်နှစ်လောက်က ဖောင် ပထမဆုံး ချတဲ့နေ့၊ အမေ့ ပထမဆုံး ဖာရာကို သူ ရယ်ခဲ့တယ်။ အခု သူ့ကြိမ်က ဈေးထဲမှာ အရောင်းရဆုံး။', en: "Seven years back, the raft's first day, he laughed at mother's first patch. Now his cane sells best in the whole Market.", need: 'envy', seems: 'hot', face: 'think',
+      { my: 'ခုနစ်နှစ်လောက်က ဖောင် စချတဲ့နေ့၊ အမေ့ ပထမဆုံး ဖာရာကို သူ ရယ်ခဲ့တယ်။ အခု သူ့ကြိမ်က ဈေးထဲမှာ အရောင်းရဆုံး။', en: "Seven years back, the raft's first day, he laughed at mother's first patch. Now his cane sells best in the whole Market.", need: 'envy', seems: 'hot', face: 'think',
         tell: { my: 'မျက်လုံးက အဘိုးကြီးဆီ မရောက်ဘူး။ မြင့်မြင့် စီထားတဲ့ ကြိမ်စည်းတွေဆီ ရောက်နေတယ်။ ဒေါသ မဟုတ်ဘူး။ ရိုင်းတဲ့သူ အဆင်ပြေနေတာကို မကျေနပ်တာ။', en: 'His eyes go not to the old man but to the tall stacks of cane. Not anger: it galls him that a rude man does well.' } },
       { my: 'ရိုင်းတဲ့သူကမှ အဆင်ပြေနေတာ။ မတရားဘူး။', en: "The rude one's the one doing well. It isn't fair.", need: 'envy', seems: 'looksdown', face: 'sad',
         tell: { my: 'အဘိုးကြီးကို အထင်သေးတာ မဟုတ်ဘူး။ "မတရားဘူး" ဆိုတာကိုပဲ ပြန်ပြန်ပြောနေတယ်။', en: 'He doesn\'t look down on the old man. He keeps coming back to "it isn\'t fair".' } },

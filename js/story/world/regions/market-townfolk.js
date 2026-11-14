@@ -25,7 +25,7 @@ export const TOWN_HELLO = {
   mpauksi: { my: 'လမ်းထိပ်မှာ ဆံပင်ညှပ်ဆိုင် အသစ် ဖွင့်တော့ ရင်ထဲ ပူသွားတယ်။ ပြီးတော့ သူ သင်တုန်းဓား ကိုင်ပုံ ကြည့်ပြီး တစ်ခု သင်ယူလိုက်တယ်။', en: 'A new barber opened at the top of the lane and I felt the heat. Then I watched how he holds the razor, and learnt something.' },
   mohnmar: { my: 'ဖောက်သည် စိတ်ရှည်အောင် ကိုယ် လုပ်ပေးလို့ မရဘူး။ ကိုယ့်ချုပ်ရိုး ဖြောင့်အောင်ပဲ ကိုယ် လုပ်နိုင်တာ။', en: "I can't make a customer patient. I can only make my own seams straight." },
   mthawda: { my: 'ကိုယ့်အိမ်ရှေ့ကို အရင် လှည်းတယ်။ ပြီးမှ လမ်းကို ဆက်လှည်းတယ်။ ဘယ်သူမှ ကျေးဇူးတင်စရာ မလိုပါဘူး။', en: 'I sweep my own step first, then on along the lane. Nobody needs to thank me for it.' },
-  mlaylay: { my: 'ကျွန်တော့် ကွင်းကို ကိုကို့ ငှားလိုက်တယ်။ သူ ဘယ်လို လှိမ့်လဲ နောက်က လိုက်မကြည့်တော့ဘူး။', en: "I lent my hoop to Ko Ko. I didn't follow him round to see how he rolls it." },
+  mlaylay: { my: 'ကျွန်တော့်ကွင်းကို ကိုကို့ ငှားလိုက်တယ်။ သူ ဘယ်လို လှိမ့်လဲ နောက်က လိုက်မကြည့်တော့ဘူး။', en: "I lent my hoop to Ko Ko. I didn't follow him round to see how he rolls it." },
   uaungba: { my: 'ဘေးအိမ်ရဲ့ ဝါးထရံက ငါ့ဟာထက် ဖြောင့်တယ်။ ကောင်းတာပေါ့၊ ဖြောင့်အောင် ယက်လို့ရတယ် ဆိုတာ သိသွားပြီ။', en: "My neighbour's bamboo wall came out straighter than mine. Good. Now I know it can be done." },
 };
 

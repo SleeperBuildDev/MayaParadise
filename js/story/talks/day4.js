@@ -13,7 +13,7 @@
 // ---------------------------------------------------------------------------------------------
 export const D4_KP_CARDS = [
   { id: 'theirs', flag: 'd4.card.theirs', name: { my: 'သူ့လက်ဆောင်၊ သူ့ရွေးချယ်မှု', en: 'Their gift, their choice' },
-    line: { my: 'ဘယ်မှာ ပေးမလဲဆိုတာ ပေးတဲ့သူ ရွေးတာလေ။ ကျွန်မ သယ်ရုံပဲ သယ်ခဲ့တာ။', en: "Where to give is the giver's choice. I only carried." },
+    line: { my: 'ဘယ်မှာ ပေးမလဲဆိုတာ ပေးတဲ့သူ ရွေးတာလေ။ ကျွန်မက သယ်ရုံပဲ သယ်ခဲ့တာ။', en: "Where to give is the giver's choice. I only carried." },
     answers: ['envy'], from: { my: 'လက်ဆောင်သုံးခု ပို့ရင်း', en: 'from carrying the three gifts' } },
   { id: 'glad', flag: 'd4.card.glad', name: { my: 'ရေသောက်တာ မြင်ရတော့', en: 'Watching it drink' },
     line: { my: 'ခွေးအိုကြီး ရေသောက်တာ မြင်ရတော့ ရင်ထဲ အေးသွားတယ်။ ကိုဖြိုးရော အဲဒီလို ခံစားဖူးလား။', en: 'When the old dog drank, it went cool inside me. Have you ever felt that, Ko Phyo?' },
@@ -65,7 +65,7 @@ export const TALK_D4_KOPHYO = {
       { my: 'သူတို့ ပေးရင် လူတွေ ကျေးဇူးတင်ကြတယ်။ ကျွန်တော် ပြောရင် ဘယ်သူမှ နားမထောင်ဘူး။', en: 'When they give, people thank them. When I talk, nobody listens.', need: 'envy', face: 'sad', heard: true },
     ] },
     { lines: [
-      { my: 'ဘာဖြစ်ဖြစ်… ကျွန်တော့်မှာ ပေးစရာ ဘာမှ မရှိဘူး။ ကိုယ်ပိုင် ကရားအိုလေးတောင် မရှိဘူး။', en: "Anyway… I've nothing to give. Not even a little pot of my own.", need: 'given', seems: 'envy', face: 'sad', mood: 'down',
+      { my: 'ဘာဖြစ်ဖြစ်… ကျွန်တော့်မှာ ပေးစရာ ဘာမှ မရှိဘူး။ ကိုယ်ပိုင် ကရားအိုးလေးတောင် မရှိဘူး။', en: "Anyway… I've nothing to give. Not even a little pot of my own.", need: 'given', seems: 'envy', face: 'sad', mood: 'down',
         tell: { my: 'မနာလိုတာထက် လက်လျှော့နေတာ။ ဆိုင်က စင်ပေါ်ရှိ ကရားလေးတွေကို ခဏခဏ ကြည့်နေတယ်။', en: "More given up than envious. His eyes keep going to the little pots on the shop's shelf." } },
     ] },
     { lines: [
@@ -80,7 +80,7 @@ export const TALK_D4_KOPHYO = {
   ],
   react: {
     miss: { my: '…အဲဒါက လက်ဖက်ရည်နဲ့ ဘာဆိုင်လဲ။', en: '…What has that got to do with tea?' },
-    hot: { my: '(ကိုဖြိုး ခွက်ကို ဆောင့်ချပြီး တံခါးအပြင်ကို မျက်စောင်းထိုးနေတယ်။ ဘာမှ မကြားဘူး။)', en: '(Ko Phyo bangs his cup down and glares out of the door. Nothing gets through.)' },
+    hot: { my: '(ကိုဖြိုး ခွက်ကို ဆောင့်ချပြီး တံခါးအပြင် မျက်စောင်းထိုးနေတယ်။ ဘာမှ မကြားဘူး။)', en: '(Ko Phyo bangs his cup down and glares out of the door. Nothing gets through.)' },
   },
   decision: [
     { my: 'ရေသုံးပုံး ခပ်ပြီး ကိုယ့်ရွက် ကိုယ်ရှာမယ်။ ပြီးရင် ဒေါ်တင်တင့်ကို ဖျော်နည်း မေးမယ်။', en: "I'll fetch three pails and earn my own leaves. Then I'll ask Daw Tin Tin how to brew.", face: 'think' },
@@ -101,7 +101,7 @@ export const D4_TH_CARDS = [
     backfire: { they: { my: 'ဟုတ်တယ်! တစ်နေ့ နှစ်စောင် ရေးမယ်!', en: "Yes! I'll write twice a day!" },
                 maya: { my: '(ကြိုးကို ပိုတင်းအောင် ဆွဲခိုင်းလိုက်မိပြီ။ စွန် ပိုထိုးကျသွားတယ်။)', en: '(I told her to grip harder. The kite dives.)' } } },
   { id: 'ownhands', flag: 'd4.card.ownhands', name: { my: 'ကိုယ့်လက်နဲ့ ခေါက်တာ', en: 'Folded by your own hands' },
-    line: { my: 'ဒီလေယာဉ်တွေ မသီရိ ကိုယ်တိုင် ခေါက်တာ။ ထောင့်တိုင်း တည့်တယ်။ စာရောက်ရောက် မရောက်ရောက် တည့်နေတာပဲ။', en: 'You folded these planes yourself. Every corner true, letter or no letter.' },
+    line: { my: 'ဒီလေယာဉ်တွေ မသီရိ ကိုယ်တိုင် ခေါက်တာ။ ထောင့်တိုင်း တည့်တယ်။ စာရောက်ရောက် မရောက်ရောက် တည့်တာပဲ။', en: 'You folded these planes yourself. Every corner true, letter or no letter.' },
     answers: ['given'], from: { my: 'သူ့စားပွဲပေါ်က လေယာဉ်တွေ', en: 'from the planes on her table' } },
   { id: 'wishwell', flag: 'd4.card.wishwell', name: { my: 'ပေါ့တဲ့စာ', en: 'The light letter' },
     line: { my: 'ပြန်စာ စောင့်တဲ့စာက လေးတယ်တဲ့။ ဆုတောင်းရုံ စာက ပေါ့တယ်။ ဦးလူအေး ပြောတာ။', en: 'U Lu Aye says a letter that waits for an answer is heavy, and one that only wishes well is light.' },
@@ -134,7 +134,7 @@ export const TALK_D4_THIRI = {
   hand: D4_TH_CARDS, // first hand (data order): notwind, holdtight, ownhands, wishwell
   stones: [
     { lines: [
-      { my: 'သုံးရက် ရှိပြီ။ မနက်တိုင်း ရေးတယ်။ သူကတော့… ဘာမှ မရေးဘူး။', en: 'Three days. I write every morning. She… writes nothing.', need: 'cling', seems: 'hot', face: 'sad',
+      { my: 'သုံးရက် ရှိပြီ။ မနက်တိုင်း ရေးတယ်။ သူကတော့… ဘာမှ မပြန်ဘူး။', en: 'Three days. I write every morning. She… writes nothing.', need: 'cling', seems: 'hot', face: 'sad',
         tell: { my: 'စိတ်ဆိုးနေတာ မဟုတ်ဘူး။ စကားတစ်ခွန်းပြောတိုင်း အကွက် ၁၄ ကို လှမ်းကြည့်တယ်။ ခုံစွန်းကို လက်ဆစ်ဖြူအောင် ဆုပ်ထားတယ်။', en: 'Not angry. She glances at hole ၁၄ after every word, gripping the bench edge till her knuckles go pale.' } },
       { my: 'အလံ တက်လာရင် စွန်လည်း တက်မှာ။ ခဏလေး စောင့်ကြည့်ရအောင်။', en: "If the flag goes up, the kite will too. Let's just wait a little.", need: 'cling', face: 'worried' },
     ] },
@@ -153,7 +153,7 @@ export const TALK_D4_THIRI = {
     ] },
     { lines: [
       { my: 'ဒါဆို… စောင့်နေရင်း ကျွန်မ ဒီမှာ ဘာလုပ်ရမလဲ။', en: 'Then… what do I do here while I wait?', need: 'unknown', face: 'think', heard: true,
-        tell: { my: 'တံခါးဝကနေ ကိုယ့်ဆိုင်ဘက်ကို ပထမဆုံးအကြိမ် လှည့်ကြည့်တယ်။', en: 'For the first time, she turns to look out of the door at her own stall.' } },
+        tell: { my: 'တံခါးဝကနေ ကိုယ့်ဆိုင်ဘက် ပထမဆုံးအကြိမ် လှည့်ကြည့်တယ်။', en: 'For the first time, she turns to look out of the door at her own stall.' } },
     ] },
   ],
   react: {
@@ -162,6 +162,6 @@ export const TALK_D4_THIRI = {
   },
   decision: [
     { my: 'စွန်ကို ကိုယ့်ဝါးတိုင်မှာ ပြန်ချည်မယ်။', en: "I'll tie the kite back to my own post.", face: 'think' },
-    { my: 'ဖူးဖူးကို ဆုတောင်းစာ ပို့မယ်။ လူတိုင်းကို ပို့သလိုပဲ။ ပြန်စာ မစောင့်ဘူး။', en: "I'll send Phoo Phoo a good wish. The same as anyone. And not wait for an answer.", face: 'happy' },
+    { my: 'ဖူးဖူးကို ဆုတောင်းစာ ပို့မယ်။ လူတိုင်း ပို့သလိုပဲ။ ပြန်စာ မစောင့်ဘူး။', en: "I'll send Phoo Phoo a good wish. The same as anyone. And not wait for an answer.", face: 'happy' },
   ],
 };
