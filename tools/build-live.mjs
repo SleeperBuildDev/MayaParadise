@@ -589,7 +589,8 @@ if (flags.core) {
     const f = u.split('?')[0];
     if (!f.endsWith('.js') || !exists(f) || pageScripts.has(f)) continue;
     if (/^js\/story\/world\/(regions\/(?!outlines\.js$|home\.js$)|art\/)/.test(f)) continue;
-    if (/^js\/story\/(day\d+[^/]*\.js|talks\/day\d+\.js|acts\/)/.test(f)) continue;
+    if (/^js\/story\/(day\d+[^/]*\.js|talks\/day\d+\.js|hints\/day\d+\.js|acts\/)/.test(f)) continue;
+    if (/-worker\.js$/.test(f)) continue; // (a worker script: a module preload would not be shared with the worker)
     preloadUrls.push(u);
   }
 } else {
@@ -649,6 +650,61 @@ const rank = (f) => {
 };
 const rest = [...outputs.keys()].filter((f) => !coreSet.has(f) && !PRECACHE_SKIP.has(f) && !/(^|\/)LICENSE$/.test(f) && !/^img\/og\./.test(f) && !/\.txt$/.test(f))
   .sort((a, b) => { const x = rank(a), y = rank(b); return x[0] - y[0] || x[1] - y[1] || a.localeCompare(b, 'en', { numeric: true }); });
+// game: what the story game needs to start for a given save, for the service worker's website-mode warm-up (sw.js
+// firstFor(): today's page with everything it imports, then the towns townboot.js would start with for that save)
+//   { home: rect, towns: { t: { files, rects } }, dayTowns: { day: [t] }, days: { day: [files] }, boot: [files] }
+let game = null;
+try {
+  const src = before.get('js/story/world/regions/outlines.js').toString('utf8');
+  const constOf = (n) => JSON.parse(src.match(new RegExp(`export const ${n} = (\\{.*\\});`))[1]);
+  const TOWNS = constOf('TOWNS'), FILES = constOf('FILES'), DAY_IMPORTS = constOf('DAY_IMPORTS');
+  const home = JSON.parse(before.get('js/story/world/regions/home.js').toString('utf8').match(/\brect:\s*(\[[^\]]+\])/)[1]);
+  const towns = {};
+  for (const [t, o] of Object.entries(TOWNS)) towns[t] = { files: (FILES[t] || []).filter(exists), rects: o.REGION.map((r) => r.rect) };
+  // (the page's own module and everything it imports, static or literal import(), that is not core already)
+  const closure = (roots) => {
+    const out = [], seen = new Set(), queue = roots.filter(exists);
+    while (queue.length) {
+      const f = queue.shift();
+      if (seen.has(f)) continue;
+      seen.add(f);
+      // (core files are cached anyway, and the towns come from "towns": neither is followed)
+      if (!roots.includes(f) && (coreSet.has(f) || /^js\/story\/world\/(regions|art)\//.test(f))) continue;
+      if (!coreSet.has(f)) out.push(f);
+      const { st, dyn } = importsOf(before.get(f).toString('utf8'));
+      for (const s of [...st, ...dyn]) { const r = resolveSpec(f, s); if (r && exists(r.file) && r.file.endsWith('.js')) queue.push(r.file); }
+    }
+    return out;
+  };
+  const days = {};
+  for (let d = 1; d <= 15; d++) {
+    const roots = [`js/story/day${d}.js`, `js/story/talks/day${d}.js`, `js/story/hints/day${d}.js`];
+    if (exists(roots[0])) days[d] = closure(roots);
+  }
+  // a town is its FILES plus everything they import (a region's own -detail.js, the art kits it uses), not core
+  const reach = (roots, follow) => {
+    const out = [], seen = new Set(), queue = roots.filter(exists);
+    while (queue.length) {
+      const f = queue.shift();
+      if (seen.has(f)) continue;
+      seen.add(f);
+      if (!coreSet.has(f)) out.push(f);
+      const { st, dyn } = importsOf(before.get(f).toString('utf8'));
+      for (const [s, isDyn] of [...st.map((s) => [s, false]), ...dyn.map((s) => [s, true])]) {
+        const r = resolveSpec(f, s);
+        if (r && exists(r.file) && r.file.endsWith('.js') && follow(r.file, isDyn)) queue.push(r.file);
+      }
+    }
+    return out;
+  };
+  for (const t of Object.keys(towns)) towns[t].files = reach(towns[t].files, (f) => !coreSet.has(f));
+  // boot: what the story's core code imports that is not core itself (core drifts behind new modules: a static import
+  // of a core file, or a game-start import() such as story.js's anim/), every save's first files; the lazy parts
+  // (days, talks, hints, acts, towns, art) come from "days" and "towns"
+  const LAZY = /^js\/story\/(day\d+[^/]*\.js|talks\/|hints\/|acts\/|world\/(regions|art)\/)/;
+  const boot = reach(core.filter((f) => f.startsWith('js/story/') && f.endsWith('.js') && exists(f)), (f, isDyn) => !isDyn || !LAZY.test(f));
+  game = { home, towns, dayTowns: DAY_IMPORTS, days, boot };
+} catch (e) { log('game start lists not written (the warm-up then follows "rest" only):', e.message); }
 
 // inject the live marker, version, service-worker registration and (story mode only) modulepreload
 {
@@ -656,6 +712,15 @@ const rest = [...outputs.keys()].filter((f) => !coreSet.has(f) && !PRECACHE_SKIP
   const swReg = exists('js/sw-register.js');
   const pre = flags['no-preload'] ? [] : preloadUrls;
   let head = `<script>window.__LIVE=true;window.__BUILD=${JSON.stringify(version)};`;
+  // the mode switch's turning page, up from the first paint of the page it lands on (boot.js lifts it when the game
+  // draws; same test as boot.js switchedHere(), same rule: TURN_CSS in boot.js); 45 s at most
+  const turnCss = (before.get('js/boot.js')?.toString('utf8').match(/^const TURN_CSS = ('[^'\\\n]*');$/m) || [])[1];
+  if (turnCss) {
+    head += `(function(){try{var h=location.pathname+location.search,s=JSON.parse(sessionStorage.getItem('mw-switch')||'null'),a=history.state&&history.state.mwAuto;`
+      + `if(!(s&&s.to===h&&Date.now()-s.t<60000)&&!a)return;var d=document.documentElement,c=document.createElement('style');c.id='mw-turn-style';c.textContent=${turnCss};`
+      + `document.head.appendChild(c);if(s&&s.to===h&&s.msg)d.style.setProperty('--mw-turn-msg',JSON.stringify(String(s.msg)));d.classList.add('mw-turn');`
+      + `setTimeout(function(){d.classList.remove('mw-turn')},45000)}catch(e){}})();`;
+  } else log('WARNING: TURN_CSS not found in js/boot.js: no turning page at the first paint');
   if (pre.length) {
     // (+ the saved day's own module and lines, when they exist)
     const days = [...Array(15)].map((_, i) => i + 1).filter((d) => exists(`js/story/day${d}.js`));
@@ -686,7 +751,7 @@ for (const [f, buf] of outputs) {
 // hash: unchanged files are copied from the previous version's cache on an update (sw.js), not downloaded again
 const hash = {};
 for (const f of [...core, ...rest]) hash[f] = createHash('sha256').update(outputs.get(f)).digest('hex').slice(0, 16);
-const precache = { version, built: new Date().toISOString(), core: core.slice().sort(), rest, hash };
+const precache = { version, built: new Date().toISOString(), core: core.slice().sort(), rest, hash, ...(game ? { game } : {}) };
 writeFileSync(join(OUT, 'precache.json'), JSON.stringify(precache, null, 1) + '\n');
 
 // node --check every .js in dist (a few at a time)

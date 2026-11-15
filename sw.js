@@ -6,7 +6,11 @@
 //   install  : core files (most are already in the browser's HTTP cache after the first play,
 //              so this costs almost nothing); files whose hash did not change are copied from
 //              the previous version's cache instead of downloaded again.
-//   later    : the page asks for "rest" a few files at a time while the game is idle (fill).
+//   later    : the page asks for "rest" a few files at a time while the game is idle (fill). In website mode
+//              (sw-register.js) the page asks sooner and in bigger batches, and the game's start files for
+//              this visitor's save come first (firstFor: today's page and its towns, from precache.json "game"),
+//              so the switch to the game finds everything here. A file a fill is still fetching is not
+//              fetched twice: the page's own request for it waits for that download (inflight).
 //   activate : old rc-* caches are deleted. A new version never takes over mid-play: it waits
 //              until the next visit (sw-register.js reloads once on the cover if one is waiting).
 // Requests: code, fonts, images -> cache first (one version per cache, so never mixed with a
@@ -28,6 +32,8 @@ let manifest = null; // { version, core, rest, hash }
 let full = false; // storage quota reached: stop filling
 let latest = null; // newest build seen on the network
 const bad = new Set(); // files that failed their hash check this session: not retried
+const have = new Set(); // files known to be in this version's cache (fewer cache lookups per fill)
+const inflight = new Map(); // path -> Promise of a fill/install download still running
 
 // "js/boot.js?v=6" -> "<scope>js/boot.js"; the page is "<scope>index.html".
 function rel(url) {
@@ -49,6 +55,7 @@ async function put(cache, p, res) {
   if (full) return false;
   try {
     await cache.put(keyOf(p), res);
+    have.add(p);
     return true;
   } catch (e) {
     if (e && (e.name === 'QuotaExceededError' || /quota/i.test(e.message))) full = true;
@@ -71,6 +78,12 @@ async function grab(cache, p, man, seen) {
     return put(cache, p, res);
   }
   return false; // the server has a different file than this version: do not keep it
+}
+function grabOnce(cache, p, man, seen) {
+  if (inflight.has(p)) return inflight.get(p);
+  const pr = grab(cache, p, man, seen).finally(() => inflight.delete(p));
+  inflight.set(p, pr);
+  return pr;
 }
 
 async function loadManifest(cache) {
@@ -110,8 +123,26 @@ async function pool(items, n, fn) {
 
 async function missing(cache, paths) {
   const out = [];
-  for (const p of paths) if (!(await cache.match(keyOf(p)))) out.push(p);
+  for (const p of paths) {
+    if (have.has(p)) continue;
+    if (await cache.match(keyOf(p))) have.add(p); else out.push(p);
+  }
   return out;
+}
+
+// The story game's start files for a save { day, place: { x, z } } (website mode): what the core code imports that
+// is not core itself (boot), today's page and what it imports, then the towns js/story/world/townboot.js starts with (within 70 m of where the save puts her, or of
+// the home book, plus the day's own towns). precache.json "game" is written by tools/build-live.mjs.
+function firstFor(man, save) {
+  const g = man.game;
+  if (!g || !save) return [];
+  const day = Math.max(1, Math.min(15, +save.day || 1));
+  const sp = save.place && +save.place.z > 19.5 ? save.place : null;
+  const at = sp ? [+sp.x, +sp.z, +sp.x, +sp.z] : g.home;
+  const gap = ([a, b, c, d], [e, f, h, i]) => Math.hypot(Math.max(0, e - c, a - h), Math.max(0, f - d, b - i));
+  const towns = new Set((g.dayTowns && g.dayTowns[day]) || []);
+  for (const [t, o] of Object.entries(g.towns || {})) if (at && (o.rects || []).some((r) => gap(r, at) < 70)) towns.add(t);
+  return [...(g.boot || []), ...((g.days && g.days[day]) || []), ...[...towns].flatMap((t) => (g.towns[t] && g.towns[t].files) || [])];
 }
 
 self.addEventListener('install', (event) => {
@@ -140,7 +171,7 @@ self.addEventListener('install', (event) => {
     try {
       for (const u of (await (await cache.match(META + 'seen'))?.json()) || []) { const p = rel(u); if (p) seen[p] = u; }
     } catch { /* none */ }
-    await pool(todo, 4, (p) => grab(cache, p, man, seen));
+    await pool(todo, 4, (p) => grabOnce(cache, p, man, seen));
     // An update must be complete before it may replace a working version; a first install
     // keeps whatever it got (the rest still comes from the network and is kept as it arrives).
     if (hadOld && (await missing(cache, man.core)).length) throw new Error('update incomplete, will retry');
@@ -179,7 +210,9 @@ self.addEventListener('fetch', (event) => {
     let cache = null;
     try {
       cache = await caches.open(CACHE);
-      const hit = await cache.match(keyOf(p));
+      let hit = await cache.match(keyOf(p));
+      // (a fill is downloading it right now: wait for that one download instead of starting a second)
+      if (!hit && inflight.has(p)) { await inflight.get(p).catch(() => {}); hit = await cache.match(keyOf(p)); }
       if (hit) {
         if (nav) event.waitUntil(checkLatest(req.url));
         return hit;
@@ -202,6 +235,8 @@ self.addEventListener('fetch', (event) => {
 // Messages from js/sw-register.js:
 //   hello -> { version, latest, cached, total, full }
 //   fill  -> caches up to n missing "rest" files, replies { got, left, full }
+//            (website mode adds save: { day, place } and par: the game's start files for that save come first,
+//            then any core file a first install missed, then "rest"; par = downloads at once, 1..6)
 //   skip  -> a waiting version takes over (only when this is the only open page)
 self.addEventListener('message', (event) => {
   const msg = event.data || {};
@@ -224,10 +259,11 @@ self.addEventListener('message', (event) => {
         return reply({ version: VERSION, latest, cached: all.length - miss.length, total: all.length, full });
       }
       if (msg.type === 'fill') {
-        const miss = full ? [] : (await missing(cache, man.rest)).filter((p) => !bad.has(p));
-        const batch = miss.slice(0, Math.max(1, Math.min(8, msg.n | 0 || 3)));
+        const list = msg.save ? [...new Set([...firstFor(man, msg.save), ...man.core, ...man.rest])].filter((p) => man.hash?.[p] || man.rest.includes(p) || man.core.includes(p)) : man.rest;
+        const miss = full ? [] : (await missing(cache, list)).filter((p) => !bad.has(p));
+        const batch = miss.slice(0, Math.max(1, Math.min(12, msg.n | 0 || 3)));
         let got = 0;
-        await pool(batch, 2, async (p) => { const r = await grab(cache, p, man); if (r) got++; else if (r === false && !full) bad.add(p); });
+        await pool(batch, Math.max(1, Math.min(6, msg.par | 0 || 2)), async (p) => { const r = await grabOnce(cache, p, man); if (r) got++; else if (r === false && !full) bad.add(p); });
         return reply({ got, left: full ? 0 : miss.length - got, full });
       }
     } catch (e) {
