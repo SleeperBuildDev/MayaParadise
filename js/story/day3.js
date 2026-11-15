@@ -873,7 +873,7 @@ export async function create(story) {
           picked = i - 3;
           ul.querySelectorAll('li').forEach((x) => x.classList.toggle('on', x === li));
           ask.textContent = tr(L.boardReplyQ);
-          C.set({ kind: 'many', delay: 5000, many: () => [...reps.children], label: { my: 'ပြန်စာ တစ်ခု ရွေးပါ', en: 'Pick a reply' } });
+          C.set({ kind: 'many', delay: 5000, box: () => el.querySelector('.cork'), many: () => [...reps.children], label: { my: 'ပြန်စာ တစ်ခု ရွေးပါ', en: 'Pick a reply' } });
           reps.innerHTML = '';
           n.replies.forEach((r, k) => {
             const b = document.createElement('button');
@@ -896,7 +896,7 @@ export async function create(story) {
     if (all.length > 3 && !F('board')) ask.textContent = tr(L.boardPin);
     // the cue: the notes Maya can answer glow alike, then the replies (which one is the player's choice)
     const C = cue(el);
-    if (!F('board') && ul.querySelector('li.can')) C.set({ kind: 'many', delay: 5000, many: () => [...ul.querySelectorAll('li.can')], label: { my: 'စာတစ်စောင်ကို နှိပ်ပြီး ပြန်စာ ချိတ်ပါ', en: 'Tap a note to pin a reply' } });
+    if (!F('board') && ul.querySelector('li.can')) C.set({ kind: 'many', delay: 5000, box: () => el.querySelector('.cork'), many: () => [...ul.querySelectorAll('li.can')], label: { my: 'စာတစ်စောင်ကို နှိပ်ပြီး ပြန်စာ ချိတ်ပါ', en: 'Tap a note to pin a reply' } });
     const close = () => { C.stop(); el.remove(); applyState(); };
     el.querySelector('.x').addEventListener('click', (ev) => { ev.stopPropagation(); close(); });
     el.addEventListener('click', (ev) => { if (ev.target === el) close(); });

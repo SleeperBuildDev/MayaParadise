@@ -686,12 +686,12 @@ export function shape({ title = '', hint = '', loads = [2, 3, 5], best = 2, roun
     const onCv = (x, y) => { const r = cv.getBoundingClientRect(); return [r.left + x, r.top + y]; };
     function cueFor(ph) {
       if (S.auto) return A.cue.set(null);
-      if (ph === 'choose') return A.cue.set({ kind: 'many', many: () => [...loadsEl.children], label: { my: 'ဒီနေ့ အိုးဘယ်နှလုံး လုပ်မလဲ — တစ်ခု နှိပ်ပါ', en: 'How many pots today? Tap one' } });
+      if (ph === 'choose') return A.cue.set({ kind: 'many', many: () => [...loadsEl.children], label: { my: 'ဒီနေ့ အိုးဘယ်နှလုံး လုပ်မလဲ — တစ်ခုရွေးနှိပ်ပါ', en: 'How many pots today? Tap one' } });
       if (ph === 'centre') {
         return A.cue.set({ kind: 'drag', delay: 3000, when: () => S.drop >= 1,
           at: () => { const { cx, y } = geo(); return onCv(cx + S.off.x, y + S.off.y); },
           to: () => { const { cx, y, ringR } = geo(); return [...onCv(cx, y), ringR + 4]; },
-          label: { my: 'ရွှံ့ကို ဖိပြီး ဝိုင်းထဲ ဆွဲသွင်းထားပါ', en: 'Press the clay and drag it into the ring' } });
+          label: { my: 'ရွှံ့ကို ဖိပြီး စက်ဝိုင်းထဲ ဆွဲထည့်ပါ', en: 'Press the clay and drag it into the ring' } });
       }
       if (ph === 'pull') {
         return A.cue.set({ kind: 'drag', delay: 3000,

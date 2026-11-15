@@ -179,11 +179,11 @@ export function guide({ title = '', hint = '', labels = [], pace = 70, lag = 0.6
       if (key === 'none') return A.cue.set(null);
       if (L.lostNow) {
         return A.cue.set({ kind: 'drag', when: () => !L.busy, ms: 1600, at: () => onCv(L.pen, trackY), to: () => [...onCv(L.finger + OFF, trackY), 16],
-          label: { my: 'ခဲတံကို သူ့လက်ချောင်းဆီ ပြန်ယူခဲ့ပါ', en: 'Bring the pencil back to his finger' } });
+          label: { my: 'ခဲတံကို သူ့လက်ချောင်းဆီ ပြန်ဆွဲသွားပါ', en: 'Bring the pencil back to his finger' } });
       }
       A.cue.set({ kind: 'drag', when: () => !L.busy, ms: (len) => (len / (speed * 0.8)) * 1000,
         at: () => onCv(L.pen, trackY), to: () => [...onCv(L.x1, trackY), 16],
-        label: { my: 'ခဲတံကို စာလုံးအောက်မှာ ဖြည်းဖြည်း ဆွဲပါ', en: 'Drag the pencil slowly under the words' } });
+        label: { my: 'ခဲတံကို စာလုံးအောက်ကနေ ဖြည်းဖြည်း ဆွဲပါ', en: 'Drag the pencil slowly under the words' } });
     }
 
     stop = runLoop((dt) => {

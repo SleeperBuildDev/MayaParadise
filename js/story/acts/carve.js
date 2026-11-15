@@ -25,7 +25,7 @@ const T = {
 };
 const HOLD_MAX = 1.2; // seconds a hot thought can be held before it bites
 
-const CUE_ON = { my: 'အနားကြောင်းအတိုင်း ဆက်ဆွဲပါ', en: 'Keep following the border' };
+const CUE_ON = { my: 'အနားသတ်အတိုင်း ဆက်ဆွဲပါ', en: 'Keep following the border' };
 export function carve({ title = '', hint = '', heat = [], nickStays = true, tolerance = 22, lines = {} } = {}) {
   return new Promise((resolve) => {
     let raf = 0;

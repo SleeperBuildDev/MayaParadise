@@ -89,7 +89,7 @@ export const L = {
     grip: [{ my: 'လှော်တက် ဆွေးနေပြီ', en: "the pole's rotten" }, { my: 'လှော်တက်လက်ကိုင်နဲ့ အရောင်တူ အဝတ်စ။ ဒီအပတ်ထဲ ညှပ်ထားတာပဲ။ အပ်လေးတောင် ထိုးထားတုန်း။', en: "A strip the colour of the pole's new grip, cut this week, her needle still in it." }],
     bail: [{ my: 'ကူးတို့က အေးဆေး', en: 'the ferry has it easy' }, { my: 'ကူးတို့ပေါ်မှာလည်း ရေခပ်ထုတ်နေရတယ်။', en: "They're bailing on the ferry too." }],
     shallow: [{ my: 'ဘယ်သူမှ မသွားဘူး', en: 'nobody goes there' }, { my: 'ရေတိမ်တယ်။ ကူးတို့ မဝင်နိုင်ဘူး။ ဆိပ်မှာ လူတွေ စောင့်နေကြတယ်။', en: 'Too shallow for the ferry. People are waiting on the jetties.' }],
-    shifts: [{ my: 'အမေက အလုပ်အေး', en: 'Mum has it easy' }, { my: 'ဒေါ်စန္ဒာ့နာမည် နှစ်ခါတောင် ပါတယ်။ အလှည့် နှစ်ခု ဆင်းရတာကိုး။', en: "Daw Sanda's name twice: two shifts." }],
+    shifts: [{ my: 'အမေက အလုပ်အေးတယ်', en: 'Mum has it easy' }, { my: 'ဒေါ်စန္ဒာ့နာမည် နှစ်ခါတောင် ပါတယ်။ အလှည့် နှစ်ခု ဆင်းရတာကိုး။', en: "Daw Sanda's name twice: two shifts." }],
   },
   lookHeard: { my: 'ကြားခဲ့တာ', en: 'heard' },
   lookSeen: { my: 'ကိုယ်တိုင် မြင်တာ', en: 'seen' },

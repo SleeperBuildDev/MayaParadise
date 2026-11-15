@@ -574,7 +574,7 @@ export function steady(o = {}) {
     let cueOn = null;
     const CUE = {
       kite: [0.64, 0.42, { my: 'ဖိထားရင် ကြိုးဆွဲ၊ လွှတ်ရင် ကြိုးလျှော့ — ရွှေကွက်ထဲ ထိန်းထားပါ', en: 'Hold to pull, let go to give line; stay in the gold' }],
-      pour: [0.4, 0.3, { my: 'ဖိထားရင် ငှဲ့တယ်၊ ဘေးကိုရွှေ့ပြီး ခွက်ထဲ ကျအောင် ထိန်းပါ', en: 'Hold to pour; slide sideways to keep it in the cup' }],
+      pour: [0.4, 0.3, { my: 'ဖိထားရင် ငှဲ့မယ်၊ ဘေးကိုရွှေ့ပြီး ခွက်ထဲဝင်အောင် ထိန်းပါ', en: 'Hold to pour; slide sideways to keep it in the cup' }],
       walk: [0.5, 0.84, { my: 'ဖိထားရင် လျှောက်မယ်၊ လွှတ်ရင် ရပ်မယ်', en: 'Hold to walk, let go to stop' }],
       stance: [0.26, 0.82, { my: 'ဖိထားပြီး အပေါ်အောက် ဖြည်းဖြည်းဆွဲလို့ ခေါင်းကို တည့်တည့်ထားပါ', en: 'Hold and drag gently up or down to keep the head level' }],
     };

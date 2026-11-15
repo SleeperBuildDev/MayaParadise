@@ -17,6 +17,7 @@ import { chunkJob, treeGeo, chunkOf, CELL } from './build.js';
 import { CHUNK, GRID, ITEMS, REGIONS, LAZY, LOADED, regionReady } from './region.js';
 import { disposeMesh } from './kit.js';
 import { createStoryGround } from './ground.js';
+import { fastRaycast, prepareRaycast } from './rayindex.js';
 
 const LOAD_R = 50; // metres from the focus to a chunk's edge: build it
 const DROP_R = 78; // farther than this: dispose it
@@ -57,6 +58,13 @@ export function createStreamer({ scene, net, edges, shadows = false, low = false
   // ---- shared instanced trees (padauk, rain tree) and lamp cores
   const warm = new THREE.Color('#FFE6C2'), white = new THREE.Color('#FFFFFF');
   const pools = {};
+  // The trees get their own copies of the see-through materials (the same shader, the same uniforms, the same compiled
+  // program): one material drawn both instanced (the trees) and not (the blocks) had three.js work out its whole
+  // program key again at each switch, several times a frame in the main and shadow passes, ~15% of the render's CPU
+  // time and a good part of the garbage behind the GC pauses (perf pass, 2026-11-15). Looks the same: it is the same.
+  const twin = (m) => { const c = m.clone(); c.onBeforeCompile = m.onBeforeCompile; c.customProgramCacheKey = m.customProgramCacheKey; return c; };
+  const treeMats = cut ? { mat: twin(cut.trees), depth: twin(cut.depth) } : null;
+  if (cut) cut.trees = treeMats.mat; // (extras-heinhtet.js reads cut.trees: a ray hit on a faded crown is ignored)
   for (const kind of ['padauk', 'rain']) {
     const g = treeGeo(kind);
     const mesh = new THREE.InstancedMesh(g.geometry(), cut ? cut.trees : toon('#ffffff', { vertexColors: true }), TREE_CAP);
@@ -68,7 +76,7 @@ export function createStreamer({ scene, net, edges, shadows = false, low = false
     if (cut) outline.material = cut.outline14;
     outline.count = 0;
     if (shadows) { mesh.castShadow = true; mesh.receiveShadow = true; }
-    if (cut) mesh.customDepthMaterial = cut.depth;
+    if (cut) mesh.customDepthMaterial = treeMats.depth;
     pools[kind] = { mesh, outline, list: [], all: [] };
   }
   const glows = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), basic('#FFE3A0'), GLOW_CAP);
@@ -179,6 +187,9 @@ export function createStreamer({ scene, net, edges, shadows = false, low = false
   // runs before the camera rig moves the camera, so its test used the frame before's, and while the camera swung
   // (the car's view <-> the walking view, a turn) a block at the screen's edge was left out for a frame.
   let viewCam = null, viewLive = true;
+  let drawnBy = null, drawnFor = null; // (the renderer and camera of the last world frame)
+  const WAIT = Symbol('wait'); // (a build step that waits for something: the rest of the slice goes unused)
+  const warmOn = !/[?&]warm=0/.test(globalThis.location?.search || '');
   // A block kept only for the shadow it lays into view (its own box off screen) is drawn into the sun's map but not
   // on screen: three.js lists what the camera draws before it draws the sun's map, so it is hidden for that list and
   // shown again for the shadow pass (one draw call a frame each, not two).
@@ -198,6 +209,7 @@ export function createStreamer({ scene, net, edges, shadows = false, low = false
   const beforeRender0 = scene.onBeforeRender;
   scene.onBeforeRender = function (renderer, sc0, camera) {
     if (typeof beforeRender0 === 'function') beforeRender0.apply(this, arguments);
+    if (camera && !camera.isOrthographicCamera) { drawnBy = renderer; drawnFor = camera; } // (finish: warms new shader variants)
     for (const c of shadowOnly) c.mesh.visible = true; // (a frame whose shadow pass did not run)
     shadowOnly.length = 0;
     if (!viewLive || !viewOk || !camera || camera !== viewCam || hold || !api.viewCull) return;
@@ -278,28 +290,37 @@ export function createStreamer({ scene, net, edges, shadows = false, low = false
   // its zone map follows the roads (refresh() below tells it when a gate changes them). ?ground=off: plain paper
   const painted = createStoryGround({ edges: ownEdges, isOpen: ctx.isOpen, low });
 
-  function finish(ch) {
-    const group = new THREE.Group();
+  // The chunk's meshes, made a piece at a time inside step()'s budget (the ground, each quarter's solid, each sign):
+  // made all at once, in the frame its build job ended, they cost up to ~22 ms at 2x CPU throttle, a hitch a few
+  // times a minute while she walked and for a few seconds after she stopped (perf pass, 2026-11-15). Nothing is
+  // shown until the last piece is there: the group joins the scene whole, as before.
+  function* finish(ch) {
+    const group = ch.part = new THREE.Group();
     group.name = `chunk ${ch.key}`;
     if (!ch.ground.empty) {
       const g = ch.ground.mesh(painted ? { material: painted.material(toon('#ffffff', { vertexColors: true })) } : undefined);
       if (painted) painted.tag(g.geometry, ch.gKind);
       g.name = 'ground';
+      fastRaycast(g); // (rays test only the triangles under their path: rayindex.js)
       g.userData.shadow = 'receive';
       group.add(g);
     }
-    ch.cells = [];
-    ch.solids.forEach((geo, k) => {
-      if (!geo || geo.empty) return;
+    yield;
+    const cells = [];
+    for (let k = 0; k < ch.solids.length; k++) {
+      const geo = ch.solids[k];
+      if (!geo || geo.empty) continue;
       const s = geo.mesh({ px: 1.5, material: cut?.solid });
       if (cut) s.customDepthMaterial = cut.depth;
       if (cut && s.children[0]) s.children[0].material = cut.outline; // see-through round Maya (cutaway.js)
       s.name = 'solid';
+      fastRaycast(s);
       group.add(s);
       const x0 = ch.x0 + (k & 1 ? CELL : 0), z0 = ch.z0 + (k & 2 ? CELL : 0);
-      ch.cells.push({ mesh: s, outline: s.children[0] || null, x0, z0, x1: x0 + CELL, z1: z0 + CELL, cast: true });
-    });
-    ch.signMeshes = [];
+      cells.push({ mesh: s, outline: s.children[0] || null, x0, z0, x1: x0 + CELL, z1: z0 + CELL, cast: true });
+      yield;
+    }
+    const signMeshes = ch.partSigns = [];
     for (const s of ch.out.signs) {
       const tex = signTexture(s.lines.map((l) => ({ text: l.text, size: l.size, weight: l.weight, font: l.font === 'serif' ? '"Cormorant Garamond", Georgia, serif' : undefined, color: l.color })),
         { width: s.width || 512, height: s.height || 160, bg: s.bg === undefined ? '#F6F0E2' : s.bg, border: s.border === undefined ? '#A47A2C' : s.border, radius: 18, borderWidth: s.border === null ? 0 : 8 });
@@ -310,21 +331,42 @@ export function createStreamer({ scene, net, edges, shadows = false, low = false
       m.userData.tex = tex;
       m.userData.ax = s.ax; m.userData.az = s.az; m.userData.tall = s.tall; // its item (a faded building hides its sign too)
       group.add(m);
-      ch.signMeshes.push(m);
+      signMeshes.push(m);
+      yield;
     }
     if (shadows) markShadows(group);
-    for (const c of ch.cells) c.cast = c.mesh.castShadow;
+    for (const c of cells) c.cast = c.mesh.castShadow;
+    // (the tiled raycast lists, a mesh a slice: rayindex.js)
+    if (!ch.sync) for (const o of group.children) if (o.name === 'ground' || o.name === 'solid') { prepareRaycast(o); yield; }
+    // the shader programs it needs, compiled before it is drawn (in the background where the browser can: a variant
+    // first met in the frame it was drawn cost 40-150 ms at 2x throttle, e.g. the first town block or sign seen
+    // after starting on the Home Book). Already compiled: nothing to wait for.
+    if (warmOn && !ch.sync && drawnBy?.compileAsync && drawnFor && !hold) {
+      let ready = false;
+      try { drawnBy.compileAsync(group, drawnFor, scene).then(() => { ready = true; }, () => { ready = true; }); } catch { ready = true; }
+      for (const t = performance.now(); !ready && !ch.sync && performance.now() - t < 1500;) yield WAIT;
+    }
     ch.ground = ch.solids = null; ch.gKind = null; // typed arrays can go
+    ch.part = ch.partSigns = null;
+    ch.cells = cells; ch.signMeshes = signMeshes;
     ch.group = group;
     ch.state = 'ready';
     root.add(group);
     rebuildPools();
     onReady?.(ch);
   }
+  // (a chunk dropped or rebuilt while its meshes were still being made: what was made so far goes)
+  function dropPart(ch) {
+    if (!ch.part) return;
+    for (const m of ch.partSigns || []) { m.userData.tex?.dispose(); m.material.dispose(); }
+    for (const o of [...ch.part.children]) disposeMesh(o);
+    ch.part = ch.partSigns = null;
+  }
   function drop(ch) {
     if (ch.state === 'building' && current === ch) current = null;
     const qi = queue.indexOf(ch);
     if (qi >= 0) queue.splice(qi, 1);
+    dropPart(ch);
     if (ch.group) {
       for (const m of ch.signMeshes || []) { m.userData.tex?.dispose(); m.material.dispose(); }
       for (const o of [...ch.group.children]) disposeMesh(o);
@@ -340,14 +382,19 @@ export function createStreamer({ scene, net, edges, shadows = false, low = false
     if (current === ch) current = null;
     const qi = queue.indexOf(ch);
     if (qi >= 0) queue.splice(qi, 1);
-    while (!step(ch, 1e9));
+    ch.sync = true; // (no waiting on the shader warm-up: it is needed now)
+    try { while (!step(ch, 1e9)); } finally { ch.sync = false; }
   }
   function step(ch, budget) {
     const t0 = performance.now();
-    if (!ch.job) { ch.state = 'building'; ch.job = chunkJob(ch, ctx); }
+    if (!ch.job) { ch.state = 'building'; ch.job = chunkJob(ch, ctx); ch.finishing = false; }
     for (;;) {
       const r = ch.job.next();
-      if (r.done) { ch.job = null; finish(ch); return true; }
+      if (r.done) {
+        if (ch.finishing) { ch.job = null; ch.finishing = false; return true; }
+        ch.job = finish(ch); ch.finishing = true; // (the build is done: now its meshes)
+      }
+      else if (r.value === WAIT) return false; // (the rest on a later frame)
       if (performance.now() - t0 > budget) return false;
     }
   }
@@ -397,7 +444,7 @@ export function createStreamer({ scene, net, edges, shadows = false, low = false
       painted?.roadsChanged(bx0, bz0, bx1, bz1); // (the strips of paper along the roads follow on the next update)
       for (const ch of chunks.values()) {
         if (ch.x1 < bx0 || ch.x0 > bx1 || ch.z1 < bz0 || ch.z0 > bz1) continue;
-        if (ch.state === 'building') { if (current === ch) current = null; ch.job = null; ch.state = 'empty'; continue; }
+        if (ch.state === 'building') { if (current === ch) current = null; dropPart(ch); ch.job = null; ch.state = 'empty'; continue; }
         if (ch.state !== 'ready') continue;
         const old = { group: ch.group, signs: ch.signMeshes };
         ch.group = null; ch.signMeshes = null; ch.cells = null; ch.out = null; ch.job = null; ch.state = 'empty';
@@ -488,6 +535,7 @@ export function createStreamer({ scene, net, edges, shadows = false, low = false
       for (const ch of chunks.values()) drop(ch);
       for (const kind in pools) { pools[kind].mesh.geometry.dispose(); pools[kind].mesh.dispose(); pools[kind].outline.dispose(); }
       glows.geometry.dispose(); glows.dispose();
+      if (treeMats) { treeMats.mat.dispose(); treeMats.depth.dispose(); }
       painted?.dispose();
       scene.remove(root);
     },

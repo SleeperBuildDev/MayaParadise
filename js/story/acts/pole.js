@@ -625,7 +625,7 @@ export function pole({ title = '', hint = '', route = 'raftSide', stops = [], be
       if (k === cueKey) return;
       cueKey = k;
       if (!k) return C.set(null);
-      if (k === 'stop') return C.set({ kind: 'tap', at: strip.stopBtn, delay: 1400, label: { my: 'ဆိပ်ရောက်ပြီ — ရပ်မယ် ကို နှိပ်ပါ', en: 'At the jetty: tap Stop' } });
+      if (k === 'stop') return C.set({ kind: 'tap', at: strip.stopBtn, delay: 1400, label: { my: 'ဆိပ်ကမ်းရောက်ပြီ — \'ရပ်မယ်\' ကို နှိပ်ပါ', en: 'At the jetty: tap Stop' } });
       if (k === 'beat') {
         return C.set({ kind: 'tap', at: () => strip.el.querySelector('.pl-rc'), glow: false, r: 30,
           label: { my: 'ဝါးလုံး အောက်ခြေထိတာနဲ့ ဒီမှာ နှိပ်ပါ', en: 'Tap here as the pole touches the bottom' } });

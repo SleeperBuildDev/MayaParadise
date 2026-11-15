@@ -495,7 +495,7 @@ export function hold(o = {}) {
       return {
         cueKey: () => (Pn.state === 'rest' ? 'pin' : ''),
         cueSpec: () => ({ kind: 'hold', r: 30, at: () => onCv(W * 0.5 + W * 0.13, H * 0.68),
-          label: { my: 'ပင်အပ်ကို ဖိပြီး မ ထားပါ', en: 'Press and hold to lift the pin' } }),
+          label: { my: 'ပင်အပ်ကို ဖိပြီး ဆွဲမထားပါ', en: 'Press and hold to lift the pin' } }),
         down() { if (Pn.state === 'rest') { Pn.state = 'held'; Pn.held = 0; } },
         up() { putDown(false); },
         step(dt) {

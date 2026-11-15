@@ -108,20 +108,30 @@ export async function createOpenWorld(game, story) {
   const mine = new Set();
   // a day module may claim region people for itself: day.owns(id) -> true (then the region never spawns or drops them)
   const dayOwns = (id) => { try { return typeof story.day?.owns === 'function' && !!story.day.owns(id); } catch { return false; } };
-  function spawnFor(ch) {
+  // A chunk streamed in while she walks brings its people one a frame (spawnQ, emptied in update): all at once they
+  // were a 25-40 ms frame at 4x CPU throttle, a hitch as each new chunk joined (perf verify pass, 2026-11-15). The
+  // chunk is built ~50 m out, so they are all there long before she is. Built now for her (a page-turn): all at once.
+  const spawnQ = [];
+  function spawnFor(ch, later = false) {
     for (const pp of PEOPLE) {
       const c = chunkOf(pp.x, pp.z);
       if (!c || c[0] !== ch.i || c[1] !== ch.j || story.people.has(pp.id)) continue;
-      if (dayOwns(pp.id)) continue; // today's page places this person itself (day.owns(id))
-      const e = story.spawn(pp.id, { x: pp.x, z: pp.z, heading: pp.heading || 0 });
-      if (!e) continue;
-      // a hello of their own, unless today's page has something for them to say
-      e.cast = Object.assign({}, e.cast, { hello: e.cast.hello || pp.hello });
-      if (pp.job) story.setJob(pp.id, pp.job);
-      mine.add(pp.id);
+      if (later) { if (!spawnQ.some((q) => q[1] === pp)) spawnQ.push([ch, pp]); continue; }
+      spawnOne(pp);
     }
   }
+  function spawnOne(pp) {
+    if (story.people.has(pp.id)) return;
+    if (dayOwns(pp.id)) return; // today's page places this person itself (day.owns(id))
+    const e = story.spawn(pp.id, { x: pp.x, z: pp.z, heading: pp.heading || 0 });
+    if (!e) return;
+    // a hello of their own, unless today's page has something for them to say
+    e.cast = Object.assign({}, e.cast, { hello: e.cast.hello || pp.hello });
+    if (pp.job) story.setJob(pp.id, pp.job);
+    mine.add(pp.id);
+  }
   function dropFor(ch) {
+    for (let k = spawnQ.length; k--;) if (spawnQ[k][0] === ch) spawnQ.splice(k, 1); // (not spawned yet: never will be)
     for (const pp of PEOPLE) {
       if (!mine.has(pp.id)) continue;
       if (dayOwns(pp.id)) { mine.delete(pp.id); continue; } // the day took this person over: theirs to remove
@@ -142,7 +152,7 @@ export async function createOpenWorld(game, story) {
     scene: world.scene, net, edges, shadows: !!game.shadowsOn, low: game.tier === 'low', cut,
     shadowArea: game.worldShadowBounds || null, // (the patch the sun's shadow map covers: blocks cast while their shadow can land in it)
     extraGlows: () => desks.glows(deskGlows),
-    onReady: (ch) => spawnFor(ch),
+    onReady: (ch) => spawnFor(ch, !ch.sync),
     onGone: (ch) => dropFor(ch),
     offPaper,
   });
@@ -459,6 +469,7 @@ export async function createOpenWorld(game, story) {
       gateT -= dt;
       if (gateT <= 0) { gateT = 1; for (const f of gateFlags) applyGate(f, !!save.flags[f]); }
       streamer.update(dt, t, p.x, p.z, game.camera, fog && !ow.overviewOn ? fog.far : 1e9);
+      if (spawnQ.length) { const [ch, pp] = spawnQ.shift(); if (ch.state === 'ready') spawnOne(pp); } // (a streamed chunk's people: one a frame)
       if (townRebuild.length) { // (lazy towns: a town arrived over chunks already built)
         townRebuild.sort((a, b) => Math.hypot((a.x0 + a.x1) / 2 - p.x, (a.z0 + a.z1) / 2 - p.z) - Math.hypot((b.x0 + b.x1) / 2 - p.x, (b.z0 + b.z1) / 2 - p.z));
         const ch = townRebuild.shift();
@@ -488,17 +499,12 @@ export async function createOpenWorld(game, story) {
       if (lensD > 6 && game.camera.near < NEAR_OUT) { nearSaved = game.camera.near; game.camera.near = NEAR_OUT; game.camera.updateProjectionMatrix(); }
       else if (lensD < 5 && nearSaved !== null) { if (game.camera.near === NEAR_OUT) { game.camera.near = nearSaved; game.camera.updateProjectionMatrix(); } nearSaved = null; }
       desks.update(dt, t, p.x, p.z);
-      homeBudget.update(p.x, p.z, ow.overviewOn);
-      seenT -= dt;
-      if (seenT <= 0) { seenT = 0.4; seen.mark(p.x, p.z); }
-      seen.update(dt);
-      feet.settle(dt); // (last: everyone has moved this frame; lift them onto the road, footpath or kerb under them)
-      // haze: the book keeps its wide view; out on the land the far chunks fade into the cloud colour
-      const k = THREE.MathUtils.smoothstep(away, 0, 26);
-      if (fog && !ow.overviewOn) { fog.near = fogBook.near + (34 - fogBook.near) * k; fog.far = fogBook.far + (105 - fogBook.far) * k; }
-      if (farClouds) farClouds.visible = away < 6 && game.tier !== 'low';
       // the home book drops detail in steps as she goes south (z of the focus): tiny things and tree
       // outlines and the book's ink outlines (14 m off it), trees (44), the landmarks (54), then everything (82: deep in the haze)
+      // (before the rules below that hide some of the book's own children every frame: bookAll includes the far
+      // cloud ring, whose clouds stand up through the land 45-105 m round the book. Run after them, a step here
+      // showed that ring for one frame each time she crossed 14 / 44 / 54 / 82 m: big pink cloud boxes over the
+      // grass, the paths and the townsfolk, gone the next frame (the owner's "super fast glitches")
       const level = ow.overviewOn ? 0 : away < 14 ? 0 : away < 44 ? 1 : away < 54 ? 2 : away < 82 ? 3 : 4;
       if (level !== homeLevel) {
         homeLevel = level;
@@ -508,6 +514,15 @@ export async function createOpenWorld(game, story) {
         for (const o of homeTrees) o.visible = level < 2;
         if (landmarks) landmarks.visible = level < 3;
       }
+      homeBudget.update(p.x, p.z, ow.overviewOn);
+      seenT -= dt;
+      if (seenT <= 0) { seenT = 0.4; seen.mark(p.x, p.z); }
+      seen.update(dt);
+      feet.settle(dt); // (last: everyone has moved this frame; lift them onto the road, footpath or kerb under them)
+      // haze: the book keeps its wide view; out on the land the far chunks fade into the cloud colour
+      const k = THREE.MathUtils.smoothstep(away, 0, 26);
+      if (fog && !ow.overviewOn) { fog.near = fogBook.near + (34 - fogBook.near) * k; fog.far = fogBook.far + (105 - fogBook.far) * k; }
+      if (farClouds) farClouds.visible = away < 6 && game.tier !== 'low';
       // a curl of smoke from the kiln now and then (not on Day 2, when the kiln is cold, nor on Day 3, whose
       // page draws its own smoke until the kiln door opens; a day may also say day.kilnSmoke = false)
       smokeT -= dt;

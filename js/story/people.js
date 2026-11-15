@@ -555,7 +555,161 @@ function buildParts(spec) {
   return { parts, M, skin, hairC, topC, botC, exC, glasses, headY, H, HW, HH, hc, fz, shoulderY, hipY, SW, armW, A, top, hair, V, style, chinlone, legX, ballRest };
 }
 const UNIT = new THREE.BoxGeometry(1, 1, 1);
+// A person's body (or outline) geometry, written straight into typed arrays: the same numbers, in the same order, as
+// the VoxelBuilder + mergeGeometries (+ mergeVertices) path below (buildGeometryRef, kept for the check in
+// people.selfCheck). That path made three.js objects for every box (a clone, a scale, a move, a non-indexed copy, a
+// merge) and hashed every outline corner as a string: ~12 ms a person at 2x CPU throttle, a hitch each time a
+// townsperson or a passer-by appeared while she walked (perf pass, 2026-11-15). This one: ~1-2 ms.
+let BOX = null;
+const _bc = new THREE.Color();
+function boxTemplate() {
+  if (!BOX) {
+    const g = new THREE.BoxGeometry(1, 1, 1).toNonIndexed(); // (VoxelBuilder's unit box, laid out as it merges it)
+    BOX = { p: g.attributes.position.array.slice(), n: g.attributes.normal.array.slice() };
+    g.dispose();
+  }
+  return BOX;
+}
 function buildGeometry(parts, outlineOnly) {
+  const T = boxTemplate(), V = T.p.length / 3;
+  const byBone = new Map();
+  for (const p of parts) {
+    if (outlineOnly && !p.outline) continue;
+    let l = byBone.get(p.bone);
+    if (!l) byBone.set(p.bone, (l = []));
+    l.push(p);
+  }
+  let n = 0;
+  for (const l of byBone.values()) n += l.length * V;
+  const f = Math.fround;
+  const pos = new Float32Array(n * 3), si = new Uint16Array(n * 4), sw = new Float32Array(n * 4);
+  const nor = outlineOnly ? null : new Float32Array(n * 3), col = outlineOnly ? null : new Float32Array(n * 3);
+  let v = 0;
+  for (const [bone, list] of byBone) {
+    const b = BI[bone];
+    for (const p of list) {
+      // (geometry.scale: x * w stored as a float, then translate: + x, stored again; the normals of a scaled box are
+      // the unit box's, flipped on a mirrored axis, and nothing on a flat (zero-size) one)
+      const sx = Math.sign(p.w), sy = Math.sign(p.h), sz = Math.sign(p.d), flat = !sx || !sy || !sz;
+      if (col) _bc.set(p.color);
+      for (let k = 0; k < V; k++, v++) {
+        const o = v * 3, t = k * 3;
+        pos[o] = f(f(T.p[t] * p.w) + p.x); pos[o + 1] = f(f(T.p[t + 1] * p.h) + p.y); pos[o + 2] = f(f(T.p[t + 2] * p.d) + p.z);
+        if (nor) {
+          if (flat) { nor[o] = nor[o + 1] = nor[o + 2] = 0; } else { nor[o] = T.n[t] ? T.n[t] * sx : 0; nor[o + 1] = T.n[t + 1] ? T.n[t + 1] * sy : 0; nor[o + 2] = T.n[t + 2] ? T.n[t + 2] * sz : 0; }
+          col[o] = _bc.r; col[o + 1] = _bc.g; col[o + 2] = _bc.b;
+        }
+        si[v * 4] = b; sw[v * 4] = 1;
+      }
+    }
+  }
+  const g = new THREE.BufferGeometry();
+  if (!outlineOnly) {
+    g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    g.setAttribute('normal', new THREE.BufferAttribute(nor, 3));
+    g.setAttribute('color', new THREE.BufferAttribute(col, 3));
+    g.setAttribute('skinIndex', new THREE.BufferAttribute(si, 4));
+    g.setAttribute('skinWeight', new THREE.BufferAttribute(sw, 4));
+    g.computeBoundingSphere();
+    return g;
+  }
+  // (mergeVertices(geometry, 1e-4): corners equal after rounding share one vertex, first one first)
+  const tol = Math.max(1e-4, Number.EPSILON), mul = Math.pow(10, Math.log10(1 / tol)), add = tol * 0.5 * mul;
+  const q = new Float64Array(11), keys = [], buckets = new Map(), index = new Array(n);
+  const np = new Float32Array(n * 3), nsi = new Uint16Array(n * 4), nsw = new Float32Array(n * 4);
+  let next = 0;
+  for (let i = 0; i < n; i++) {
+    for (let k = 0; k < 3; k++) q[k] = Math.trunc(pos[i * 3 + k] * mul + add);
+    for (let k = 0; k < 4; k++) { q[3 + k] = Math.trunc(si[i * 4 + k] * mul + add); q[7 + k] = Math.trunc(sw[i * 4 + k] * mul + add); }
+    let h = 0;
+    for (let k = 0; k < 11; k++) h = (Math.imul(h, 31) + (q[k] | 0)) | 0;
+    const list = buckets.get(h);
+    let found = -1;
+    if (list) for (const id of list) { let same = true; for (let k = 0; k < 11; k++) if (keys[id * 11 + k] !== q[k]) { same = false; break; } if (same) { found = id; break; } }
+    if (found >= 0) { index[i] = found; continue; }
+    for (let k = 0; k < 11; k++) keys.push(q[k]);
+    if (list) list.push(next); else buckets.set(h, [next]);
+    for (let k = 0; k < 3; k++) np[next * 3 + k] = pos[i * 3 + k];
+    for (let k = 0; k < 4; k++) { nsi[next * 4 + k] = si[i * 4 + k]; nsw[next * 4 + k] = sw[i * 4 + k]; }
+    index[i] = next++;
+  }
+  g.setAttribute('position', new THREE.BufferAttribute(np.slice(0, next * 3), 3));
+  g.setAttribute('skinIndex', new THREE.BufferAttribute(nsi.slice(0, next * 4), 4));
+  g.setAttribute('skinWeight', new THREE.BufferAttribute(nsw.slice(0, next * 4), 4));
+  g.setIndex(index);
+  g.computeVertexNormals();
+  g.computeBoundingSphere();
+  return g;
+}
+// Rays against a townsperson: three.js skins every corner of every triangle it tests (a few thousand bone blends a
+// person), again for each ray. The companion's "can the lens see this spot" check sends three rays to several spots
+// in one go, past the same people: 20-35 ms at 2x throttle (perf pass, 2026-11-15). While a ray is tested, each
+// corner's skinned position is kept and reused until a bone moves (the bones' world matrices are compared once per
+// ray): the same numbers three.js works out, worked out once.
+const _skinProto = THREE.SkinnedMesh.prototype;
+const _bi = new THREE.Vector4(), _bw = new THREE.Vector4(), _bp = new THREE.Vector4(), _bq = new THREE.Vector4(), _bm = new THREE.Matrix4();
+function rayCache(mesh, bones) {
+  const n = mesh.geometry.attributes.position.count;
+  const C = { on: false, snap: new Float64Array(bones.length * 16 + 16).fill(NaN), pos: null, have: null };
+  mesh.raycast = function (raycaster, intersects) {
+    let same = true, k = 0;
+    const S = C.snap;
+    for (const b of bones) { const e = b.matrixWorld.elements; for (let i = 0; i < 16; i++, k++) if (S[k] !== e[i]) { same = false; S[k] = e[i]; } }
+    const m = this.bindMatrixInverse.elements;
+    for (let i = 0; i < 16; i++, k++) if (S[k] !== m[i]) { same = false; S[k] = m[i]; }
+    if (!C.pos) { C.pos = new Float64Array(n * 3); C.have = new Uint8Array(n); same = false; }
+    if (!same) C.have.fill(0);
+    C.on = true;
+    try { return _skinProto.raycast.call(this, raycaster, intersects); } finally { C.on = false; }
+  };
+  // three.js r186 SkinnedMesh.applyBoneTransform, step for step, without its `set(...target, 1)` (a spread: an
+  // iterator and its results made for every corner skinned; feet.js skins every sole of everyone in view each frame,
+  // ~1/3 of all the garbage made while walking, and so of the GC pauses)
+  mesh.applyBoneTransform = function (index, target) {
+    const sk = this.skeleton, g = this.geometry;
+    _bi.fromBufferAttribute(g.attributes.skinIndex, index);
+    _bw.fromBufferAttribute(g.attributes.skinWeight, index);
+    if (target.isVector4) { _bp.copy(target); target.set(0, 0, 0, 0); } else { _bp.set(target.x, target.y, target.z, 1); target.set(0, 0, 0); }
+    _bp.applyMatrix4(this.bindMatrix);
+    for (let r = 0; r < 4; r++) {
+      const w = _bw.getComponent(r);
+      if (w !== 0) {
+        const o = _bi.getComponent(r);
+        _bm.multiplyMatrices(sk.bones[o].matrixWorld, sk.boneInverses[o]);
+        target.addScaledVector(_bq.copy(_bp).applyMatrix4(_bm), w);
+      }
+    }
+    if (target.isVector4) target.w = _bp.w;
+    return target.applyMatrix4(this.bindMatrixInverse);
+  };
+  mesh.getVertexPosition = function (index, target) {
+    if (!C.on) return _skinProto.getVertexPosition.call(this, index, target);
+    if (C.have[index]) return target.set(C.pos[index * 3], C.pos[index * 3 + 1], C.pos[index * 3 + 2]);
+    _skinProto.getVertexPosition.call(this, index, target);
+    C.pos[index * 3] = target.x; C.pos[index * 3 + 1] = target.y; C.pos[index * 3 + 2] = target.z;
+    C.have[index] = 1;
+    return target;
+  };
+}
+/** Tests: the fast builder against the original path, number for number, over some people's parts. */
+export function selfCheckGeometry(specs) {
+  const bad = [];
+  for (const spec of specs) {
+    const B = buildParts(spec);
+    for (const outline of [false, true]) {
+      const a = buildGeometry(B.parts, outline), b = buildGeometryRef(B.parts, outline);
+      for (const name of Object.keys(b.attributes)) {
+        const x = a.attributes[name]?.array, y = b.attributes[name].array;
+        if (!x || x.length !== y.length) { bad.push(`${spec.name || '?'} ${outline ? 'outline' : 'body'} ${name}: length ${x?.length} vs ${y.length}`); continue; }
+        for (let i = 0; i < y.length; i++) if (x[i] !== y[i]) { bad.push(`${spec.name || '?'} ${outline ? 'outline' : 'body'} ${name}[${i}] ${x[i]} vs ${y[i]}`); break; }
+      }
+      if (!!a.index !== !!b.index || (b.index && (a.index.count !== b.index.count || a.index.array.some((v, i) => v !== b.index.array[i])))) bad.push(`${spec.name || '?'} ${outline ? 'outline' : 'body'} index differs`);
+      a.dispose(); b.dispose();
+    }
+  }
+  return bad;
+}
+function buildGeometryRef(parts, outlineOnly) {
   const byBone = new Map();
   for (const p of parts) {
     if (outlineOnly && !p.outline) continue;
@@ -649,6 +803,7 @@ export function createPerson(spec = {}) {
   mesh.updateMatrixWorld(true);
   const skeleton = new THREE.Skeleton(list);
   mesh.bind(skeleton);
+  rayCache(mesh, list);
   const oMat = outlineMat();
   const outline = new THREE.SkinnedMesh(outGeo, oMat);
   outline.userData.isOutline = true;

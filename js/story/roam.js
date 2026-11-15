@@ -695,7 +695,7 @@ export function installRoam(game, story, ow) {
     // Maya is walking up to them (a tap): they stand and wait for her, like anyone she talks to
     if (e.roamHold && e.roamHold > performance.now()) {
       setMood(e, null);
-      if (rm.state === 'walk') rm.state = 'idle';
+      if (rm.state === 'walk') { rm.state = 'idle'; rm.t = Math.min(rm.t, rand(0.8, 2)); } // (the walk's own 25 s clock is not a pause: on again soon after)
       headAt(e, M.x, M.z);
       if (mdist < 2.6) turnToward(root, Math.atan2(M.x - pos.x, M.z - pos.z), dt, 3);
       stand(e, dt);
@@ -709,7 +709,7 @@ export function installRoam(game, story, ow) {
       for (const q of people.values()) if (q !== e && q.paused && q.p?.root) { const p = q.p.root.position, d = Math.hypot(p.x - pos.x, p.z - pos.z); if (d < od) { o = q; od = d; } }
       if (o && od > 2.3 && rm.state !== 'walk') { const p = o.p.root.position, k = (od - 1.6) / od; const tx = pos.x + (p.x - pos.x) * k, tz = pos.z + (p.z - pos.z) * k; if (lineOk(pos.x, pos.z, tx, tz) && roadDist(tx, tz) >= ROAD_KEEP - 0.2) go(e, tx, tz, 'dodge'); } // (never a step closer onto the road: they chat from the pavement)
       if (rm.state === 'walk' && rm.kindT === 'dodge') { walkStep(e, dt); return true; }
-      if (rm.state === 'walk') rm.state = 'idle';
+      if (rm.state === 'walk') { rm.state = 'idle'; rm.t = Math.min(rm.t, rand(0.8, 2)); } // (stopped mid-walk for a word: on again soon after it, not a 25 s stand wherever it caught them)
       if (roadDist(pos.x, pos.z) < ROAD_KEEP - 0.3 && performance.now() > (rm.offT || 0)) { rm.offT = performance.now() + 1000; if (offRoadStep(e)) { walkStep(e, dt); return true; } } // (stopped for a word out in the road: onto the pavement first; tried once a second)
       if (o) e.home.h = Math.atan2(o.p.root.position.x - pos.x, o.p.root.position.z - pos.z);
       turnToward(root, e.home.h, dt, 5);

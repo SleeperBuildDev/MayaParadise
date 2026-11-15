@@ -273,7 +273,7 @@ export function sort({ title = '', hint = '', who = null, baskets = [], cards, s
     }
 
     // the cue: every basket glows alike (which one is the player's reading of the slip)
-    const cueSpec = { kind: 'many', many: () => B.map((b) => b.el), label: { my: 'စာရွက်ကိုဖတ်ပြီး ထည့်ရမယ့် တောင်းကို နှိပ်ပါ', en: 'Read the slip, then tap the basket it goes in' } };
+    const cueSpec = { kind: 'many', many: () => B.map((b) => b.el), label: { my: 'စာရွက်ကိုဖတ်ပြီး သက်ဆိုင်ရာ တောင်းကို နှိပ်ပါ', en: 'Read the slip, then tap the basket it goes in' } };
     A.cue.set(cueSpec);
 
     // ---- dropping

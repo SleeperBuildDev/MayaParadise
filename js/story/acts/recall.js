@@ -81,7 +81,7 @@ export function recall({ title = '', hint = '', who = 'eimon', evenings = [], wr
       [...dots.children].forEach((d, i) => d.className = i < k ? 'on' : i === k ? 'cur' : '');
       // the cue: the four frames glow alike (which moment came just before the boil is the player's reading)
       A.cue.set({ kind: 'many', delay: 5000, when: () => !busy, many: () => frames.map((x) => x.el),
-        label: { my: 'မဆူခင် အရင်ဆုံး ဖြစ်ခဲ့တဲ့ ပုံကို နှိပ်ပါ', en: 'Tap the moment just before it boils' } });
+        label: { my: 'မဆူခင်လေး ဖြစ်ခဲ့တဲ့ ပုံကို နှိပ်ပါ', en: 'Tap the moment just before it boils' } });
     }
 
     async function tap(i) {

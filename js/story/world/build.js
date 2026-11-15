@@ -1309,6 +1309,12 @@ function pencilLines(f, e, x0, z0, x1, z1) {
 
 /** Roads (open-world part): cream surface, gold strips and walls, footpaths, dashes. The first bridge is a
  * ribbon, a 'deck' edge a paper-truss bridge deck; 'pencil' edges are sketched; closed gates per their look. */
+/** A road sample's two edge flags: is another road there (the gold strip and the footpath stop). */
+function cuts(q, e, W, net) {
+  if (q.cutL !== undefined) return;
+  q.cutL = net.onOtherRoad(q.x + q.nx * (W - 0.09), q.z + q.nz * (W - 0.09), e, -0.15);
+  q.cutR = net.onOtherRoad(q.x - q.nx * (W - 0.09), q.z - q.nz * (W - 0.09), e, -0.15);
+}
 function roadsInChunk(f, net, x0, z0, x1, z1, ownEdges, ctx) {
   const W = ROAD.width / 2;
   const P = { x: 0, y: 0, z: 0 }, T = { x: 0, z: 0 };
@@ -1327,11 +1333,15 @@ function roadsInChunk(f, net, x0, z0, x1, z1, ownEdges, ctx) {
       const s = (e.length * i) / n;
       sampleAt(e, s, P, T);
       const nx = -T.z, nz = T.x;
-      const cur = { x: P.x, z: P.z, nx, nz, cutL: net.onOtherRoad(P.x + nx * (W - 0.09), P.z + nz * (W - 0.09), e, -0.15), cutR: net.onOtherRoad(P.x - nx * (W - 0.09), P.z - nz * (W - 0.09), e, -0.15) };
+      // (whether another road crosses each edge of the road here: only worked out for the samples this chunk draws.
+      // A long road crosses many chunks, and every chunk walked all of it, two road-crossing tests a sample: a 9 ms
+      // build step at 2x throttle; perf pass, 2026-11-15. Same quads, same order)
+      const cur = { x: P.x, z: P.z, nx, nz, cutL: undefined, cutR: undefined };
       if (prev) {
         const mx = (prev.x + cur.x) / 2, mz = (prev.z + cur.z) / 2;
         const torn = tear && mx > tear[0] - 0.3 && mx < tear[2] + 0.3 && mz > tear[1] - 0.25 && mz < tear[3] + 0.25;
         if (!torn && mx >= x0 && mx < x1 && mz >= z0 && mz < z1) {
+          cuts(prev, e, W, net); cuts(cur, e, W, net);
           const pt = (q, off, yy) => [q.x + q.nx * off, yy, q.z + q.nz * off];
           f.quad(pt(prev, W, y), pt(prev, -W, y), pt(cur, -W, y), pt(cur, W, y), C.cream, 0, 1, 0);
           const ys = y + 0.004;
@@ -1434,13 +1444,18 @@ export const SIGHT = new WeakMap();
 // taken as covered: the tea shop and the godown faded with her in plain sight; verifier, 2026-11-15)
 export const SIGHT_BAND = 0.25, SIGHT_KEEP = 0.45;
 const clipA = [], clipB = [];
+// (the points a clip makes come from a pool, reused band to band: a new array per point was most of the garbage of a
+// tall building's sight bands; perf verify pass, 2026-11-15. The same numbers: all 1293 items' bands checked in node)
+const clipPool = [];
+let clipN = 0;
+function clipPt(x, y, z) { const p = clipPool[clipN] || (clipPool[clipN] = [0, 0, 0]); clipN++; p[0] = x; p[1] = y; p[2] = z; return p; }
 function clipY(src, n, dst, y, above) {
   let m = 0;
   for (let i = 0; i < n; i++) {
     const a = src[i], b = src[(i + 1) % n];
     const ina = above ? a[1] >= y : a[1] <= y, inb = above ? b[1] >= y : b[1] <= y;
     if (ina) dst[m++] = a;
-    if (ina !== inb) { const t = (y - a[1]) / (b[1] - a[1]); dst[m++] = [a[0] + (b[0] - a[0]) * t, y, a[2] + (b[2] - a[2]) * t]; }
+    if (ina !== inb) { const t = (y - a[1]) / (b[1] - a[1]); dst[m++] = clipPt(a[0] + (b[0] - a[0]) * t, y, a[2] + (b[2] - a[2]) * t); }
   }
   return m;
 }
@@ -1457,13 +1472,14 @@ function sightBands(P, v0, v1) {
     const k0 = Math.floor(Math.max(y0, SIGHT_KEEP) / SIGHT_BAND), k1 = Math.max(k0, Math.ceil(y1 / SIGHT_BAND) - 1);
     for (let k = k0; k <= k1; k++) {
       const lo = Math.max(k * SIGHT_BAND, SIGHT_KEEP), hi = (k + 1) * SIGHT_BAND;
+      clipN = 0;
       let n = clipY(q, 4, clipA, lo, true);
       n = clipY(clipA, n, clipB, hi, false);
       if (!n) continue;
       while (bands.length < (k + 1) * 4) bands.push(Infinity, -Infinity, Infinity, -Infinity);
       const o = k * 4;
       for (let i = 0; i < n; i++) {
-        const [x, y, z] = clipB[i];
+        const pt = clipB[i], x = pt[0], y = pt[1], z = pt[2];
         if (x < bands[o]) bands[o] = x; if (x > bands[o + 1]) bands[o + 1] = x;
         if (z < bands[o + 2]) bands[o + 2] = z; if (z > bands[o + 3]) bands[o + 3] = z;
         if (x < box[0]) box[0] = x; if (x > box[1]) box[1] = x; if (y < box[2]) box[2] = y; if (y > box[3]) box[3] = y;
@@ -1520,7 +1536,11 @@ export function* chunkJob(chunk, ctx) {
     gk(ground, GK.item);
     local.glows.length = 0; local.signs.length = 0; local.smoke.length = 0;
     const v0 = solid.nv, o0 = solid.onv;
+    const tIt = performance.now();
     fn(solid, tall ? standUp(solid, ground) : ground, it, local);
+    // (a big item's build and its sight bands in separate slices: together they were one 25-60 ms step at 4x CPU
+    // throttle, e.g. a market house; perf verify pass, 2026-11-15)
+    if (performance.now() - tIt > 1 && (tall || solid.nv > v0)) yield;
     if (tall) SIGHT.set(it, sightBands(solid.p, v0, solid.nv));
     else if (solid.nv > v0 && topOf(solid.p, v0, solid.nv) >= SIGHT_AUTO_H) {
       // a prop that stands as tall as she does (a stall's roof on its posts, an awning, a cart's canopy, a lamp): it

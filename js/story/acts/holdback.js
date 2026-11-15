@@ -167,7 +167,7 @@ export function holdback(o = {}) {
       if (k === cueKey) return;
       cueKey = k;
       A.cue.set(k ? { kind: 'hold', at: btn, glow: false, r: 40, delay: k === 'intro' ? 3000 : 900, when: () => !held(),
-        label: { my: 'နောက်ဆုတ်ပေး ခလုတ်ကို ဖိထားပါ', en: 'Press and hold Step back' } } : null);
+        label: { my: '\'နောက်ဆုတ်ပေး\' ခလုတ်ကို ဖိထားပါ', en: 'Press and hold Step back' } } : null);
     }
     stop = runLoop((dt) => {
       if (auto) auto(dt);

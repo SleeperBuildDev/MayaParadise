@@ -112,7 +112,7 @@ export const L = {
 
   // ---- 5.4 · the cane shed
   looks: {
-    rack: { pencil: { my: 'ကြိမ်တွေကို ပစ်ထားတာတဲ့', en: 'he leaves the cane lying' }, gold: { my: 'အရိပ်ထဲမှာ ဖြည်းဖြည်း ခြောက်အောင် လက်နဲ့ လှန်ထားတာ။', en: 'Drying slowly in the shade, turned by hand.' } },
+    rack: { pencil: { my: 'ကြိမ်တွေကို ပစ်ထားတာတဲ့', en: 'he leaves the cane lying' }, gold: { my: 'အရိပ်ထဲမှာ ဖြည်းဖြည်းချင်း ခြောက်အောင် လက်နဲ့ လှန်ထားတာ။', en: 'Drying slowly in the shade, turned by hand.' } },
     jar: { pencil: { my: 'ရေကို သူ့တစ်ယောက်တည်း သိမ်းထားတာတဲ့', en: 'keeps the water to himself' }, gold: { my: 'ကြိမ်ခုတ်သမားတွေအတွက် ကိုယ်တိုင် ဖြည့်ထားပေးတဲ့ ရေအိုး။', en: 'A jar he fills himself, for the cutters.' } },
     tally: { pencil: { my: 'ကြိမ်စည်းကို လျှော့စည်းတယ်တဲ့', en: 'short-ties his bundles' }, gold: { my: 'စည်းတိုင်း ရေတွက်ထားတယ်။ ပြည့်ပြည့်၊ တင်းတင်း။', en: 'Every bundle counted. Full and tight.' } },
     hands: { pencil: { my: 'လျှာထက်တဲ့ အဘိုးကြီး', en: 'sharp-tongued old man' }, gold: { my: 'လက်ဖဝါးမှာ ကြိမ်ရာတွေ ပြည့်နေတယ်။ နှစ်လေးဆယ် ခုတ်ခဲ့တာကိုး။ စကားလည်း ထက်တယ်။', en: 'Cane scars all over his palms: forty years of cutting. His words are sharp too.' } },
@@ -289,9 +289,9 @@ export const L = {
     { my: 'ကျွန်မ မဟုတ်ပါဘူး။ လေကြောင့်ပါ။', en: "It wasn't me. It was the wind." },
   ],
   sorryPicks: [ // NEW (r11) the buttons: short gists of sorryChoices, which Nay Chi then says in full
-    { my: '(ဆောရီး ပြောပြီး တံဆိပ်ကို အပြစ်ပုံ)', en: '(Say sorry, then blame the tags)' },
+    { my: '(ဆောရီးပြောပြီး တံဆိပ်ကို အပြစ်ပုံချ)', en: '(Say sorry, then blame the tags)' },
     { my: '(ကိုယ့်အမှား ဝန်ခံပြီး ကိုယ်တိုင် ပို့ပေး)', en: '(Own it, and take it there herself)' },
-    { my: '(လေကို အပြစ်ပုံ)', en: '(Blame the wind)' },
+    { my: '(လေကို အပြစ်ပုံချ)', en: '(Blame the wind)' },
   ],
   sorryQ: { my: 'နေခြည် ဘယ်လို တောင်းပန်မလဲ။', en: 'How does Nay Chi say sorry?' }, // (added) the pick is hers
   sorryWrong: [
@@ -351,7 +351,7 @@ export const L = {
       replies: [{ my: 'ဂရုမစိုက်နဲ့။', en: 'Ignore them.' }, { my: 'လူတိုင်းလိုပဲ နှုတ်ဆက်လိုက်။', en: 'Greet them like everyone.' }, { my: 'ရှောင်နေ။', en: 'Keep away.' }] },
     { from: { my: 'ဆိပ်ကမ်းက ဝါးထိုးသမား', en: 'a polesman at the Wharf' }, my: 'မနက်ဖြန် တံတားဖွင့်ရင် ကျွန်တော့်ဖောင် အလုပ်ပြုတ်မလားဟင်။', en: 'When the bridge opens tomorrow, will my raft lose its work?',
       replies: [{ my: 'ပြုတ်မယ်။', en: 'It will.' }, { my: 'မပြုတ်ပါဘူး။', en: "It won't." }, { my: 'ရေတိမ်ဆိပ်တွေ ရှိသေးတယ်။', en: 'There are still the shallow jetties.' }] },
-    { from: { my: 'စာကောင်တာက မိန်းကလေး', en: 'a girl at the letter counter' }, my: 'နေခြည်လိုပဲ ကျွန်မလည်း မာရာ့ဆယ်ချက် လိုချင်တယ်။', en: "I want Maya's ten too, like Nay Chi.",
+    { from: { my: 'စာကောင်တာက ကောင်မလေး', en: 'a girl at the letter counter' }, my: 'နေခြည်လိုပဲ ကျွန်မလည်း မာရာ့ဆယ်ချက် လိုချင်တယ်။', en: "I want Maya's ten too, like Nay Chi.",
       replies: [{ my: 'ရေးပေးမယ်။', en: "I'll write them." }, { my: 'နေခြည်ဆီက ငှားဖတ်။', en: "Borrow Nay Chi's." }, { my: 'တံတားဖွင့်ရင် ဘုတ်မှာ သွားဖတ်။', en: 'Read them on the board when the bridge opens.' }] },
   ],
   boardMaya: [{ my: '(သုံးဆယ့်တစ်စောင်။ အကုန် ပြန်ရေးပေးနိုင်ပါ့မလား။)', en: '(Thirty-one. Can I answer them all?)' }],

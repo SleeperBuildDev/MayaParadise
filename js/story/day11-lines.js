@@ -190,8 +190,8 @@ export const L = {
   ],
   nn1: [{ my: 'လေ့ကျင့်စရာ မလိုပါဘူး။ စင်ပေါ်ရောက်မှ အလိုလို ရသွားမှာ။', en: "Don't need practice. It'll come to me on the night." }],
   look: {
-    sheet: { pencil: { my: '(ကြားထားတာ: «ဇီဇာများတယ်»)', en: '(Heard: «too fussy»)' }, gold: { my: '«ချယ်ရီ - ခုနစ်ညလုံး အမှန်ခြစ်။ ညီညီ - တစ်ညမှ မရှိဘူး။»', en: '«Cherry: seven ticks. Nyi Nyi: none.»' } },
-    book: { pencil: { my: '(ကြားထားတာ: «နှစ်ယောက်ဆိုမှ သီချင်း»)', en: '(Heard: «a song needs two»)' }, gold: { my: '«သူမရဲ့ အပိုင်းမှာ ခဲတံမှတ်ချက် အပြည့်။ သူ့အပိုင်းကတော့ ဗလာ။»', en: '«Her part full of pencil marks; his is blank.»' } },
+    sheet: { pencil: { my: '(ကြားထားတာ - «ဇီဇာများတယ်»)', en: '(Heard: «too fussy»)' }, gold: { my: '«ချယ်ရီ - ခုနစ်ညလုံး အမှန်ခြစ်။ ညီညီ - တစ်ညမှ မရှိဘူး။»', en: '«Cherry: seven ticks. Nyi Nyi: none.»' } },
+    book: { pencil: { my: '(ကြားထားတာ - «နှစ်ယောက်ဆိုမှ သီချင်း»)', en: '(Heard: «a song needs two»)' }, gold: { my: '«သူမရဲ့ အပိုင်းမှာ ခဲတံမှတ်ချက် အပြည့်။ သူ့အပိုင်းကတော့ ဗလာ။»', en: '«Her part full of pencil marks; his is blank.»' } },
   },
   lookAgain: [{ my: '(သေချာ ကြည့်ဦးမယ်…)', en: '(Let me look properly…)' }], // NEW
   ch2: [{ my: 'အစ်မ… သူနဲ့ပဲ ဆိုလိုက်ရမလား။ လူတိုင်းက တစ်ယောက်တည်းထက် ကောင်းတယ်တဲ့။', en: 'Sister… should I just sing with him? Everyone says it beats singing alone.' }],

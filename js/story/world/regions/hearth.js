@@ -475,7 +475,7 @@ export const PEOPLE = [
     job(138.6, 202.5, Math.PI, 'work', 0.6)),
   folk('cherry', [11], 241.4, 198.2, 0, { my: 'သီချင်းဆိုတဲ့အခါ တစ်ယောက်ယောက် ဆုံးအောင် နားထောင်ပေးတာ အကောင်းဆုံး လက်ဆောင်ပဲ။', en: 'When I sing, someone listening to the end is the best gift.' },
     job(241.4, 198.2, 0, 'read', 1.0)),
-  folk('nyinyi', [11], 245.0, 198.2, -0.3, { my: 'သူငယ်ချင်းကောင်းက ကြိုးညှိပေးသလိုပဲ။ မပြောခင် သိပြီး ကူတယ်။', en: 'A good friend is like someone tuning your strings: they notice before you say, and help.' },
+  folk('nyinyi', [11], 245.0, 198.2, -0.3, { my: 'သူငယ်ချင်းကောင်းဆိုတာ ကြိုးညှိပေးသလိုပဲ။ မပြောခင် သိပြီး ကူညီတယ်။', en: 'A good friend is like someone tuning your strings: they notice before you say, and help.' },
     job(245.0, 198.2, -0.3, 'work', 0.8)),
   folk('sithu', [13], 168.4, 197.2, Math.PI, { my: 'ရတနာ့ချည်ကို ဆွဲရင် သူ စိတ်ဆိုးတတ်တယ်။ ဒါကြောင့် မကိုင်ခင် မေးတယ်။', en: "Yadanar gets cross if her thread is pulled. So I ask before I touch it." },
     job(168.4, 197.4, Math.PI, 'work', 0.9)),

@@ -566,7 +566,7 @@ export const PEOPLE = [
   // Ma Thida writes letters for people at her doorstep; Daw Sein minds her tea cart; Moe Moe at the hopscotch
   { id: 'thida', x: 122.4, z: 298.2, heading: 0.3, hello: { my: 'ကြားခဲ့တာကို စာရေးပေးပါတဲ့။ ကျွန်မက ပြန်မေးတယ်၊ ကိုယ်တိုင် မြင်ခဲ့လား လို့။', en: 'They ask me to write down what they heard. I ask them back: did you see it yourself?' },
     job: { area: { x: 122.4, z: 298.6, r: 0.9 }, spot: { x: 122.4, z: 298.2, h: 0.3 }, mood: 'read', workChance: 0.8, workFor: [8, 16] } },
-  { id: 'sein', x: 145.6, z: 298.2, heading: -1.2, hello: { my: 'ဒီဆိုင်မှာ လက်ဖက်ရည်ထက် သတင်းက ပိုမြန်မြန် ကုန်တယ်။ မှန်တာ မမှန်တာ ရောမွှေပြီးပေါ့။', en: 'In this shop the news goes faster than the tea. True and untrue, all stirred in together.' },
+  { id: 'sein', x: 145.6, z: 298.2, heading: -1.2, hello: { my: 'ဒီဆိုင်မှာ လက်ဖက်ရည်ထက် သတင်းက ပိုမြန်မြန် ကုန်တယ်။ မှန်တာ မမှန်တာ ရောမွှေထားတာပေါ့။', en: 'In this shop the news goes faster than the tea. True and untrue, all stirred in together.' },
     job: { area: { x: 145.8, z: 298.4, r: 1.0 }, spot: { x: 145.6, z: 298.2, h: -1.2 }, mood: 'work', workChance: 0.8, workFor: [6, 14] } },
   { id: 'moemoe', x: 137.4, z: 313.4, heading: -0.3, hello: { my: 'ကိုယ့်ပေါင်းလဒ် ကိုယ် မှန်တယ်လို့ ထင်တာပဲ။ …ထင်ရုံပဲနော်။', en: 'I think my own sum is right. …I only think so, mind.' },
     job: { area: { x: 137.0, z: 313.0, r: 1.4 }, spot: { x: 137.4, z: 313.4, h: -0.3 }, mood: 'play', workChance: 0.6, workFor: [6, 12] } },

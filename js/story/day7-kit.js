@@ -184,7 +184,7 @@ export function lookLabels(game, items, { onTap = null } = {}) {
   const gameEl = document.getElementById('game');
   C.set({ kind: 'tap', when: () => !gameEl.classList.contains('talking') && !gameEl.classList.contains('choosing'),
     at: () => els.find((b, i) => !items[i].done && b.style.display !== 'none') || null,
-    label: { my: 'ခဲတံစာတွေကို တစ်ခုချင်း နှိပ်ကြည့်ပါ', en: 'Tap each pencil label' } });
+    label: { my: 'ခဲတံနဲ့ရေးထားတဲ့ စာတွေကို တစ်ခုချင်း နှိပ်ကြည့်ပါ', en: 'Tap each pencil label' } });
   els.forEach((b) => b.addEventListener('click', () => C.set(C.spec())));
   let raf = 0;
   const place = () => {

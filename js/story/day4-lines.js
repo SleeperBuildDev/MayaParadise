@@ -134,7 +134,7 @@ export const L = {
     { left: { my: 'ကရားကို ရေနွေးနဲ့ အရင်ဆေး', en: 'Rinse the pot with hot water first', icon: '🫖' }, right: l('လက်ဖက်ရည် မအေးသွားအောင်', "So the tea doesn't go cold") },
     { left: { my: 'လက်ဖက်ခြောက် တစ်ဆုပ်ပဲ', en: 'Just one pinch of leaves', icon: '🍃' }, right: l('များရင် ခါးတယ်', 'Too much turns bitter') },
     { left: { my: 'ရေနွေးဆူပြီးမှ ခဏ ငြိမ်ပါစေ', en: 'Let the boil settle a moment', icon: '♨️' }, right: l('ဆူဆူပွက်ပွက်ဆို လက်ဖက်ခြောက် လောင်တယ်', 'A rolling boil scorches the leaves') },
-    { left: { my: 'အသက် သုံးချက်စာ စောင့်', en: 'Wait three breaths', icon: '⏳' }, right: l('အရောင် ထွက်လာအောင်လို့', 'So the colour comes out') },
+    { left: { my: 'အသက် သုံးချက်စာ စောင့်ပါ', en: 'Wait three breaths', icon: '⏳' }, right: l('အရောင် ထွက်လာအောင်လို့', 'So the colour comes out') },
   ],
   kpBrew: [l('ခါးတာ လက်ဖက်ခြောက်ကြောင့် မဟုတ်ဘူး။ ဖျော်နည်းကြောင့်ပဲ။', "It isn't the leaves that make it bitter. It's how you brew.")],
 

@@ -104,8 +104,8 @@ export function match({ title = '', hint = '', pairs = [], shuffle = true } = {}
         return A.cue.set({ kind: 'tap', at: L[i], label: { my: 'ဘယ်ဘက်က တစ်ခုကို အရင်နှိပ်ပါ', en: 'First tap one on the left' } });
       }
       A.cue.set({ kind: 'many', many: () => open(sel?.side === 'R' ? L : R), delay: 3500,
-        label: sel.side === 'L' ? { my: 'ပြီးရင် ညာဘက်က သူနဲ့ကိုက်တာကို နှိပ်ပါ', en: 'Now tap its match on the right' }
-          : { my: 'ပြီးရင် ဘယ်ဘက်က သူနဲ့ကိုက်တာကို နှိပ်ပါ', en: 'Now tap its match on the left' } });
+        label: sel.side === 'L' ? { my: 'ပြီးရင် ညာဘက်က အတွဲကို နှိပ်ပါ', en: 'Now tap its match on the right' }
+          : { my: 'ပြီးရင် ဘယ်ဘက်က အတွဲကို နှိပ်ပါ', en: 'Now tap its match on the left' } });
     }
     cueStep();
 

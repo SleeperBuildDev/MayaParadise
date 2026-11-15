@@ -52,7 +52,7 @@ export const myNum = (n) => String(n).replace(/\d/g, (d) => MY_DIGITS[d]);
 // come from Day 2's evening, crowd it by Day 6, stop growing, lose Ko Kaung's on Day 10, and by the last
 // pages one note is left
 const TT_NOTE = [{ my: 'မာရာ…', en: 'Maya…' }, { my: 'အစ်မ ရွေးပေးပါ။', en: 'You choose.' }, { my: '— တိုးတိုး', en: '— Toe Toe' }]; // DRAFT(my)
-const TOWN_NOTE = [{ my: 'မာရာ၊ ဒီတစ်ခါ ကျွန်တော်တို့ အလှည့် — မေးမယ်နော်။', en: 'Maya, this time we ask.' }, { my: 'ဒီည မာရာ ကိုယ်တိုင်ကော ဘာမီး ယူလာမလဲ။', en: 'What light will you bring tonight?' }]; // DRAFT(my), Day 15's note
+const TOWN_NOTE = [{ my: 'မာရာ၊ ဒီတစ်ခါ ကျွန်တော်တို့ အလှည့် — မေးမယ်နော်။', en: 'Maya, this time we ask.' }, { my: 'ဒီည မာရာကိုယ်တိုင်ကော ဘာမီး ယူလာမှာလဲ။', en: 'What light will you bring tonight?' }]; // DRAFT(my), Day 15's note
 const BOARD_DAYS = {
   1: {}, 2: {}, 3: { notes: 3, replies: 1 }, 4: { notes: 14, replies: 2 }, 5: { notes: 22, replies: 3 }, 6: { notes: 31, replies: 3 },
   7: { notes: 31, replies: 4 }, 8: { notes: 31, replies: 4 }, 9: { notes: 31, replies: 4 }, 10: { notes: 30, replies: 4, gap: true },
