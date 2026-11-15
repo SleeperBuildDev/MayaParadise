@@ -295,7 +295,7 @@ export const L = {
   nightQ: { my: 'ဒီနေ့အကြောင်း မှန်မှန်ကန်ကန် ဘယ်လို ရေးမလဲ။', en: 'How will she write today, truthfully?' },
   nightChoices: [
     { my: 'ဒေါ်ခင်မေကို ကျွန်မ ပြင်ပေးလိုက်တယ်။ မောင်အာကာ့ကိုလည်း သူငယ်ချင်း ရှာပေးလိုက်တယ်။', en: 'I fixed Daw Khin May, and I found Maung Arkar a friend.' },
-    { my: 'ဒေါ်ခင်မေက ဆင်ခြေမပေးဘဲ ကိုယ့်အမှား ကိုယ်ပြင်တယ်။ အော်သံမပါတဲ့ ဗန်းက မုန့်လည်း အတူတူပဲ။ အိမွန်က မောင်အာကာ့ကို အရင်နားထောင်ပြီးမှ လမ်းပြတယ်။ ကတောက်ကဆတ် ဖြစ်တော့ ကိုယ့်အသံ ကိုယ်ပြင်ကြတယ်။', en: 'Daw Khin May put her own fault right, no excuses; the quiet tray\'s bread was the same. Ei Mon listened to Maung Arkar first, then showed him the way. When they squabbled, each mended their own tone.' },
+    { my: 'ဒေါ်ခင်မေက ဆင်ခြေမပေးဘဲ ကိုယ့်အမှား ကိုယ်ပြင်တယ်။ အော်သံမပါတဲ့ ဗန်းက မုန့်လည်း အတူတူပဲ။ အိမွန်က မောင်အာကာ့ကို အရင်နားထောင်ပြီးမှ လမ်းပြတယ်။ ကတောက်ကဆ ဖြစ်တော့ ကိုယ့်အသံ ကိုယ်ပြင်ကြတယ်။', en: 'Daw Khin May put her own fault right, no excuses; the quiet tray\'s bread was the same. Ei Mon listened to Maung Arkar first, then showed him the way. When they squabbled, each mended their own tone.' },
     { my: 'အော်တတ်တဲ့လူက ဘယ်တော့မှ မပြောင်းဘူး။ ရွာလွမ်းတဲ့ ကောင်လေးလည်း တစ်ယောက်တည်းပဲ ကျန်မှာ။', en: 'People who shout never change. And a homesick boy stays alone.' },
   ],
   nightWrong: [

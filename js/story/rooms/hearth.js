@@ -2764,7 +2764,7 @@ function handLoom(R, f, { bare = false, cloth = C.red, cloth2 = P.gold, bench = 
   }
 }
 function buildLoomShed() {
-  const R = begin('loomshed', { my: 'ယက်ကန်းရုံ', en: 'The loom shed' }, {
+  const R = begin('loomshed', { my: 'ရက်ကန်းရုံ', en: 'The loom shed' }, {
     width: 7, depth: 8, height: 3, wall: '#F3EEE2', wainscot: '#C9A87A', trim: C.kraftD,
     floor: 'planks', floorColor: '#C8A578', background: '#F1E6CF',
   });
@@ -3006,7 +3006,7 @@ export const ROOMS = {
   boxshop: { name: { my: 'ဦးစံရှား ဘူးခေါက်ဆိုင်', en: "U San Shar's box workshop" }, build: (opts) => make(buildBoxShop, opts) },
   lampshop: { name: { my: 'ဒေါ်ငြိမ်း သံပြား မီးအိမ်ဆိုင်', en: "Daw Nyein's tin-lamp shop" }, build: (opts) => make(buildLampShop, opts) },
   hearthtea: { name: { my: 'မီးဖိုတန်း လက်ဖက်ရည်ဆိုင်', en: 'The Hearth Row tea shop' }, build: (opts) => make(buildHearthTea, opts) },
-  loomshed: { name: { my: 'ယက်ကန်းရုံ', en: 'The loom shed' }, build: (opts) => make(buildLoomShed, opts) },
+  loomshed: { name: { my: 'ရက်ကန်းရုံ', en: 'The loom shed' }, build: (opts) => make(buildLoomShed, opts) },
 };
 
 /** Build a room, apply its day dressing (opts.day / opts.dressing) and return the public object. */

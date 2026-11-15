@@ -272,7 +272,7 @@ export const L = {
   pierChild: { my: 'ကလေး', en: 'A child' },
   childStuck: [{ my: '(တိုင်ကို တင်းတင်းဖက်ထားတယ်) …မပြန်ရဲတော့ဘူး…', en: "(clinging to the winch) …I can't go back…" }],
   ncChild: [{ my: 'ငါလည်း ကြောက်တာပဲ။ လက်ချင်း ကိုင်ပြီး အတူတူ ပြန်ကြမလား။', en: "I'm scared too. Shall we hold hands and go back together?" }],
-  nc6c: [{ my: 'ကြောက်ရက်နဲ့ သွားတာ… ကလေးလက်ကို ကိုင်ထားရတော့ ကိုယ့်ကြောက်တာ မေ့သွားတယ်။', en: 'Going while scared… holding her hand, I forgot my own fear.' }],
+  nc6c: [{ my: 'ကြောက်လျက်နဲ့ သွားတာ… ကလေးလက်ကို ကိုင်ထားရတော့ ကိုယ့်ကြောက်တာ မေ့သွားတယ်။', en: 'Going while scared… holding her hand, I forgot my own fear.' }],
   ncNeedSlates: [{ my: 'ကျောက်သင်ပုန်းတွေ စုပြီးမှ ဘုတ်ပေါ် ပြန်ချိတ်မယ်။ ကျန်တာတွေက ဗလာစာအုပ်ရပ်ထဲမှာ။', en: "I'll hang them once they're all together. The others are still in the Quarter." }],
   // 6.5 slate 10 and the ordering (inside the hut)
   bhHut: [{ my: 'ဒီမှာ လေက ကျောက်သင်ပုန်းကို ယူသွားတတ်တယ်။ တဲထဲမှာ ခင်းပါ။', en: 'The wind here takes slates. Lay them out in the hut.' }],

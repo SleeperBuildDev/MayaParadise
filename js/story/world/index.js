@@ -23,7 +23,7 @@ import { createSpace, createOpenWalker } from './walker.js';
 import { createDesks } from './desks.js';
 import { createFeet } from './feet.js';
 import { createSeen, openMap, pageTurn } from './map.js';
-import { itemObstacles, chunkOf, tearRect, homeBookBudget, isArt } from './build.js';
+import { itemObstacles, chunkOf, tearRect, homeBookBudget, SIGHT, SIGHT_BAND } from './build.js';
 import { ITEMS, REGIONS, ROAD_EDGES, PEOPLE, BRIDGE, EXTENT, GATES, OBSTACLES, ART as REG_ART, PROP as REG_PROP, bookDist } from './region.js';
 
 const call = (o, fn, ...a) => (o && typeof o[fn] === 'function' ? o[fn](...a) : undefined);
@@ -136,7 +136,6 @@ export async function createOpenWorld(game, story) {
   const deskGlows = [];
   const cut = createCutaway();
   const cutAt = new THREE.Vector3();
-  const NEAR_CLEAR = 1.6; // metres (see the near cut in update; with the shader.s 0.05 margin about 2.4 m on a phone. At 4.5 a low home whose back wall she stood at still laid its roof over the bottom of the screen)
   const NEAR_OUT = 0.5; // the camera's near plane out on the land (see update)
   let nearSaved = null;
   const streamer = createStreamer({
@@ -232,17 +231,99 @@ export async function createOpenWorld(game, story) {
     // (a line that only enters the box in its last metre or so is her standing at the building's front, under its
     // eaves or at its counter, with the building behind her: the whole front vanished round her, the clerk left
     // standing in the air)
+    // (a building whose chunk is built: against what it really drew, build.js SIGHT, as on foot. Its keep-out box,
+    // grown 0.45 m and as tall as its tallest part all over, stood over the car parked beside the wharf godown and
+    // faded the whole godown, nowhere near her on screen; verifier, 2026-11-15)
+    if (o.key && SIGHT.get(o.key)) {
+      carPts[0][2] = carPts[1][2] = p.x; carPts[0][4] = carPts[1][4] = p.z; carPts[0][3] = 0.45; carPts[1][3] = h;
+      corr.x0 = Math.min(cam.x, p.x); corr.x1 = Math.max(cam.x, p.x); corr.z0 = Math.min(cam.z, p.z); corr.z1 = Math.max(cam.z, p.z);
+      return covering(o, cam, carPts, 0);
+    }
     const L = Math.hypot(cam.x - p.x, cam.z - p.z);
     for (const y of [0.45, h]) { const t = enters(cam.x, cam.y, cam.z, p.x, y, p.z, o); if (t >= 0 && t < 0.97 && (1 - t) * L > 1.3) return t; }
     return -1;
   }
-  function findBlockers(cam, p, h) {
+  // on foot only what really covers her goes (owner, 2026-11-15: "keep the houses"; the old near cut cleared every
+  // tall thing in the front part of the walking view, a whole house lot left bare beside her as she walked by).
+  // Rays from the lens to points spread over her body grown by about a third (feet to a little over her head, a
+  // little either side across the view): a ray that enters an item's box on its way to her (not only in its last
+  // metre or so: the building behind her, her under its eaves) and the item fades. A house beside her, or one low
+  // in the screen that does not cover her, stays whole. Once fading, a wider spread holds it (hysteresis: walking
+  // along its edge it does not flicker in and out), with BLOCK_HOLD on top.
+  const BODY_IN = { side: [-0.3, 0, 0.3], up: [0.05, 0.5, 0.95, 1.5] }; // her ~0.45 x 1.3 m, grown ~33%
+  // (the hold spread only a little wider: at +-0.45 m a wall she walked beside, 0.45 m off her side, held the whole
+  // school faded while she walked along it; verifier, 2026-11-15)
+  const BODY_HOLD = { side: [-0.36, -0.18, 0, 0.18, 0.36], up: [0, 0.75, 1.6] };
+  const SIGHT_IN = 0.2; // (an item whose chunk is not built yet: its keep-out box, less most of the 0.45 m grown round it)
+  const makePts = (b) => { const a = []; for (const u of b.up) for (const sd of b.side) a.push([sd, u, 0, 0, 0]); return a; };
+  const ptsIn = makePts(BODY_IN), ptsHold = makePts(BODY_HOLD);
+  const sightBox = { minX: 0, maxX: 0, minY: 0, maxY: 0, minZ: 0, maxZ: 0 };
+  const carPts = [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]; // (the car's two lines of sight, blocking)
+  const camRight = new THREE.Vector3();
+  const corr = { x0: 0, x1: 0, z0: 0, z1: 0 }; // the camera -> her corridor (xz) this frame
+  // the sample points round her: across the view (the camera's own right, level) and up
+  function bodyPts(cam, p) {
+    camRight.setFromMatrixColumn(game.camera.matrixWorld, 0); camRight.y = 0;
+    if (camRight.lengthSq() < 1e-6) camRight.set(1, 0, 0); else camRight.normalize();
+    for (const pts of [ptsIn, ptsHold]) for (const q of pts) { q[2] = p.x + camRight.x * q[0]; q[3] = p.y + q[1]; q[4] = p.z + camRight.z * q[0]; }
+    corr.x0 = Math.min(cam.x, p.x - 0.7); corr.x1 = Math.max(cam.x, p.x + 0.7); corr.z0 = Math.min(cam.z, p.z - 0.7); corr.z1 = Math.max(cam.z, p.z + 0.7);
+  }
+  // where the first ray to her body enters the item (0..1 along it), or -1. A building is tested against what it
+  // really drew (build.js SIGHT: its extents in 25 cm bands of height above the plinth), a tree against its crown box
+  const bandBox = { minX: 0, maxX: 0, minY: 0, maxY: 0, minZ: 0, maxZ: 0 };
+  const autoBox = { key: null }; // (a SIGHT auto prop: covering reads its bands)
+  function covering(o, cam, pts, shrink) {
+    const sg = o.key ? SIGHT.get(o.key) : null;
+    const b = sightBox;
+    if (sg) { const q = sg.box; b.minX = q[0]; b.maxX = q[1]; b.minY = q[2]; b.maxY = q[3]; b.minZ = q[4]; b.maxZ = q[5]; }
+    else { b.minX = o.minX + shrink; b.maxX = o.maxX - shrink; b.minZ = o.minZ + shrink; b.maxZ = o.maxZ - shrink; b.minY = o.minY; b.maxY = o.maxY; }
+    if (!(b.maxX >= corr.x0 && b.minX <= corr.x1 && b.maxZ >= corr.z0 && b.minZ <= corr.z1)) return -1; // (an empty box too)
+    let best = -1;
+    for (const q of pts) {
+      let t = enters(cam.x, cam.y, cam.z, q[2], q[3], q[4], b);
+      if (t < 0) continue;
+      if (sg) { // (through the whole box: now the bands, nearest entry)
+        t = -1;
+        const B = sg.bands;
+        for (let k = 0; k < B.length; k += 4) {
+          if (B[k] > B[k + 1]) continue;
+          const y0 = (k / 4) * SIGHT_BAND;
+          bandBox.minX = B[k]; bandBox.maxX = B[k + 1]; bandBox.minZ = B[k + 2]; bandBox.maxZ = B[k + 3];
+          bandBox.minY = Math.max(y0, b.minY); bandBox.maxY = Math.min(y0 + SIGHT_BAND, b.maxY);
+          const u = enters(cam.x, cam.y, cam.z, q[2], q[3], q[4], bandBox);
+          if (u >= 0 && (t < 0 || u < t)) t = u;
+        }
+        if (t < 0) continue;
+      }
+      if (t >= 0.97 || (1 - t) * Math.hypot(cam.x - q[2], cam.z - q[4]) <= 1.3) continue;
+      if (best < 0 || t < best) best = t;
+    }
+    return best;
+  }
+  const held = (key) => slots.some((q) => q.key === key && q.want);
+  function findBlockers(cam, p, h, foot) {
     found.length = 0;
     const R = Math.hypot(cam.x - p.x, cam.z - p.z) + 4;
+    if (foot) bodyPts(cam, p);
     for (const o of tall) {
       if (Math.abs(o.x - p.x) > R + 14 || Math.abs(o.z - p.z) > R + 14) continue;
-      const t = blocking(o, cam, p, h);
+      const t = foot ? covering(o, cam, held(o.key) ? ptsHold : ptsIn, SIGHT_IN) : blocking(o, cam, p, h);
       if (t >= 0) found.push({ o, t });
+    }
+    // (on foot: the props as tall as she is, build.js SIGHT auto, in the chunks the camera -> her corridor crosses)
+    if (foot) {
+      const M = 4; // (metres: an item's anchor to the far edge of what it drew)
+      for (const ch of streamer.chunks.values()) {
+        if (ch.state !== 'ready' || !ch.items || ch.x1 < corr.x0 - M || ch.x0 > corr.x1 + M || ch.z1 < corr.z0 - M || ch.z0 > corr.z1 + M) continue;
+        for (const it of ch.items) {
+          if (it.x < corr.x0 - M || it.x > corr.x1 + M || it.z < corr.z0 - M || it.z > corr.z1 + M) continue;
+          const sg = SIGHT.get(it);
+          if (!sg?.auto) continue;
+          autoBox.key = it;
+          const t = covering(autoBox, cam, held(it) ? ptsHold : ptsIn, 0);
+          if (t >= 0) found.push({ o: { key: it, x: it.x, z: it.z, keep: 0.45 }, t });
+        }
+      }
     }
     for (const kind in streamer.pools) {
       for (const it of streamer.pools[kind].list) {
@@ -250,7 +331,7 @@ export async function createOpenWorld(game, story) {
         const s = it.s || 1;
         treeBox.minX = it.x - 1.3 * s; treeBox.maxX = it.x + 1.3 * s; treeBox.minZ = it.z - 1.3 * s; treeBox.maxZ = it.z + 1.3 * s;
         treeBox.minY = 1.5 * s; treeBox.maxY = 3.6 * s;
-        const t = blocking(treeBox, cam, p, h);
+        const t = foot ? covering(treeBox, cam, held(it) ? ptsHold : ptsIn, 0) : blocking(treeBox, cam, p, h);
         if (t >= 0) found.push({ o: { key: it, x: it.x, z: it.z, keep: 1.45 * s }, t });
       }
     }
@@ -258,10 +339,10 @@ export async function createOpenWorld(game, story) {
     if (found.length > BLOCKERS) found.length = BLOCKERS;
     return found;
   }
-  function updateBlockers(dt, on, cam, p, h) {
+  function updateBlockers(dt, on, cam, p, h, foot) {
     for (const sl of slots) sl.seen = false;
     if (on) {
-      for (const { o } of findBlockers(cam, p, h)) {
+      for (const { o } of findBlockers(cam, p, h, foot)) {
         let sl = slots.find((q) => q.key === o.key);
         if (!sl) sl = slots.find((q) => q.key === null) || slots.find((q) => q.fade <= 0.001 && !q.want);
         if (!sl) continue;
@@ -274,16 +355,15 @@ export async function createOpenWorld(game, story) {
       if (!sl.seen) sl.hold = on ? sl.hold - dt : 0;
       sl.want = sl.seen || sl.hold > 0;
       // (quick through the grain: the dithered half-way is a passing moment, not a look)
-      // (in 0.1 s, out 0.2 s: the stall roofs' grain showed through the camera's move between car and foot views)
-      sl.fade = Math.max(0, Math.min(1, sl.fade + (sl.want ? 10 : -5) * dt));
+      // (in 0.1 s, out 0.2 s: the stall roofs' grain showed through the camera's move between car and foot views;
+      // on foot a little softer, 0.2 s in and 0.3 s out: a house she walks behind dissolves rather than blinks)
+      sl.fade = Math.max(0, Math.min(1, sl.fade + (sl.want ? (foot ? 5 : 10) : (foot ? -3.4 : -5)) * dt));
       if (!sl.want && sl.fade <= 0) sl.key = null;
       cut.blocker(k, sl.x, sl.z, sl.key === null ? 0 : sl.fade, sl.keep);
     });
   }
-  // canvas signs are their own meshes: hide the sign of a building that is faded out (or cleared
-  // from the near part of the view), so it never hangs in the air
-  function updateSigns(cam, p, near) {
-    const dx = p.x - cam.x, dz = p.z - cam.z, l2 = dx * dx + dz * dz || 1;
+  // canvas signs are their own meshes: hide the sign of a building that is faded out, so it never hangs in the air
+  function updateSigns() {
     for (const ch of streamer.chunks.values()) {
       if (ch.state !== 'ready' || !ch.signMeshes) continue;
       for (const m of ch.signMeshes) {
@@ -291,57 +371,37 @@ export async function createOpenWorld(game, story) {
         if (u.ax === undefined) continue;
         let hide = false;
         for (const sl of slots) if (sl.key !== null && sl.fade > 0.5 && Math.abs(sl.x - u.ax) + Math.abs(sl.z - u.az) < 0.02) hide = true;
-        if (!hide && u.tall) {
-          // (an item easing across the near line: its sign goes, or comes back, half-way through its grain)
-          const ne = nearEasing.get(anchorKey(u.ax, u.az));
-          hide = ne ? ne.f > 0.5 : near > 0 && ((u.ax - cam.x) * dx + (u.az - cam.z) * dz) / l2 < near - 0.05;
-        }
         m.visible = !hide;
       }
     }
-  }
-
-  // ---- the near part of the walking view (cutaway.js clears tall things anchored there): an item crossing that
-  // line used to go (or come back) in one frame: a house beside her as she walked past it, every house in the lower
-  // half of the screen when she got out of the car or back in. Now the line itself glides when it switches on and
-  // off (NEAR_RATE), and each item that crosses it eases through the grain over NEAR_EASE_T (up to NEAR_EASE at once;
-  // more than that, the ones farthest from her just switch, as before).
-  const NEAR_EASE_T = 0.3, NEAR_RATE = 2.4; // seconds; the line's glide (fraction of camera -> her per second)
-  const NEAR_EASE = cut.nearSlots || 0; // (cutaway.js; 0 from a cutaway.js a browser still holds from before: every item just switches)
-  const anchorKey = (x, z) => Math.round(x * 50) * 1e7 + Math.round(z * 50);
-  const nearItems = []; // every item the near line can clear (buildings and the low homes marked `cut`)
-  const addNear = (list) => { for (const it of list) if (isArt(it.k) || REG_PROP[it.k]?.cut) nearItems.push(it); };
-  addNear(ITEMS);
-  const nearEasing = new Map(); // anchorKey -> { x, z, on, f, seen }
-  const nearSlot = [];
-  let nearCur = 0, nearFrame = 0;
-  function nearCandidate(x, z, A, dx, dz, l2, n, p, dt, frame) {
-    const k = anchorKey(x, z);
-    const on = n > 0 && ((x - A.x) * dx + (z - A.z) * dz) / l2 < n - 0.05;
-    let s = nearEasing.get(k);
-    if (!s) { nearEasing.set(k, (s = { x, z, on, f: on ? 1 : 0, seen: frame, d: 0 })); return; }
-    s.seen = frame;
-    s.on = on;
-    const want = on ? 1 : 0;
-    if (s.f !== want) s.f = want > s.f ? Math.min(1, s.f + dt / NEAR_EASE_T) : Math.max(0, s.f - dt / NEAR_EASE_T);
-    if (s.f > 0 && s.f < 1) { s.d = Math.abs(x - p.x) + Math.abs(z - p.z); nearSlot.push(s); }
-  }
-  function updateNear(dt, A, p, n) {
-    const frame = ++nearFrame;
-    const dx = p.x - A.x, dz = p.z - A.z, l2 = Math.max(dx * dx + dz * dz, 1e-3);
-    // (the box round her takes in the camera too: it stands 15-35 m south of her)
-    const x0 = Math.min(A.x, p.x) - 24, x1 = Math.max(A.x, p.x) + 24, z0 = Math.min(A.z, p.z) - 24, z1 = Math.max(A.z, p.z) + 12;
-    nearSlot.length = 0;
-    for (const it of nearItems) if (it.x > x0 && it.x < x1 && it.z > z0 && it.z < z1) nearCandidate(it.x, it.z, A, dx, dz, l2, n, p, dt, frame);
-    for (const kind in streamer.pools) for (const it of streamer.pools[kind].list) if (it.x > x0 && it.x < x1 && it.z > z0 && it.z < z1) nearCandidate(it.x, it.z, A, dx, dz, l2, n, p, dt, frame);
-    for (const [k, s] of nearEasing) if (s.seen !== frame) nearEasing.delete(k);
-    // the ones nearest her get the slots; the rest switch at once (as the line alone would draw them)
-    if (nearSlot.length > NEAR_EASE) { nearSlot.sort((a, b) => a.d - b.d); for (let i = NEAR_EASE; i < nearSlot.length; i++) nearSlot[i].f = nearSlot[i].on ? 1 : 0; }
-    for (let k = 0; k < NEAR_EASE; k++) {
-      const s = nearSlot[k];
-      if (s && k < nearSlot.length) cut.nearEase?.(k, s.x, s.z, s.f); else cut.nearEase?.(k, 0, 0, -1);
+    // ...and the lamp cores (the shared glows mesh): a faded lamp or stall left its lit core hanging in the air, right
+    // over her head (verifier, 2026-11-15). A glow inside a faded item's drawn box is scaled to nothing until it is back
+    const G = glowMesh || (glowMesh = world.scene.getObjectByName('ow-glows'));
+    if (!G) return;
+    let any = glowHidden;
+    for (const sl of slots) if (sl.key !== null && sl.fade > 0.5 && SIGHT.get(sl.key)) any = true;
+    if (!any) return;
+    const E = G.instanceMatrix.array;
+    let changed = false;
+    glowHidden = false;
+    for (let i = 0; i < G.count; i++) {
+      const o = i * 16, x = E[o + 12], z = E[o + 14];
+      let hide = false;
+      for (const sl of slots) {
+        if (sl.key === null || !(sl.fade > 0.5)) continue;
+        const b = SIGHT.get(sl.key)?.box;
+        if (b && x > b[0] - 0.3 && x < b[1] + 0.3 && z > b[4] - 0.3 && z < b[5] + 0.3) { hide = true; break; }
+      }
+      if (hide) glowHidden = true;
+      if (hide === (E[o] === 0)) continue;
+      G.setMatrixAt(i, glowM4.compose(glowP.set(x, E[o + 13], z), glowQ, glowS.set(hide ? 0 : 0.26, hide ? 0 : 0.3, hide ? 0 : 0.26)));
+      changed = true;
     }
+    if (changed) G.instanceMatrix.needsUpdate = true;
   }
+  let glowMesh = null, glowHidden = false;
+  const glowM4 = new THREE.Matrix4(), glowP = new THREE.Vector3(), glowQ = new THREE.Quaternion(), glowS = new THREE.Vector3();
+
   // her: walking (or on her way to or from the car door, between the steps of that walk: game.worldWalk is
   // empty for a frame between them, and for the half second her landing takes after the hop out), or seated
   function mayaAfoot() {
@@ -376,6 +436,12 @@ export async function createOpenWorld(game, story) {
   const ow = {
     space, desks, seen, streamer, net, cut, feet, tall, // (tall: the cutaway's 3D building boxes, read by hints.js)
     cutOn: true, // tests turn the see-through hole off for overview shots
+    /** Debug (tests): what the cutaway clears this frame: the faded blockers (near/easing: the retired near cut, always none). */
+    cutState() {
+      return { near: 0, afoot: mayaAfoot(),
+        blockers: slots.filter((s) => s.key !== null).map((s) => ({ x: +s.x.toFixed(1), z: +s.z.toFixed(1), f: +s.fade.toFixed(2), k: s.key?.k || 'tree' })),
+        easing: [] };
+    },
     createWalker: (spawn) => createOpenWalker(space, spawn),
     bounds: { minX: EXTENT.x0, maxX: EXTENT.x1, minZ: EXTENT.z0, maxZ: EXTENT.z1 },
     focus() {
@@ -409,22 +475,11 @@ export async function createOpenWorld(game, story) {
       const walking = mayaAfoot();
       // (not during a talk: the two-shot picks a clear side by itself, and a hole by the lens would show as grain)
       const cutting = ow.cutOn && away > 1 && !(story.talking && !ow.deskScene);
-      // the near part of the walking view: tall things anchored more than NEAR_CLEAR metres in front of her (towards
-      // the lens) go whole. A fixed fraction (0.55) of a phone's long portrait view left the low homes across the lane
-      // standing, their roofs a dark slab over the bottom half of the screen
-      const camL = Math.hypot(game.camera.position.x - p.x, game.camera.position.z - p.z);
-      const nearWant = cutting && walking ? Math.max(0.55, 1 - NEAR_CLEAR / Math.max(camL, 1)) : 0;
-      // (the line glides on and off: from the lens out to her when she gets out of the car, back when she gets in;
-      // the items it crosses ease through the grain, updateNear)
-      if (nearWant > 0 && nearCur === 0) nearCur = 0.06; // (it starts just in front of the lens)
-      nearCur = nearCur < nearWant ? Math.min(nearWant, nearCur + NEAR_RATE * dt) : Math.max(nearWant, nearCur - NEAR_RATE * dt);
-      if (nearWant === 0 && nearCur < 0.07) nearCur = 0;
-      const nearCut = nearCur;
-      cut.set(game.camera.position, cutAt.set(p.x, walking ? 0.9 : 0.8, p.z), cutting ? 1 : 0, nearCut);
-      updateNear(dt, game.camera.position, p, nearCut);
+      // (on foot nothing is cleared wholesale any more: only what covers her fades, updateBlockers)
+      cut.set(game.camera.position, cutAt.set(p.x, walking ? 0.9 : 0.8, p.z), cutting ? 1 : 0);
       // (blockers also during talks: the two-shot may still have a wall or a crown between it and her)
-      updateBlockers(dt, ow.cutOn && away > 1, game.camera.position, p, walking ? 1.3 : 1.2);
-      updateSigns(game.camera.position, p, nearCut);
+      updateBlockers(dt, ow.cutOn && away > 1, game.camera.position, p, walking ? 1.3 : 1.2, walking);
+      updateSigns();
       // depth precision: the follow cameras stand 15-35 m off, and with the near plane at 10 cm the ground's decals
       // (a few millimetres apart) fought for the same depth on a phone and flickered while the camera moved. Out here
       // nothing is drawn that close to the lens (cutaway.js clears 3 m round it), so the near plane steps out to 0.5 m;
@@ -610,7 +665,6 @@ export async function createOpenWorld(game, story) {
       space.add(obstacles);
       for (const [k, v] of Object.entries(REG_ART)) if (v?.h) TALL_H[k] = v.h;
       addTall(items);
-      addNear(items);
       const t1 = performance.now();
       streamer.addItems(items);
       const t2 = performance.now();

@@ -224,7 +224,7 @@ export const L = {
   // ---- 6.4 · slate 3 (the tea-leaf basket)
   kpHabit: [
     { my: 'ဟိုနေ့ကစပြီး မနက်တိုင်း အရုဏ်မတက်ခင် လက်ဖက်ခြောက် ကိုယ်တိုင် သွားယူတယ်။ ထင်ထားတာထက် ခက်တယ်ဗျ။', en: 'Since that day I fetch my own leaves before dawn, every morning. Harder than I thought.' },
-    { my: 'တချို့မနက် ထချင်စိတ်တောင် မရှိဘူး။ ဒါပေမဲ့ အဲဒီကတည်းက ပထမခွက်က တစ်ခါမှ နောက်မကျဖူးဘူး။ လက်ဖက်ရည်လည်း ပိုကောင်းလာတယ်။', en: "Some mornings I don't even want to get up. But the first cup's never once been late since. And the tea's got better." },
+    { my: 'တချို့မနက် ထချင်စိတ်တောင် မရှိဘူး။ ဒါပေမဲ့ အဲဒီကတည်းက ပထမခွက်က တစ်ခါမှ နောက်မကျဘူး။ လက်ဖက်ရည်လည်း ပိုကောင်းလာတယ်။', en: "Some mornings I don't even want to get up. But the first cup's never once been late since. And the tea's got better." },
   ],
   kpFind: [{ my: '(ကိုဖြိုး လက်ဖက်ခြောက် ကော်လိုက်တော့ ကျောက်သင်ပုန်းလေး ပါလာတယ်။)', en: '(Scooping leaves for his pot, Ko Phyo comes up with a little slate.)' }], // (added)
   ncHabitQ: [{ my: 'ကျွန်မလည်း တစ်ခုခု ထိန်းချင်တယ်။ အစ်မ… ဘာထိန်းရမလဲ ရွေးပေးပါလား။', en: 'I want to keep one too. Sister… pick one for me?' }],

@@ -57,7 +57,8 @@ import { tr } from '../../game/ui.js';
 import { castById, CAST } from '../cast.js';
 import { regionAt, bookDist, PEOPLE as REGION_PEOPLE } from '../world/region.js';
 
-const FILES = ['./lines-A.js', './lines-B.js', './lines-C.js'];
+// (lines-D.js: more town lines, same shape; until it exists its import just fails and is skipped)
+const FILES = ['./lines-A.js', './lines-B.js', './lines-C.js', './lines-D.js'];
 // District townsfolk in cast.js's own shape ({ id, name, role, look }), kept beside the region files until cast.js
 // lists them. Read here only for their age, clothes and role (a line's `job` kind), and to tell them from story cast.
 const FOLK_FILES = ['hearth-folk.js', 'garden-folk.js', 'garden-town-folk.js', 'market-townfolk.js', 'wharf-folk.js', 'junction-people.js', 'blank-folk.js'];
@@ -65,7 +66,16 @@ const FOLK = new Map();
 const folkReady = Promise.all(FOLK_FILES.map((f) => import(`../world/regions/${f}`).then((m) => {
   for (const v of Object.values(m)) if (Array.isArray(v)) for (const c of v) if (c && c.id && c.look && c.role) FOLK.set(c.id, c);
 }).catch(() => null)));
-const STORE = 'rc-chatter-v1';
+// What was said, per save (the save's `created` stamp): { created, clock, used: { key: play-second }, seen: { district } }.
+// v1 counted picks (and small talk kept its own store, rc-smalltalk-v1, for every save): both are read once and dropped.
+const STORE = 'rc-chatter-v2', OLD_STORE = 'rc-chatter-v1', OLD_SMALL = 'rc-smalltalk-v1';
+const COOL = 20 * 60; // play seconds before a line or an exchange may be said again (owner: "the same dialogs repeat")
+const KEEP = 1500; // at most this many remembered keys (the oldest go first; ~20 bytes each)
+const QUIET = [18, 32]; // people are about but everything they could say is still fresh in her ears: quiet this long
+// a short key for a line or an exchange (FNV-1a of its id or text): the same words are the same key wherever they are
+const hashKey = (s) => { let h = 0x811c9dc5; s = String(s); for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193); } return (h >>> 0).toString(36); };
+const lineKey = (l) => hashKey(typeof l === 'string' ? l : (l?.id || l?.my || l?.en || ''));
+const exKey = (x) => hashKey('ex:' + (typeof x === 'string' ? x : (x?.id || x?.my || x?.en || '')));
 const call = (o, fn, ...a) => (o && typeof o[fn] === 'function' ? o[fn](...a) : undefined);
 const segmenter = typeof Intl !== 'undefined' && Intl.Segmenter ? new Intl.Segmenter('my', { granularity: 'grapheme' }) : null;
 const glen = (s) => (segmenter ? Array.from(segmenter.segment(s)).length : Array.from(s).length);
@@ -152,25 +162,43 @@ export function createChatter(game, story) {
 
   let hereAreas = new Set(); // area ids Maya stands in (a line's `area` tag)
 
-  // ---- what was said (per save: the save's `created` stamp)
-  let mem = { created: save.created, seq: 0, used: {}, seen: {} };
+  // ---- what was said (per save: the save's `created` stamp), stamped in play seconds (mem.clock + now), so "not
+  // within COOL" is time, not a count of picks: a line, a pair or a small-talk exchange heard once stays away for
+  // twenty minutes of play, across towns, rooms and reloads. Keys are the words (lineKey / exKey), not the pool:
+  // the same text from another area or speaker is the same line to her ears.
+  let mem = { created: save.created, clock: 0, used: {}, seen: {} };
   try {
     const m = JSON.parse(localStorage.getItem(STORE) || 'null');
-    if (m && m.created === save.created) mem = { ...mem, ...m };
+    if (m && m.created === save.created) mem = { ...mem, ...m, used: m.used || {}, seen: m.seen || {} };
+    else {
+      const o = JSON.parse(localStorage.getItem(OLD_STORE) || 'null'); // (v1: keep which towns she has arrived in)
+      if (o && o.created === save.created && o.seen) mem.seen = { ...o.seen };
+    }
+    localStorage.removeItem(OLD_STORE); localStorage.removeItem(OLD_SMALL);
   } catch { /* private mode: in memory only */ }
-  const remember = () => { try { localStorage.setItem(STORE, JSON.stringify(mem)); } catch { /* ignore */ } };
-  const keyOf = (scope, l) => scope + ':' + (l.id || l.my || l.en);
-  function markUsed(key) { mem.used[key] = ++mem.seq; remember(); }
-  /** Least-recently-used pick: every unused one first; once all are used, one of the oldest quarter. */
-  /** (in the game) not a line or exchange said in the last RECENT picks: with few speakers around, the same one
-   * would otherwise come back every quiet gap (Maya's one area thought, every ten seconds) */
-  const RECENT = 12;
-  const notRecent = (items) => items.filter((it) => !(mem.used[it.key] && mem.seq - mem.used[it.key] < RECENT));
-  function pickLRU(items) {
-    if (!items.length) return null;
-    const unused = items.filter((it) => !mem.used[it.key]);
+  const clock0 = +mem.clock || 0;
+  const playT = () => clock0 + now;
+  function remember() {
+    mem.clock = Math.round(playT());
+    try { localStorage.setItem(STORE, JSON.stringify(mem)); } catch { /* ignore */ }
+  }
+  addEventListener('pagehide', remember);
+  function markUsed(key) {
+    mem.used[key] = Math.round(playT());
+    const ks = Object.keys(mem.used);
+    if (ks.length > KEEP) { ks.sort((a, b) => mem.used[a] - mem.used[b]); for (const k of ks.slice(0, ks.length - Math.floor(KEEP * 0.8))) delete mem.used[k]; }
+    remember();
+  }
+  const ago = (key) => (mem.used[key] == null ? Infinity : playT() - mem.used[key]);
+  /** the items not said within COOL (all of them with `any`) */
+  const fresh = (items, any = false) => (any ? items : items.filter((it) => ago(it.key) >= COOL));
+  /** One of the items: never-said ones first; else one of the longest-ago quarter. Nothing fresh: null (quiet). */
+  function pickFresh(items, any = false) {
+    const el = fresh(items, any);
+    if (!el.length) return null;
+    const unused = el.filter((it) => mem.used[it.key] == null);
     if (unused.length) return pickOne(unused);
-    const sorted = items.slice().sort((a, b) => mem.used[a.key] - mem.used[b.key]);
+    const sorted = el.slice().sort((a, b) => mem.used[a.key] - mem.used[b.key]);
     return pickOne(sorted.slice(0, Math.max(1, Math.ceil(sorted.length * 0.25))));
   }
 
@@ -340,6 +368,12 @@ export function createChatter(game, story) {
     gameEl.appendChild(el);
     pool.push({ el, text: el.firstChild, on: false, line: null, p: null, until: 0, w: 0, h: 0, x: -1, y: -1, tx: -1, fade: 0 });
   }
+  // A bubble can change size after show() measured it (the Burmese web font finishing, a late re-wrap): keep the
+  // measured size true so place() still clamps it inside the screen (a stale width let one sit 20 px off a 412 px phone).
+  try {
+    const ro = new ResizeObserver(() => { for (const b of pool) if (b.on) { const w = b.el.offsetWidth, h = b.el.offsetHeight; if (w !== b.w || h !== b.h) { b.w = w; b.h = h; b.x = -1; } } });
+    for (const b of pool) ro.observe(b.el);
+  } catch { /* no ResizeObserver: the size from show() stands */ }
   let now = 0;
   function show(sp, line, ms, cls = '') {
     const b = pool.find((x) => !x.on && !x.fade) || pool.find((x) => !x.on) || pool[0];
@@ -425,7 +459,7 @@ export function createChatter(game, story) {
     let line = null;
     if (first && t.first) line = [].concat(t.first).find(ok) || null;
     if (!line && !first && t.again?.length) {
-      const it = pickLRU(t.again.filter(ok).map((l) => ({ l, key: keyOf('arrive:' + districtId, l) })));
+      const it = pickFresh(t.again.filter(ok).map((l) => ({ l, key: lineKey(l) }))); // (all heard lately: no thought)
       if (it) { line = it.l; markUsed(it.key); }
     }
     if (!line) return false;
@@ -445,7 +479,7 @@ export function createChatter(game, story) {
   // ---- state
   let nextAt = 3 + Math.random() * 3; // a moment's quiet after loading
   let seq = null; // a playing exchange: { sp: [a, b], steps: [{ who, line }], i, t, b }
-  let scanT = 0, pairWatch = null, lastPos = null, mayaSpeed = 0;
+  let scanT = 0, pairWatch = null, lastPos = null, mayaSpeed = 0, singleQuiet = 0;
   let fast = false;
   const logArr = [];
   function log(kind, who, line) { logArr.push({ t: +now.toFixed(1), kind, who, my: line.my, en: line.en }); if (logArr.length > 60) logArr.shift(); }
@@ -465,13 +499,13 @@ export function createChatter(game, story) {
     for (const l of list) {
       if (!ok(l)) continue;
       if (maxLen < Infinity && glen(tr(l)) > maxLen) continue;
-      if (l.by === 'maya' || l.job === 'maya') { out.push({ key: keyOf(scope, l), l, sp: null }); continue; }
+      if (l.by === 'maya' || l.job === 'maya') { out.push({ key: lineKey(l), l, sp: null }); continue; }
       const job = story.inRoom ? l.job : outdoorJob(l.job);
       const who = speakers.filter((s) => (job != null && job !== '*' ? jobMatch(s, job) : canSayJobless(s)) && ageOK(s, l.age) && !namesSelf(s, l));
       if (!who.length) continue;
       // nearer people speak more often
       const sp = who.length > 1 && Math.random() < 0.35 ? who[1] : who[0];
-      out.push({ key: keyOf(scope, l), l, sp });
+      out.push({ key: lineKey(l), l, sp });
     }
     return out;
   }
@@ -480,22 +514,30 @@ export function createChatter(game, story) {
     const speakers = speakersNear(inCar ? T.carNear : T.near);
     const maxLen = inCar && carSpeed() > 0.3 ? T.slowCarLen : Infinity;
     const d = opts.district || forceDistrict || currentDistrict();
-    let cands = [];
+    const who = (cs) => (opts.who ? cs.filter((c) => c.sp?.id === opts.who) : cs);
+    let cands = [], any = 0;
     if (story.inRoom) {
       const rd = roomDistrict(story.inRoom);
       const list = (rd && (lines[rd].rooms[story.inRoom] || (rd === story.inRoom ? lines[rd].town : null))) || [];
-      cands = candidates(list, 'room:' + story.inRoom, speakers, { maxLen });
+      const all = who(candidates(list, 'room:' + story.inRoom, speakers, { maxLen }));
+      any = all.length; cands = fresh(all, opts.any); // (indoors no fallback to the street's lines: a room says its own or nothing)
     } else {
       const mp = mayaPos();
       const areas = opts.area ? Object.entries(lines[d]?.areas || {}).filter(([id]) => id === opts.area).map(([id, a]) => ({ d, id, a })) : insideAreas(mp.x, mp.z);
-      const areaC = [];
-      for (const ar of areas) areaC.push(...candidates(ar.a.lines, 'area:' + ar.d + ':' + ar.id, speakers, { maxLen }));
-      const townC = opts.area ? [] : candidates(lines[d]?.town || [], 'town:' + d, speakers, { maxLen });
+      const areaA = [];
+      for (const ar of areas) areaA.push(...candidates(ar.a.lines, 'area:' + ar.d + ':' + ar.id, speakers, { maxLen }));
+      const townA = opts.area ? [] : candidates(lines[d]?.town || [], 'town:' + d, speakers, { maxLen });
+      // the area's own lines first (mostly), else the town's; whichever still has something she has not heard lately
+      const areaC = fresh(who(areaA), opts.any), townC = fresh(who(townA), opts.any);
+      any = who(areaA).length + who(townA).length;
       cands = areaC.length && (!townC.length || Math.random() < 0.6 || opts.area) ? areaC : townC;
     }
-    if (opts.who) cands = cands.filter((c) => c.sp?.id === opts.who);
-    const it = pickLRU(opts.any ? cands : notRecent(cands));
-    if (!it) return false;
+    const it = pickFresh(cands, true);
+    if (!it) {
+      // somebody could talk, but all of it was said within COOL: a longer quiet rather than a repeat
+      if (any) singleQuiet = now + (fast ? rand(1, 2) : rand(QUIET[0], QUIET[1])); // (an exchange may still start)
+      return false;
+    }
     markUsed(it.key);
     const ms = msFor(it.l);
     if (!it.sp) { sayMaya(it.l); nextAt = now + ms / 1000 + gap(); return true; }
@@ -521,6 +563,8 @@ export function createChatter(game, story) {
     list.forEach((pair, i) => {
       if (opts.index != null && i !== opts.index) return;
       if (!whenOK(pair.when) || !pair.lines.some(ok)) return;
+      const key = exKey(pair.id || pair.lines[0]);
+      if (!opts.stale && ago(key) < COOL) return; // (heard within COOL: not even looked for)
       let found = null;
       const ages = Array.isArray(pair.age) ? pair.age : [];
       // '*' = anyone of the district's own folk (outdoors the story cast keep to lines that name them)
@@ -537,12 +581,13 @@ export function createChatter(game, story) {
       }
       // (the dev page may force a pair onto the two nearest people, whoever they are)
       if (!found && opts.anyone && speakers.length >= 2) found = [speakers[0], speakers[1]];
-      if (found) out.push({ key: 'pair:' + d + ':' + (pair.id || pair.lines[0].my || pair.lines[0].en), pair, sp: found });
+      if (found) out.push({ key, pair, sp: found });
     });
     return out;
   }
   function startPair(c) {
     markUsed(c.key);
+    for (const l of c.pair.lines) if (ok(l)) mem.used[lineKey(l)] = mem.used[c.key]; // (its lines count as said too)
     let turn = 0;
     const steps = [];
     for (const l of c.pair.lines) {
@@ -632,15 +677,15 @@ export function createChatter(game, story) {
     if (now < nextAt) { watchPairs(T.scan); return; }
     if (game.ui?.barkOpen) return; // Maya is saying something herself
     if (watchPairs(T.scan)) return;
-    if (Math.random() < (fast ? 0.9 : T.chance)) trySingle();
+    if (now >= singleQuiet && Math.random() < (fast ? 0.9 : T.chance)) trySingle();
   }
   /** Overheard pairs: two matching people near a Maya who stands still for ~2 s. Returns true if one started. */
   function watchPairs(dtScan) {
     const inCar = !story.inRoom && !story.footActive;
     if (mayaSpeed > T.pairStill || (inCar && carSpeed() > 0.3)) { pairWatch = null; return false; }
-    const cs = notRecent(pairCandidates());
+    const cs = pairCandidates(); // (only exchanges not heard within COOL)
     if (!cs.length) { pairWatch = null; return false; }
-    const pick = (pairWatch && cs.find((c) => c.key === pairWatch.key)) || pickLRU(cs);
+    const pick = (pairWatch && cs.find((c) => c.key === pairWatch.key)) || pickFresh(cs, true);
     if (!pairWatch || pairWatch.key !== pick.key) pairWatch = { key: pick.key, t: 0 };
     pairWatch.t += dtScan;
     if (now < nextAt || game.ui?.barkOpen) return false;
@@ -656,15 +701,26 @@ export function createChatter(game, story) {
      * Shares the one exchange slot, so nothing else talks over it. false = something is already playing or blocked. */
     play(sp, list, onDone = null, kind = 'small') {
       if (seq || pendingArrive || game.ui?.barkOpen || blockReason() || !sp?.length || !list?.length) return false;
+      // (the caller picks with chatter.recall and marks its exchange key; every line said is marked here)
       const steps = list.filter((l) => l && (l.my || l.en)).map((l) => ({ who: l.who === 'maya' ? 'maya' : Math.min(sp.length - 1, +l.who || 0), line: l }));
       if (!steps.length) return false;
       hideAll(true);
       seq = { sp: sp.map((s) => ({ id: s.id, p: s.p })), steps, i: -1, t: 0, b: null, onDone, far: kind === 'small' }; // (small talk is overheard up the street: extras-chatter.js SMALL.near)
+      { const at = Math.round(playT()); for (const st of steps) mem.used[lineKey(st.line)] = at; remember(); }
       log(kind, seq.sp.map((s) => s.id).join('+'), steps[0].line);
       return true;
     },
     /** something showing or about to (an exchange, a bubble, Maya's arrival thought) */
     get busy() { return !!seq || !!pendingArrive || pool.some((b) => b.on); },
+    /** what was said, for extras-chatter.js's small talk and house lines (same memory, same COOL, per save):
+     * items are [{ key, ... }] with key = recall.lineKey(line) or recall.exKey(firstLine | id) */
+    recall: {
+      COOL, lineKey, exKey,
+      fresh: (items, any = false) => fresh(items, any),
+      pick: (items, any = false) => pickFresh(items, any),
+      mark: (key) => markUsed(key),
+      ago,
+    },
     blocked: () => blockReason(),
     get now() { return now; },
     onArrive,
@@ -684,7 +740,7 @@ export function createChatter(game, story) {
           district: currentDistrict(), force: forceDistrict, room: story.inRoom || null, blocked: blockReason(),
           areas: insideAreas(mp.x, mp.z).map((a) => a.d + ':' + a.id), nextIn: +(nextAt - now).toFixed(1), playing: !!seq,
           near: speakersNear(T.carNear).map((s) => ({ id: s.id, d: +s.d.toFixed(1), role: s.cast?.role?.en || s.who })),
-          pairs: pairCandidates().map((c) => c.key + ' ' + c.sp.map((s) => s.id).join('+')),
+          pairs: pairCandidates({ stale: true }).map((c) => c.key + ' ' + c.sp.map((s) => s.id).join('+')),
           lineCount: Object.fromEntries(Object.entries(lines).map(([k, t]) => [k, t.town.length + Object.values(t.areas).reduce((n, a) => n + a.lines.length, 0) + Object.values(t.rooms).reduce((n, l) => n + l.length, 0) + t.pairs.length])),
         };
       },
@@ -693,15 +749,17 @@ export function createChatter(game, story) {
       /** an overheard exchange now: { district, index, anyone } */
       pair(opts = {}) {
         hideAll(true); seq = null;
-        const cs = pairCandidates(opts);
-        const c = pickLRU(cs);
+        const cs = pairCandidates({ stale: true, ...opts });
+        const c = pickFresh(cs, true);
         return c ? startPair(c) : false;
       },
       /** short gaps, quick pairs (testing) */
       fast(on = true) { fast = !!on; if (fast) nextAt = Math.min(nextAt, now + 1); },
       /** treat Maya as being in this district (null = where she really is) */
       force(o = {}) { if ('district' in o) forceDistrict = o.district || null; },
-      reset() { mem = { created: save.created, seq: 0, used: {}, seen: {} }; remember(); },
+      reset() { mem = { created: save.created, clock: mem.clock, used: {}, seen: {} }; remember(); },
+      /** the memory: how many keys, the play clock (s), and how many were said within COOL */
+      memory() { const t = playT(); const v = Object.values(mem.used); return { keys: v.length, clock: Math.round(t), recent: v.filter((x) => t - x < COOL).length, bytes: (localStorage.getItem(STORE) || '').length }; },
       /** which `job` values no cast member of the district could say (room walk-on keys show up here too) */
       coverage(cast) {
         const out = {};

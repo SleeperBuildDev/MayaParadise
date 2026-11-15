@@ -200,26 +200,26 @@ export function buildRow(story) {
   const nook = lampG.userData.nook;
   const windowAt = [toWorld(PL.lamp.x, PL.lamp.z, PL.lamp.ry, nook.x - 0.35, nook.z), toWorld(PL.lamp.x, PL.lamp.z, PL.lamp.ry, nook.x + 0.4, nook.z + 0.15)];
 
-  // the cut-away: a building standing between the camera and Maya is hidden whole (never a torn hole)
-  const ray = new THREE.Ray(), head = new THREE.Vector3(), hit = new THREE.Vector3();
+  // the cut-away: a building that really covers Maya on screen is hidden whole (never a torn hole). Rays from the
+  // lens to points over her body grown by about a third (as the open world does, world/index.js): only a building
+  // one of them crosses on the way goes; the ones beside her or low in the screen stay (owner, 2026-11-15)
+  const ray = new THREE.Ray(), pt = new THREE.Vector3(), hit = new THREE.Vector3(), side = new THREE.Vector3();
+  const SIDE = [-0.32, 0, 0.32], UP = [0.05, 0.5, 0.95, 1.5];
   function cutaway() {
     const cam = game.camera.position;
     const m = game.maya.root;
     if (!m.parent || m.parent !== scene) { for (const b of blockers) b.root.visible = true; return; }
-    head.set(m.position.x, 1.1, m.position.z);
-    const far = cam.distanceTo(head);
-    ray.origin.copy(cam);
-    ray.direction.copy(head).sub(cam).normalize();
-    // walking, the near part of the view goes too (as the open world's own buildings do, world/index.js): the class's
-    // roof south of the Note Wall filled the bottom half of the screen
-    const dx = head.x - cam.x, dz = head.z - cam.z, l2 = dx * dx + dz * dz || 1;
-    const nearCut = story.foot?.active && !story.talking ? Math.max(0.55, 1 - 1.6 / Math.max(Math.sqrt(l2), 1)) : 0;
-    for (const b of blockers) {
-      const inside = b.box.containsPoint(cam);
-      const p = !inside && ray.intersectBox(b.box, hit);
-      const ti = (((b.box.min.x + b.box.max.x) / 2 - cam.x) * dx + ((b.box.min.z + b.box.max.z) / 2 - cam.z) * dz) / l2;
-      b.root.visible = !(inside || (p && cam.distanceTo(hit) < far - 0.4) || (nearCut > 0 && ti < nearCut - 0.05));
+    side.setFromMatrixColumn(game.camera.matrixWorld, 0); side.y = 0;
+    if (side.lengthSq() < 1e-6) side.set(1, 0, 0); else side.normalize();
+    for (const b of blockers) b.cover = b.box.containsPoint(cam);
+    for (const u of UP) for (const s of SIDE) {
+      pt.set(m.position.x + side.x * s, m.position.y + u, m.position.z + side.z * s);
+      const far = cam.distanceTo(pt);
+      ray.origin.copy(cam);
+      ray.direction.copy(pt).sub(cam).normalize();
+      for (const b of blockers) if (!b.cover && ray.intersectBox(b.box, hit) && cam.distanceTo(hit) < far - 0.4) b.cover = true;
     }
+    for (const b of blockers) b.root.visible = !b.cover;
   }
 
   return {

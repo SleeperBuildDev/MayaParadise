@@ -89,7 +89,7 @@ export const KIND_TITLES = {
 };
 export const TRADE_TITLES = {
   carver: { my: 'တံဆိပ်တုံး ထွင်းရုံ', en: "A stamp carver's" }, potter: { my: 'မြေအိုး ဖိုရုံ', en: "A potter's" }, printer: { my: 'ပုံနှိပ်တိုက်', en: "A printer's" },
-  weaver: { my: 'ယက်ကန်းရုံ', en: "A weaver's" }, netmender: { my: 'ပိုက်ကွန် ပြင်ရုံ', en: "A net-mender's" }, carpenter: { my: 'လက်သမားရုံ', en: "A carpenter's" },
+  weaver: { my: 'ရက်ကန်းရုံ', en: "A weaver's" }, netmender: { my: 'ပိုက်ကွန် ပြင်ရုံ', en: "A net-mender's" }, carpenter: { my: 'လက်သမားရုံ', en: "A carpenter's" },
 };
 
 /** The hour (0..24) -> the evening amount the stage and doors.js use (0 day .. 1 night). */

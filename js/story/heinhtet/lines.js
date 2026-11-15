@@ -879,7 +879,7 @@ const sing = [
   S('♪ "Baby Shark"… ဟမ်း ဟမ်း ♪ နားထဲ စွဲသွားပြီ! ကယ်ကြပါ!', "♪ 'Baby Shark'… hm hm ♪ Stuck in my head! Help!", 'Baby Shark / Pinkfong'), // CHECK(song)
   S('♪ ဟေး… ဟေး… ♪ လေးဖြူလို အော်ဆိုမယ်! …အသံ ကွဲသွားပြီ။', '♪ Hey… hey… ♪ Rock out like Lay Phyu! …Voice cracked.', 'a Lay Phyu rock song / Lay Phyu & Iron Cross'), // CHECK(song)
   S('♪ ဟမ်း ဟမ်း ♪ စိုင်းစိုင်းလို ကရင်း ဆိုမယ်။ ကချိန် ရှိရင်ပေါ့။', '♪ Hm hm ♪ Sing and dance like Sai Sai. If I had time to dance.', 'a Sai Sai Kham Leng hit / Sai Sai Kham Leng'), // CHECK(song)
-  S('♪ "ဘတ်စ်ကား လွတ်ပြီ…" ♪ နီနီခင်ဇော် သီချင်း။ စာသား တော့ လွဲနေပြီ။', "♪ 'I've missed the bus…' ♪ A Ni Ni Khin Zaw song. Pretty sure those aren't the real words.", 'a Ni Ni Khin Zaw love song / Ni Ni Khin Zaw'), // CHECK(song)
+  S('♪ "ဘတ်စ်ကား လွတ်ပြီ…" ♪ နီနီခင်ဇော် သီချင်း။ စာသားတော့ လွဲနေပြီ။', "♪ 'I've missed the bus…' ♪ A Ni Ni Khin Zaw song. Pretty sure those aren't the real words.", 'a Ni Ni Khin Zaw love song / Ni Ni Khin Zaw'), // CHECK(song)
   S('♪ အာဇာနည်လို အသံနိမ့်နိမ့်… ♪ မရဘူး။ ပြေးနေလို့ အသံ မြင့်နေတယ်။', '♪ Deep and smooth like R Zarni… ♪ No good. Running keeps my voice squeaky.', 'an R Zarni ballad / R Zarni'), // CHECK(song)
   S('♪ ဘော့ဘီဆော့ဆာလို ♪ ဆန်၊ ဆီ၊ ဆား၊ ငါ နောက်ကျ… ဒါ ငါ့ ရက်ပ်!', "♪ Rapping like Bobby Soxer… ♪ Rice, oil, salt, I'm late: that's my rap!", 'a Bobby Soxer track / Bobby Soxer'), // CHECK(song)
   S('♪ ထူးအိမ်သင် သီချင်းဟောင်း ♪ အဖေ့အကြိုက်။ စာသား မေ့လို့ "လ လ" ပဲ!', "♪ An old Htoo Ein Thin classic… ♪ Dad's favourite. Can't remember the words, so: 'la la'!", 'a Htoo Ein Thin classic / Htoo Ein Thin'), // CHECK(song)
@@ -1052,7 +1052,7 @@ const mentions = {
         [1, '(ရယ်) ဟုတ်တော့ ဟုတ်တယ်။ အနီမြင်ရင် သူမှန်း သိတာပဲ။', "(laughs) Fair. See red, you know it's him."],
       ]),
       pr('mn-hr-holes', [
-        [0, 'ကိုဟိန်းထက် ယက်ကန်း ရက်ကြည့်ချင်တယ်တဲ့။', 'Ko Hein Htet wants to try the loom.'],
+        [0, 'ကိုဟိန်းထက် ရက်ကန်း ရက်ကြည့်ချင်တယ်တဲ့။', 'Ko Hein Htet wants to try the loom.'],
         [1, 'အပေါက်တွေချည်း ထွက်မှာပေါ့။', "It'll be all holes."],
         [0, 'ခေတ်မီတယ်တဲ့။', 'He says holes are in fashion.'],
         [1, '(ရယ်) တစ်ထည် ရက်ပေးလိုက်ရမလား။', '(laughs) Shall we weave him one?'],

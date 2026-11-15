@@ -310,7 +310,7 @@ const market = {
     again: [
       maya('(ပန့်သံ၊ ကရားသံ၊ ဈေးသည်သံ။ ဒီမှာ ပေးတာတွေ နာမည်မပါဘူး။)', '(Pump, kettle, hawkers. The giving here comes without names.)', { from: 5 }),
       maya('(စွန်တွေ ကိုယ့်ကြိုးနဲ့ကိုယ်။ သူများအလံမှာ မချည်ထားဘူး။)', "(Every kite on its own string. None tied to anyone else's flag.)", { from: 5 }),
-      maya('(ဆောက်သံ တချက်ချက်။ ပူရင် ချထား၊ အေးမှ ပြန်ကိုင်။)', '(Tap, tap of gouges. Hot, put it down; cool, pick it up.)', { from: 6 }),
+      maya('(ဆောက်သံ တစ်ချက်ချက်။ ပူရင် ချထား၊ အေးမှ ပြန်ကိုင်။)', '(Tap, tap of gouges. Hot, put it down; cool, pick it up.)', { from: 6 }),
     ],
   },
 };
@@ -737,7 +737,7 @@ const junction = {
       by('utint', 'ရွှေတုံးကို ကျောက်ခဲထင်ပြီး ပစ်တတ်ကြတယ်။ မသိရင် အရင်မေး။', "Folk toss out a gold nugget thinking it's a pebble. If you don't know, ask first.", { from: 9 }),
       by('newcomer', 'ဒီနေ့မှ ရောက်တာ။ မေးလို့ရလားလို့ မေးတော့ ရတယ်တဲ့။', "First day here. I asked if I may ask. They said yes.", { days: [14] }),
       by('utint', 'စကားတိုင်းနောက်မှာ ပိုင်ရှင်နာမည်။ စကားက သူတို့ဟာ။', "An owner's name after every saying. The words are theirs.", { flag: 'd14.printed' }),
-      by('kowunna', 'နေခြည် ကိုယ့်ဘာသာ ဆုံးဖြတ်လိုက်တယ်။ ကျွန်တော်တောင် အံ့သြတယ်။', "Nay Chi made up her own mind. Even I was surprised.", { flag: 'd14.ncChoice' }),
+      by('kowunna', 'နေခြည် ကိုယ့်ဘာသာ ဆုံးဖြတ်လိုက်တယ်။ ကျွန်တော်တောင် အံ့ဩတယ်။', "Nay Chi made up her own mind. Even I was surprised.", { flag: 'd14.ncChoice' }),
       by('kowunna', 'စက္ကူတွေ အပေါ်စင် တင်ထားတယ်။ ဘယ်ဟာအရင်လဲ ဦးတင့်ကို မေးပြီးမှ။', "Moved the paper up high, away from the wet. Asked U Tint which first.", RAIN),
     ],
   },

@@ -40,7 +40,7 @@ export const L = {
   ww1: [l('မာရာရေ… မှတ်စုစာအုပ်လေး ပြန်ရောက်ပြီ။ ညက အိပ်ခဲ့တဲ့အိမ်က စာတစ်ကြောင်း ရေးပေးလိုက်တယ်။', 'Maya… your notebook is back. The house it slept at wrote you a line.')],
   ww2: [l('မောင်ငယ်ဆီကလည်း တစ်ခု ပါလာတယ်။ စုနွယ်က အိတ်ထဲ ထည့်ပေးလိုက်တာတဲ့။', 'And something from Maung Nge. Su Nwe slipped it into my bag.')],
   mnNote: l('အစ်မ… မောင်ငယ် နောက်ဆုံးတံဆိပ်ကို တစ်ယောက်တည်း ဖတ်သွားတယ်။\nအောက်က နာမည်ကို သူကိုယ်တိုင် ရေးတာ။ ကျွန်မ ခဲတံ ကိုင်မပေးရဘူး။ — စုနွယ်\n\nမောင်ငယ်', "Sister… Maung Nge read the last label on his own.\nHe wrote the name underneath himself. I didn't hold the pencil. — Su Nwe\n\nMaung Nge"),
-  ttQ: l('"ဒီနေ့မေးခွန်း: စာအိတ်တွေကို ဘာလို့ လေးထောင့် လုပ်ကြတာလဲ။" — တိုးတိုး', '"Today\'s question: why are envelopes made square-cornered?" — Toe Toe'),
+  ttQ: l('"ဒီနေ့မေးခွန်း - စာအိတ်တွေကို ဘာလို့ လေးထောင့် လုပ်ကြတာလဲ။" — တိုးတိုး', '"Today\'s question: why are envelopes made square-cornered?" — Toe Toe'),
   seedling: l('(မနေ့က စာမျက်နှာပေါ်က ပျိုးပင်လေး ထွက်လာတယ်။ အိုးကွဲလေး တစ်လုံးထဲမှာ ပေါက်နေတယ်။ "မရသေးဘူး" လို့ပဲ တိုးတိုးလေး ပြောတယ်။)', '(The seedling steps off yesterday\'s page, growing in a little cracked pot. All it whispers is "not yet".)'),
   ch9comp: l('(နောက်တစ်ကောင်က မာရာ့ လက်ပေါ်မှာ ခဏနားပြီး ပခုံးပေါ် တက်ထိုင်တယ်။)', "(The other rests on Maya's hand a moment, then settles on her shoulder.)"),
   compMaya: [l('မရသေးဘူး… ပြီးတော့ လမ်းပြပေးတာ။ နှစ်ယောက်လုံး လိုက်ခဲ့ကြမလား။', 'Not yet… and showing the way. Coming, both of you?')],

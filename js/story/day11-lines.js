@@ -291,7 +291,7 @@ export const L = {
     upuAfter: [[{ my: 'ဟင်းချို ကြိုက်တဲ့သူ ကြိုက်ပါစေ။ ကျုပ်ဆိုင်မှာလည်း ထိုင်ခုံ မလွတ်ဘူး။', en: 'Let the soup folk love soup. My stools are full too.' }]],
     upuBefore: [[{ my: '(ဦးပု ခေါင်းမဖော်ဘဲ ခေါက်ဆွဲ ဆက်သုပ်နေတယ်။)', en: "(U Pu keeps his head down, tossing noodles.)" }]], // NEW (he says nothing before p2)
     panRain: [[{ my: 'ဦးချစ်က မနက်ဖြန် မိုးရွာမယ်တဲ့! ဦးချစ် ပြောတာ အကုန်မှန်တယ်။', en: "Uncle Chit says it'll rain tomorrow! He's always right." }]],
-    uchitAfter: [[{ my: 'ကစ်ကျိုးရင် ယူလာခဲ့။ ကျုပ်ပြောတာတွေကိုတော့ ကိုယ့်ဘာသာ စစ်။', en: 'Bring me broken kites. Check what I say for yourself.' }]],
+    uchitAfter: [[{ my: 'စွန်ကျိုးရင် ယူလာခဲ့။ ကျုပ်ပြောတာတွေကိုတော့ ကိုယ့်ဘာသာ စစ်။', en: 'Bring me broken kites. Check what I say for yourself.' }]],
     cherryAfter: [[{ my: 'မနက်ဖြန်လည်း လေ့ကျင့်မယ်။ တစ်ယောက်တည်းပဲ ဖြစ်ဖြစ်။', en: "I'll practise tomorrow too. Even on my own." }]],
     nyinyiAfter: [[{ my: 'ဒီညကစပြီး လေ့ကျင့်ကြည့်မယ်။ ချယ်ရီ့အတွက် မဟုတ်ဘူး၊ ကိုယ့်အတွက်။', en: "I'll start practising tonight. Not for Cherry. For me." }]],
     cherryLook: [[{ my: 'စာရွက်နဲ့ စာအုပ်ကို ကြည့်ချင်ရင် ကြည့်လို့ရတယ်နော်။', en: 'You can look at the sheet and the book if you like.' }]], // NEW (the L step, said by her, not pointed)

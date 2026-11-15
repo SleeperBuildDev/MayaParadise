@@ -137,7 +137,7 @@ export const L = {
 
   // ---- 5.4 match
   matchTitle: { my: 'ဘယ်စာမျက်နှာက ဘယ်နေရာအကြောင်းလဲ', en: 'Which page is about which stop?' },
-  matchHint: { my: 'လမ်းက နေရာတစ်ခုကို နှိပ်ပြီး သူ့စာမျက်နှာကို နှိပ်ပါ', en: 'Tap a stop from the walk, then its page' },
+  matchHint: { my: 'လမ်းက နေရာတစ်ခုကို နှိပ်ပြီး သူ့စာမျက်နှာကို နှိပ်ပါ။', en: 'Tap a stop from the walk, then its page' },
   ttBooks: [{ my: '(တိုးတိုး ခုံအဖုံးကို ဖွင့်ပြီး စာအုပ်ပါးပါးလေး ငါးအုပ် ထုတ်ချတယ်။)', en: '(Toe Toe lifts his desk lid and lays out five thin schoolbooks.)' }],
   matchStops: [
     { my: 'မုန့်ဆိုင် ချိန်ခွင်', en: 'Snack-shop scale', icon: 'scale' },
@@ -159,7 +159,7 @@ export const L = {
 
   // ---- 5.6 own words
   ownTitle: { my: 'တိုးတိုး ကိုယ့်စကားနဲ့ ရေးမယ့် စာကြောင်း', en: "Toe Toe's line, in his own words" },
-  ownHint: { my: 'သူ ကိုယ်တိုင် မြင်ခဲ့တာကို သူ့စကားနဲ့ စီပါ', en: 'Lay out what he saw himself, in his words' },
+  ownHint: { my: 'သူ ကိုယ်တိုင် မြင်ခဲ့တာကို သူ့စကားနဲ့ စီပါ။', en: 'Lay out what he saw himself, in his words' },
   ownPrompt: { my: 'ဆရာမအတွက် တစ်ကြောင်း', en: 'One line for Teacher' },
   ownFrags: [
     { id: 'a', my: 'ကျွန်တော့် ပဲပင်တွေ', en: 'My beans', good: true },
@@ -233,7 +233,7 @@ export const L = {
     { my: 'ဘီး လှည့်ပေးပါလား အစ်မ။ ကျွန်မ ဆွဲမယ်။', en: "Will you turn the wheel for me, sister? I'll pull." },
   ],
   shapeTitle: { my: 'မိချိုနဲ့ အိုးလုပ်မယ်', en: 'Make pots with Mi Cho' },
-  shapeHint: { my: 'ရွှံ့ကို အလယ်တည့်အောင် ထိန်း၊ ပြီးမှ ဖြည်းဖြည်း ဆွဲတင်ပါ', en: 'Centre the clay, then pull up slowly' },
+  shapeHint: { my: 'ရွှံ့ကို အလယ်တည့်အောင် ထိန်း၊ ပြီးမှ ဖြည်းဖြည်း ဆွဲတင်ပါ။', en: 'Centre the clay, then pull up slowly' },
   shapeAgain: [{ my: 'ဆယ့်နှစ်လုံး လုပ်ရသလို ဆွဲမိသွားတယ်။ ကိုယ့်လက်နဲ့ ပြန်လုပ်မယ်။', en: 'I pulled as if I had twelve to make. Again, with my own hands.' }],
   mcCarry: [{ my: 'အပြင်ကို အတူတူ သယ်ကြရအောင်။ ပြီးရင် ခြောက်အောင် ထားမယ်။', en: "Let's carry them out together. Then they can dry." }], // (added)
   mcCarryLater: [{ my: 'အိုးတွေ အပြင်မှာ ထားမှ ဖြစ်မယ်နော်။', en: 'The pots need to go out to dry.' }], // (added)

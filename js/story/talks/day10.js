@@ -132,7 +132,7 @@ export const TALK_D10_KOPHYO = {
     { lines: [
       { my: 'ဝယ်သူက ကျွန်တော့်ကို မသိဘူး။ ဘယ်သူမှ သိမှာ မဟုတ်ဘူး။', en: "The buyer doesn't know me. Nobody would ever know.", need: 'looksdown', seems: 'afraid', face: 'worried',
         tell: l('ကြောက်တာ မဟုတ်ဘူး။ ဝယ်သူနဲ့ တစ်ခါမှ မျက်နှာချင်း မဆိုင်ဖူးဘူး။ မမြင်ဖူးတဲ့လူကို အထင်သေးရတာ လွယ်တယ်။', "Not fear. He's never once met the buyer's eye. It's easy to think little of someone you've never seen.") },
-      { my: 'ကိုယ်ကိုယ်တိုင်တော့ သိနေမှာပေါ့… (ရေပုံးကို ခြေထောက်နဲ့ ဘေးတွန်းထားတယ်)', en: "I'd know, though… (he nudges the can aside with his foot)", need: 'looksdown', face: 'think', heard: true },
+      { my: 'ကိုယ့်ကိုယ်တိုင်တော့ သိနေမှာပေါ့… (ရေပုံးကို ခြေထောက်နဲ့ ဘေးတွန်းထားတယ်)', en: "I'd know, though… (he nudges the can aside with his foot)", need: 'looksdown', face: 'think', heard: true },
     ] },
     { lines: [ // his: the decision
       { my: '…ကျွန်တော် ဆုံးဖြတ်ပြီ။', en: "…I've decided.", need: 'own', face: 'think',

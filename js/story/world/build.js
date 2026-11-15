@@ -1423,6 +1423,57 @@ function standUp(solid, ground) {
   return px;
 }
 
+// ---- what a tall item really fills (index.js: on foot it fades only when it really covers her). Per item, the
+// extents of what it drew above its plinth (the plinth never fades), in 25 cm bands of height: a gable roof narrows to
+// its ridge, a porch, a yard or a floor slab stays low, nothing is grown for eaves. Every Geo part is a run of
+// four-vertex quads: each is clipped to each band it spans. SIGHT: item -> { box: [minX, maxX, minY, maxY, minZ, maxZ],
+// bands: Float32Array of [minX, maxX, minZ, maxZ] per band (band k: y in [k, k + 1) * SIGHT_BAND; empty: minX > maxX) }.
+export const SIGHT = new WeakMap();
+// (25 cm, not 1 m: a band's box reaches up to the band's top over all it holds, so a roof's lowest step or eave at
+// 3.1 m stood as a 4 m wall over the whole eave, and the line to her, passing half a metre over the real roof, was
+// taken as covered: the tea shop and the godown faded with her in plain sight; verifier, 2026-11-15)
+export const SIGHT_BAND = 0.25, SIGHT_KEEP = 0.45;
+const clipA = [], clipB = [];
+function clipY(src, n, dst, y, above) {
+  let m = 0;
+  for (let i = 0; i < n; i++) {
+    const a = src[i], b = src[(i + 1) % n];
+    const ina = above ? a[1] >= y : a[1] <= y, inb = above ? b[1] >= y : b[1] <= y;
+    if (ina) dst[m++] = a;
+    if (ina !== inb) { const t = (y - a[1]) / (b[1] - a[1]); dst[m++] = [a[0] + (b[0] - a[0]) * t, y, a[2] + (b[2] - a[2]) * t]; }
+  }
+  return m;
+}
+export const SIGHT_AUTO_H = 1.6; // metres: a prop this tall can hide her (her ~1.3 m), so it gets SIGHT too (auto)
+function topOf(P, v0, v1) { let y = -Infinity; for (let v = v0; v < v1; v++) if (P[v * 3 + 1] > y) y = P[v * 3 + 1]; return y; }
+function sightBands(P, v0, v1) {
+  const box = [Infinity, -Infinity, Infinity, -Infinity, Infinity, -Infinity];
+  let bands = [];
+  const q = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]];
+  for (let v = v0; v + 3 < v1; v += 4) {
+    let y0 = Infinity, y1 = -Infinity;
+    for (let k = 0; k < 4; k++) { const o = (v + k) * 3; q[k][0] = P[o]; q[k][1] = P[o + 1]; q[k][2] = P[o + 2]; y0 = Math.min(y0, P[o + 1]); y1 = Math.max(y1, P[o + 1]); }
+    if (y1 <= SIGHT_KEEP) continue;
+    const k0 = Math.floor(Math.max(y0, SIGHT_KEEP) / SIGHT_BAND), k1 = Math.max(k0, Math.ceil(y1 / SIGHT_BAND) - 1);
+    for (let k = k0; k <= k1; k++) {
+      const lo = Math.max(k * SIGHT_BAND, SIGHT_KEEP), hi = (k + 1) * SIGHT_BAND;
+      let n = clipY(q, 4, clipA, lo, true);
+      n = clipY(clipA, n, clipB, hi, false);
+      if (!n) continue;
+      while (bands.length < (k + 1) * 4) bands.push(Infinity, -Infinity, Infinity, -Infinity);
+      const o = k * 4;
+      for (let i = 0; i < n; i++) {
+        const [x, y, z] = clipB[i];
+        if (x < bands[o]) bands[o] = x; if (x > bands[o + 1]) bands[o + 1] = x;
+        if (z < bands[o + 2]) bands[o + 2] = z; if (z > bands[o + 3]) bands[o + 3] = z;
+        if (x < box[0]) box[0] = x; if (x > box[1]) box[1] = x; if (y < box[2]) box[2] = y; if (y > box[3]) box[3] = y;
+        if (z < box[4]) box[4] = z; if (z > box[5]) box[5] = z;
+      }
+    }
+  }
+  return { box, bands: new Float32Array(bands) };
+}
+
 /** chunk: { i, j, x0, z0, x1, z1, items }; ctx: { net, edges, isOpen(edge), offPaper(x, z) } (edges: the open-world road edges). */
 export function* chunkJob(chunk, ctx) {
   const ground = new Geo({ outline: false, cap: 6000 });
@@ -1462,14 +1513,24 @@ export function* chunkJob(chunk, ctx) {
     const fn = ART[it.k] || PROP[it.k];
     if (!fn) continue;
     const solid = solidFor(it.x, it.z);
-    // tall: buildings, and low homes marked `cut` (a one-storey roof right under the walking camera fills half the
-    // screen): the cutaway may clear them from the near part of the view and fade them when they hide her
+    // tall: buildings, and low homes marked `cut`: the cutaway fades them when they hide her (SIGHT: what they fill)
     const tall = !!ART[it.k] || !!REG_PROP[it.k]?.cut;
     solid.at(it.x, it.z, it.ry || 0).item(it.x, it.z, tall ? 1 : 0);
     ground.at(it.x, it.z, it.ry || 0);
     gk(ground, GK.item);
     local.glows.length = 0; local.signs.length = 0; local.smoke.length = 0;
+    const v0 = solid.nv, o0 = solid.onv;
     fn(solid, tall ? standUp(solid, ground) : ground, it, local);
+    if (tall) SIGHT.set(it, sightBands(solid.p, v0, solid.nv));
+    else if (solid.nv > v0 && topOf(solid.p, v0, solid.nv) >= SIGHT_AUTO_H) {
+      // a prop that stands as tall as she does (a stall's roof on its posts, an awning, a cart's canopy, a lamp): it
+      // fades too, but only when it covers her (index.js); its anchors are marked tall for the cutaway shader
+      const sg = sightBands(solid.p, v0, solid.nv);
+      sg.auto = true;
+      SIGHT.set(it, sg);
+      for (let v = v0; v < solid.nv; v++) solid.a[v * 3 + 2] = 1;
+      if (solid.oa) for (let v = o0; v < solid.onv; v++) solid.oa[v * 3 + 2] = 1;
+    }
     for (let k = 0; k < local.glows.length; k += 3) out.glows.push(local.glows[k], local.glows[k + 1], local.glows[k + 2]); // (world space)
     for (const s of local.signs) {
       // sign positions are in the item's local space: turn them into world space

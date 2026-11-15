@@ -3927,7 +3927,7 @@ export function eveningClass({ open = 0, lit = 0.8, title = { my: 'ညနေ စ
  * light and flat loom-and-weaver cut-outs whose beaters swing (setWeaving; one instanced draw call), skeins of dyed
  * thread drying on a pole, a bobbin basket and a bench. clack: the sound anchor at the door.
  */
-export function weavingShed({ lit = 1, weaving = true, title = { my: 'ယက်ကန်းရုံ', en: 'Weaving Shed' } } = {}) {
+export function weavingShed({ lit = 1, weaving = true, title = { my: 'ရက်ကန်းရုံ', en: 'Weaving Shed' } } = {}) {
   const root = new THREE.Group();
   root.name = 'weavingShed';
   const r = rand(53);

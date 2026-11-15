@@ -142,7 +142,7 @@ function shopA(c) {
   c.res('keep', cx - 0.45, cz - 0.62, 0.15, { role: R.pick(['woman', 'man', 'elder']) });
   // a bottle shelf and a price slate on the right wall
   c.onWall(A.shelves({ w: 1.2, h: 1.4, rows: 3, goods: 'bottles', seed: c.seed % 29 }), 'right', -0.2, { w: 1.2, d: 0.36 }, 'bottleShelf');
-  c.sign('right', 0.85, 1.75, 0.7, 0.55, (g, w, h) => ART.chalkBoard(g, w, h, 'ဈေးနှုန်း', [['ဆန် ၁ပြည်', 3200], ['ဆီ ၁ဗူး', 4500], ['ဆပ်ပြာ', 800]], c.seed), 260); // DRAFT(my): prices
+  c.sign('right', 0.85, 1.75, 0.7, 0.55, (g, w, h) => ART.chalkBoard(g, w, h, 'ဈေးနှုန်း', [['ဆန် ၁ပြည်', 3200], ['ဆီ ၁ဘူး', 4500], ['ဆပ်ပြာ', 800]], c.seed), 260); // DRAFT(my): prices
   // sacks and baskets at the front, open to the street
   const v = new VoxelBuilder();
   A.sack(v, -0.3, 0, C.sack, 1, 0.1, '#F2E8D2');

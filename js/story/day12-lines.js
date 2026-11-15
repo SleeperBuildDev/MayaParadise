@@ -113,7 +113,7 @@ export const L = {
   sortIntro: [T('မနက်ကတည်းက ခေါင်းထဲမှာ ရှုပ်နေတာ။ ခွဲကြည့်မယ်။ …ခြင်းတောင်းကို ကိုင်ထားပေး။', "It's been tangled in my head all morning. I'll sort it. …Hold the basket steady.")],
   sortDone: [T('ထိန်းလို့ မရတာ လေးခု။ ထိန်းလို့ရတာလည်း လေးခု။ …ငါ့လက်ထဲက လေးခုကိုပဲ ကိုင်မယ်။', "Four I can't steer. Four I can. …I'll hold the four in my hands.")],
   sortWait: [T('(သူ့ ပန်းခင်းတွေကို အရင် ကိုယ်တိုင် ကြည့်ဦးမယ်။ လမ်းကြားထဲရော၊ ဒီထဲရော။)', "(I'll look at it all myself first: the lane, and in here.)")],
-  mug: [T('(သူ့ စားပွဲအောက်က ခုံပုလေးမှာ ထိုင်ပြီး စာရေးဆရာ ခွက်လေးကို ချထားလိုက်တယ်။)', '(I take the low stool across his table and set down the Writer mug.)')],
+  mug: [T('(သူ့ စားပွဲတစ်ဖက်က ခုံပုလေးမှာ ထိုင်ပြီး စာရေးဆရာ ခွက်လေးကို ချထားလိုက်တယ်။)', '(I take the low stool across his table and set down the Writer mug.)')],
 
   // ------------------------------------------------------------------ 5.5 ownwords: his diary line
   ow19: {
@@ -264,7 +264,7 @@ export const L = {
   gaAfter: [T('ကောင်မလေးက ပျိုးခင်းကို လာကူတယ်။ ဘယ်သူမှ မခေါ်ဘဲနဲ့။', 'That girl came to help with the seedbed. Nobody called her.')],
   gaName: T('ဘူးစင်အဒေါ်', 'the gourd aunty'),
   kp: [
-    [T('ဒီနေ့ ပေကျင်း အကုန် စိုတယ်။ ခြောက်မှ ချိန်မယ်။ ဝယ်သူ စောင့်လို့ရတယ်။', "Every bale's damp today. I'll weigh when they're dry. The buyer can wait.")],
+    [T('ဒီနေ့ ပေထုပ် အကုန် စိုတယ်။ ခြောက်မှ ချိန်မယ်။ ဝယ်သူ စောင့်လို့ရတယ်။', "Every bale's damp today. I'll weigh when they're dry. The buyer can wait.")],
     [T('ဆန်တန်းက ချိန်ခွင်ရဲ့ ချိန်သီးတွေ ပါးတယ်တဲ့။ ကြားတာပဲ။ ကိုယ်တိုင် မစစ်ရသေးဘူး။', "They say the weights at the rice scale are light. Only heard it. Haven't checked.")],
     [T('မိုးကြောင့် အိုးဖိုကြီး ငြိမ်းသွားပြီတဲ့။', 'They say the rain put the big kiln out.')],
   ],
@@ -346,7 +346,7 @@ export const L = {
   nightWrong: [
     [T('(မဟုတ်ဘူး… ဒါ ချော့ပြောတာ။ ပျောက်တာ တကယ်ပျောက်တယ်။ ကျွန်မ ညွှန်ပြတာလည်း မဟုတ်ဘူး။)', '(No… that flatters. What was lost is lost, and I gave no directions.)')],
     [],
-    [T('(မဟုတ်ဘူး… ဒါ အားလျှော့ပြောတာ။ သံဗူးထဲက မျိုးစေ့ ကျန်တယ်။ မိုးက လူတိုင်းဆီ ရောက်တာ။)', '(No… too gloomy. Seed was left in the tin, and the rain came to everyone.)')],
+    [T('(မဟုတ်ဘူး… ဒါ အားလျှော့ပြောတာ။ သံဘူးထဲက မျိုးစေ့ ကျန်တယ်။ မိုးက လူတိုင်းဆီ ရောက်တာ။)', '(No… too gloomy. Seed was left in the tin, and the rain came to everyone.)')],
   ],
   sleepQ: T('ဒီည မှတ်စုစာမျက်နှာလေး ဘယ်သူ့အိမ်မှာ အိပ်မလဲ။', "Whose house does tonight's notebook page sleep at?"),
   stampText: T('စာမျက်နှာ ၁၉ — ဒုက္ခ\nမဖိတ်ဘဲ လူတိုင်းဆီ ရောက်လာတယ်။ နောက်တစ်နာရီကတော့ ကိုယ့်ဟာ။\nစာမျက်နှာ ၂၀ — သည်းခံခြင်း\nအသိဉာဏ်နဲ့ သည်းခံပြီး မှန်တဲ့တံခါးကနေ ကိုယ်တိုင် သွားတယ်။', "Page 19 — Suffering\nIt came uninvited, and to everyone. The next hour is one's own.\nPage 20 — Patience\nPatient with good sense, she went through the proper door herself."),

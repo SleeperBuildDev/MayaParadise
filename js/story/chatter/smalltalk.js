@@ -558,7 +558,7 @@ export const SMALLTALK = {
       ['ညကျ မီးထွန်းထားရင် ပိုလှတယ်။', "Prettier at night, when it's lit."],
     ]),
     c([
-      ['ယက်ကန်းသံ တချပ်ချပ်။', 'Clack, clack, go the looms.'],
+      ['ရက်ကန်းသံ တချပ်ချပ်။', 'Clack, clack, go the looms.'],
       ['နှလုံးခုန်သံလိုပဲ။', 'Like a heartbeat.'],
       ['ငါ့နှလုံးက ဒီလောက် မမြန်ပါဘူး။', "My heart isn't that fast."],
     ], { jobs: ['weaver'] }),

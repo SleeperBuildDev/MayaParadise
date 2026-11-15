@@ -11,7 +11,7 @@ export const L = {
   ww1: [{ my: 'မာရာရေ… မှတ်စုစာအုပ်လေး ပြန်ရောက်လာပြီ။ ဒီတစ်ခါလည်း စာတစ်ကြောင်း ပါလာတယ်။', en: 'Maya… your notebook is back. With a line again.' }],
   ink21: { my: 'စာမျက်နှာ ၂၁ — မကြိုက်ဆုံးအရာ\nအိမွန် ကိုယ်တိုင် ရေးလိုက်ပြီ။ ခဲတံ အမှန်ခြစ်က မင်ဖြစ်သွားပြီ။', en: 'Page 21 — What I Dislike Most\nEi Mon wrote it herself. The pencil tick turns to ink.' }, // NEW draft (spec: "inks ✓ ၂၁")
   lift: [
-    { my: '(မနေ့က စာမျက်နှာပေါ်က ထိကရုန်းလေးနဲ့ မျက်မှန်ကြည်လေး ထွက်လာကြတယ်။)', en: "(A little touch-me-not and a pair of clear glasses climb out of yesterday's page.)" },
+    { my: '(မနေ့က စာမျက်နှာပေါ်က ထိကရုံးလေးနဲ့ မျက်မှန်ကြည်လေး ထွက်လာကြတယ်။)', en: "(A little touch-me-not and a pair of clear glasses climb out of yesterday's page.)" },
   ],
   liftFold: { my: '(သိုးမည်းလေး ပွတ်မိတော့ ရွက်လေးတွေ ပိတ်သွားတယ်။ ခဏနေတော့ ကိုယ့်ဘာသာ ပြန်ပွင့်လာတယ်။)', en: '(The Sheep brushes it and its leaves fold shut. A breath later they open again by themselves.)' }, // NEW draft (spec: shown, not said; said once here as a caption)
   ww2: [

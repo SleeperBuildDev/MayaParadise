@@ -217,19 +217,12 @@ export function installChatter(game, story, ow) {
     return !!e.folk || AMBIENT_IDS.has(e.id) || !!e.cast?.ambient || !castById(e.id);
   }
 
-  // ---- small talk: what was said (least recently used first; per viewer, a convenience only)
-  const STORE = 'rc-smalltalk-v1';
-  let used = {};
-  try { used = JSON.parse(localStorage.getItem(STORE) || '{}') || {}; } catch { used = {}; }
-  let useSeq = Object.values(used).reduce((a, b) => Math.max(a, b), 0);
-  const markUsed = (k) => { used[k] = ++useSeq; try { localStorage.setItem(STORE, JSON.stringify(used)); } catch { /* private mode */ } };
-  function pickLRU(items) {
-    if (!items.length) return null;
-    const fresh = items.filter((it) => !used[it.key]);
-    if (fresh.length) return pick(fresh);
-    const s = items.slice().sort((a, b) => used[a.key] - used[b.key]);
-    return pick(s.slice(0, Math.max(1, Math.ceil(s.length / 4))));
-  }
+  // ---- small talk and house lines: what was said lives in the chatter's own memory (chatter.recall: per save, in
+  // play seconds), so an exchange or a line heard once stays away for recall.COOL (20 min of play) wherever she is;
+  // nothing fresh left = they keep quiet a while (never a repeat)
+  const R = chatter.recall;
+  const markUsed = (k) => R.mark(k);
+  const pickLRU = (items) => R.pick(items);
   /** a small-talk exchange that suits these two, here and now: { key, ex } or null */
   function chooseExchange(group, a, b) {
     const ta = tagsOf(a), tb = tagsOf(b);
@@ -241,9 +234,9 @@ export function installChatter(game, story, ow) {
       if (kids && !(ex.jobs || []).includes('kid') && Math.random() < 0.7) return false;
       return true;
     };
-    const items = (g) => (SMALLTALK[g] || []).map((ex, i) => ({ key: g + ':' + i, ex })).filter((it) => fits(it.ex));
+    const items = (g) => R.fresh((SMALLTALK[g] || []).map((ex) => ({ key: R.exKey(ex.id || ex.lines[0]), ex }))).filter((it) => fits(it.ex));
     const local = group ? items(group) : [];
-    const gen = items('general');
+    const gen = items('general'); // (the town's own all heard lately: the general ones, and the other way round)
     const pool = local.length && (Math.random() < 0.6 || !gen.length) ? local : gen.length ? gen : local;
     return pickLRU(pool);
   }
@@ -286,14 +279,16 @@ export function installChatter(game, story, ow) {
     }
     return out.sort((x, y) => x.score - y.score);
   }
+  /** true = an exchange started; 'none' = two could talk but she has heard all theirs lately; false = nobody */
   function trySmall() {
     const pairs = smallPairs();
     if (!pairs.length) return false;
     const { a, b } = pairs[0];
     const mp = mayaXZ();
     const it = chooseExchange(districtAt(mp.x, mp.z), a, b);
+    if (!it) return 'none';
     const [x, y] = Math.random() < 0.5 ? [a, b] : [b, a]; // (either may start)
-    return !!it && playExchange(x, y, it, 'small');
+    return playExchange(x, y, it, 'small');
   }
 
   // ---- an everyday house: its residents (rooms/generic.js r.residents) talk now and then
@@ -302,11 +297,12 @@ export function installChatter(game, story, ow) {
     const R = story.room;
     return (R?.residents || []).filter((r) => r?.p?.root && r.lie == null && r.job !== 'nap' && r.p.root.visible !== false);
   }
+  /** true = something said; 'none' = all theirs heard lately (quiet a while); false = nobody awake */
   function tryRoom() {
-    const R = story.room;
+    const RM = story.room;
     const res = residentsAwake();
     if (!res.length) return false;
-    const group = R.district || R.talk?.group || null;
+    const group = RM.district || RM.talk?.group || null;
     if (res.length >= 2 && Math.random() < 0.55) {
       const [a, b] = res.slice().sort(() => Math.random() - 0.5);
       const it = chooseExchange(group, a, b);
@@ -316,14 +312,12 @@ export function installChatter(game, story, ow) {
     const mp = mayaXZ();
     const byD = res.map((r) => ({ r, d: r.p.root.getWorldPosition(w).distanceTo(mp) })).sort((x, y) => x.d - y.d);
     const sp = (byD.length > 1 && Math.random() < 0.3 ? byD[1] : byD[0]).r;
-    const kind = R.kind || 'home';
+    const kind = RM.kind || 'home';
     const lines = [...(HOUSE_LINES[kind] || HOUSE_LINES.home), ...HOUSE_LINES.any].filter(fitsNow)
-      .map((l) => ({ key: 'house:' + (l.en || l.my), l }));
+      .map((l) => ({ key: R.lineKey(l), l }));
     const it = pickLRU(lines);
-    if (!it) return false;
-    if (!chatter.play([{ id: 'res:' + sp.id, p: sp.p }], [{ who: 0, my: it.l.my, en: it.l.en }], null, 'house')) return false;
-    markUsed(it.key);
-    return true;
+    if (!it) return 'none';
+    return chatter.play([{ id: 'res:' + sp.id, p: sp.p }], [{ who: 0, my: it.l.my, en: it.l.en }], null, 'house'); // (play marks the line)
   }
 
   // ---- ambient folk
@@ -748,12 +742,16 @@ export function installChatter(game, story, ow) {
     if (story.inRoom) {
       if (roomId !== story.inRoom) { roomId = story.inRoom; nextRoom = t + rand(ROOMT.first[0], ROOMT.first[1]); }
       if (story.room?.residents?.length && t >= nextRoom) {
-        nextRoom = t + (tryRoom() ? rand(ROOMT.gap[0], ROOMT.gap[1]) : 3);
+        const r = tryRoom();
+        nextRoom = t + (r === true ? rand(ROOMT.gap[0], ROOMT.gap[1]) : r === 'none' ? rand(ROOMT.gap[1], ROOMT.gap[1] * 2) : 3);
       }
       return;
     }
     roomId = null;
-    if (t >= nextSmall) { if (!trySmall()) nextSmall = t + SMALL.retry; else nextSmall = Infinity; } // (set again when it ends)
+    if (t >= nextSmall) { // (Infinity while one plays: its end sets the next; all heard lately: a long quiet, never a repeat)
+      const r = trySmall();
+      nextSmall = r === true ? Infinity : r === 'none' ? t + rand(SMALL.gap[0], SMALL.gap[1]) : t + SMALL.retry;
+    }
   });
 
   story.chatterExtras = {

@@ -68,13 +68,13 @@ export const L = {
     { my: 'အနားကွပ် ထွင်းပေးပါတဲ့။ ညနေ ကောင်တာ ပိတ်ချိန်မတိုင်ခင်။ …မထွင်းပေးရင် သူ မသွားရဘူးပေါ့။', en: "Carve the border, she says. Before the counter shuts tonight. …If I don't, she can't go, can she." },
   ],
   klChoices: [
-    { my: '"ကံကောင်းလိုက်တာနော်၊ ခွာညိုက။"[cite: 1]', en: '"Lucky her, isn\'t she."' },
+    { my: '"ကံကောင်းလိုက်တာနော်၊ ခွာညိုက။"', en: '"Lucky her, isn\'t she."' },
     { my: '"သူ့ကို မေ့ပစ်လိုက်ပါ။ မရှိသလို နေလိုက်။"', en: '"Just forget her. Act as if she isn\'t there."' },
     { my: '"ခွာညိုဆီ ခဏ သွားကြည့်ပြီး ပြန်လာခဲ့မယ်။"', en: '"I\'ll go and see Khwar Nyo, and come back."' },
   ],
   klLucky: [{ my: 'ဟုတ်တယ်မလား။ မာရာတောင် ကံလို့ ပြောတယ်။', en: "See? Even you say it's luck." }],
   klLuckyMaya: [{ my: '(ချီးမွမ်းသလိုနဲ့ သူ့အပူကို ထပ်လောင်းလိုက်မိပြီ။)', en: '(It sounded like praise, and it fed his heat.)' }],
-  klForget: [{ my: 'မေ့ရမယ်? တစ်နေ့လုံး ဒီတုံးကိုပဲ ကြည့်နေရတာ။[cite: 1]', en: "Forget her? I've stared at this block all day." }],
+  klForget: [{ my: 'မေ့ရမယ်? တစ်နေ့လုံး ဒီတုံးကိုပဲ ကြည့်နေရတာ။', en: "Forget her? I've stared at this block all day." }],
   klForgetMaya: [{ my: '(မရှိသလို နေခိုင်းတာက အေးဆေးသလို ထင်ရတယ်။ အေးတာ မဟုတ်ဘူး။)', en: "(Pretending she doesn't exist looks calm. It isn't.)" }],
   klGo: [{ my: '…စာတိုက်ကောင်တာ နောက်က အခန်းထဲမှာ အထုပ်ထုပ်နေတယ်။ ကောင်တာအဆုံးက တံခါးပဲ။ ကျွန်တော် မသွားဘူး။', en: "…She's packing in the room behind the letter counter. The door at the counter's end. I'm not going." }],
   klNotYet: [{ my: 'ခဏ ထားပါဦး။ ကောင်တာ မပိတ်သေးပါဘူး။', en: "Leave it a while. The counter's not shut yet." }],
@@ -88,7 +88,7 @@ export const L = {
     patches: [{ my: 'အဟောင်းကြီး', en: 'a wreck' }, { my: 'ဖာထေးရာ ခုနစ်ခု။ တစ်နှစ် တစ်ခု။ အချုပ်တိုင်း အမေ့လက်ရာ။', en: 'Seven patches, one a year, every stitch hers.' }],
     grip: [{ my: 'လှော်တက် ဆွေးနေပြီ', en: "the pole's rotten" }, { my: 'လှော်တက် လက်ကိုင်နဲ့ အရောင်တူ အဝတ်စ။ ဒီအပတ်ထဲ ညှပ်ထားတာ။ အပ်လေး ထိုးထားတုန်း။', en: "A strip the colour of the pole's new grip, cut this week, her needle still in it." }],
     bail: [{ my: 'ကူးတို့က အေးဆေး', en: 'the ferry has it easy' }, { my: 'ကူးတို့ပေါ်မှာလည်း ရေခပ်ထုတ်နေရတယ်။', en: "They're bailing on the ferry too." }],
-    shallow: [{ my: 'ဘယ်သူမှ မသွားဘူး', en: 'nobody goes there' }, { my: 'ရေတိမ်တယ်။ ကူးတို့ မဝင်နိုင်ဘူး။ ဆိပ်မှာ လူတွေ စောင့်နေကြတယ်။[cite: 1]', en: 'Too shallow for the ferry. People are waiting on the jetties.' }],
+    shallow: [{ my: 'ဘယ်သူမှ မသွားဘူး', en: 'nobody goes there' }, { my: 'ရေတိမ်တယ်။ ကူးတို့ မဝင်နိုင်ဘူး။ ဆိပ်မှာ လူတွေ စောင့်နေကြတယ်။', en: 'Too shallow for the ferry. People are waiting on the jetties.' }],
     shifts: [{ my: 'အမေက အလုပ်အေး', en: 'Mum has it easy' }, { my: 'ဒေါ်စန္ဒာ နာမည် နှစ်ခါ။ အလှည့် နှစ်ခု ဆင်းတယ်။', en: "Daw Sanda's name twice: two shifts." }],
   },
   lookHeard: { my: 'ကြားခဲ့တာ', en: 'heard' },
@@ -106,13 +106,13 @@ export const L = {
   blockRack: [{ my: '(သူ့တုံးဟောင်းတွေ။ အားလုံး မျဉ်းဖြောင့်။)', en: '(His old blocks. All straight lines.)' }], // (added)
 
   // ---- 5.3 the envelope seller (tea shop)
-  es1: [{ my: 'ကြားပြီးပြီလား။ ခွာညိုက ဆရာ့ပုံစံကို ကူးပြီး ပြိုင်ပွဲ နိုင်တာတဲ့။ အောင်မြင်တော့မှ ပေါ်လာတာ။[cite: 1]', en: "Heard? Khwar Nyo copied her teacher's design to win. It only came out once she'd won." }],
+  es1: [{ my: 'ကြားပြီးပြီလား။ ခွာညိုက ဆရာ့ပုံစံကို ကူးပြီး ပြိုင်ပွဲ နိုင်တာတဲ့။ အောင်မြင်တော့မှ ပေါ်လာတာ။', en: "Heard? Khwar Nyo copied her teacher's design to win. It only came out once she'd won." }],
   esChoices: [
     { my: '"ဟုတ်လား… ထင်သားပဲ။"', en: '"Really… I thought so."' },
     { my: '"သူ့ စမ်းထွင်းတုံး လေးဆယ်ကို ကိုယ်တိုင် မြင်ခဲ့တယ်။ ဒီစကား သူ့ကို နာစေတယ်။ ဆက်မပြောပါနဲ့။"', en: '"I saw her forty trial blocks myself. That talk hurts her. Please don\'t pass it on."' },
   ],
   esLaugh: [{ my: '(ကိုယ်တိုင် မမြင်ဘဲ လိုက်ခေါင်းညိတ်မိပြီ။ ဒီလိုနဲ့ပဲ ပုံမှန်လို ဖြစ်သွားတာ။)', en: "(I nodded along to something I haven't seen. That's how it starts to sound normal.)" }],
-  esStop: [{ my: '…လေးဆယ်တုံးလား? ဒါဆို… ကျွန်မ မပြောတော့ပါဘူး။[cite: 1]', en: "…Forty blocks? Then… I'll stop saying it." }],
+  esStop: [{ my: '…လေးဆယ်တုံးလား? ဒါဆို… ကျွန်မ မပြောတော့ပါဘူး။', en: "…Forty blocks? Then… I'll stop saying it." }],
   esAfter: [{ my: 'စာအိတ် ဝယ်ဦးမလား။ …သတင်းတော့ မရောင်းတော့ဘူး။', en: "Envelopes? …I've stopped selling gossip." }],
 
   // ---- 5.5 carve / 5.6 own words / 5.7 close
@@ -164,7 +164,7 @@ export const L = {
   // ---- 8.1 Market ambient
   knAfter: [{ my: 'တံတား ပွင့်ရင် သွားမယ်။ ဒီပြတင်းကနေ ဆရာ့ မီးခိုးတိုင် မြင်ရတယ်။ မီးခိုး ပြန်ထွက်နေပြီ။', en: "I'll go when the bridge opens. From this window I can see Teacher's chimney. There's smoke again." }],
   knWait: [{ my: 'ကောင်တာ မပိတ်ခင် ထုပ်ပိုးပြီးအောင် လုပ်နေတယ်။', en: "I'm getting packed before the counter shuts." }], // (added)
-  luaye: [{ my: 'ပြိုင်ပွဲ ဝင်တုံး အကုန် ဒီမှာ ပြန်ပို့ရတယ်။ ရှုံးတဲ့တုံးကလည်း တုံးပဲ။ လက်ရာပဲ။', en: "I had to send every losing block back from here. A block that loses is still a block. Still someone's work." }],
+  luaye: [{ my: 'ပြိုင်ပွဲဝင်တုံး အကုန် ဒီမှာ ပြန်ပို့ရတယ်။ ရှုံးတဲ့တုံးကလည်း တုံးပဲ။ လက်ရာပဲ။', en: "I had to send every losing block back from here. A block that loses is still a block. Still someone's work." }],
   carvers: [
     { my: 'ဆရာလွင့် လက်က တန်းထဲမှာ အဖြောင့်ဆုံး။ ခုတော့ ချထားတယ်။', en: 'Teacher Lwin has the straightest hand in the row. He\'s put it down.' },
     { my: 'လက်ဖက်ရည်ဆိုင်ထဲမှာ ခွာညို ကူးတာတဲ့ ပြောနေကြတယ်။ ငါကတော့ သူ ညတိုင်း ထွင်းတာ ကိုယ်တိုင် မြင်ခဲ့တယ်။[cite: 1]', en: "In the tea shop they're saying Khwar Nyo copied. I watched her carve every night myself." },

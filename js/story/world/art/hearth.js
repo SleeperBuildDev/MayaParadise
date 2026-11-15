@@ -513,7 +513,7 @@ function loomShed(g, f, it, ctx) {
   }
   g.box(-W / 2 + 0.8, 0.22, FZ + 0.5, 0.6, 0.44, 0.5, C.bamboo);
   for (let k = 0; k < 4; k++) g.box(-W / 2 + 0.62 + k * 0.12, 0.48, FZ + 0.5, 0.1, 0.14, 0.1, ['#C8323C', '#2F5DB3', '#E2B33C', '#F7F2E6'][k]);
-  board(ctx, -2.6, H - 0.35, FZ + 0.06, 2.2, 0.48, 'ယက်ကန်းရုံ', 'Loom Shed', { bg: '#EFE2C6', border: C.woodDD, size: 46 });
+  board(ctx, -2.6, H - 0.35, FZ + 0.06, 2.2, 0.48, 'ရက်ကန်းရုံ', 'Loom Shed', { bg: '#EFE2C6', border: C.woodDD, size: 46 });
 }
 function teaHouse(g, f, it, ctx) {
   const W = it.w, D = it.d, H = 3.6, FZ = D / 2, SK = 0.25, AL = 2.6, dx = it.door || 0;
