@@ -95,13 +95,13 @@ export const D2_OHN_CARDS = [
   { id: 'wrongway', lookalike: true, name: { my: 'ဒီနည်း မှားတယ်', en: 'Your way is wrong' },
     line: { my: 'တစ်နေ့ ဆယ့်နှစ်လုံးဆိုတာ မှားတဲ့နည်းပါ။', en: 'Twelve a day is simply the wrong way.' },
     shows: ['cling'], really: { my: 'သူ့ဆရာကို အပြစ်ရှာတာ', en: 'finding fault with her master' },
-    backfire: { they: { my: 'မှားတယ်? ကျွန်မ စင်ကို ကြည့်စမ်း! ဆရာ့ကို ဒီလို မပြောနဲ့!', en: "Wrong? Look at my shelf! Don't talk about my master like that!" },
-                maya: { my: '(သူ့အတွက် မှန်ခဲ့တာကို မှားတယ် ပြောလိုက်မိပြီ။)', en: '(I called wrong what was right for her.)' } } },
-  { id: 'doit', lookalike: true, name: { my: 'ကျွန်မ သင်ပေးမယ်', en: "I'll teach her myself" },
+    backfire: { they: { my: 'မှားတယ် ဟုတ်လား။ ငါ့စင်ကို ကြည့်စမ်း! ဆရာ့ကို အဲဒီလို မပြောနဲ့!', en: "Wrong? Look at my shelf! Don't talk about my master like that!" },
+                maya: { my: '(သူ့အတွက် မှန်ခဲ့တဲ့နည်းကို မှားတယ်လို့ ပြောလိုက်မိပြီ။)', en: '(I called wrong what was right for her.)' } } },
+  { id: 'doit', lookalike: true, name: { my: 'ကျွန်မ ကိုယ်တိုင် သင်ပေးမယ်', en: "I'll teach her myself" },
     line: { my: 'မိချိုကို ကျွန်မ ကိုယ်တိုင် သင်ပေးလိုက်မယ်လေ။', en: "I'll just teach Mi Cho myself." },
-    shows: ['unknown', 'given'], really: { my: 'ကူညီသလို အထင်သေးတာ', en: 'looking down that passes for help' },
-    backfire: { they: { my: 'အိုး တစ်လုံးမှ မလုပ်ဖူးဘဲ ကျွန်မ တပည့်ကို သင်မယ်?', en: "You've never made a pot and you'll teach MY apprentice?" },
-                maya: { my: '(ကူညီမယ်ဆိုပြီး သူ့နေရာကို ယူလိုက်မိပြီ။)', en: '(Meaning to help, I tried to take her place.)' } } },
+    shows: ['unknown', 'given'], really: { my: 'ကူညီသလိုနဲ့ အထင်သေးတာ', en: 'looking down that passes for help' },
+    backfire: { they: { my: 'အိုး တစ်လုံးမှတောင် မလုပ်ဖူးဘဲ ငါ့တပည့်ကို သင်မယ် ဟုတ်လား။', en: "You've never made a pot and you'll teach MY apprentice?" },
+                maya: { my: '(ကူညီမယ်ဆိုပြီး သူ့နေရာကို ဝင်ယူလိုက်မိပြီ။)', en: '(Meaning to help, I tried to take her place.)' } } },
 ];
 
 export const TALK_D2_DAWOHN = {
@@ -113,27 +113,27 @@ export const TALK_D2_DAWOHN = {
   hand: D2_OHN_CARDS,
   stones: [
     { lines: [
-      { my: 'ကျွန်မဆရာက ပထမအပတ်ကတည်းက တစ်နေ့ ဆယ့်နှစ်လုံး ခိုင်းတာ။ ကျွန်မ စင်ကို ကြည့်။', en: 'My master gave me twelve a day from the first week. Look at my shelf.', need: 'cling', seems: 'looksdown', face: 'think',
-        tell: { my: 'မိချိုကို အထင်သေးတာ မဟုတ်ဘူး။ ပန်းကုံးတင်ထားတဲ့ ဘီးကို လက်နဲ့ ထိနေတယ်။ သူ့ကို လူဖြစ်စေခဲ့တဲ့ နည်းကို ဆုပ်ကိုင်ထားတာ။', en: "She isn't looking down on Mi Cho. Her hand rests on the jasmine wheel. She's holding on to the way that made her." } },
-      { my: 'အိုးကောင်းရဖို့ နာနာပုတ်ရတယ်။ ဒါ ဆရာ့စကား။', en: '"A good pot takes a hard beating." My master\'s words.', need: 'cling', face: 'think', heard: true },
+      { my: 'ငါ့ဆရာက ပထမအပတ်ကတည်းက တစ်နေ့ ဆယ့်နှစ်လုံး ခိုင်းတာ။ ငါ့စင်ကို ကြည့်။', en: 'My master gave me twelve a day from the first week. Look at my shelf.', need: 'cling', seems: 'looksdown', face: 'think',
+        tell: { my: 'မိချိုကို အထင်သေးတာ မဟုတ်ဘူး။ စပယ်ပန်းကုံး တင်ထားတဲ့ အိုးထိန်းစက်ကို လက်နဲ့ ထိနေတယ်။ သူ့ကို လူဖြစ်စေခဲ့တဲ့ နည်းကို ဆုပ်ကိုင်ထားတာ။', en: "She isn't looking down on Mi Cho. Her hand rests on the jasmine wheel. She's holding on to the way that made her." } },
+      { my: 'အိုးကောင်းရဖို့ နာနာပုတ်ရတယ်။ ဒါ ဆရာ့စကားပဲ။', en: '"A good pot takes a hard beating." My master\'s words.', need: 'cling', face: 'think', heard: true },
     ] },
     { lines: [
-      { my: 'တချို့လက်က ရွှံ့အတွက် မွေးလာတာ။ ကျွန်မလက်လိုပေါ့။ သူ့လက်က မဟုတ်ဘူး။ မြေဖြူနဲ့ ရေးထားလိုက်တာ မမျှော်လင့်တော့အောင်။', en: "Some hands are born for clay, like mine. Hers aren't. I chalked it so she'd stop hoping.", need: 'given', seems: 'looksdown', face: 'hot', steam: 1,
-        tell: { my: 'မိချိုရဲ့ ပထမဆုံးအိုးလေးကို ကိုယ့်စင်ပေါ်မှာ သိမ်းထားသေးတယ်။ မျှော်လင့်ချက် မကုန်သေးဘူး။ ပင်ပန်းပြီး လက်လျှော့လိုက်တာ။', en: "Mi Cho's very first pot still sits on her own shelf. She hasn't stopped hoping; she's tired, and gave up." } },
+      { my: 'တချို့လက်တွေက ရွှံ့အတွက် မွေးလာတာ။ ငါ့လက်လိုပေါ့။ သူ့လက်က မဟုတ်ဘူး။ ဆက်မမျှော်လင့်တော့အောင် မြေဖြူနဲ့ ရေးထားလိုက်တာ။', en: "Some hands are born for clay, like mine. Hers aren't. I chalked it so she'd stop hoping.", need: 'given', seems: 'looksdown', face: 'hot', steam: 1,
+        tell: { my: 'မိချိုရဲ့ ပထမဆုံးအိုးလေးကို သူ့စင်ပေါ်မှာ သိမ်းထားတုန်းပဲ။ မျှော်လင့်ချက် မကုန်သေးဘူး။ ပင်ပန်းပြီး လက်လျှော့လိုက်တာ။', en: "Mi Cho's very first pot still sits on her own shelf. She hasn't stopped hoping; she's tired, and gave up." } },
     ] },
     { lines: [
-      { my: 'တခြားနည်းနဲ့ သင်ရင်… ကျွန်မဆရာ မှားတယ်လို့ ပြောသလို ဖြစ်မှာပေါ့။', en: "If I teach her another way… it's like saying my master was wrong.", need: 'afraid', seems: 'hot', face: 'worried', heard: true,
+      { my: 'တခြားနည်းနဲ့ သင်ရင်… ငါ့ဆရာ မှားတယ်လို့ ပြောသလို ဖြစ်မှာပေါ့။', en: "If I teach her another way… it's like saying my master was wrong.", need: 'afraid', seems: 'hot', face: 'worried', heard: true,
         tell: { my: 'ဒေါသ မဟုတ်ဘူး။ ကျေးဇူးမသိတတ်သလို ဖြစ်မှာ ကြောက်နေတာ။', en: "Not anger. She's afraid of seeming ungrateful." } },
-      { my: 'သူ မရှိတော့ပေမဲ့ ကျွန်မ လက်ထဲမှာ သူ့နည်း ရှိနေတယ်။', en: "He's long gone from this yard, but his way is still in my hands.", need: 'afraid', seems: 'cling', face: 'sad' },
+      { my: 'ဆရာ မရှိတော့ပေမဲ့ ငါ့လက်ထဲမှာ သူ့နည်း ရှိနေတုန်းပဲ။', en: "He's long gone from this yard, but his way is still in my hands.", need: 'afraid', seems: 'cling', face: 'sad' },
     ] },
     { lines: [
-      { my: 'ပြီးတော့… တခြားနည်း ကျွန်မ မသိဘူး။ မိချိုက ကျွန်မရဲ့ ပထမဆုံး တပည့်။', en: "And… I don't know any other way. Mi Cho is the first pupil I've ever had.", need: 'unknown', seems: 'given', face: 'think',
+      { my: 'ပြီးတော့… တခြားနည်း ငါ မသိဘူး။ မိချိုက ငါ့ရဲ့ ပထမဆုံး တပည့်ပဲ။', en: "And… I don't know any other way. Mi Cho is the first pupil I've ever had.", need: 'unknown', seems: 'given', face: 'think',
         tell: { my: 'လက်လျှော့တာ မဟုတ်ဘူး။ ဆရာလုပ်ရတာ သူ့အတွက်လည်း အသစ်ပဲ။', en: 'Not giving up. Teaching is new for her too.' } },
     ] },
   ],
   react: {
     miss: { my: '…အဲဒါက ရွှံ့နဲ့ မဆိုင်ဘူး သမီး။', en: '…That has nothing to do with clay, dear.' },
-    hot: { my: '(ဒေါ်အုန်း ရွှံ့ကို ဆောင့်နယ်နေတယ်။ ဘာမှ မကြားဘူး။)', en: '(Daw Ohn is pounding the clay. Nothing gets through.)' },
+    hot: { my: '(ဒေါ်အုန်း ရွှံ့ကို ဆောင့်နယ်နေတယ်။ ဘာပြောပြော မကြားဘူး။)', en: '(Daw Ohn is pounding the clay. Nothing gets through.)' },
   },
   decision: [
     { my: 'မင်း မှန်တယ်လို့ မပြောသေးဘူးနော်။ တစ်ရက်ပဲ။ မိချို ကိုယ့်အရေအတွက် ကိုယ်ရွေး။', en: "I'm not saying you're right. One day. Mi Cho chooses her own load.", face: 'think' },

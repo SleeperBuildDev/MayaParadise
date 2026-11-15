@@ -222,8 +222,8 @@ export async function create(story) {
       game.ui.cinema(true);
       try {
         await say('maya', [L.deskMgateQ], { face: 'think' });
-        for (;;) {
-          const i = await D.choose(lines);
+        for (const again = D.retry(); ;) {
+          const i = await again(lines);
           if (i === 0) break;
           await say('maya', L.deskWrong, { face: 'think' });
         }

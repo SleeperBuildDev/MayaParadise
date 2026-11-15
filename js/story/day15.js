@@ -739,7 +739,7 @@ export async function create(story) {
       if (id === 'rope') return run(() => say('maya', [{ my: '(ခေါင်းလောင်းကြိုး။ မှောင်ရီပျိုးရင် မဝင့်ဝါ ဆွဲမယ်။)', en: '(The bell rope. Ma Wint War will pull it at dusk.)' }], { face: 'smile' })); // new
       if (id === 'wintwar') { const e = story.people.get('wintwar'); if (e) { story.talkTo(e); return true; } }
       if (id === 'table') return run(() => say('maya', [{ my: '(ပွဲနေ့ တံဆိပ်ရိုက်ထားတဲ့ စာအုပ်ငယ်တွေ။)', en: '(Booklets stamped with the launch-day postmark.)' }], { face: 'smile' })); // new
-      if (id === 'rack' || id === 'scale') return run(() => say('maya', [{ my: '(ဖိတ်စာ ကျန်တာလေးတွေ ခွဲထားတယ်။)', en: '(The leftover invitations, sorted.)' }], { face: 'smile' })); // new
+      if (id === 'rack' || id === 'scale') return run(() => say('maya', [{ my: '(ကျန်နေတဲ့ ဖိတ်စာလေးတွေ ခွဲထားတယ်။)', en: '(The leftover invitations, sorted.)' }], { face: 'smile' })); // new
     }
     return false;
   }

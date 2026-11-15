@@ -60,9 +60,9 @@ export const FOLK_PEOPLE = [
     hello: { my: 'အိတ်တွေ ဘယ်လောက် လေးမလဲ ကိုယ် မရွေးရဘူး။ ဘယ်လို မမလဲ ဆိုတာပဲ ကိုယ် ရွေးရတာ။', en: "I don't get to choose how heavy the sacks are. Only how I lift them." },
     job: job(17.1, 338.4, 0, 'work', 1.2) },
   // in front of Daw Yi's free-food shop (market.js: riceShop 34.2, 328.15)   ch 6: give with a clean, cool heart
-  { id: 'mmar', x: 28.4, z: 332.6, heading: 0,
+  { id: 'mmar', x: 27.2, z: 332.6, heading: 0,
     hello: { my: 'ပေးပြီးရင် မေ့လိုက်တယ်။ ပြန်ရေတွက်နေရင် ပေးတုန်းက အေးတဲ့စိတ် ပူလာတတ်လို့။', en: 'Once I give, I forget it. Count it up afterwards and the cool heart you gave with starts to burn.' },
-    job: job(28.4, 332.6, 0, 'sweep', 1.4) },
+    job: job(27.2, 332.6, 0, 'sweep', 1.4) },
   // beside his wheel stand on the envelope road (market-fill.js: bikeFix 17.2, 222.8)   ch 11: steer yourself
   { id: 'mpekyi', x: 15.6, z: 223.9, heading: 0.4,
     hello: { my: 'လမ်းပေါ်က ချိုင့်တွေကို ကိုယ် မရွေးရဘူး။ မထွက်ခင် ကိုယ့်ဘီး လေထိုးထားဖို့ပဲ ကိုယ် ရွေးရတာ။', en: "I don't get to pick the potholes on the road. I pick to pump up my own tyres before I set off." },

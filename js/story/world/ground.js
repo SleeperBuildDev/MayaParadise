@@ -669,7 +669,9 @@ export function createStoryGround({ edges = [], isOpen = () => true, low = false
     /** Puts build.js's per-vertex kinds on a chunk's ground geometry (none: every vertex a kept decal). */
     tag(geometry, kinds) {
       const n = geometry.getAttribute('position').count;
-      geometry.setAttribute('gKind', new THREE.BufferAttribute(kinds && kinds.length === n ? kinds : new Uint8Array(n).fill(2), 1));
+      // (floats: a Uint8 kind is a converted vertex format on phones, and came out wrong there for a frame now and
+      // then: a patch of ground drawn as bare paper. three.js turns any whole-number attribute to floats anyway)
+      geometry.setAttribute('gKind', new THREE.BufferAttribute(kinds && kinds.length === n ? Float32Array.from(kinds) : new Float32Array(n).fill(2), 1));
     },
     /** A gate opened or closed over this box: the strips of paper follow the roads there (on the next update). */
     roadsChanged(x0, z0, x1, z1) {

@@ -36,6 +36,7 @@
 import * as THREE from '../game/three.js';
 import { tr } from '../game/ui.js';
 import { recall } from './acts/recall.js';
+import { cue } from './acts/cue.js';
 import { sort } from './acts/sort.js';
 import { nightPage, showLetter, showSlip, liftOff } from './post.js';
 import { companionById } from './companions.js';
@@ -244,8 +245,8 @@ export async function create(story) {
   async function emStep() { // 5.2, outdoors on the back step
     const em = story.people.get('eimon');
     await D.say('eimon', L.em1, { face: 'worried' });
-    for (;;) {
-      const i = await D.choose(L.emChoices);
+    for (const again = D.retry(); ;) {
+      const i = await again(L.emChoices);
       if (i === 0) { await D.say('eimon', L.emOpen, { face: 'worried' }); await D.say('maya', L.emOpenMaya, { face: 'think' }); continue; }
       if (i === 1) { await D.say('eimon', L.emSmall, { face: 'hot', emote: 'fists' }); await D.say('maya', L.emSmallMaya, { face: 'think' }); continue; }
       break;
@@ -297,12 +298,12 @@ export async function create(story) {
   async function carryWords() { // C1: their words as said, or a "kinder" edit
     for (let k = 0; k < L.carry.length; k++) {
       const c = L.carry[k];
-      for (;;) {
+      for (const again = D.retry(); ;) {
         await D.say('maya', [L.carryQ], { face: 'think', auto: true });
         const flip = (k + (F('carryFlip') ? 1 : 0)) % 2 === 1;
         const opts = flip ? [c.soft, c.said] : [c.said, c.soft];
-        const i = await D.choose(opts);
-        if (opts[i] === c.said) { await D.say('maya', [c.said], { face: 'smile' }); break; }
+        const i = await again(opts);
+        if (opts[i] === c.said) break; // the pick is what she passes on (no second, word-for-word echo)
         await D.say('eimon', L.emSoft, { face: 'hot' });
       }
     }
@@ -333,8 +334,8 @@ export async function create(story) {
       call(carried, 'liftCorner', 1);
       call(game.audio, 'play', 'flutter');
       await D.say('maya', [L.peekQ], { face: 'surprised' });
-      for (;;) {
-        const i = await D.choose(L.peekChoices);
+      for (const again = D.retry(); ;) {
+        const i = await again(L.peekChoices);
         if (i === 1) { F('peek', 1); await D.say('eimon', L.peekYes, { face: 'worried' }); continue; }
         call(carried, 'liftCorner', 0);
         await D.say('maya', L.peekNo, { face: 'smile' });
@@ -417,8 +418,8 @@ export async function create(story) {
   }
   async function deskQuestion() { // 8.1: only what she can see from here
     await D.say('maya', [L.deskBlankQ], { face: 'think' });
-    for (;;) {
-      const i = await D.choose(L.deskBlank);
+    for (const again = D.retry(); ;) {
+      const i = await again(L.deskBlank);
       if (i === 0) return true;
       await D.say('maya', [L.deskWrong], { face: 'think' });
     }
@@ -465,8 +466,8 @@ export async function create(story) {
     }
     if (!F('plain')) {
       await D.say('pyaesone', L.ps1, { face: 'hot' });
-      for (;;) {
-        const i = await D.choose(L.psChoices);
+      for (const again = D.retry(); ;) {
+        const i = await again(L.psChoices);
         if (i === 0) { await D.say('pyaesone', L.psRespect, { face: 'hot', emote: 'shrug' }); await D.say('maya', L.psRespectMaya, { face: 'think' }); continue; }
         if (i === 1) { await D.say('pyaesone', L.psDown, { face: 'surprised' }); await D.say('maya', L.psDownMaya, { face: 'think' }); continue; }
         break;
@@ -507,9 +508,9 @@ export async function create(story) {
       if (n === 1) call(R.gecko, 'run');
       if (n === 5) await walkToSpot('dawpwint', sc.spot, 1.0);
       await D.say('maya', [sc.play], { face: 'think' });
-      for (;;) {
+      for (const again = D.retry(); ;) {
         await D.say('maya', [L.testQ], { face: 'think', auto: true });
-        const i = await D.choose(L.testA);
+        const i = await again(L.testA);
         if (i === 1) break;
         await D.say('maya', [L.testYes], { face: 'think' });
         await D.say(sc.yes.who, [sc.yes], { face: 'think' });
@@ -604,6 +605,17 @@ export async function create(story) {
       const count = () => { el.querySelector('small').textContent = `${tr(L.spotFound)} · ${tr({ my: '၀၁၂၃'[found.size], en: String(found.size) })}`; };
       count();
       document.getElementById('game').appendChild(el);
+      // the quiet round only: a player still looking after a while gets a soft ring on one thing not yet found
+      // (the din round stays as hard as it is meant to be)
+      const C = din ? null : cue(el, { delay: 9000 });
+      const cueAt = new THREE.Vector3();
+      C?.set({ kind: 'tap', r: 26, label: { my: 'ဒီနားကို သေချာကြည့်ပြီး နှိပ်ပါ။', en: 'Look closely here, and tap it' }, at: () => {
+        const tg = targets.find((x) => !found.has(x.id));
+        if (!tg) return null;
+        const p = tg.at();
+        const q = game.rig.project(cueAt.set(p.x, p.y ?? 0.8, p.z), game.viewW, game.viewH);
+        return q ? [q.x, q.y] : null;
+      } });
       const t0 = performance.now();
       const blocked = (tg, t) => din && Math.sin(t * 1.7 + tg.ph) + Math.sin(t * 0.9 + tg.ph * 2) > -0.35; // people and noise in the way
       el.addEventListener('pointerdown', (ev) => {
@@ -617,6 +629,7 @@ export async function create(story) {
             found.add(tg.id);
             call(game.audio, 'play', tg.id === 'gecko' ? 'chirp' : tg.id === 'drip' ? 'pop' : 'sparkle');
             count();
+            C?.set(C.spec());
             break;
           }
         }
@@ -680,8 +693,8 @@ export async function create(story) {
         await D.say('dawpwint', L.dpNorth, { face: 'think' });
         await D.say('maya', [L.roadQ], { face: 'think' });
         let drew = false;
-        for (;;) {
-          const i = await D.choose(L.roadChoices);
+        for (const again = D.retry(); ;) {
+          const i = await again(L.roadChoices);
           if (i === 0) { drew = true; await D.say('maya', L.roadDraw, { face: 'surprised' }); continue; }
           break;
         }

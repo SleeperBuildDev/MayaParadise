@@ -794,8 +794,8 @@ export async function create(story) {
   /** "You have a true weight, I heard." Maya lends it and stands back; she walks out to the scale herself. */
   async function lendWeight() {
     await say('dawohn', L.ohWeight, { face: 'think' });
-    for (;;) {
-      const i = await D.choose(L.wChoices);
+    for (const again = D.retry(); ;) {
+      const i = await again(L.wChoices);
       if (i === 1) break;
       await say('dawohn', L.wFront, { face: 'smile' });
     }
@@ -864,8 +864,8 @@ export async function create(story) {
   async function handIn() {
     if (F('handed')) return;
     const room = story.room;
-    for (;;) {
-      const i = await D.choose(L.cChoices);
+    for (const again = D.retry(); ;) {
+      const i = await again(L.cChoices);
       if (i === 1) break;
       await say('dawohn', L.cFront, { face: 'smile' });
     }
@@ -931,7 +931,7 @@ export async function create(story) {
       if (story.talking || game.busy) return;
       const ok = await stage(async () => {
         await say('maya', [L.deskKilnQ], { face: 'think' });
-        for (;;) { const i = await D.choose(L.deskKiln); if (i === 0) break; await say('maya', L.deskWrong, { face: 'think' }); }
+        for (const again = D.retry(); ;) { const i = await again(L.deskKiln); if (i === 0) break; await say('maya', L.deskWrong, { face: 'think' }); }
       });
       if (!ok) return;
       await lightDesk0.call(ow, d);
@@ -957,10 +957,11 @@ export async function create(story) {
     const bt = story.board?.target || { x: P.homeBoard.x, y: 1.3, z: P.homeBoard.z };
     game.rig.shot(new THREE.Vector3(bt.x - 0.25, bt.y + 0.85, bt.z + 3.9), new THREE.Vector3(bt.x + 0.35, bt.y - 0.2, bt.z + 0.2), 0.8); // (straight from the south: the Post Office wall is east of it)
     if (story.people.get('wintwar')) await say('wintwar', L.wwBoard, { face: 'think' });
-    let i = await D.choose(L.boardChoices);
+    const again = D.retry(); // asked twice at most: the second time without the one already picked
+    let i = await again(L.boardChoices);
     if (i !== 1) {
       await say('maya', i === 0 ? L.boardFront : L.boardCold, { face: 'think' });
-      i = await D.choose(L.boardChoices);
+      i = await again(L.boardChoices);
     }
     if (i === 1) await say('maya', L.boardLeave, { face: 'smile' });
     F('board', i);

@@ -190,8 +190,8 @@ export async function nightPage(story, o = {}) {
     if (o.truth) {
       if (o.truth.q) await D.say('maya', [o.truth.q], { face: 'think' });
       const right = o.truth.right ?? 1;
-      for (;;) {
-        const i = await D.choose(o.truth.choices);
+      for (const again = D.retry(); ;) {
+        const i = await again(o.truth.choices);
         if (i === right) break;
         const w = o.truth.wrong?.[i];
         if (w?.length) await D.say('maya', w, { face: 'think' });

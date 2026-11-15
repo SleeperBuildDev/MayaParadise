@@ -23,11 +23,11 @@ import { paperStage, sayBox, runLoop, rr, fillStroke, folk, sparkle, noise, shad
 
 const T = {
   back: { my: 'နောက်ဆုတ်ပေး', en: 'Step back' },
-  backSub: { my: 'ဖိထားပါ · သူ့ဘာသာ သင်ပါစေ', en: 'hold · let her teach' },
+  backSub: { my: 'ဖိထားပါ · သူ့ဘာသာ သင်ပေးပါစေ', en: 'hold · let her teach' },
   holding: { my: 'ဖိထားဆဲ… သူ့ဘာသာ အေးသွားအောင် စောင့်', en: 'Still holding… let her cool down herself' },
   stepped: { my: 'မာရာ ဝင်ပြောမိသွားပြီ။ ဒီတစ်ခါ ဆက်ဖိထား။', en: 'Maya stepped in. This time keep holding.' },
   keep: { my: 'နောက်ဆုတ်ပေးကို ဆက်ဖိထား', en: 'Keep holding Step back' },
-  done: { my: 'သင်တာ သူ့ဟာ ဖြစ်သွားပြီ', en: 'The teaching stayed hers' },
+  done: { my: 'သင်ပေးတာ သူ့အပိုင်း ဖြစ်သွားပြီ', en: 'The teaching stayed hers' },
   maya: { my: 'ကျွန်မ ပြောပြမယ်…', en: 'Let me tell him…' },
   they: { my: 'ဒါဆို နင်ပဲ သင်လိုက်တော့လေ။', en: 'Then you teach him.' },
 };
@@ -160,9 +160,19 @@ export function holdback(o = {}) {
     }
 
     let auto = null;
+    // the cue: the Step back button, while it should be held and is not (quickly once a beat is under way)
+    let cueKey = '';
+    function cueTick() {
+      const k = auto ? '' : P.state === 'intro' ? 'intro' : P.state === 'watch' ? `w${P.i}` : '';
+      if (k === cueKey) return;
+      cueKey = k;
+      A.cue.set(k ? { kind: 'hold', at: btn, glow: false, r: 40, delay: k === 'intro' ? 3000 : 900, when: () => !held(),
+        label: { my: 'နောက်ဆုတ်ပေး ခလုတ်ကို ဖိထားပါ', en: 'Press and hold Step back' } } : null);
+    }
     stop = runLoop((dt) => {
       if (auto) auto(dt);
       step(dt);
+      cueTick();
       draw();
     });
     const stopAll = stop;

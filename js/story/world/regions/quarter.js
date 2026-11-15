@@ -575,7 +575,7 @@ export const DESKS = [
 // job: see story.setJob ({ area: { x, z, r }, spot: { x, z, h }, mood, workChance })
 // ---------------------------------------------------------------------------------
 export const PEOPLE = [
-  { id: 'dawohn', x: 15.6, z: 60.5, heading: 0, hello: { my: 'မုန့်ဟင်းခါး ပူပူလေး ရှိတယ်နော် သမီး။', en: 'Hot mohinga today, dear.' },
+  { id: 'dawohn', x: 15.6, z: 60.2, heading: 0, hello: { my: 'မုန့်ဟင်းခါး ပူပူလေး ရှိတယ်နော် သမီး။', en: 'Hot mohinga today, dear.' },
     job: { area: { x: 15, z: 65.8, r: 2.6 }, spot: { x: 14.2, z: 60.3, h: 0 }, mood: 'work', workChance: 0.7, workFor: [6, 12] } },
   { id: 'hninwai', x: -11.5, z: 88.4, heading: 0, hello: { my: 'ကလေးတွေ ဒီနေ့ အရမ်းဆော့ကြတယ်။', en: 'The children are very lively today.' },
     job: { area: { x: -12, z: 94.6, r: 3.6 }, spot: { x: -12.5, z: 93.4, h: Math.PI }, mood: 'read', workChance: 0.5, workFor: [5, 9] } },

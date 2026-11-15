@@ -503,7 +503,7 @@ const T = {
   dive: { my: 'တင်းလွန်းတယ် — စွန် ထိုးကျနေပြီ', en: 'Too tight: the kite is diving' },
   sag: { my: 'လျော့လွန်းတယ် — စွန် နိမ့်ကျလာပြီ', en: 'Too slack: the kite is sinking' },
   flagDown: { my: 'အလံ ကျသွားပြီ… စွန်လည်း လိုက်ကျတယ်', en: 'The flag dropped… and the kite with it' },
-  looked: { my: 'မော့ကြည့်မိလို့ ရေစီး လွဲသွားပြီ', en: 'Looked up: the stream went wide' },
+  looked: { my: 'မော့ကြည့်မိလို့ ရေ လွဲသွားပြီ', en: 'Looked up: the stream went wide' },
   missCup: { my: 'ခွက်ထဲ မကျဘူး — ဘေးနည်းနည်း ရွှေ့ပါ', en: 'Missing the cup: move it a little sideways' },
   full: { my: 'ခွက် ပြည့်ပြီ', en: 'The cup is full' },
   settle: { my: 'ရပ်ပြီး ငြိမ်အောင် စောင့်', en: 'Stop, and wait for it to settle' },
@@ -511,7 +511,7 @@ const T = {
   spilled: { my: 'ဖိတ်သွားပြီ', en: 'Spilled' },
   declined: { my: 'ရပ်ပြီး ယဉ်ယဉ်လေး ငြင်းလိုက်တယ်', en: 'Stopped, and kindly said no' },
   again: { my: 'ပြန်စမယ်', en: 'Again' },
-  clench: { my: 'တင်းနေတယ် — ဖွဖွလေး', en: 'Bracing: gently' },
+  clench: { my: 'တင်းနေတယ် — ဖွဖွလေး ထိန်း', en: 'Bracing: gently' },
 };
 
 export function steady(o = {}) {
@@ -570,6 +570,23 @@ export function steady(o = {}) {
       A.done({ ok, ...stats, score: +stats.score.toFixed(3), ...extra });
     }
 
+    // the cue: where and how to press, until the first press (after that the feel is the player's own)
+    let cueOn = null;
+    const CUE = {
+      kite: [0.64, 0.42, { my: 'ဖိထားရင် ကြိုးဆွဲ၊ လွှတ်ရင် ကြိုးလျှော့ — ရွှေကွက်ထဲ ထိန်းထားပါ', en: 'Hold to pull, let go to give line; stay in the gold' }],
+      pour: [0.4, 0.3, { my: 'ဖိထားရင် ငှဲ့တယ်၊ ဘေးကိုရွှေ့ပြီး ခွက်ထဲ ကျအောင် ထိန်းပါ', en: 'Hold to pour; slide sideways to keep it in the cup' }],
+      walk: [0.5, 0.84, { my: 'ဖိထားရင် လျှောက်မယ်၊ လွှတ်ရင် ရပ်မယ်', en: 'Hold to walk, let go to stop' }],
+      stance: [0.26, 0.82, { my: 'ဖိထားပြီး အပေါ်အောက် ဖြည်းဖြည်းဆွဲလို့ ခေါင်းကို တည့်တည့်ထားပါ', en: 'Hold and drag gently up or down to keep the head level' }],
+    };
+    function cueTick() {
+      if (P.down) P.ever = true;
+      const want = !auto && !finished && !P.ever;
+      if (want === cueOn) return;
+      cueOn = want;
+      const [fx, fy, label] = CUE[mode] || CUE.walk;
+      A.cue.set(want ? { kind: 'hold', r: 28, at: () => { const b = S.cv.getBoundingClientRect(); return [b.left + W * fx, b.top + H * fy]; }, label } : null);
+    }
+
     // ---- mode builders return { step(dt), draw(), down?, up?, policy(care) }
     const M = ({ kite: kiteMode, pour: pourMode, bowl: walkMode, cup: walkMode, plank: walkMode, stance: stanceMode }[mode] || kiteMode)();
 
@@ -581,6 +598,7 @@ export function steady(o = {}) {
       P.px = P.x; P.py = P.y;
       if (auto && !finished) auto(dt);
       M.step(dt);
+      cueTick();
       M.draw();
       P.dx = 0;
     });
@@ -1198,7 +1216,7 @@ export function steady(o = {}) {
         stats.slips++;
         buzz(30);
         const line = kind === 'clench' ? react.clench : kind === 'down' ? react.bowed : react.tossed;
-        A.setHint({ my: 'ပြန်ငြိမ်ပြီး ဒီစကားပဲ ထပ်စမယ်', en: 'Settle, and the same words come again' }, 'warn');
+        A.setHint({ my: 'ပြန်ငြိမ်အောင် စောင့်ပြီး ဒီစကားပဲ ထပ်စမယ်', en: 'Settle, and the same words come again' }, 'warn');
         await say.say(who0, line || { my: '…', en: '…' });
         say.clear();
         stats.tries++;

@@ -342,8 +342,8 @@ export async function create(story) {
       if (story.talk.waiting(TALK_D14_TOETOE.id)) return D.say('toetoe', L.ttNotYet, { face: 'think' });
       return ttTalkRun();
     }
-    for (;;) {
-      const i = await D.choose(L.ttChoices);
+    for (const again = D.retry(); ;) {
+      const i = await again(L.ttChoices);
       if (i === 0) { await D.say('toetoe', L.ttMe, { face: 'sad' }); await D.say('maya', L.ttMeMaya, { face: 'think' }); continue; }
       if (i === 1) { await D.say('toetoe', L.ttAll, { face: 'sad' }); await D.say('maya', L.ttAllMaya, { face: 'think' }); continue; }
       break;
@@ -369,8 +369,8 @@ export async function create(story) {
     await D.say('maya', L.knSits, { face: 'smile' });
     postmark();
     await D.say('khwarnyo', L.knQ, { face: 'think' });
-    for (;;) {
-      const i = await D.choose(L.knChoices);
+    for (const again = D.retry(); ;) {
+      const i = await again(L.knChoices);
       if (i === 0) break;
       await D.say('maya', L.knWrong, { face: 'think' });
     }
@@ -458,8 +458,8 @@ export async function create(story) {
     if (F('ncChoice') || (!F('inv.junction') && !story.has('invites'))) return D.say('maya', L.ncBusy, { face: 'smile' });
     if (!(await handover('junction'))) return;
     await D.say('naychi', L.nc1, { face: 'happy' });
-    for (;;) {
-      const i = await D.choose(L.ncChoices);
+    for (const again = D.retry(); ;) {
+      const i = await again(L.ncChoices);
       if (i === 2) break;
       await D.say('naychi', L.ncLean, { face: 'think' });
       await D.say('maya', L.ncLeanMaya, { face: 'think' });
@@ -546,8 +546,8 @@ export async function create(story) {
       return;
     }
     await D.say('maya', [L.deskQ], { face: 'think' });
-    for (;;) {
-      const i = await D.choose(L.desk);
+    for (const again = D.retry(); ;) {
+      const i = await again(L.desk);
       if (i === 0) break;
       await D.say('maya', [L.deskWrong], { face: 'think' });
     }
@@ -561,8 +561,8 @@ export async function create(story) {
   }
   async function lastLine() {
     await D.say('maya', [L.lastQ], { face: 'think' });
-    for (;;) {
-      const i = await D.choose(L.lastChoices);
+    for (const again = D.retry(); ;) {
+      const i = await again(L.lastChoices);
       if (i === 2) break;
       await D.say('maya', L.lastWrong[i], { face: 'think' });
     }

@@ -7,27 +7,27 @@ export const L = {
   // ---- 4. morning at home
   ww1: [l('မာရာရေ… မှတ်စုစာမျက်နှာလေး ပြန်ရောက်လာပြီ။ စာတစ်ကြောင်း ရေးပေးလိုက်တယ်တဲ့။', 'Maya… your notebook page is back. They wrote you a line.')],
   ww2: [l('မောင်အာကာဆီကလည်း စာလေး ပါလာတယ်။', 'And a note from Maung Arkar.')],
-  mlNote: l('အစ်မ… ဒီမနက် ပထမဆုံး ပို့တဲ့ခရီးမှာ ဥယျာဉ်ထဲက အဘိုးကြီး ဥယျာဉ်မှူးကို တွေ့တယ်။\nသော့ခတ်ထားတဲ့ တံခါးနောက်ကနေ လမ်းကို တစ်နေကုန် ကြည့်နေတာ။ ဘယ်သူမှ သတိမထားမိဘူး။\nတံခါးတိုင်ပေါ်မှာ ပေါင်မုန့်တစ်လုံး တင်ခဲ့တယ်။ ဘာမှ မပြောခဲ့ဘူး။', "Sister… on my first round this morning I saw the old gardener in the Garden.\nBehind his locked gate, watching the lane all day. Nobody notices.\nI left a loaf on his gatepost. I didn't say anything."),
-  ember: l('(မနေ့က စာမျက်နှာပေါ်က မီးခဲလေးတစ်ခု လွင့်ထွက်လာတယ်။) အေးသွားပြီ။ ဘယ်သူ့ကိုမှ မလောင်တော့ဘူး။', "(A little ember floats up off yesterday's page.) Cooled. It burns nobody now."),
+  mlNote: l('အစ်မ… ဒီမနက် ပထမဆုံး စာပို့ထွက်ရင်း ဥယျာဉ်ထဲက ဥယျာဉ်မှူး အဘိုးကြီးကို တွေ့ခဲ့တယ်။\nသော့ခတ်ထားတဲ့ တံခါးနောက်ကနေ လမ်းကို တစ်နေကုန် ငေးကြည့်နေတာ။ ဘယ်သူမှ သတိမထားမိကြဘူး။\nတံခါးတိုင်ပေါ်မှာ ပေါင်မုန့်တစ်လုံး တင်ထားခဲ့တယ်။ ဘာမှတော့ မပြောခဲ့ဘူး။', "Sister… on my first round this morning I saw the old gardener in the Garden.\nBehind his locked gate, watching the lane all day. Nobody notices.\nI left a loaf on his gatepost. I didn't say anything."),
+  ember: l('(မနေ့က စာမျက်နှာပေါ်က မီးခဲလေးတစ်ခု လွင့်ထွက်လာတယ်။) အေးသွားပြီ။ ဘယ်သူ့ကိုမှ မပူလောင်စေတော့ဘူး။', "(A little ember floats up off yesterday's page.) Cooled. It burns nobody now."),
   emberMaya: [l('ပစ်ဖို့ ကောက်ကိုင်ရင် ကိုယ့်လက်ပဲ အရင်ပူတာ… နင်ရော လိုက်ခဲ့မလား။', 'Pick it up to throw and your own hand burns first… Coming with me?')],
   ww3: [
-    l('ပြီးတော့… မီးဖိုတန်း အဆုံးက ဒိုင်ယာရီ ချိတ်ကြီး ညက ပွင့်သွားပြီတဲ့။ အထဲမှာ နေ့စဉ်မှတ်တမ်းဥယျာဉ်။', 'And… the great diary clasp at the end of Hearth Row came open in the night, they say. The Diary Garden is inside.'),
+    l('ပြီးတော့… မီးဖိုတန်း အဆုံးက ဒိုင်ယာရီ ချိတ်ကြီး ညက ပွင့်သွားပြီတဲ့။ အထဲမှာ နေ့စဉ်မှတ်တမ်း ဥယျာဉ် ရှိတယ်။', 'And… the great diary clasp at the end of Hearth Row came open in the night, they say. The Diary Garden is inside.'),
     l('ကိုဖြိုးလည်း ဈေးက စက္ကူဟောင်းတွေ အဲဒီကို လှည်းနဲ့ တွန်းသွားတာ မြင်တယ်။ အလေးချိန်နဲ့ ဝယ်တာတဲ့။', "I've seen Ko Phyo pushing the market's old paper down there on his cart. They buy it by weight."),
-    l('အထဲက အဘိုးကြီး ဥယျာဉ်မှူးက ခြံတံခါး သော့ခတ်ထားတယ်။ တံခါးမှာ ခွေးကြီး ချည်ထားတယ်လို့လည်း ကြားတယ်။', "And the old gardener in there keeps his gate locked. I heard he's tied a big dog at it."),
-    l('နေခြည်လည်း မနက်က ဘုတ်ကို လာဖတ်သွားတယ်။ ဘာစာရွက်မှတော့ မကပ်သွားဘူး။', "Nay Chi came and read the board this morning. She didn't pin anything."),
+    l('အထဲက ဥယျာဉ်မှူး အဘိုးကြီးက ခြံတံခါး သော့ခတ်ထားတယ်။ တံခါးမှာ ခွေးကြီး ချည်ထားတယ်လို့လည်း ကြားတယ်။', "And the old gardener in there keeps his gate locked. I heard he's tied a big dog at it."),
+    l('နေခြည်လည်း မနက်က ဘုတ်ကို လာဖတ်သွားတယ်။ ဘာစာရွက်မှတော့ ကပ်မသွားဘူး။', "Nay Chi came and read the board this morning. She didn't pin anything."),
   ],
   wwLater: [l('ဥယျာဉ်က မီးဖိုတန်းရဲ့ အရှေ့ဘက် အဆုံးမှာ။ မနေ့က ပိတ်နေတာ ဒီနေ့ ပွင့်နေပြီ။ ဘာမှ အမြဲ တစ်မျိုးတည်း မနေဘူးလေ။', "The Garden's at the east end of Hearth Row. Shut yesterday, open today. Nothing stays one way for ever.")],
-  wwEvening: [l('မာရာ… ဒီနေ့ ဘုတ်ကနေ စာရွက်တစ်ရွက် ပြုတ်သွားတယ်။ ကပ်ခဲ့တဲ့သူ ကိုယ်တိုင် လာဖြုတ်သွားတာ။ ပထမဆုံး တစ်ရွက်ပဲ။', 'Maya… a note came off the board today. The one who pinned it came and took it down himself. The very first.')],
-  wwAfterBoard: [l('ကွက်လပ်လေး ဒီအတိုင်း ရှိပါစေ။ ညနေ စာတွေ ခွဲလိုက်ဦးမယ်။', "Let the gap be. I'll get on with the evening post.")], // (new, draft)
+  wwEvening: [l('မာရာ… ဒီနေ့ ဘုတ်ပေါ်က စာရွက်တစ်ရွက် ပြုတ်သွားတယ်။ ကပ်ခဲ့တဲ့သူ ကိုယ်တိုင် လာဖြုတ်သွားတာ။ ပထမဆုံး တစ်ရွက်ပဲ။', 'Maya… a note came off the board today. The one who pinned it came and took it down himself. The very first.')],
+  wwAfterBoard: [l('ကွက်လပ်လေး ဒီအတိုင်း ရှိပါစေ။ ညနေစာတွေ ခွဲလိုက်ဦးမယ်။', "Let the gap be. I'll get on with the evening post.")], // (new, draft)
 
   // arrival (first step under the clasp)
   carter: [l('နေဝင်ရင် ချိတ်ကြီး ပြန်ပိတ်တယ်နော်! အထဲမှာ ပိတ်မိနေမယ်!', "The clasp shuts again at sunset, mind! You'll get locked in!")],
-  arriveMaya: [l('နေ့စွဲမျဉ်းတိုင်းမှာ ပန်းခင်းတစ်ခု။ မနေ့ကဟာတွေ ညှိုးစပြုပြီ၊ ဒီနေ့ဟာတွေ ပွင့်နေတယ်။', "A flower bed on every dated line. Yesterday's are starting to wilt; today's are in flower.")],
+  arriveMaya: [l('နေ့စွဲမျဉ်းတိုင်းမှာ ပန်းခင်းတစ်ခုစီ ရှိတယ်။ မနေ့ကဟာတွေ ညှိုးစပြုပြီ၊ ဒီနေ့ဟာတွေက ပွင့်နေတယ်။', "A flower bed on every dated line. Yesterday's are starting to wilt; today's are in flower.")],
 
   // ---- 5. chapter 16 · U Hpo Htaw
   hpShut: [l('တံခါး ပိတ်ထားတယ်။', 'The gate is shut.')],
   hp1: [
-    l('တံခါး သော့ခတ်ထားတာ မမြင်ဘူးလား။ လူတွေက နွယ်ပင်တွေပဲ။ ဝင်လာရင် အကုန် ရစ်ပတ်ပြီး ဆွဲချတယ်။', "Can't you see the gate's locked? People are creepers. Let them in and they wind round everything and pull it down."),
+    l('တံခါး သော့ခတ်ထားတာ မမြင်ဘူးလား။ လူတွေက နွယ်ပင်တွေလိုပဲ။ ဝင်လာရင် အကုန် ရစ်ပတ်ပြီး ဆွဲချတတ်တယ်။', "Can't you see the gate's locked? People are creepers. Let them in and they wind round everything and pull it down."),
     l('အကြံပေးဖို့ လာတာဆိုရင် မလိုဘူး။ တစ်ယောက်တည်း နေတာပဲ အေးတယ်။', "If you've come with advice, don't. Alone is peaceful."),
   ],
   hpChoices: [
@@ -36,38 +36,38 @@ export const L = {
     l('"တစ်ယောက်တည်း နေတာ မမှားပါဘူး။ တံခါးအပြင်က ခုံလေးမှာ ခဏ ထိုင်လို့ရမလား။"', '"Being alone isn\'t wrong. May I sit on the bench outside your gate a while?"'),
   ],
   hpArgue: [l('ကြည့်… စကားတစ်ခွန်းနဲ့တင် ရစ်ပတ်လာပြီ။', 'See… one sentence in and already winding round me.')],
-  hpArgueMaya: [l('(သူ့တံခါးကို ကျွန်မ ဆုံးဖြတ်ပေးနေမိပြီ။)', '(I was deciding his gate for him.)')],
+  hpArgueMaya: [l('(သူ့တံခါးကို ကျွန်မက ဝင်ဆုံးဖြတ်ပေးနေမိပြီ။)', '(I was deciding his gate for him.)')],
   hpAgree: [l('…ဟုတ်တယ်။ (မပြုံးဘူး။ မျက်လုံးက လမ်းပေါ် ပြန်ရောက်သွားတယ်။)', "…Right. (He doesn't smile. His eyes go back to the lane.)")],
-  hpAgreeMaya: [l('(သူ့နာကျည်းချက်ကို မီးထပ်မွှေးလိုက်သလိုပဲ။)', '(That only fanned his grudge.)')],
+  hpAgreeMaya: [l('(သူ့နာကျည်းချက်ကို မီးထပ်မွှေးပေးလိုက်သလိုပဲ။)', '(That only fanned his grudge.)')],
   hpSit: [l('အပြင်ဘက် ခုံက လမ်းပိုင်။ ထိုင်ချင် ထိုင်။ စကားတော့ များများ မပြောနဲ့။', "The bench outside belongs to the lane. Sit if you like. Just don't talk much.")],
   hpBench: [l('ခုံက လမ်းပိုင်ပဲ။', "The bench is the lane's.")],
-  mayaBench: [l('(ဒီခုံကနေ သံတိုင်ကြားက အထဲကို မြင်ရတယ်။)', '(From this bench I can see in through the bars.)')], // (new, draft: she says what she sees, nothing more)
+  mayaBench: [l('(ဒီခုံကနေ သံတိုင်ကြားကနေ အထဲကို မြင်ရတယ်။)', '(From this bench I can see in through the bars.)')], // (new, draft: she says what she sees, nothing more)
   looked: [l('တံခါးက ပိတ်ထားတယ်။ စိတ်ကတော့ လမ်းပေါ်မှာ။', 'The gate is shut. His mind is out in the lane.')],
   hook: [l('(ပေါက်ပြား ချိတ်ရမယ့်နေရာ။ ချိတ်က လွတ်နေတယ်။)', '(Where a hoe should hang. The hook is empty.)')],
   heardWas: (p) => ({ my: `(ကြားခဲ့တာက «${p.my}»…)`, en: `(What I'd heard: "${p.en}"…)` }),
 
-  sortIntro: [l('ဦးနဲ့ ဆက်နေတဲ့ အရာတွေကို စာရွက်လေးတွေပေါ် ရေးကြည့်ရအောင်လား။', "Shall we write the things you're tied to on slips?")],
-  sorted: [l('တံခါး ပိတ်ထားတာတောင် ရစ်ပတ်နေတုန်းပဲလား။', "Even with the gate locked, I'm still winding round things?")],
+  sortIntro: [l('ဦးနဲ့ ဆက်နွှယ်နေတဲ့ အရာတွေကို စာရွက်လေးတွေပေါ် ရေးကြည့်ရအောင်လား။', "Shall we write the things you're tied to on slips?")],
+  sorted: [l('တံခါး ပိတ်ထားတာတောင် ငါက ရစ်ပတ်နေတုန်းပဲလား။', "Even with the gate locked, I'm still winding round things?")],
   tendrilAsk: [l('ငါ့လက်က တုန်တယ်။ ဒီသုံးချောင်း တိုင်ဆီ လမ်းပြပေး။ အပင်ငယ်ကို မရစ်စေနဲ့။', "My hands shake. Lead these three to the post. Don't let them take the sapling.")],
   tendrilDone: [l('ထိပြီး လွှတ်လိုက်တာ… ဆက်တော့ ဆက်နေတာပဲ။ အပင်ငယ်လည်း မညွတ်တော့ဘူး။', 'Touched, then let go… still connected. And the sapling has stopped bending.')],
   voices: [l('ဒီအသံတွေ အကုန် ညလုံးပေါက် ကြားယောင်နေတာ။', 'I hear every one of these all night.')],
-  voicesMaya: [l('ကြားရတာ အကုန် စိတ်ထဲ ထည့်ရမှာလား ဦး။', 'Does everything you hear have to go inside, Uncle?')],
+  voicesMaya: [l('ကြားရသမျှ အကုန် စိတ်ထဲ ထည့်နေရမှာလား ဦး။', 'Does everything you hear have to go inside, Uncle?')],
   beansCall: [l('ပဲနွယ်ကို မနက်ဖြန် ပြန်ချည်ပေးမယ်!', "I'll tie the beans back tomorrow!")],
   lanesDone: [l('ကိုယ်နဲ့ ဆိုင်တာကိုပဲ နားထောင်… ကျန်တာ လွင့်သွားပါစေ။', "Listen to what's mine… let the rest blow past.")],
   hpBulbs: [
     l('ပန်းဥဆိုတာ အံဆွဲထဲ သိမ်းထားရင် ပုပ်သွားတာပဲ။ ဘာမှ ထာဝရ မနေဘူး။ ကောင်းတုန်း ဝေလိုက်ရတယ်။', "Keep bulbs in a drawer and they rot. Nothing stays for ever. You give them out while they're good."),
-    l('နေရောင်ရတဲ့ မြေထဲမှာ ငါးည အိပ်ရမယ်။ တစ်ညတည်းနဲ့ ပွင့်တယ်ဆိုတာ လူတွေ ပြောတာ။', "Five nights asleep in sunny soil. 'Flowers in one night' is just what people say."),
+    l('နေရောင်ရတဲ့ မြေထဲမှာ ငါးည အိပ်ရမယ်။ တစ်ညတည်းနဲ့ ပွင့်တယ်ဆိုတာ လူတွေ ပြောကြတာ။', "Five nights asleep in sunny soil. 'Flowers in one night' is just what people say."),
     l('မိုးရွာရွာ မရွာရွာ မြေအောက်မှာ အိပ်နေတာ။ ပေါက်ချိန်ကျ ပေါက်မှာပဲ။', "Rain or no rain, they sleep under the soil. They'll come up when it's time."),
   ],
-  mugDown: [l('(ခွက်လေးကို ခုံပေါ် ချထားလိုက်တယ်။ နားထောင်ဖို့ပဲ။)', '(She sets her mug down on the bench. Only to listen.)')], // (new, draft)
+  mugDown: [l('(ခွက်လေးကို ခုံပေါ် ချထားလိုက်တယ်။ နားထောင်ပေးဖို့ပဲ။)', '(She sets her mug down on the bench. Only to listen.)')], // (new, draft)
   hpWait: [l('ခဏ… ငါ့ဘာသာ စဉ်းစားပါရစေ။', 'A moment… let me think on my own.')],
   hisGate: [l('(သူ့တံခါး။ သူ့ဆုံးဖြတ်ချက်။)', '(His gate. His decision.)')],
-  hpAfter: [l('လာချင်ရင် တွန်းဝင်။ မလာလည်း ရတယ်။ ပန်းခင်းတွေကတော့ ရေလိုတယ်။', "Push it if you want to come in. Or don't, that's fine too. The beds need water either way.")],
+  hpAfter: [l('လာချင်ရင် တွန်းဝင်ခဲ့။ မလာလည်း ရတယ်။ ပန်းခင်းတွေကတော့ ရေလိုနေတယ်။', "Push it if you want to come in. Or don't, that's fine too. The beds need water either way.")],
 
   // ---- 6. chapter 17 · Ko Phyo and U Kyi Nyein
   kn1: [
-    l('ကိုဖြိုး၊ စက္ကူထုပ်ကို အခြောက်တိုင်း ချိန်ရင် ရှုံးတယ်ကွ။ ကြည့်… ကျုပ်ထုပ်က မနေ့က ကိုးပိဿာ။', 'Ko Phyo, weigh your bales dry and you lose out. Look… this bale of mine was nine viss yesterday.'),
-    l('ရေနည်းနည်း ဖျန်းလိုက်တော့ ဆယ့်တစ်ပိဿာ။ စက်ရုံက အလေးချိန်နဲ့ ပေးတာ။', "A sprinkle of water, and it's eleven. The mill pays by weight."),
+    l('ကိုဖြိုး၊ စက္ကူထုပ်ကို အခြောက်အတိုင်း ချိန်ရင် ရှုံးတယ်ကွ။ ကြည့်… ကျုပ်ထုပ်က မနေ့က ကိုးပိဿာ။', 'Ko Phyo, weigh your bales dry and you lose out. Look… this bale of mine was nine viss yesterday.'),
+    l('ရေနည်းနည်း ဖျန်းလိုက်တော့ ဆယ့်တစ်ပိဿာ ဖြစ်သွားတယ်။ စက်ရုံက အလေးချိန်နဲ့ ပေးတာ။', "A sprinkle of water, and it's eleven. The mill pays by weight."),
     l('ဝယ်သူက မေးရင် "မနက်ခင်း နှင်းစိုတာ" လို့ ပြောလိုက်။ မြို့က ဝယ်သူက ဘာသိမှာလဲကွ။', "If the buyer asks, say 'it's the morning dew'. A buyer from town — what would he know?"),
     l('ကျုပ်ဂိုဒေါင်က ခေါင်မိုးထိ ပြည့်နေပြီ။ ခင်ဗျား လှည်းလေးနဲ့ ဘယ်တော့ ရောက်မှာလဲ။', "My store's full to the roof. With your little cart, when will you ever get there?"),
   ],
@@ -77,7 +77,7 @@ export const L = {
   kpMutter: l('ကိုးလား… ဆယ့်တစ်လား…', 'Nine… or eleven…'),
   kp1: [
     l('မာရာ… ဈေးက စက္ကူဟောင်းတွေ ဒီမှာ ရောင်းပြီး လက်ဖက်ခြောက်ဖိုး ကိုယ်တိုင် ရှာတာ။ အဲဒီနေ့ကတည်းကပဲ။', "Maya… I sell the market's old paper here and earn my tea-leaf money myself. Ever since that day."),
-    l('ဦးကြည်ငြိမ်းက ချမ်းသာတယ်။ ဂိုဒေါင်အပြည့်။ ကျွန်တော်က လှည်းတစ်စီး။', "U Kyi Nyein's rich. A full store. Me, one cart."),
+    l('ဦးကြည်ငြိမ်းက ချမ်းသာတယ်။ ဂိုဒေါင်အပြည့်။ ကျွန်တော်က လှည်းတစ်စီးတည်း။', "U Kyi Nyein's rich. A full store. Me, one cart."),
     l('ဝယ်သူက မနက် အာရုဏ်တက်ရင် လာမယ်။ ဒီည လှည်းဘေးမှာပဲ အိပ်မယ်။ သူ့ဆိုင် မျက်နှာချင်းဆိုင် ပလက်ဖောင်းပေါ်မှာ။', "The buyer comes at dawn. I'll sleep by my cart tonight. On the kerb across from his store."),
     l('မီးထွန်းချိန်လောက် လှည်းဘေး လာထိုင်ပါလား။ …တစ်ယောက်တည်း စဉ်းစားရမှာ ကြောက်တယ်။', "Come and sit by my cart when the lamps are lit? …I'm scared to think it over alone."),
   ],
@@ -90,7 +90,7 @@ export const L = {
   kpTrip: [l('ဒီမှာ ထားခဲ့ရင် တစ်ယောက်ယောက် ခလုတ်တိုက်မယ်။', "Leave it out here and someone'll trip on it.")],
   kpInside: [l('ဦးလေးဆိုင် ဖွင့်တုန်းပဲ။ အထဲမှာ ထိုင်ရအောင်။ ချိတ်လည်း ရှိတယ်။', "The uncle's still open. Let's sit inside. He has a hook, too.")],
   matched: [l('ချမ်းသာတာနဲ့ အေးချမ်းတာ… စကားလုံး တစ်လုံးတည်းလို့ ထင်ခဲ့တာ။', 'Rich, and at ease… I thought that was one word.')],
-  cards2: [l('(စားပွဲပေါ်မှာ စာရွက်ကတ် နှစ်ကတ်: «ချမ်းသာ · ပေါများတာ — သူ့မှာ ရှိတယ်»၊ «သုခ · သက်သောင့်သက်သာ — သူ့မှာ မရှိဘူး»)', '(Two paper cards settle on the table: "plenty: he has it", "ease: he hasn\'t".)')],
+  cards2: [l('(စားပွဲပေါ်မှာ စာရွက်ကတ် နှစ်ကတ် ကျလာတယ်: «ချမ်းသာ · ပေါများတာ — သူ့မှာ ရှိတယ်»၊ «သုခ · သက်သောင့်သက်သာ — သူ့မှာ မရှိဘူး»)', '(Two paper cards settle on the table: "plenty: he has it", "ease: he hasn\'t".)')],
   tuHook: [l('ဒီချိတ်က ချိတ်ပဲ။ ဘယ်သူ့ဘက်မှ မလိုက်ဘူး။', "That hook's just a hook. It takes nobody's side.")],
   kpWeight: [l('ကိုလွင် တံဆိပ်ခတ်ပေးထားတဲ့ ချိန်သီး။ ချိန်ခွင် မှန်မမှန် အရင် စစ်မယ်။', 'A weight Ko Lwin stamped for me. First we check the scale is honest.')],
   kpNine: [l('ကိုးပိဿာ။ ရေမဖျန်းရင် ကိုးပဲ။ မနက်ဖြန်လည်း ကိုးပဲ။', 'Nine viss. No water, nine. Tomorrow, still nine.')],
@@ -99,9 +99,9 @@ export const L = {
     l('ကိုလွင်က ဒီချိန်သီး နှစ်လုံး တံဆိပ်ခတ်ပေးထားတယ်။ တစ်လုံးက ကျွန်တော့်လှည်းအတွက်။', 'Ko Lwin stamped two of these weights for me. One is for my cart.'),
     l('နောက်တစ်လုံး အစ်မ ယူထားပါ။ ချိန်ခွင်တစ်ခု မှန်မမှန် စစ်ဖို့ တစ်ယောက်ယောက် လိုလာမှာပဲ။', 'Take the other, sister. Someday someone will need to check a scale.'),
   ],
-  kpThanks: [l('ရေပုံး ပြန်ပို့ပါတယ် ဦး။ ကျေးဇူးပါ။', "I've brought your can back, Uncle. Thank you.")], // (new, draft: the spec gives his thank-you as a stage direction)
+  kpThanks: [l('ရေပုံး ပြန်လာပို့တာပါ ဦး။ ကျေးဇူးပါ။', "I've brought your can back, Uncle. Thank you.")], // (new, draft: the spec gives his thank-you as a stage direction)
   knThanks: [l('…အင်း။', '…Mm.')],
-  vignette: [l('ဒီည သူ့မီး အရင်ငြိမ်းတယ်။', 'Tonight his lamp went out first.')],
+  vignette: [l('ဒီည သူ့မီး အရင်ငြိမ်းသွားတယ်။', 'Tonight his lamp went out first.')],
   kpAfter: [l('မနက် ဝယ်သူ လာရင် မျက်နှာချင်း ဆိုင်ရဲပြီ။', "When the buyer comes in the morning, I can look him in the face.")],
   storeShut: [l('(ညအတွက် ပိတ်ထားပြီ။)', '(Shut for the night.)')],
   canNot: l('(ဒါ ကျွန်မ ကိုင်ရမယ့်ဟာ မဟုတ်ဘူး။)', '(Not mine to pick up.)'),
@@ -109,7 +109,7 @@ export const L = {
   // ---- 7. other Garden people
   ga: [
     l('ဦးဖိုးထော်က နှစ်တိုင်း ပန်းဥ လှန်းပြီး လမ်းထဲက အိမ်တိုင်းကို ဝေတာ။ လူမုန်းတဲ့လူက ဒီလို လုပ်ပါ့မလား။', 'Every year U Hpo Htaw dried bulbs and gave them to every house in the lane. Would a man who hates people do that?'),
-    l('လူတွေ သူ့ပေါက်ပြား ငှားပြီး ပြန်မပေးဘူး။ သူ့အကြောင်းလည်း ပြောကြတယ်။ အဲဒီကတည်းက တံခါး ပိတ်ထားတာ။', 'People borrowed his hoe and never gave it back. And talked about him. He has kept the gate shut since.'),
+    l('လူတွေ သူ့ပေါက်ပြား ငှားပြီး ပြန်မပေးဘူး။ သူ့အကြောင်းလည်း အတင်းပြောကြတယ်။ အဲဒီကတည်းက တံခါး ပိတ်ထားတာ။', 'People borrowed his hoe and never gave it back. And talked about him. He has kept the gate shut since.'),
     l('ပန်းဥက တစ်ညတည်းနဲ့ ပွင့်တယ်တဲ့။ ကျုပ်မြေး ပြောတာ။ ကျုပ်ကတော့ မယုံဘူး။', "Bulbs flower in one night, my grandson says. I don't believe it."),
     l('စက္ကူထုပ် စိုရင် ပိုလေးတာပေါ့။ ဒါပေမဲ့ ဝယ်သူက စက္ကူဝယ်တာ၊ ရေ ဝယ်တာ မဟုတ်ဘူးလေ။', "Damp paper weighs more, of course. But the buyer is buying paper, not water."),
     l('လှည်းတွေလား။ လမ်းအဆုံး မီးဖိုရင်ပြင်မှာ။ ကိုဖြိုးလှည်းက အသေးဆုံး။ ဒါပေမဲ့ ခေါင်းချတာနဲ့ အိပ်ပျော်တာ သူပဲ။', "The carts? On the kiln square at the lane's end. Ko Phyo's is the smallest. But he's the one who's asleep the moment his head's down."),
@@ -120,23 +120,23 @@ export const L = {
   gaFritters: [l('(ဘူးသီးကြော် နံ့ မွှေးနေတယ်။)', '(The gourd fritters smell wonderful.)')], // (new, draft)
   gaWindow: [l('(ပြတင်းပေါက်ကနေ သူ့ကိုယ်ပိုင် ဘူးစင်ကိုပဲ မြင်ရတယ်။)', '(The window shows only her own gourd trellis.)')], // (new, draft)
   mn: [
-    l('ဒီဥယျာဉ်ထဲက ပါဆယ်တွေ ကျွန်တော် ပို့တယ်။ တံဆိပ်တွေ ဖြည်းဖြည်း ဖတ်တတ်လာပြီ!', "I deliver the Garden's parcels now. I can read the labels, slowly!"),
+    l('ဒီဥယျာဉ်ထဲက ပါဆယ်တွေ ကျွန်တော် ပို့တယ်။ တံဆိပ်တွေ ဖြည်းဖြည်းချင်း ဖတ်တတ်လာပြီ!', "I deliver the Garden's parcels now. I can read the labels, slowly!"),
     l('တတိယခြံက အဘိုးရဲ့ တံခါးမှာ ခေါင်းလောင်းလေး ရှိတယ်။ ဘယ်သူမှ မဆွဲရဲဘူး။ ကျွန်တော် ဖြတ်သွားပြီလားလို့ ခဏခဏ မေးတယ်တဲ့။', "The grandpa in the third plot has a little bell on his gate. Nobody dares ring it. He keeps asking if I've gone by yet, they say."),
-    l('အဲဒီ အဘိုးကြီးက လူမုန်းတယ်တဲ့။ လမ်းက လူတွေ ပြောတာ။', "They say that old man hates people. That's what the lane says."),
+    l('အဲဒီ အဘိုးကြီးက လူမုန်းတယ်တဲ့။ လမ်းက လူတွေ ပြောကြတာ။', "They say that old man hates people. That's what the lane says."),
     l('မီးဖိုဈေးက နေ့တိုင်း စည်တယ်တဲ့။', "They say the kiln market's busy every day."),
   ],
   tu: [
-    l('လှည်းသမားတွေ ဝယ်သူ မလာခင် ဒီချိတ်မှာ အရင်ချိန်ကြတယ်။ ချိတ်က ဘယ်သူ့ကိုမှ မချော့ဘူး။', 'The carters weigh at that hook before the buyer comes. A hook flatters nobody.'),
+    l('လှည်းသမားတွေ ဝယ်သူ မလာခင် ဒီချိတ်မှာ အရင်ချိန်ကြတယ်။ ချိတ်က ဘယ်သူ့ကိုမှ မျက်နှာသာ မပေးဘူး။', 'The carters weigh at that hook before the buyer comes. A hook flatters nobody.'),
     l('ဈေးနေ့လား။ ပြက္ခဒိန်မှာ ဝိုင်းထားတယ်လေ။ ခုနစ်ရက်တစ်ခါ။ ကြားတာထက် ကိုယ်တိုင် ကြည့်တာ ပိုကောင်းတယ်။', "Market day? It's ringed on the calendar. Every seventh day. Better to look than go by what you hear."),
   ],
-  tuDusk: [l('အဲဒီ မီးကလည်း ညတိုင်း လင်းတာပဲ။ ကျုပ်ကတော့ ကိုယ့်ဆိုင် ပိတ်ပြီး အိပ်တာပဲ။', "That light's on every night. Me, I shut my shop and sleep.")],
+  tuDusk: [l('အဲဒီ မီးကလည်း ညတိုင်း လင်းနေတာပဲ။ ကျုပ်ကတော့ ကိုယ့်ဆိုင် ပိတ်ပြီး အိပ်တာပဲ။', "That light's on every night. Me, I shut my shop and sleep.")],
   tuStools: [l('(ဦးလေးက ခုံတွေ စားပွဲပေါ် ပြန်တင်နေပြီ။ ဆိုင်ပိတ်ချိန်။)', '(The uncle is putting the stools up. Closing time.)')], // (new, draft)
   calendar: [l('(ခုနစ်ရက်တစ်ခါ အနီနဲ့ ဝိုင်းထားတယ်။ နောက်တစ်ဝိုင်းက သုံးရက်နေရင်။)', '(Every seventh day ringed in red. The next ring is three days on.)')], // (new, draft)
   ko: [
-    l('ဗလာစာအုပ်ရပ် အရှေ့လမ်းက လာတာ။ ဒီတစ်လလုံး နေ့တိုင်း အိုးအရေအတွက် တစ်မျိုးစီ စမ်းနေတာ။', "I'm from the Quarter's east street. All this month I've tried a different number of pots every day."),
+    l('ဗလာစာအုပ်ရပ် အရှေ့လမ်းက လာတာ။ ဒီတစ်လလုံး နေ့တိုင်း အိုးအရေအတွက် တစ်မျိုးစီ စမ်းလုပ်နေတာ။', "I'm from the Quarter's east street. All this month I've tried a different number of pots every day."),
     l('စက္ကူဆိုင်ပိုင်ရှင် အိမ်ပေါ်က မီးက တစ်ညလုံး လင်းနေတယ်တဲ့။', "They say the light above the paper store burns all night."),
   ],
-  koNote: [l('မာရာ… ကျွန်တော် စာတိုက်နံရံမှာ စာရွက် ကပ်ခဲ့တယ်။ "တစ်နေ့ အိုးဘယ်နှလုံး လုပ်ရမလဲ" ဆိုတာလေ။', 'Maya… I pinned a note on the Post Office wall. "How many pots a day?"')],
+  koNote: [l('မာရာ… ကျွန်တော် စာတိုက်နံရံမှာ စာရွက် ကပ်ခဲ့တယ်။ "တစ်နေ့ အိုးဘယ်နှလုံး လုပ်ရမလဲ" ဆိုပြီးလေ။', 'Maya… I pinned a note on the Post Office wall. "How many pots a day?"')],
   koReply: {
     six: l('မာရာက "ခြောက်လုံး" တဲ့။ ခြောက်လုံး လုပ်ကြည့်တယ်။ နှစ်လုံး ကွဲတယ်။', 'You wrote "six". I tried six. Two cracked.'),
     teacher: l('မာရာက "ဆရာ ပြောသလောက်" တဲ့။ ဆရာက ရွာပြန်သွားပြီ… မေးစရာ လူ မရှိတော့ဘူး။', 'You wrote "as many as your teacher says". He\'s gone back to his village… nobody left to ask.'),
@@ -154,7 +154,7 @@ export const L = {
     l('အထုပ်တွေနောက်ကို မဝင်နဲ့နော်! …စိတ်မရှိပါနဲ့။ ကျုပ်က စိုးရိမ်တတ်လို့။', "Not behind the bales, please! …Sorry. I'm the worrying kind."),
     l('အဲဒီ မီးဖိုကြီးလား။ မီးငြိမ်းနေတာ နှစ်ချီပြီ။ ကျုပ်ကတော့ အပြင် သိပ်မထွက်ဘူး။', "That big kiln? It's been cold for years. Not that I go out much."),
   ],
-  knAfter17: [l('…ကောင်လေးက ရေပုံး ပြန်ပို့သွားတယ်။ ကျေးဇူးတင်တယ်တဲ့။ (မျက်လုံးအောက်မှာ အရိပ်မည်းတွေ။)', '…The lad brought my can back. Said thank you. (Dark rings under his eyes.)')],
+  knAfter17: [l('…ကောင်လေးက ရေပုံး ပြန်လာပို့သွားတယ်။ ကျေးဇူးတင်တယ်တဲ့။ (မျက်လုံးအောက်မှာ အရိပ်မည်းတွေ။)', '…The lad brought my can back. Said thank you. (Dark rings under his eyes.)')],
   storeScale: [l('(ချိန်ခွင်တံက ဆယ့်တစ်ကို ညွှန်နေတုန်း။)', '(The beam still points at eleven.)')], // (new, draft)
   storeRope: [l('(ကြိုးနောက်ကို မသွားဘူး။ သူ့နေရာ။)', "(I won't go past the rope. That's his.)")], // (new, draft)
 
@@ -186,23 +186,23 @@ export const L = {
   replyLine: l('ကိုယ့်အဖြေကို ကိုယ်တိုင် တွေ့ရင် ကျွန်မဘုတ်ပေါ်က စာရွက်ကို ကိုယ်တိုင် ပြန်ဖြုတ်ပါ။', 'When you find your own answer, take your note off my board yourself.'),
 
   // ---- 9. night page
-  writeHome: [l('ဒီနေ့အကြောင်း စာရေးခန်းမှာ ပြန်ရေးမှ ဖြစ်မယ်။', 'I should write today down at my Writing Room.')],
-  nightQ: l('ဒီနေ့အကြောင်း မှန်မှန်ကန်ကန် ဘယ်လို ရေးမလဲ။', 'How will she write today, truthfully?'),
+  writeHome: [l('ဒီနေ့အကြောင်း စာရေးခန်းထဲ ပြန်ရေးမှ ဖြစ်မယ်။', 'I should write today down at my Writing Room.')],
+  nightQ: l('ဒီနေ့အကြောင်း အမှန်အတိုင်း ဘယ်လို ရေးမလဲ။', 'How will she write today, truthfully?'),
   nightChoices: [
     l('ကျွန်မကြောင့် ဦးဖိုးထော် တံခါးဖွင့်ပြီး လူတွေနဲ့ ပြန်ပျော်နေပြီ။ ကိုဖြိုးလည်း ချမ်းသာမှုမှန်သမျှ ငြင်းလိုက်ပြီ။', 'Thanks to me, U Hpo Htaw opened his gate and is happy among people again. And Ko Phyo turned down every kind of wealth.'),
-    l('ဦးဖိုးထော်က တံခါးကို သူ့ဘာသာ ဆုံးဖြတ်ပြီး လမ်းကို စောင့်ကြည့်တာ ရပ်လိုက်တယ်။ ပန်းဥတွေ ဝေပေးတယ်။ ကိုဖြိုးက စက္ကူထုပ်ကို အခြောက်တိုင်း ချိန်တယ်။ ငွေ နည်းပေမဲ့ ဒီည အရင် အိပ်ပျော်တယ်။ အိုးသမားတစ်ယောက်က သူ့စာရွက်ကို သူ့ဘာသာ ဖြုတ်သွားတယ်။', 'U Hpo Htaw decided his gate himself and stopped watching the lane; he gave his bulbs away. Ko Phyo weighed his bale dry: less money, and tonight he fell asleep first. A potter took his own note off my board.'),
-    l('တစ်ယောက်တည်း အေးအေး နေလို့ မရဘူး။ ရိုးရိုးသားသား နေရင် ဆင်းရဲတာပဲ ကျန်မယ်။', 'Nobody can be alone in peace. The honest only stay poor.'),
+    l('ဦးဖိုးထော်က တံခါးကို သူ့ဘာသာ ဆုံးဖြတ်ပြီး လမ်းကို စောင့်ကြည့်တာ ရပ်လိုက်တယ်။ ပန်းဥတွေ ဝေပေးတယ်။ ကိုဖြိုးက စက္ကူထုပ်ကို အခြောက်အတိုင်း ချိန်တယ်။ ငွေ နည်းပေမဲ့ ဒီည အရင် အိပ်ပျော်တယ်။ အိုးသမားတစ်ယောက်က သူ့စာရွက်ကို သူ့ဘာသာ ဖြုတ်သွားတယ်။', 'U Hpo Htaw decided his gate himself and stopped watching the lane; he gave his bulbs away. Ko Phyo weighed his bale dry: less money, and tonight he fell asleep first. A potter took his own note off my board.'),
+    l('တစ်ယောက်တည်း အေးအေးဆေးဆေး နေလို့ မရဘူး။ ရိုးရိုးသားသား နေရင် ဆင်းရဲတာပဲ ကျန်မယ်။', 'Nobody can be alone in peace. The honest only stay poor.'),
   ],
   nightWrong: [
-    [l('(မဟုတ်ဘူး… ဒါ ချော့ပြောတာ။ တံခါးက သူ့ဆုံးဖြတ်ချက်။ ကျွန်မကြောင့် မဟုတ်ဘူး။ ဦးကြည်ငြိမ်းလည်း ချမ်းသာတုန်းပဲ။)', '(No… that flatters. The gate was his decision, not mine. And U Kyi Nyein is still rich.)')],
+    [l('(မဟုတ်ဘူး… ဒါ မြှောက်ပြောတာ။ တံခါးက သူ့ဆုံးဖြတ်ချက်။ ကျွန်မကြောင့် မဟုတ်ဘူး။ ဦးကြည်ငြိမ်းလည်း ချမ်းသာတုန်းပဲ။)', '(No… that flatters. The gate was his decision, not mine. And U Kyi Nyein is still rich.)')],
     [],
     [l('(မဟုတ်ဘူး… ဒါ အားလျှော့ပြောတာ။ ကိုဖြိုးရဲ့ မီး အရင်ငြိမ်းတာ ကိုယ်တိုင် မြင်ခဲ့တယ်။)', "(No… too gloomy. I saw Ko Phyo's lamp go out first myself.)")],
   ],
   bulbsPlant: [l('ဦးဖိုးထော်ရဲ့ ပန်းဥတွေကို တိုးတိုးရဲ့ ပဲပင်ဘေးမှာ စိုက်လိုက်မယ်။ ငါးည အိပ်ပြီးရင် ပွင့်မယ်။', "I'll plant U Hpo Htaw's bulbs beside Toe Toe's beans. Five nights' sleep, then flowers.")],
   sleepQ: l('ဒီည မှတ်စုစာမျက်နှာလေး ဘယ်သူ့အိမ်မှာ အိပ်မလဲ။', "Whose house does tonight's notebook page sleep at?"),
   stamp15: l('စာမျက်နှာ ၁၅ — သူငယ်ချင်းကောင်း\nဘယ်သူမှ မမြင်တဲ့ ဒုက္ခကို နားထောင်ပေးတယ်။ ပြီးတော့ ကိုယ်တိုင် သူငယ်ချင်း ဖြစ်လာတယ်။', 'Page 15 — A Good Friend\nHe was heard when nobody saw his trouble; today he was the friend himself.'),
-  stamp16: l('စာမျက်နှာ ၁၆ — တစ်ယောက်တည်း နေချင်ခြင်း\nဆက်ပါ၊ မနွယ်ပါနဲ့။ တခြားသူ တစ်ယောက်အတွက်လည်း မှန်ကြောင်း ကိုယ်တိုင် တွေ့ခဲ့ပြီ။', "Page 16 — Wanting to Be Alone\nConnect; don't entwine. She saw for herself that it holds for someone else too."),
-  stamp17: l('စာမျက်နှာ ၁၇ — မကောင်းတာလုပ်ပြီး ချမ်းသာခြင်း\nချမ်းသာတာနဲ့ အေးချမ်းတာ မတူဘူး။ တခြားသူ တစ်ယောက်အတွက်လည်း မှန်ကြောင်း ကိုယ်တိုင် တွေ့ခဲ့ပြီ။', 'Page 17 — Getting Rich by Doing Wrong\nPlenty and ease are not the same. She saw for herself that it holds for someone else too.'),
+  stamp16: l('စာမျက်နှာ ၁၆ — တစ်ယောက်တည်း နေချင်ခြင်း\nဆက်ပါ၊ မနွယ်ပါနဲ့။ တခြားသူ တစ်ယောက်အတွက်လည်း မှန်ကန်ကြောင်း ကိုယ်တိုင် တွေ့ခဲ့ပြီ။', "Page 16 — Wanting to Be Alone\nConnect; don't entwine. She saw for herself that it holds for someone else too."),
+  stamp17: l('စာမျက်နှာ ၁၇ — မကောင်းတာလုပ်ပြီး ချမ်းသာခြင်း\nချမ်းသာတာနဲ့ အေးချမ်းတာ မတူဘူး။ တခြားသူ တစ်ယောက်အတွက်လည်း မှန်ကန်ကြောင်း ကိုယ်တိုင် တွေ့ခဲ့ပြီ။', 'Page 17 — Getting Rich by Doing Wrong\nPlenty and ease are not the same. She saw for herself that it holds for someone else too.'),
   page17b: l('မနက်ဖြန် မနက် ကိုဖြိုး ဝယ်သူနဲ့ တွေ့မယ်။', 'Tomorrow morning Ko Phyo meets the buyer.'),
   tomorrow: l('နောက်တစ်နေ့ မနက် ရောက်ပြီ။', 'Morning comes.'),
 };

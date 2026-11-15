@@ -363,8 +363,8 @@ export async function create(story) {
         try {
           call(game.maya, 'emote', 'think');
           await D.say('maya', [q[0]], { face: 'think' });
-          for (;;) {
-            const i = await D.choose(q[1]);
+          for (const again = D.retry(); ;) {
+            const i = await again(q[1]);
             if (i === 0) break;
             await D.say('maya', L.deskWrong, { face: 'think' });
           }
@@ -492,8 +492,8 @@ export async function create(story) {
       if (!F('ttMet')) { await D.say('toetoe', L.tt1, { face: 'sad', mood: 'down' }); F('ttMet', true); }
       else await D.say('toetoe', [L.tt1[1]], { face: 'sad' });
       if (!F('class')) await D.say('toetoe', L.ttTeacher, { face: 'think' });
-      for (;;) {
-        const i = await D.choose(L.ttChoices);
+      for (const again = D.retry(); ;) {
+        const i = await again(L.ttChoices);
         if (i === 0) { await D.say('toetoe', L.ttRecite, { face: 'sad' }); await D.say('maya', L.ttReciteMaya, { face: 'think' }); continue; }
         if (i === 1) { await D.say('toetoe', L.ttTold, { face: 'think' }); await D.say('maya', L.ttToldMaya, { face: 'think' }); continue; }
         break;
@@ -761,8 +761,8 @@ export async function create(story) {
   async function refusal() {
     if (!F('ohnNo')) { await D.say('dawohn', L.oh1, { face: 'think' }); F('ohnNo', true); }
     else await D.say('dawohn', L.ohAgain, { face: 'smile' });
-    for (;;) {
-      const i = await D.choose(L.ohChoices);
+    for (const again = D.retry(); ;) {
+      const i = await again(L.ohChoices);
       if (i === 0) { await D.say('maya', L.ohLeave, { face: 'think' }); return; }
       if (i === 1) { await D.say('dawohn', L.ohWrong, { face: 'hot', emote: 'fists' }); await D.say('maya', L.ohWrongMaya, { face: 'think' }); F('ohnSteam', 1); continue; }
       break;
@@ -806,8 +806,8 @@ export async function create(story) {
     if (md > 1.6 || md < 0.8) await Promise.race([story.walkPerson('micho', mp.x + side, mp.y + 0.1, 1.4), wait(4000)]);
     pair('micho');
     await D.say('micho', L.mcLoadQ, { face: 'worried' });
-    for (;;) {
-      const i = await D.choose(L.mcChoices);
+    for (const again = D.retry(); ;) {
+      const i = await again(L.mcChoices);
       if (i === 0) { await D.say('micho', L.mcTwelve, { face: 'sad' }); continue; }
       if (i === 1) { await D.say('micho', L.mcOne, { face: 'think' }); continue; }
       break;

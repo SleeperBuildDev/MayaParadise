@@ -7,6 +7,7 @@ import { createPerson } from './people.js';
 import { CAST, castById } from './cast.js';
 import { createFoot } from './onfoot.js';
 import { createWalker } from '../game/nav.js';
+import { pointAt, tangentAt } from '../game/world/roads.js';
 import { loadSave, persist, resetSave } from './save.js';
 import { createDialog } from './dialog.js';
 import { loadDay } from './days.js';
@@ -39,6 +40,41 @@ export async function createStory(game) {
   const people = new Map(); // id -> { p, home: {x,z,h}, talk() }
   const personObstacles = [];
   const v = new THREE.Vector3();
+  // ---- nobody is put to stand on a road (owner 2026-11-15: "standing on the road, that's not okay"): a spot outdoors
+  // on a road's surface (gold strips included: under ROAD_STAND from its middle line) is moved straight out to the
+  // pavement beside it, the nearer side first, where nothing solid and no other road is. Sketched paths and bridge
+  // decks are not roads to keep off. Facing is kept. (A day's scripted walk can still pass over a road.)
+  const ROAD_STAND = 1.6, PAVE = [1.75, 2.0, 2.3];
+  const rp = new THREE.Vector3(), rt = { x: 0, z: 0 };
+  /** is (x, z) on a road's surface (not a sketched path or a bridge deck)? */
+  function onRoad(x, z) {
+    const n = story.openWorld?.net?.nearest?.(x, z);
+    return !!n && n.dist < ROAD_STAND && !['pencil', 'deck', 'ribbon'].includes(n.edge.style);
+  }
+  /** does the straight walk from (x0, z0) to (x1, z1) go over a road? (daily life keeps to its own side of the street) */
+  function crossesRoad(x0, z0, x1, z1) {
+    const n = Math.ceil(Math.hypot(x1 - x0, z1 - z0) / 0.5);
+    for (let i = 1; i < n; i++) if (onRoad(x0 + ((x1 - x0) * i) / n, z0 + ((z1 - z0) * i) / n)) return true;
+    return false;
+  }
+  function offRoad(at) {
+    const ow = story.openWorld, net = ow?.net;
+    if (!at || !net?.nearest || typeof at.x !== 'number') return at;
+    const n = net.nearest(at.x, at.z);
+    if (!n || n.dist >= ROAD_STAND || ['pencil', 'deck', 'ribbon'].includes(n.edge.style)) return at;
+    pointAt(n.edge, n.s, rp);
+    tangentAt(n.edge, n.s, rt);
+    let nx = at.x - rp.x, nz = at.z - rp.z;
+    const l = Math.hypot(nx, nz);
+    if (l > 0.05) { nx /= l; nz /= l; } else { nx = -rt.z; nz = rt.x; }
+    for (const side of [1, -1]) for (const w of PAVE) {
+      const x = rp.x + nx * side * w, z = rp.z + nz * side * w;
+      if (ow.space?.collides?.(x, z, 0.3)) continue;
+      if ((net.nearest(x, z)?.dist ?? 99) < ROAD_STAND) continue;
+      return { ...at, x: +x.toFixed(2), z: +z.toFixed(2) };
+    }
+    return at;
+  }
 
   const story = {
     game, save, people, talking: false,
@@ -46,9 +82,10 @@ export async function createStory(game) {
     dialog: null,
     foot: null,
     /** Put a townsperson on the map. at: { x, z, heading } */
-    spawn(id, at) {
+    spawn(id, at, o = {}) {
       const c = castById(id);
       if (!c || people.has(id)) return people.get(id);
+      if (!o.indoor) at = offRoad(at); // (a room's spots are its own: doors.js passes indoor)
       const p = createPerson(c.look);
       p.root.position.set(at.x, 0, at.z);
       p.root.rotation.y = at.heading ?? 0;
@@ -370,10 +407,11 @@ export async function createStory(game) {
     if (goWork) { L.tx = J.spot.x; L.tz = J.spot.z; L.toJob = true; }
     else {
       L.toJob = false;
+      const inRoad = onRoad(pos.x, pos.z); // (out in the road already: any way off it will do)
       for (let k = 0; k < 8; k++) {
         const a = Math.random() * Math.PI * 2, r = Math.sqrt(Math.random()) * J.area.r;
         const x = J.area.x + Math.cos(a) * r, z = J.area.z + Math.sin(a) * r;
-        if (!blockedAt(x, z, e) && clearLine(pos.x, pos.z, x, z, e)) { L.tx = x; L.tz = z; break; }
+        if (!blockedAt(x, z, e) && !onRoad(x, z) && (inRoad || !crossesRoad(pos.x, pos.z, x, z)) && clearLine(pos.x, pos.z, x, z, e)) { L.tx = x; L.tz = z; break; } // (never a stop in the road, nor back and forth over it)
         L.tx = pos.x; L.tz = pos.z;
       }
     }
@@ -401,6 +439,7 @@ export async function createStory(game) {
   story.setJob = (id, job) => {
     const e = people.get(id);
     if (!e) return;
+    if (job?.spot && !e.indoor) { const s = offRoad(job.spot); if (s !== job.spot) job = { ...job, spot: s }; } // (their work spot: off the road too)
     e.job = job;
     e.life = null;
     // walk grid limited to their own patch (plus the job spot): small, so it builds fast

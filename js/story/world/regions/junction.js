@@ -292,7 +292,8 @@ add({ k: 'fence', x: 145.2, z: 272.6, len: 6, ry: Math.PI / 2 });
 add({ k: 'fence', x: 151.0, z: 274.4, len: 5, ry: Math.PI / 2 });
 add({ k: 'flowers', x: 145.0, z: 262.6, seed: 95 }); add({ k: 'planters', x: 151.4, z: 262.4, seed: 96 });
 
-// ---- the townsfolk at their work (junction-folk.js `jFolk`: still figures merged into the chunk, no draw call
+// ---- the townsfolk at their work (junction-folk.js `jFolk`: still figures; RETIRED 2026-11-15, region.js STILL_FOLK drops them
+// at merge: the owner wants no statue-like people. The calls stay so the fill pass lays out as before.
 // of their own) and the chalk boards on the footpaths (prices and sayings, never a way to go). North frontages:
 // the figure stands on the strip before the shop, facing the street (+Z). Clear of Day 7's square, Day 8's
 // well queue, bench and slip board, and every doorstep.
@@ -526,7 +527,7 @@ export const PLACES = {
   hut: { x: HUT.x, z: HUT.z, w: HUT.w, d: HUT.d }, hutDoor: { x: HUT.x, z: HUT.z + HUT.d / 2 + 0.35 },
   board: { x: 76.0, z: 294.3, ry: -0.9 }, rope: { x: 79, z: 293, len: 19 }, pier: { x: 99, z: 293 },
   letter: { x: LET.x, z: LET.z }, letterDoor: { x: LET.x - 1.25, z: LET.z + LET.d / 2 + 0.35 }, box: { x: 125.9, z: 298.2 },
-  kominHouse: { x: KOMIN.x, z: KOMIN.z }, ladder: { x: 134.7, z: 298.15 }, komin: { x: 133.8, z: 298.6, h: 2.6 },
+  kominHouse: { x: KOMIN.x, z: KOMIN.z }, ladder: { x: 134.7, z: 298.15 }, komin: { x: 133.8, z: 298.2, h: 2.6 },
   tea: { x: TEA.x, z: TEA.z }, teaDoor: { x: TEA.x, z: TEA.z + TEA.d / 2 + 0.3 }, cart: { x: 144.5, z: 298.2 },
   slips: { x: 151.6, z: 297.6 }, school: { x: SCH.x, z: SCH.z }, schoolDoor: { x: SCH.x, z: SCH.z + SCH.d / 2 + 0.6 },
   well: { x: 149.6, z: 305.0 }, stall: { x: 165.8, z: MF - 0.8 },
@@ -554,8 +555,8 @@ export function useLive(ow, names, on = true) {
 // chapter's lesson and never at where to go; the day scripts give them their real lines.
 // ---------------------------------------------------------------------------------
 export const PEOPLE = [
-  { id: 'komin', x: 133.8, z: 298.6, heading: 2.6, hello: { my: 'ပေးတာကို ကပ်ရုံပဲ ဗျ။ မှန်မမှန်ကတော့ ကိုယ့်မျက်စိနဲ့ကိုယ် ကြည့်ပေါ့။', en: "I just paste what I'm given. True or not, that's for your own eyes." },
-    job: { area: { x: 133.6, z: 298.6, r: 1.1 }, spot: { x: 133.8, z: 298.6, h: 2.6 }, mood: 'work', workChance: 0.85, workFor: [8, 16] } },
+  { id: 'komin', x: 133.8, z: 298.2, heading: 2.6, hello: { my: 'ပေးတာကို ကပ်ရုံပဲ ဗျ။ မှန်မမှန်ကတော့ ကိုယ့်မျက်စိနဲ့ကိုယ် ကြည့်ပေါ့။', en: "I just paste what I'm given. True or not, that's for your own eyes." },
+    job: { area: { x: 133.6, z: 298.4, r: 1.1 }, spot: { x: 133.8, z: 298.2, h: 2.6 }, mood: 'work', workChance: 0.85, workFor: [8, 16] } },
   { id: 'kosan', x: 121.6, z: 302.9, heading: -0.5, hello: { my: 'တံတား ယိမ်းတယ်လို့ လူတွေ ပြောကြတယ်။ ကျွန်တော်ကတော့ နေ့တိုင်း ကိုယ့်ခြေနဲ့ကိုယ် စမ်းတယ်။', en: 'Folk say the bridge sways. Me, I test it every day with my own feet.' },
     job: { area: { x: 122.4, z: 303.0, r: 1.4 }, spot: { x: 121.6, z: 302.9, h: -0.5 }, mood: 'work', workChance: 0.7, workFor: [6, 12] } },
   { id: 'kan', x: 157.9, z: 310.3, heading: 0.1, hello: { my: 'သတင်းစာထဲ ပါတယ်ဆိုတော့ မှန်မှာပေါ့… မဟုတ်ဘူးလား။', en: "It's in the paper, so it must be true… mustn't it?" },
@@ -563,10 +564,10 @@ export const PEOPLE = [
   { id: 'dawhla', x: 151.9, z: 306.2, heading: -2.0, hello: { my: 'ကြားရုံနဲ့ မယုံသေးဘူး။ ကိုယ်တိုင် လာကြည့်တာ။', en: "I don't believe it just because I heard it. I came to look myself." },
     job: { area: { x: 152.2, z: 306.4, r: 1.2 }, spot: { x: 151.9, z: 306.2, h: -2.0 }, mood: 'read', workChance: 0.5, workFor: [5, 9] } },
   // Ma Thida writes letters for people at her doorstep; Daw Sein minds her tea cart; Moe Moe at the hopscotch
-  { id: 'thida', x: 122.4, z: 298.5, heading: 0.3, hello: { my: 'ကြားခဲ့တာကို စာရေးပေးပါတဲ့။ ကျွန်မက ပြန်မေးတယ်၊ ကိုယ်တိုင် မြင်ခဲ့လား လို့။', en: 'They ask me to write down what they heard. I ask them back: did you see it yourself?' },
-    job: { area: { x: 122.4, z: 298.6, r: 0.9 }, spot: { x: 122.4, z: 298.5, h: 0.3 }, mood: 'read', workChance: 0.8, workFor: [8, 16] } },
-  { id: 'sein', x: 145.6, z: 299.0, heading: -1.2, hello: { my: 'ဒီဆိုင်မှာ လက်ဖက်ရည်ထက် သတင်းက ပိုမြန်မြန် ကုန်တယ်။ မှန်တာ မမှန်တာ ရောမွှေပြီးပေါ့။', en: 'In this shop the news goes faster than the tea. True and untrue, all stirred in together.' },
-    job: { area: { x: 145.8, z: 299.2, r: 1.0 }, spot: { x: 145.6, z: 299.0, h: -1.2 }, mood: 'work', workChance: 0.8, workFor: [6, 14] } },
+  { id: 'thida', x: 122.4, z: 298.2, heading: 0.3, hello: { my: 'ကြားခဲ့တာကို စာရေးပေးပါတဲ့။ ကျွန်မက ပြန်မေးတယ်၊ ကိုယ်တိုင် မြင်ခဲ့လား လို့။', en: 'They ask me to write down what they heard. I ask them back: did you see it yourself?' },
+    job: { area: { x: 122.4, z: 298.6, r: 0.9 }, spot: { x: 122.4, z: 298.2, h: 0.3 }, mood: 'read', workChance: 0.8, workFor: [8, 16] } },
+  { id: 'sein', x: 145.6, z: 298.2, heading: -1.2, hello: { my: 'ဒီဆိုင်မှာ လက်ဖက်ရည်ထက် သတင်းက ပိုမြန်မြန် ကုန်တယ်။ မှန်တာ မမှန်တာ ရောမွှေပြီးပေါ့။', en: 'In this shop the news goes faster than the tea. True and untrue, all stirred in together.' },
+    job: { area: { x: 145.8, z: 298.4, r: 1.0 }, spot: { x: 145.6, z: 298.2, h: -1.2 }, mood: 'work', workChance: 0.8, workFor: [6, 14] } },
   { id: 'moemoe', x: 137.4, z: 313.4, heading: -0.3, hello: { my: 'ကိုယ့်ပေါင်းလဒ် ကိုယ် မှန်တယ်လို့ ထင်တာပဲ။ …ထင်ရုံပဲနော်။', en: 'I think my own sum is right. …I only think so, mind.' },
     job: { area: { x: 137.0, z: 313.0, r: 1.4 }, spot: { x: 137.4, z: 313.4, h: -0.3 }, mood: 'play', workChance: 0.6, workFor: [6, 12] } },
   ...FOLK_PEOPLE, // the fill pass's townsfolk at their yard work (junction-people.js; they appear once cast.js lists them)

@@ -10,6 +10,7 @@
 // finger. Practice lowers the wobble (the caller passes less each attempt), and the player's care
 // matters as much: a rushed or careless trace fails however small the wobble is.
 import { tr } from '../../game/ui.js';
+import { cue } from './cue.js';
 
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -77,6 +78,16 @@ export function trace({ title = '', hint = '', path = 'stitch', wobble = 10, tol
       g.setLineDash([]);
     }
     draw();
+    // the cue: after ~4 s without a line, a finger walks the first stroke not yet followed (from the gold dot)
+    const strokes = [];
+    P.forEach((q, i) => { if (!i || q[2]) strokes.push([]); strokes[strokes.length - 1].push(q); });
+    const followed = (st) => st.filter((q, i) => i % 4 === 0).every((q) => drawn.some((p) => Math.hypot(p[0] - q[0], p[1] - q[1]) < tolerance * 1.6));
+    const C = cue(wrap);
+    C.set({ kind: 'trace', r: 12, path: () => {
+      const st = strokes.find((x) => !followed(x)) || strokes[0];
+      const b = cv.getBoundingClientRect();
+      return st.map((q) => [b.left + q[0], b.top + q[1]]);
+    }, label: { my: 'ရွှေအစက်ကနေ စပြီး အစက်လေးတွေအတိုင်း ဆွဲပါ', en: 'Start at the gold dot and follow the dots' } });
 
     let down = false, t0 = 0, len = 0;
     const local = (e) => { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
@@ -146,6 +157,7 @@ export function trace({ title = '', hint = '', path = 'stitch', wobble = 10, tol
       const s = wrap.querySelector('.act-score');
       s.textContent = ok ? '✓' : '…';
       s.className = `act-score ${ok ? 'good' : 'again'}`;
+      C.stop();
       await wait(700);
       wrap.remove();
       document.getElementById('game').classList.remove('acting');

@@ -94,15 +94,30 @@ export function match({ title = '', hint = '', pairs = [], shuffle = true } = {}
     let sel = null; // { side, i, el }
     const updateCount = () => bi(countEl, { my: `${myNum(joined.size)} / ${myNum(n)} တွဲပြီး`, en: `${joined.size} of ${n} matched` });
     updateCount();
+    // the "where do I tap?" cue: first the next stop on the left; once one is picked, every open card on the
+    // other side glows the same (which one is the player's own reading; the cue never points at the pair)
+    const open = (arr) => arr.filter((el, k) => el && !joined.has(k));
+    function cueStep() {
+      if (joined.size >= n) return A.cue.set(null);
+      if (!sel) {
+        const i = L.findIndex((_, k) => !joined.has(k));
+        return A.cue.set({ kind: 'tap', at: L[i], label: { my: 'ဘယ်ဘက်က တစ်ခုကို အရင်နှိပ်ပါ', en: 'First tap one on the left' } });
+      }
+      A.cue.set({ kind: 'many', many: () => open(sel?.side === 'R' ? L : R), delay: 3500,
+        label: sel.side === 'L' ? { my: 'ပြီးရင် ညာဘက်က သူနဲ့ကိုက်တာကို နှိပ်ပါ', en: 'Now tap its match on the right' }
+          : { my: 'ပြီးရင် ဘယ်ဘက်က သူနဲ့ကိုက်တာကို နှိပ်ပါ', en: 'Now tap its match on the left' } });
+    }
+    cueStep();
 
     function tap(side, i, el) {
       if (joined.has(i) || A.closed()) return;
       if (!sel || sel.side === side) {
         if (sel) sel.el.classList.remove('on');
-        if (sel && sel.el === el) { sel = null; return; }
+        if (sel && sel.el === el) { sel = null; cueStep(); return; }
         sel = { side, i, el };
         el.classList.add('on');
         buzz(6);
+        cueStep();
         return;
       }
       const a = sel;
@@ -110,6 +125,8 @@ export function match({ title = '', hint = '', pairs = [], shuffle = true } = {}
       a.el.classList.remove('on');
       if (a.i === i) join(i);
       else miss(a.el, el);
+      cueStep();
+      if (a.i !== i) A.cue.wrong();
     }
     function join(i) {
       joined.add(i);
@@ -172,7 +189,7 @@ export function match({ title = '', hint = '', pairs = [], shuffle = true } = {}
     ro.observe(board);
 
     async function finish() {
-      A.setHint({ my: 'လမ်းလျှောက်ခဲ့တာတွေက စာအုပ်ထဲက သင်ခန်းစာတွေပဲ', en: 'The walk was the lesson all along.' }, 'good');
+      A.setHint({ my: 'လျှောက်ခဲ့တဲ့ လမ်းတစ်လျှောက်လုံးက သင်ခန်းစာတွေချည်းပါပဲ', en: 'The walk was the lesson all along.' }, 'good');
       await wait(450);
       board.classList.add('all');
       await A.seal(true);

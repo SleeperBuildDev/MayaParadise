@@ -5,6 +5,10 @@
 //   const i = await d.choose([{my, en}, ...])        index of the picked option
 //                                                    an option { hold: true, my, en } is a held Step back: drawn
 //                                                    like the talk's button, it fires after a 0.8 s hold
+//   d.choose(options, { hide: (o, i) => bool })      hidden options keep their index (and their DOM slot)
+//   const again = d.retry(); for (;;) { const i = await again(options); ... }
+//                                                    a question asked again after a wrong pick: the options
+//                                                    already picked are left out, so the same set never shows twice
 //   d.bark('maya', {my, en}, ms, { name, actor })    a short non-blocking bubble
 //   say/bark opts.name: {my, en} (or a string) names a speaker who is not in cast.js (a walk-on: the tea
 //       master, "The class", a bridge hand); opts.actor: that walk-on's person (people.js) for the face
@@ -34,7 +38,8 @@ export function createDialog(game, story) {
     };
   }
 
-  return {
+  const optKey = (o) => (o && typeof o === 'object' ? `${o.en ?? ''}|${o.my ?? ''}` : String(o));
+  const api = {
     async say(id, lines, opts = {}) {
       if (!Array.isArray(lines)) lines = [lines];
       const s = speaker(id, opts);
@@ -53,7 +58,19 @@ export function createDialog(game, story) {
       nameEl.textContent = tr(MAYA);
     },
 
-    choose(options) {
+    // a retried question: each call leaves out what was already picked through this same `again`
+    // (matched by text, so a reshuffled set works too); if nothing would be left, all show
+    retry() {
+      const tried = new Set();
+      return async (options, o = {}) => {
+        const left = options.filter((x) => !tried.has(optKey(x))).length;
+        const i = await api.choose(options, left ? { ...o, hide: (x) => tried.has(optKey(x)) } : o);
+        if (options[i] !== undefined) tried.add(optKey(options[i]));
+        return i;
+      };
+    },
+
+    choose(options, opts = {}) {
       return new Promise((resolve) => {
         box?.remove();
         box = document.createElement('div');
@@ -96,6 +113,7 @@ export function createDialog(game, story) {
               pick(i);
             });
           }
+          if (typeof opts.hide === 'function' && opts.hide(o, i)) b.hidden = true; // tried already: kept in its slot, not shown
           box.appendChild(b);
         });
         document.getElementById('game').appendChild(box);
@@ -107,6 +125,7 @@ export function createDialog(game, story) {
       ui.bark?.(tr(line), { face: s.face('smile'), ms });
     },
   };
+  return api;
 }
 
 function injectStyle() {
@@ -114,6 +133,7 @@ function injectStyle() {
   const s = document.createElement('style');
   s.id = 'rc-dialog-style';
   s.textContent = `
+  #story-choices button[hidden] { display: none !important; }
   #story-choices button.hold { position: relative; display: grid; grid-template-columns: 40px 1fr; align-items: center; column-gap: 10px; color: #6E1F2A;
     border-color: #6E1F2A; box-shadow: 0 3px 0 #4A1520; touch-action: none; -webkit-user-select: none; user-select: none; --p: 0; }
   #story-choices button.hold .ring { grid-row: span 2; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center;

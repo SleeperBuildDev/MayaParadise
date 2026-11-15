@@ -7,6 +7,7 @@ import * as THREE from '../game/three.js';
 import { mergeGeometries } from '../game/three.js';
 import { tr } from '../game/ui.js';
 import { createPerson } from './people.js';
+import { cue } from './acts/cue.js';
 
 const call = (o, fn, ...a) => (o && typeof o[fn] === 'function' ? o[fn](...a) : undefined);
 
@@ -178,6 +179,13 @@ export function lookLabels(game, items, { onTap = null } = {}) {
     return b;
   });
   document.getElementById('game').appendChild(wrap);
+  // the cue (a mission screen, so allowed): after ~4 s, a ring on the next label not yet tapped
+  const C = cue(wrap);
+  const gameEl = document.getElementById('game');
+  C.set({ kind: 'tap', when: () => !gameEl.classList.contains('talking') && !gameEl.classList.contains('choosing'),
+    at: () => els.find((b, i) => !items[i].done && b.style.display !== 'none') || null,
+    label: { my: 'ခဲတံစာတွေကို တစ်ခုချင်း နှိပ်ကြည့်ပါ', en: 'Tap each pencil label' } });
+  els.forEach((b) => b.addEventListener('click', () => C.set(C.spec())));
   let raf = 0;
   const place = () => {
     items.forEach((it, i) => {
@@ -196,7 +204,7 @@ export function lookLabels(game, items, { onTap = null } = {}) {
   if (items.every((x) => x.done)) setTimeout(resolveAll, 0);
   return {
     done,
-    dispose() { cancelAnimationFrame(raf); wrap.remove(); },
+    dispose() { cancelAnimationFrame(raf); C.stop(); wrap.remove(); },
   };
 }
 

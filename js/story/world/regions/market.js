@@ -109,7 +109,8 @@ const addAll = (list) => { for (const [k, x, z, extra] of list) add({ k, x, z, .
 // a lane's north frontage: buildings' fronts stand at lane z - 2.6 (the kerb, a footpath, a strip)
 const FRONT = (z) => z - 2.6;
 const PI = Math.PI;
-// a still townsperson at work (market-life.js `folk`: merged into the chunk, costs no draw call)
+// a still townsperson at work (market-life.js `folk`). RETIRED 2026-11-15: region.js STILL_FOLK drops every one at merge
+// (the owner wants no statue-like people); the calls stay so the seeded passes round them lay out as before.
 const folk = (x, z, ry, pose, seed, extra = {}) => add({ k: 'folk', x, z, ry, pose, seed, ...extra });
 
 // ---- the envelope road (unchanged; the same seeded trees)
@@ -380,9 +381,8 @@ folk(35.9, 344.2, -0.6, 'squat', 743, { woman: true, hat: 'sun' });
   add({ k: 'kiteRack', x: -39.0, z: 313.6 });
   add({ k: 'bench', x: -52.4, z: 309.6, ry: 0 });
   folk(-52.8, 309.5, 0, 'sit', 732, { stool: false, woman: true });
-  // children flying their own kites (each on their own line, held in their own hands)
-  add({ k: 'kiteUp', x: -44.6, z: 317.4, h: 4.6, seed: 3 }); folk(-44.6, 317.4, PI - 0.5, 'kid', 733, { hold: 'kite' });
-  add({ k: 'kiteUp', x: -37.4, z: 320.8, h: 4.0, seed: 8 }); folk(-37.4, 320.8, PI - 0.4, 'kid', 734, { hold: 'kite', woman: true });
+  // (the two flying kites went with the still children who held them, 2026-11-15: a line down to nobody's hand.
+  // The still `folk` calls left in this file draw nothing: region.js STILL_FOLK)
   add({ k: 'goat', x: -50.6, z: 319.0, ry: 0.4 });
   add({ k: 'hens', x: -41.6, z: 324.4, seed: 51 });
   for (const [k, x, z, s] of [['padauk', -55.4, 314.2, 1.15], ['rain', -49.0, 325.8, 1.2], ['padauk', -35.4, 307.8, 1.0], ['rain', -58.0, 324.6, 1.1]]) add({ k, x, z, s });

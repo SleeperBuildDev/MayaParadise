@@ -74,6 +74,9 @@ export function ownwords({ title = '', hint = '', prompt = '', fragments = [], n
       const n = placed().length;
       [...needEl.children].forEach((d, k) => d.classList.toggle('on', k < n));
       lineEl.classList.toggle('empty', n === 0);
+      // cue: the tiles still in the tray all glow alike (which ones is the player's choice)
+      A.cue.set(finished || n >= need ? null : { kind: 'many', many: () => tiles.filter((t) => !t.placed).map((t) => t.el),
+        label: { my: 'စာလုံးတွေကို နှိပ်ပြီး စာကြောင်းပေါ် တင်ပါ', en: 'Tap words to put them on the line' } });
     }
     refresh();
 
@@ -106,12 +109,14 @@ export function ownwords({ title = '', hint = '', prompt = '', fragments = [], n
       await wait(900);
       for (const t of parroted) move(t, false);
       refresh();
+      A.cue.wrong();
       busy = false;
     }
 
     // the line, written out in pencil: word by word, the pencil riding the end of the writing
     async function write(p) {
       finished = true;
+      A.cue.set(null);
       const ordered = p.slice().sort((a, b) => a.i - b.i);
       const line = { my: ordered.map((t) => t.f.my).join(' '), en: ordered.map((t) => t.f.en).join(' ') };
       A.setHint({ my: 'သူ့စကားနဲ့ သူ ရေးလိုက်ပြီ', en: 'Written in his own words' }, 'good');

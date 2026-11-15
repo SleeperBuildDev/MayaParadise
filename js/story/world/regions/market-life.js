@@ -8,7 +8,7 @@
 //   stampHall { w, d }        the stamp printers' hall: sawtooth roof, a press seen through the open loading bay,
 //                             sheets drying on the gallery. No room behind it (its loading bay is a half-shut shutter).
 // PROP:
-//   folk { pose, seed, hold, stool }  a townsperson at work, still (merged; costs no draw call): pose 'stand' | 'sit' |
+//   folk { pose, seed, hold, stool }  a townsperson at work, still (RETIRED 2026-11-15: region.js STILL_FOLK drops it): pose 'stand' | 'sit' |
 //                             'squat' | 'sweep' | 'carry' | 'head' (basket on the head) | 'kid' | 'read' | 'pour'
 //   waterPots { sign? }       the roadside drinking-water stand: clay pots under a little roof, a tin cup on a cord
 //   bambooFence { len, gate? } a low split-bamboo yard fence (gate: a gap with two taller posts)

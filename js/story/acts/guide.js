@@ -25,7 +25,7 @@ const T = {
   him: 'maungnge', her: 'sunwe',
   again: { my: 'ဒီတံဆိပ် ပြန်စမယ်', en: 'This label again' },
   waitFinger: { my: 'ခဲတံကို သူ့လက်ချောင်းဆီ ပြန်ရွှေ့ပေးပါ', en: 'Bring the pencil back to his finger' },
-  alone: { my: 'ဒီတစ်ခု သူ ကိုယ်တိုင် ဖတ်မယ် — လက်ကို ဘေးမှာ ထားပါ', en: 'He reads this one himself: keep your hands still' },
+  alone: { my: 'ဒီတစ်ခု သူ ကိုယ်တိုင် ဖတ်မယ် — လက်ကို ငြိမ်ငြိမ်ထားပါ', en: 'He reads this one himself: keep your hands still' },
   next: { my: 'နောက်တစ်ထုပ်', en: 'Next parcel' },
 };
 
@@ -42,7 +42,7 @@ export function guide({ title = '', hint = '', labels = [], pace = 70, lag = 0.6
     btn.className = 'gd-readfor';
     btn.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l1.2-4.6L16.5 4.1a2 2 0 0 1 2.8 0l.6.6a2 2 0 0 1 0 2.8L8.6 18.8z"/><path d="M14.5 6l3.5 3.5"/></svg><span class="ak-bi gd-rf-t"></span>
       <b class="gd-cost" aria-hidden="true"><i class="gd-fing"></i><span class="ak-bi"></span></b>`;
-    bi(btn.querySelector('.gd-rf-t'), readFor || { my: 'သူ့အစား ဖတ်ပေးလိုက်မယ်', en: 'Read it for him' });
+    bi(btn.querySelector('.gd-rf-t'), readFor || { my: 'သူ့အစား ဖတ်ပေးလိုက်ပါ', en: 'Read it for him' });
     // what it costs, shown on the button: his finger comes off the line and his turn starts over
     bi(btn.querySelector('.gd-cost span'), { my: 'သူ့အလှည့် −၁', en: 'his turn −1' });
     S.wrap.append(btn);
@@ -160,17 +160,37 @@ export function guide({ title = '', hint = '', labels = [], pace = 70, lag = 0.6
         L.slide = 0;
         return;
       }
-      A.setHint({ my: 'သူ့အမြန်နှုန်းနဲ့ သူ ဖတ်သွားတယ်', en: 'He read it, at his own speed' }, 'good');
+      A.setHint({ my: 'သူ့အရှိန်နဲ့သူ ဖတ်သွားတယ်', en: 'He read it, at his own speed' }, 'good');
       await A.seal(true);
       A.done({ ok: true, lost, readFor: readForN });
     }
 
     setupLabel(0);
 
+    // the cue: drag the pencil along under the words, at his pace (or back to his finger when he is lost);
+    // nothing on the label he reads alone (reading it for him is the player's own call)
+    let cueKey = '';
+    const onCv = (x, y) => { const r = S.cv.getBoundingClientRect(); return [r.left + x, r.top + y]; };
+    function cueStep() {
+      const isAlone = L.i === alone;
+      const key = auto || L.done || isAlone ? 'none' : `${L.i}-${L.lostNow ? 'lost' : 'go'}`;
+      if (key === cueKey) return;
+      cueKey = key;
+      if (key === 'none') return A.cue.set(null);
+      if (L.lostNow) {
+        return A.cue.set({ kind: 'drag', when: () => !L.busy, ms: 1600, at: () => onCv(L.pen, trackY), to: () => [...onCv(L.finger + OFF, trackY), 16],
+          label: { my: 'ခဲတံကို သူ့လက်ချောင်းဆီ ပြန်ယူခဲ့ပါ', en: 'Bring the pencil back to his finger' } });
+      }
+      A.cue.set({ kind: 'drag', when: () => !L.busy, ms: (len) => (len / (speed * 0.8)) * 1000,
+        at: () => onCv(L.pen, trackY), to: () => [...onCv(L.x1, trackY), 16],
+        label: { my: 'ခဲတံကို စာလုံးအောက်မှာ ဖြည်းဖြည်း ဆွဲပါ', en: 'Drag the pencil slowly under the words' } });
+    }
+
     stop = runLoop((dt) => {
       L.t += dt;
       if (auto) auto(dt);
       step(dt);
+      cueStep();
       draw();
     });
 

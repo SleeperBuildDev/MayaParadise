@@ -11,7 +11,8 @@
 //   wBasin { seed }                a tin basin, a bucket, a scrubbing stone (washing corner)
 //   wShrub { seed, s, bloom }      a low bush (bougainvillea pink, jasmine white, or plain green)
 //   wTeaCorner { seed }            a low table, tiny stools, a kettle and glasses (people sit here)
-//   wWorker { pose, seed, top, bottom, woman, hat, load }  a townsperson at work, still. Poses:
+//   wWorker { pose, seed, top, bottom, woman, hat, load }  a townsperson at work, still (RETIRED 2026-11-15: region.js
+//                STILL_FOLK drops it at merge). Poses:
 //       stand | carry (sack on the shoulder) | yoke (shoulder pole, two baskets) | mend (on a mat, net on the lap) |
 //       fish (on a jetty edge, line in the water) | sweep | squat (washing / sorting) | sit (stool, tea) |
 //       hang (pegging washing, arms up) | plane (boatwright, planing a plank on trestles) | kid | coil (rope)

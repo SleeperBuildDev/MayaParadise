@@ -33,7 +33,7 @@ export const D12_HT_CARDS = [
     line: L('ပြီးသွားပြီ မဟုတ်ဘူး။ မပေါက်သေးတာပဲ။ သံဘူးထဲမှာ မျိုးစေ့ ရှိသေးတယ်။', "It isn't over. It just hasn't come up yet. There's seed in the tin."),
     answers: ['given'], from: L('မရသေးပျိုးပင်', 'the Not-Yet Seedling') },
   { id: 'earth', name: L('မြေကြီးလို', 'Like the earth'), companion: 'earth', onlyIf: 'companion:earth',
-    line: L('မြေကြီးက မိုးကိုလည်း ခံတယ်။ နေကိုလည်း ခံတယ်။ ဘာမှ ပြန်မပြောဘူး။', 'The earth takes the rain and the sun alike, and answers neither.'),
+    line: L('မြေကြီးက မိုးကိုလည်း ခံတယ်၊ နေကိုလည်း ခံတယ်။ ဘာမှ ပြန်မပြောဘူး။', 'The earth takes the rain and the sun alike, and answers neither.'),
     answers: ['hot'], from: L('မြေကြီးလေး', 'the Little Earth') },
   { id: 'nothing', lookalike: true, name: L('ဘာမှ မဖြစ်ပါဘူး', "It's nothing"),
     line: L('ဘာမှ မဖြစ်ပါဘူး ဦးဦးရယ်။ ပြန်ပေါက်လာမှာပါ။', "It's nothing, uncle. It'll all come back."),

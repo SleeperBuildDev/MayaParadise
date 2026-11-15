@@ -418,7 +418,7 @@ add({ k: 'wStreetSign', x: NET_X - ROAD_HALF - 1.6, z: WELL_Z - ROAD_HALF - 0.7,
   add({ k: 'goat', x: -40.0, z: 429.6, ry: 0.5 }); // (the Market's goat kind: kinds are shared)
 }
 
-// ---- people at their work (still figures, part of the chunk: no draw calls). The talking townsfolk are
+// ---- people at their work (still figures; RETIRED 2026-11-15, region.js STILL_FOLK drops them at merge). The talking townsfolk are
 // PEOPLE (wharf-folk.js); these are the rest of the town, busy. Nobody stands where they would point the way.
 for (const w of [
   // the quay: porters, the tea stall, fish, wood, the boatwright's corner

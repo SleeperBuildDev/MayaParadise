@@ -48,7 +48,7 @@ export const TOWN_PEOPLE = [
   row('gbakyi', 155.3, 58.6, PI,
     'ပျဉ်ချပ် ကောက်နေရင် ငွေမယူခင် ဝယ်သူကို ပြောတယ်။ နောက်တစ်ခါ စားပွဲ လိုရင် ငါ့ဆီပဲ ပြန်လာတာ။',
     'If a plank has warped, I tell the buyer before he pays. Next time he needs a table, he comes back to me.', 'work', 0.6),
-  row('gkhaing', 182.9, 98.45, 0,
+  row('gkhaing', 182.9, 98.2, 0,
     'ဆန်ကို ဝယ်သူ ရှေ့မှာပဲ ချိန်ပေးတယ်။ ဒါဆို နှစ်ယောက်လုံး ညကျ အေးအေးဆေးဆေး အိပ်ရတယ်။',
     'I weigh the rice in front of the buyer. Then neither of us lies awake tonight.', 'work', 0.5),
   row('gtuntun', 190.0, 33.6, 0,

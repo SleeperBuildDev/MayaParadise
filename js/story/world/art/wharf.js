@@ -148,20 +148,6 @@ function coil(g, x, z, r = 0.32, y = 0) {
   }
   g.box(x, y + 0.05, z, r * 1.1, 0.08, r * 1.1, C.ropeD);
 }
-/** A little standing figure (a crewman, a porter): baked art, not a townsperson. y0 = what it stands on. */
-function figure(g, x, z, ry, top, bottom, skin = '#C9946A', pose = 'stand', y0 = 0) {
-  const c = Math.cos(ry), s = Math.sin(ry);
-  const P = (lx, lz) => [x + lx * c + lz * s, z - lx * s + lz * c];
-  const lean = pose === 'lean' ? 0.12 : 0.02;
-  let [px, pz] = P(0, 0);
-  g.box(px, y0 + 0.36, pz, 0.34, 0.72, 0.24, bottom, ry);
-  [px, pz] = P(0, lean * 0.5);
-  g.box(px, y0 + 0.95, pz, 0.4, 0.5, 0.26, top, ry);
-  [px, pz] = P(0, lean);
-  g.box(px, y0 + 1.38, pz, 0.32, 0.32, 0.3, skin, ry);
-  g.box(px, y0 + 1.55, pz, 0.34, 0.08, 0.32, '#241C18', ry);
-  for (const sx of [-1, 1]) { [px, pz] = P(sx * 0.25, lean + 0.06); g.box(px, y0 + 1.02, pz, 0.12, 0.44, 0.12, skin, ry); }
-}
 /** Item-local (lx, lz) -> world [x, z] (for glows and smoke, which are in world space). */
 function world(g, lx, lz) { return [g.tx + lx * g.tc + lz * g.ts, g.tz - lx * g.ts + lz * g.tc]; }
 
@@ -718,7 +704,7 @@ function boat(g, f, it) {
 }
 
 /** The new ferry at Big Jetty: cream and teal over a deep dark hull, a windowed cabin, cargo on the fore
- * deck, and a crewman at the +Z rail bailing over the side with a bucket (it has to read from the quay). */
+ * deck. (Its still crewman bailing at the rail went 2026-11-15, with his bucket: no statue-like people.) */
 function ferry(g, f, it) {
   const L = 9, B = 2.6, y0 = WATER_Y;
   const hull = (ya, yb, col, sx = 1, sz = 1) => {
@@ -752,17 +738,12 @@ function ferry(g, f, it) {
   // a flag at the stern
   g.box(-L / 2 + 0.6, y0 + 1.7, 0, 0.05, 1.6, 0.05, C.woodD);
   g.box(-L / 2 + 0.35, y0 + 2.3, 0, 0.5, 0.32, 0.02, C.red);
-  // the crewman bailing at the +Z rail, the bucket out over the side, a spill of water falling
-  figure(g, 0.9, B / 2 - 0.35, 0, '#4E8C86', '#3E5F7A', '#B07A52', 'lean', y0 + 0.92);
-  g.box(0.9, y0 + 0.92 + 1.12, B / 2 + 0.12, 0.3, 0.26, 0.28, C.zinc);
-  g.box(0.9, y0 + 0.92 + 1.24, B / 2 + 0.12, 0.32, 0.04, 0.3, C.zincD);
-  for (let k = 0; k < 4; k++) f.box(0.92 + (k % 2) * 0.06, y0 + 1.4 - k * 0.32, B / 2 + 0.36 + k * 0.05, 0.12, 0.2, 0.12, '#CFE3F0');
   // it sits on the stream: cloud bunched along the waterline, a little bow wave
   for (const [x, z, s] of [[-3.5, B / 2 + 0.3, 0.8], [0.2, B / 2 + 0.35, 0.7], [3.4, B / 2 + 0.2, 0.7], [-2, -B / 2 - 0.3, 0.8], [2, -B / 2 - 0.3, 0.7], [L / 2 + 0.3, 0, 0.6]]) {
     f.box(x, y0 - 0.12, z, s * 2.2, s * 0.45, s * 1.1, C.cloud);
     f.box(x + 0.3, y0 - 0.32, z, s * 1.6, s * 0.3, s * 1.2, C.cloudMid);
   }
-  // (the crewman is art; the story's ferryman is a person a day can place on Big Jetty)
+  // (the story's ferryman is a person a day can place on Big Jetty)
   void it;
 }
 

@@ -25,6 +25,7 @@ const T = {
 };
 const HOLD_MAX = 1.2; // seconds a hot thought can be held before it bites
 
+const CUE_ON = { my: 'အနားကြောင်းအတိုင်း ဆက်ဆွဲပါ', en: 'Keep following the border' };
 export function carve({ title = '', hint = '', heat = [], nickStays = true, tolerance = 22, lines = {} } = {}) {
   return new Promise((resolve) => {
     let raf = 0;
@@ -57,6 +58,14 @@ export function carve({ title = '', hint = '', heat = [], nickStays = true, tole
       done: false, offT: 0, glow: 0, whisper: null, wT: 0, auto: null,
     };
     A.setHint(hint || T.start);
+    // the cue: when the finger has been off the block a while, a finger walks the next stretch of border
+    // from where the cut stopped (only the line; lifting for the hot words stays the player's own call)
+    A.cue.set({ kind: 'trace', r: 12, when: () => !S.done && !S.auto, path: () => {
+      const b = cv.getBoundingClientRect();
+      const out = [];
+      for (let i = S.pi; i <= Math.min(N - 1, S.pi + 60); i += 3) out.push([b.left + P[i].x, b.top + P[i].y]);
+      return out;
+    }, label: () => (S.pi > 2 ? CUE_ON : lines.start || T.start) });
 
     function bentPoint(i) {
       // the pull: a bump of the guide toward her design, ahead of the cut

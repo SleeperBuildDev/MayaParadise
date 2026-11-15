@@ -77,7 +77,11 @@ export function hold(o = {}) {
     }
 
     const M = (mode === 'scale' ? scaleMode : mode === 'pin' ? pinMode : releaseMode)();
-    const stopRaf = runLoop((dt) => { t += dt; if (auto && !finished) auto(dt); M.step(dt); M.draw(); });
+    // the cue: where to press (each mode says when and where; how long to hold stays the player's feel)
+    let cueKey = '';
+    const onCv = (x, y) => { const r = S.cv.getBoundingClientRect(); return [r.left + x, r.top + y]; };
+    const cueTick = () => { const k = auto || finished ? '' : M.cueKey?.() || ''; if (k !== cueKey) { cueKey = k; A.cue.set(k ? M.cueSpec() : null); } };
+    const stopRaf = runLoop((dt) => { t += dt; if (auto && !finished) auto(dt); M.step(dt); cueTick(); M.draw(); });
     stop = () => { stopRaf(); window.removeEventListener('keyup', keyUp); };
     A.wrap.autoHold = (arg = 1) => { auto = M.policy(arg); };
     window.__act = A.wrap;
@@ -143,7 +147,7 @@ export function hold(o = {}) {
         R.done.push({ k: R.round, p: R.p });
         R.round++;
         R.p = 0; R.curl = 0; R.state = 'idle';
-        if (R.round >= rounds) { A.setHint({ my: 'ထိပြီး လွှတ်လိုက်တယ်… ဆက်တော့ ဆက်နေတုန်း', en: 'Touched, then let go… still connected' }, 'good'); finish({ value: rounds }); return; }
+        if (R.round >= rounds) { A.setHint({ my: 'ထိပြီး လွှတ်လိုက်တယ်… ဆက်နေတုန်းပဲ', en: 'Touched, then let go… still connected' }, 'good'); finish({ value: rounds }); return; }
         A.setHint(hint);
       }
       async function coil() {
@@ -163,6 +167,9 @@ export function hold(o = {}) {
         A.setHint(hint);
       }
       return {
+        cueKey: () => (R.state === 'idle' && !R.busy ? `r${R.round}` : ''),
+        cueSpec: () => ({ kind: 'hold', r: 26, at: () => onCv(...at(paths[R.round], 0.05)),
+          label: { my: 'ဖိထားပါ — တိုင်ကို ထိတာနဲ့ လွှတ်လိုက်ပါ', en: 'Press and hold; let go when it touches the post' } }),
         down() { if (R.state === 'idle' && !R.busy) { R.state = 'grow'; R.heldT = 0; } },
         up() { letGo(); },
         step(dt) {
@@ -308,6 +315,9 @@ export function hold(o = {}) {
           if (x > can.x - can.w * 0.6 && x < can.x + can.w * 0.6 && y > can.y - can.h && y < can.y + 6) { say.say('maya', o.can || T.can, 2200); buzz(8); return true; }
           return false;
         },
+        cueKey: () => (Sc.state === 'idle' ? `s${Sc.round}` : ''),
+        cueSpec: () => ({ kind: 'hold', r: 28, at: () => onCv(piv.x, piv.y + H * 0.12),
+          label: { my: 'ဖိထားပြီး အပ်ကို ရွှေရောင်ထဲမှာ ငြိမ်အောင် ထားပါ', en: 'Hold, and keep the needle in the gold' } }),
         down() { Sc.y0 = P.y; Sc.off0 = Sc.off; },
         step(dt) {
           Sc.t += dt;
@@ -483,6 +493,9 @@ export function hold(o = {}) {
         finish();
       }
       return {
+        cueKey: () => (Pn.state === 'rest' ? 'pin' : ''),
+        cueSpec: () => ({ kind: 'hold', r: 30, at: () => onCv(W * 0.5 + W * 0.13, H * 0.68),
+          label: { my: 'ပင်အပ်ကို ဖိပြီး မ ထားပါ', en: 'Press and hold to lift the pin' } }),
         down() { if (Pn.state === 'rest') { Pn.state = 'held'; Pn.held = 0; } },
         up() { putDown(false); },
         step(dt) {

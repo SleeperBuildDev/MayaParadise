@@ -103,9 +103,20 @@ export function simmer({ title = '', hint = '', rounds = 3, gusts = ['tap', 'lau
       newRound();
     }
 
+    // the cue: WHERE (the pot), never WHEN: catching the first rattle is the player's own noticing
+    let cueKey = '';
+    function cueTick() {
+      const k = auto || R.i >= rounds ? '' : `p${R.i}`;
+      if (k === cueKey) return;
+      cueKey = k;
+      A.cue.set(k ? { kind: 'tap', r: W * 0.13, at: () => { const b = S.cv.getBoundingClientRect(); return [b.left + R.potX, b.top + stove.y - H * 0.135]; },
+        when: () => !R.busy && (R.state === 'heat' || R.state === 'rattle'), delay: 3000,
+        label: { my: 'အဖုံး တဂျောင်းဂျောင်း မြည်လာတာနဲ့ အိုးကို နှိပ်ပါ', en: 'When the lid rattles, tap the pot' } } : null);
+    }
     stop = runLoop((dt) => {
       if (auto) auto(dt);
       step(dt);
+      cueTick();
       draw();
     });
 

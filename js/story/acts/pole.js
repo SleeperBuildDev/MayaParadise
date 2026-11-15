@@ -32,13 +32,14 @@
 // Test hook: window.__act.autoPole({ miss = 0 } = {})  (miss: strokes to skip on purpose before the first jetty)
 import { openAct, bi, wait, buzz, clamp, lerp, myNum } from './kit.js';
 import { whoChip } from './sort.js';
+import { cue } from './cue.js';
 import { tr } from '../../game/ui.js';
 
 const T = {
   stop: { my: 'ရပ်မယ်', en: 'Stop' },
   tap: { my: 'ထိုး', en: 'Pole' },
   good: { my: 'ဟုတ်ပြီ', en: 'Good' },
-  slip: { my: 'ဝါးလုံး မထိဘူး… ရေစီးက ဆွဲသွားပြီ', en: 'The pole is not set… the current takes you past' },
+  slip: { my: 'ဝါးလုံး မထောက်မိဘူး… ရေစီးနဲ့ မျောသွားပြီ', en: 'The pole is not set… the current takes you past' },
   docked: { my: 'ဆိပ်မှာ ရပ်ထားတယ်', en: 'Held at the jetty' },
   home: { my: 'ဆိပ်ငယ်ကို ပြန်ရောက်ပြီ', en: 'Back at Little Jetty' },
   greet: { my: 'လူကို ထိပြီး နှုတ်ဆက်ပါ', en: 'Tap them to say hello' },
@@ -185,7 +186,7 @@ export function attachPoleStrip(host, R, { stopLabel = T.stop, onTap, onStop, fl
     }
     if (n !== ariaHold) {
       ariaHold = n;
-      cv.setAttribute('aria-label', `ဝါးလုံး ထောက်ရန် နှိပ်ပါ · ကိုင်ထားမှု ${n}/3 · Tap to plant the pole; grip ${n} of 3`);
+      cv.setAttribute('aria-label', `ဝါးလုံး ထောက်ဖို့ နှိပ်ပါ · ကိုင်ထားမှု ${n}/3 · Tap to plant the pole; grip ${n} of 3`);
     }
   }
   return {
@@ -236,7 +237,7 @@ export function pole({ title = '', hint = '', route = 'raftSide', stops = [], be
     R.active = !passenger;
     let raf = 0;
     const result = () => ({ strokes: R.strokes, missed: R.missed, passes: S.passes, greeted: S.greeted, route });
-    const finishAll = (r) => { cancelAnimationFrame(raf); window.removeEventListener('keydown', onKey); strip?.dispose(); resolve(r); };
+    const finishAll = (r) => { cancelAnimationFrame(raf); C?.stop(); window.removeEventListener('keydown', onKey); strip?.dispose(); resolve(r); };
     const sorted = stops.slice().sort((a, b) => a.at - b.at);
 
     // ---- frame: the paper card, or (world mode) just the strip on #game
@@ -611,6 +612,28 @@ export function pole({ title = '', hint = '', route = 'raftSide', stops = [], be
       g.beginPath(); g.roundRect(1, 1, W - 2, H - 2, 14); g.stroke();
     }
 
+    // the cue: the Stop button while a jetty is in reach, the person to greet (ride), else the strip to tap
+    // on the beat (only once the poling has gone quiet for a while)
+    const C = cue(A ? A.wrap : (document.getElementById('game') || document.body));
+    let cueKey = '';
+    function cueTick() {
+      let k = '';
+      if (S.auto || S.done) k = '';
+      else if (passenger) k = S.docked && S.docked.who && !S.greetOk.has(S.docked.id) && cv ? `g${S.docked.id}` : '';
+      else if (!strip.stopBtn.hidden) k = 'stop';
+      else if (!S.docked && !S.eddy) k = 'beat';
+      if (k === cueKey) return;
+      cueKey = k;
+      if (!k) return C.set(null);
+      if (k === 'stop') return C.set({ kind: 'tap', at: strip.stopBtn, delay: 1400, label: { my: 'ဆိပ်ရောက်ပြီ — ရပ်မယ် ကို နှိပ်ပါ', en: 'At the jetty: tap Stop' } });
+      if (k === 'beat') {
+        return C.set({ kind: 'tap', at: () => strip.el.querySelector('.pl-rc'), glow: false, r: 30,
+          label: { my: 'ဝါးလုံး အောက်ခြေထိတာနဲ့ ဒီမှာ နှိပ်ပါ', en: 'Tap here as the pole touches the bottom' } });
+      }
+      C.set({ kind: 'tap', delay: 1000, r: 30, at: () => { const st = S.docked; if (!st) return null; const b = cv.getBoundingClientRect(); const [x, y] = personXY(st); return [b.left + x, b.top + y - 30]; },
+        label: T.greet });
+    }
+
     // ---- loop
     let last = performance.now();
     function frame(now) {
@@ -619,6 +642,7 @@ export function pole({ title = '', hint = '', route = 'raftSide', stops = [], be
       if (S.auto) S.auto(dt);
       step(dt);
       strip.update(dt);
+      cueTick();
       if (view) view({ s: S.s, speed: S.v * L, hold: R.hold, docked: S.docked, stop: inZone(), tilt: S.tilt });
       else drawScene();
       if (!A || !A.closed()) raf = requestAnimationFrame(frame);

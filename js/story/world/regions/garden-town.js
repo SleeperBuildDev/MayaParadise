@@ -25,7 +25,7 @@
 //   gfShed { seed }          a tiny tin shed for tools
 //   gfRail { len, gx, gw, h, col }   a light yard fence (posts and two rails), a gap at gx; col: 'bamboo' | 'wood'
 //   gfPicket { len, gx, gw, h, col } a picket fence like the plots' but lighter (front yards of the cottages)
-//   gfFolk { pose, seed, kid? }      a townsperson at work, still (merged into the chunk: no draw call):
+//   gfFolk { pose, seed, kid? }      a townsperson at work, still (RETIRED 2026-11-15: region.js STILL_FOLK drops it at merge):
 //        'sweep' (broom), 'carry' (a yoke of two buckets), 'head' (a basket on the head), 'squat' (weeding),
 //        'sit' (on a low stool), 'stand', 'play' (a child with a cane ball)
 import { rng, shade } from '../kit.js';

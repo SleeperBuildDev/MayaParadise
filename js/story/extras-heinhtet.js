@@ -72,6 +72,9 @@ const MENTION = { gap: [150, 260], pairGap: [600, 900], pairFirst: [240, 480], o
 const CALL_CAP = 68, CALL_LEAVE = 80, TRI_CAP = 152000;
 const SPEED = { jog: 3.2, run: 4.4, dash: [4.8, 6], sprint: 6 };
 const KEEP = { door: 1.4, spot: 1.25, cast: 1.4, folk: 0.75, maya: 1.1, car: 2.4 };
+// where he stops (a pass's bit, a meet, a walk-up) is never the carriageway: this far from a road's middle line at least
+// (the road is 2.4 wide, its gold strip 0.18 more). Running across is fine; the car gags stop in the road on purpose.
+const STAND_ROAD = 1.65;
 
 const rand = (a, b) => a + Math.random() * (b - a);
 const pick = (a) => a[Math.floor(Math.random() * a.length)];
@@ -252,6 +255,7 @@ export function installHeinHtet(game, story, ow) {
   const no = (k) => { whyNot[k] = (whyNot[k] || 0) + 1; return false; };
   function clearAt(x, z, o = {}) {
     if (ow?.space?.collides?.(x, z, 0.3)) return no('space');
+    if (o.stand && !o.run && (ow?.net?.nearest?.(x, z)?.dist ?? 99) < STAND_ROAD) return no('road');
     if (local.at == null || clock - local.at > 1 || Math.hypot(x - local.x, z - local.z) > 30) refreshLocal(x, z);
     // (running past a door or a spot is fine; standing on one is not)
     const kd = o.run ? 0.75 : KEEP.door, ks = o.run ? 0.7 : KEEP.spot;
@@ -720,7 +724,7 @@ export function installHeinHtet(game, story, ow) {
       for (const tilt of [0, 0.35, -0.35]) {
         const dx = cam.rx * Math.cos(tilt) - cam.fx * Math.sin(tilt), dz = cam.rz * Math.cos(tilt) - cam.fz * Math.sin(tilt);
         const sx = tp.x + dx * gap * sd, sz = tp.z + dz * gap * sd;
-        if (!clearAt(sx, sz, o) || !inView(sx, sz, [0.12, 0.26, 0.88, 0.84]) || !bigEnough(sx, sz) || !seen(sx, sz)) continue;
+        if (!clearAt(sx, sz, { ...o, stand: true }) || !inView(sx, sz, [0.12, 0.26, 0.88, 0.84]) || !bigEnough(sx, sz) || !seen(sx, sz)) continue;
         // in: from further out on the same side (or from above / below on screen)
         const ins = [[dx * sd, dz * sd], [dx * sd * 0.7 + cam.fx * 0.7, dz * sd * 0.7 + cam.fz * 0.7], [dx * sd * 0.7 - cam.fx * 0.7, dz * sd * 0.7 - cam.fz * 0.7], [cam.fx, cam.fz]];
         for (const [ix, iz] of ins) {
@@ -773,12 +777,14 @@ export function installHeinHtet(game, story, ow) {
   }
   async function pass(o = {}) {
     const mp = mayaXZ(), town = districtAt(mp.x, mp.z);
-    const pl = await planCross('pass');
+    const sing = o.sing ?? Math.random() < SING.pass;
+    let stop = o.stop ?? (sing ? Math.random() < 0.5 : Math.random() < 0.55);
+    // (a stop is planned off the road: the middle of his line where he skids and does his bit; none there: he runs on)
+    let pl = stop ? await planCross('pass', { stand: true }) : null;
+    if (!pl) { stop = false; pl = await planCross('pass'); }
     if (!pl) return miss('pass');
     if (!o.force && (blockedWhy() || chatterArriving())) return miss('pass:gate');
     const t = onStage(pl.a, 'pass', town);
-    const sing = o.sing ?? Math.random() < SING.pass;
-    const stop = o.stop ?? (sing ? Math.random() < 0.5 : Math.random() < 0.55);
     const line = sing ? singLine() : soloLine(town);
     hh.run(SPEED.run);
     if (stop) {

@@ -422,7 +422,7 @@ export async function createDoors(game, story) {
     if (!cur) return spawn0(id, at);
     const a = spotOf(at);
     if (!a) return undefined;
-    const e = spawn0(id, a);
+    const e = spawn0(id, a, { indoor: true });
     if (e && !e.indoor) { e.indoor = cur.id; cur.R.scene.add(e.p.root); }
     return e;
   };

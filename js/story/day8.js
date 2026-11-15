@@ -91,14 +91,14 @@ export const W = {
 const PROOF = {
   mayasays: { my: 'မင်တစ်အိုး သိမ်းထားဖို့ ခွာညိုတစ်ယောက်တည်းကို ပြောခဲ့တာ။ တံဆိပ်ထုမယ့်နေ့ တစ်နေ့အတွက်ပဲ။ ရပ်ကွက်တစ်ခုလုံးကို မဟုတ်ဘူး။', en: 'I told one carver, Khwar Nyo, to keep one pot of ink, for one stamp day. Not the whole Junction.' },
   well: { my: 'ဒီနေ့ ရွှေမင်တွင်း ကိုယ်တိုင် သွားကြည့်တယ်။ တတိယအကွင်းအထိ ပြည့်နေတယ်။ မနက်ဖြန် ထပ်ကြည့်ရမယ်။', en: 'I looked in the gold-ink well myself today: full to the third ring. Look again tomorrow.' },
-  post: { my: 'စာတိုက်ပုံးက မနက် 6:00 မှာ စာထုတ်တယ်။ ပုံးပေါ်က ပြားမှာ ရေးထားတယ်။', en: 'The bridge-box is cleared at 6:00 a.m. It says so on the box.' },
+  post: { my: 'စာတိုက်ပုံးက မနက် ၆:၀၀ မှာ စာထုတ်တယ်။ ပုံးပေါ်က ပြားမှာ ရေးထားတယ်။', en: 'The bridge-box is cleared at 6:00 a.m. It says so on the box.' },
   printday: { my: 'ပုံနှိပ်နေ့တွေမှာလည်း တံတား ဖွင့်ထားတယ်။ ကိုယ်တိုင် ဖြတ်လာခဲ့တယ်။', en: 'The bridge is open on printing days. I crossed it myself.' },
   printer: { my: 'ဦးတင့်က လူငယ်ကို မုန်းတာ မဟုတ်ဘူး။ စာစီသင်ခွင့်ကို သူကိုယ်တိုင် ကမ်းခဲ့တာ။', en: "U Tint doesn't hate young people. He offered the type-setting chance himself." },
   sheet: { my: 'နေ့စဉ်စာရွက်မှာလည်း အမှား ပါတတ်တယ်။ ဒီနေ့ စာတိုက်ပုံး အချိန်ကို မှားပြီး ရိုက်မိတယ်။', en: 'The day sheet can be wrong too. Today it printed the box time wrong.' },
 };
 // the plate on the box, read aloud (new; the plate itself is the prop's canvas)
-const BOX_LINE = [{ my: '(ပုံးပေါ်က ပြားမှာ "စာထုတ်ချိန် မနက် 6:00" တဲ့။ ကိုးနာရီ မဟုတ်ဘူး။)', en: '(The plate on the box says "Collection 6:00 a.m." Not nine.)' }];
-const BOX_AGAIN = [{ my: '(မနက် 6:00။ ပြားပေါ်မှာ ရေးထားတာ။)', en: '(6:00 a.m. It says so on the plate.)' }];
+const BOX_LINE = [{ my: '(ပုံးပေါ်က ပြားမှာ "စာထုတ်ချိန် မနက် ၆:၀၀" တဲ့။ ကိုးနာရီ မဟုတ်ဘူး။)', en: '(The plate on the box says "Collection 6:00 a.m." Not nine.)' }];
+const BOX_AGAIN = [{ my: '(မနက် ၆:၀၀။ ပြားပေါ်မှာ ရေးထားတာ။)', en: '(6:00 a.m. It says so on the plate.)' }];
 // the room camera: close and low, following her (never the far whole-room view)
 const ROOM_CLOSE = { tilt: 36, width: 4.8, minHeight: 0, height: 0.85, stiffness: 4 };
 
@@ -419,8 +419,8 @@ export async function create(story) {
     await D.say('naychi', L.nc1, { face: 'worried' });
     if (story.flag('d6.readToHer')) await D.say('naychi', L.ncRead, { face: 'sad' });
     F('ncMet', true);
-    for (;;) {
-      const i = await D.choose(L.ncChoices);
+    for (const again = D.retry(); ;) {
+      const i = await again(L.ncChoices);
       if (i === 0) { await D.say('naychi', L.ncGo, { face: 'happy' }); await D.say('maya', L.ncGoMaya, { face: 'think' }); continue; }
       if (i === 1) { await D.say('naychi', L.ncSpeak, { face: 'smile' }); await D.say('maya', L.ncSpeakMaya, { face: 'think' }); continue; }
       break;
@@ -604,8 +604,8 @@ export async function create(story) {
   }
   async function draftsScene() {
     await D.say('kowunna', L.kwAskQ, { face: 'think' });
-    for (;;) {
-      const i = await D.choose(L.kwDrafts);
+    for (const again = D.retry(); ;) {
+      const i = await again(L.kwDrafts);
       if (i === 0) { await D.say('kowunna', L.kwAll, { face: 'think' }); continue; }
       if (i === 1) { await D.say('kowunna', L.kwNone, { face: 'worried' }); continue; }
       break;
@@ -758,8 +758,8 @@ export async function create(story) {
       const order = d.id === 'well' ? [2, 0, 1] : [1, 0, 2]; // the true line (index 0) never first
       try {
         await D.say('maya', [L.deskQ], { face: 'think' });
-        for (;;) {
-          const i = order[await D.choose(order.map((k) => lines[k]))];
+        for (const again = D.retry(); ;) {
+          const i = order[await again(order.map((k) => lines[k]))];
           if (i === 0) break;
           await D.say('maya', L.deskWrong, { face: 'think' });
         }

@@ -93,6 +93,15 @@ export function lastline({ title = '', prompt = '', hint = '', above = [], start
       sEls.forEach((el, i) => el.classList.toggle('on', i === si));
       eEls.forEach((el, i) => el.classList.toggle('on', i === ei));
       doneBtn.hidden = !(si >= 0 && ei >= 0);
+      cueStep();
+    }
+    // the cue: only the next action (which words is the player's own line; every tile glows alike)
+    function cueStep() {
+      if (closing) return A.cue.set(null);
+      if (typing) return A.cue.set(input.value.trim() ? { kind: 'tap', at: doneBtn, delay: 6000 } : null);
+      if (si < 0) return A.cue.set({ kind: 'many', delay: 6000, many: () => sEls, label: { my: 'အစ တစ်ခု ရွေးပါ', en: 'Pick a beginning' } });
+      if (ei < 0) return A.cue.set({ kind: 'many', many: () => eEls, label: { my: 'အဆုံး တစ်ခု ရွေးပါ', en: 'Now pick an ending' } });
+      A.cue.set({ kind: 'tap', at: doneBtn });
     }
     function pick(side, i) {
       if (closing) return;
@@ -121,16 +130,19 @@ export function lastline({ title = '', prompt = '', hint = '', above = [], start
     function updateCount() {
       countEl.textContent = `${input.value.length} / ${maxLen}`;
       doneBtn.hidden = !input.value.trim();
+      cueStep();
     }
     input.addEventListener('input', updateCount);
     input.addEventListener('keydown', (e) => { if (e.key === 'Enter' && input.value.trim()) { e.preventDefault(); finish('typed'); } });
     pencilBtn.addEventListener('click', () => (typing ? toTiles() : toTyping()));
     blankBtn.addEventListener('click', () => finish('blank'));
     doneBtn.addEventListener('click', () => finish(typing ? 'typed' : 'picked'));
+    cueStep();
 
     async function finish(kind) {
       if (closing) return;
       closing = true;
+      A.cue.set(null);
       input.blur();
       let r;
       if (kind === 'typed') {

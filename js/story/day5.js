@@ -227,8 +227,8 @@ export async function create(story) {
     if (F('klTalk')) return carveAct();
     if (!F('klMet')) {
       await D.say('kolwin', L.kl1, { face: 'think', mood: 'down' });
-      for (;;) {
-        const i = await D.choose(L.klChoices);
+      for (const again = D.retry(); ;) {
+        const i = await again(L.klChoices);
         if (i === 0) { F('luckySaid', true); await D.say('kolwin', L.klLucky, { face: 'hot' }); await D.say('maya', L.klLuckyMaya, { face: 'think' }); continue; }
         if (i === 1) { await D.say('kolwin', L.klForget, { face: 'hot' }); await D.say('maya', L.klForgetMaya, { face: 'think' }); continue; }
         break;
@@ -349,8 +349,8 @@ export async function create(story) {
     if (F('thTalk')) return poleScene();
     if (!F('thMet')) {
       await D.say('kothiha', L.th1, { face: 'sad', mood: 'down' });
-      for (;;) {
-        const i = await D.choose(L.thChoices);
+      for (const again = D.retry(); ;) {
+        const i = await again(L.thChoices);
         if (i === 0) { await D.say('kothiha', L.thBlame, { face: 'sad' }); await D.say('maya', L.thBlameMaya, { face: 'think' }); continue; }
         if (i === 1) { F('raceSaid', true); await D.say('kothiha', L.thRace, { face: 'hot' }); await D.say('maya', L.thRaceMaya, { face: 'think' }); continue; }
         break;
@@ -533,7 +533,7 @@ export async function create(story) {
         await withTalk(async () => {
           await D.say('maya', [L.deskHeadQ], { face: 'think' });
           const lines = d.id === 'wharfHead' ? L.deskHead : L.deskEnd;
-          for (;;) { const i = await D.choose(lines); if (i === 0) break; await D.say('maya', [L.deskWrong], { face: 'think' }); }
+          for (const again = D.retry(); ;) { const i = await again(lines); if (i === 0) break; await D.say('maya', [L.deskWrong], { face: 'think' }); }
           ok = true;
         });
         if (!ok) return;

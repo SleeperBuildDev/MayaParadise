@@ -17,7 +17,7 @@ import { openAct, bi, wait, buzz, myNum } from './kit.js';
 import { tr, lang } from '../../game/ui.js';
 
 const T = {
-  title: { my: 'ပြန်စာ — ကိုယ့်လက်ထဲမှာ', en: 'The reply, in your hands' },
+  title: { my: 'ပြန်စာ — ကိုယ့်လက်ထဲ ရောက်ပြီ', en: 'The reply, in your hands' },
   hint: { my: 'ဒီစာမျက်နှာကို သိမ်းထားလို့ ရပါတယ်', en: 'You can keep this page' },
   keep: { my: 'ဒီစာမျက်နှာ သိမ်းမယ်', en: 'Keep this page' },
   close: { my: 'ပိတ်မယ်', en: 'Close' },
@@ -173,6 +173,8 @@ export function keepsake({ title = T.title, hint = T.hint, page = {}, filename =
       img.hidden = false;
       A.body.querySelector('.ks-spin').remove();
       keepBtn.disabled = false;
+      // the cue: both buttons alike (keeping the page is the player's choice), after a long look
+      A.cue.set({ kind: 'many', delay: 7000, many: () => [keepBtn, closeBtn], label: { my: 'စာမျက်နှာကို သိမ်းထားမလား၊ ပိတ်ပြီး ဆက်သွားမလား', en: 'Keep the page, or close to go on' } });
     });
     async function keep() {
       if (!blob) return;
@@ -188,7 +190,7 @@ export function keepsake({ title = T.title, hint = T.hint, page = {}, filename =
           saved = true;
         }
       } catch { /* the share sheet was closed: not kept */ }
-      if (saved) { bi(keepBtn, T.kept); keepBtn.classList.add('kept'); buzz(16); }
+      if (saved) { bi(keepBtn, T.kept); keepBtn.classList.add('kept'); buzz(16); A.cue.set({ kind: 'tap', at: closeBtn, delay: 5000 }); }
     }
     keepBtn.addEventListener('click', keep);
     closeBtn.addEventListener('click', () => { const r = { saved, shared }; setTimeout(() => url && URL.revokeObjectURL(url), 2000); A.done(r); });

@@ -24,7 +24,7 @@ export const L = {
     { my: 'ပုံနှိပ်ဆရာကြီး ပြောတယ်… လမ်းဆုံရဲ့ မြောက်ဘက်မှာ ခေါင်းတိုင်တွေ မီးခိုး မပြတ်တဲ့ လမ်းတစ်လမ်း ရှိတယ်တဲ့။ မီးဖိုတန်း။', en: "The old printer says north of the Junction there's a street whose chimneys never stop smoking. Hearth Row." },
     { my: 'အဲဒီက မုန့်ဖုတ်သည်ရဲ့ အော်သံက ပုံနှိပ်တိုက်အထိ ကြားရတယ်တဲ့။ "နှုတ်ကြမ်းပေမဲ့ စိတ်ရင်းကောင်းတယ်" တဲ့။', en: 'That baker\'s shouting carries all the way to the printing shed, they say. "Rough mouth, good heart," they say.' },
     { my: 'သူ့တပည့် လှည်းတွန်းတဲ့ ကောင်လေးကတော့ အမြဲ ပြုံးနေတာပဲတဲ့။ ဘာမှ ပူပင်ပုံ မပေါ်ဘူး။', en: 'Her apprentice, the cart boy, is always smiling, they say. Nothing seems to bother him.' },
-    { my: 'ဒါနဲ့… အဲဒီဘက်က လူတွေက ကိုယ့်ဟာကိုယ်ပဲ နေကြတာ၊ တစ်ယောက်ကို တစ်ယောက် မကူကြဘူးတဲ့။ ကြားတာပဲနော်။', en: "Oh… people over there keep to themselves, they say. Nobody helps anybody. Only what I heard." }, // rumour `keepto` (false)
+    { my: 'ဒါနဲ့… အဲဒီဘက်က လူတွေက ကိုယ့်ဘာသာပဲ နေကြတာ၊ တစ်ယောက်ကို တစ်ယောက် မကူကြဘူးတဲ့။ ကြားတာပဲနော်။', en: "Oh… people over there keep to themselves, they say. Nobody helps anybody. Only what I heard." }, // rumour `keepto` (false)
   ],
   wwLater: [{ my: 'လမ်းဆုံ ရင်ပြင်ကနေ မီးခိုးကို လိုက်သွား။ မြောက်ဘက် လမ်းအတိုင်းပဲ။', en: 'From the Junction square, follow the smoke. Up the road, north.' }], // WORLD
   wwBoard: [{ my: 'ညက ဘုတ်ပေါ်မှာ စာရွက်အသစ် တစ်ရွက် ရောက်လာတယ်။ "မယုံနဲ့ဦး" ဆိုတဲ့ မာရာ့စာအောက်မှာ။', en: 'A new note went up on the board overnight. Right under your "don\'t believe it yet".' }],
@@ -35,7 +35,7 @@ export const L = {
     maungarkar: { my: 'အမြဲပြုံးတဲ့ လှည်းကောင်လေး', en: 'the Always-Smiling Cart Boy' },
     eimon: { my: 'စကားနည်းတဲ့ ကောင်မလေး', en: 'the Quiet Girl' },
   },
-  arrive: [{ my: 'စက္ကူညိုကြီးပေါ်မှာ မီးလောင်ကွင်းလေးတွေ… ပူတာက ပြီးသွားပြီ၊ အမာရွတ်ကတော့ ကျန်နေတယ်။ ပေါင်မုန့်နံ့လည်း မွှေးလိုက်တာ။', en: 'Brown paper with little scorch rings… the burn is long over, but the mark stays. And the smell of bread.' }],
+  arrive: [{ my: 'စက္ကူညိုကြီးပေါ်မှာ မီးလောင်ကွင်းလေးတွေ… ပူတာက ပြီးသွားပြီ၊ အမာရွတ်ကတော့ ကျန်နေတယ်။ ပေါင်မုန့်နံ့ကလည်း မွှေးလိုက်တာ။', en: 'Brown paper with little scorch rings… the burn is long over, but the mark stays. And the smell of bread.' }],
 
   // ---- 5. chapter 14 · Daw Khin May (inside the bakery)
   kmShout: { my: 'အာကာ! ဒုတိယဗန်း! ဘယ်ရောက်နေတာလဲ!', en: 'Arkar! The second tray! Where are you!' },
@@ -52,7 +52,7 @@ export const L = {
     { my: '"ဗန်းတစ်ဗန်း ပြီးတဲ့အထိ ဘေးကနေ ကြည့်ခွင့်ပေးပါ။"', en: '"May I watch from the side for one tray?"' },
   ],
   kmWrong: [{ my: 'မှားတယ်? ကျွန်မ ဆရာတွေလည်း အော်ပြီး သင်ခဲ့တာ။ ကျွန်မ မုန့်ဖုတ်တတ်တယ် မဟုတ်လား။', en: "Wrong? My teachers shouted too. And I can bake, can't I?" }],
-  kmWrongMaya: [{ my: '(မကြည့်ရသေးဘဲ အမှားလို့ ပြောလိုက်မိပြီ။ သူ ပိုတင်းသွားတယ်။)', en: "(I called it wrong before I'd even looked. She's only dug in.)" }], // new
+  kmWrongMaya: [{ my: '(မကြည့်ရသေးဘဲ အမှားလို့ ပြောလိုက်မိပြီ။ သူ ပိုတင်းမာသွားတယ်။)', en: "(I called it wrong before I'd even looked. She's only dug in.)" }], // new
   kmAgree: [{ my: '(ချော့ပြောလိုက်တာပဲ။ ကိုယ်တိုင် မကြည့်ရသေးဘူး။)', en: "(I just agreed with her. I haven't looked yet.)" }],
   kmWatch: [{ my: 'ကြည့်ချင် ကြည့်။ မီးဖိုတံခါးနား မကပ်နဲ့။', en: 'Watch, then. Keep away from the oven door.' }],
   // 5.2 the watch
@@ -65,7 +65,7 @@ export const L = {
   },
   looks: {
     khinHeat: { pencil: { my: 'ဒေါသကြီးလို့', en: "she's just bad-tempered" }, gold: { my: 'ဗန်းနောက်ကျတာ မြင်ရုံနဲ့ သူ့ခွက်က အရင်ပူလာတယ်။ စကား မထွက်ခင်ကတည်းက။', en: 'Her cup heats first, the moment the tray is late, before a word.' } },
-    arkarHeat: { pencil: { my: 'ကျင့်သားရနေပြီ', en: "he's used to it" }, gold: { my: 'အော်သံ ရောက်မှ သူ့ခွက် ပူလာတယ်။ ကော်ပြား လက်ထဲက ချော်လုနီးပါး။', en: 'His cup heats only when the shout reaches him; the peel nearly slips.' } },
+    arkarHeat: { pencil: { my: 'ကျင့်သားရနေပြီ', en: "he's used to it" }, gold: { my: 'အော်သံ ရောက်မှ သူ့ခွက် ပူလာတယ်။ ကော်ပြား လက်ထဲက လွတ်ကျလုနီးပါး။', en: 'His cup heats only when the shout reaches him; the peel nearly slips.' } },
     door: { pencil: { my: 'အလကား အော်တာ', en: 'shouting for nothing' }, gold: { my: 'သူ့လက်ကောက်ဝတ်ကို မီးဖိုတံခါးနားကနေ ဆွဲထုတ်လိုက်တာ။ သူ့အတွက် တကယ် ကြောက်နေတာ။', en: "She pulled his wrist back from the hot door. She's truly afraid for him." } },
     loaves: { pencil: { my: 'အော်မှ မုန့်ကောင်းတာ', en: 'bread needs shouting' }, gold: { my: 'မုန့်တွေ ကောင်းတယ်။ သူ တကယ် တတ်လာတာ မှန်တယ်။', en: 'The loaves are good. He really is learning.' } },
     // 6.3 behind the bakery
@@ -102,7 +102,7 @@ export const L = {
   arkarHears: [{ my: '…ဟုတ်ကဲ့ ဒေါ်ဒေါ်။ (ပြုံးတယ်။ ဒီတစ်ခါ မျက်လုံးပါ ပြုံးတယ်။)', en: '…Yes, Aunty. (He smiles. This time his eyes do too.)' }],
   // 5.5 holdback
   hbTitle: { my: 'နောက်ဗန်း', en: 'The next tray' },
-  hbHint: { my: 'နောက်ဆုတ်ပေးကို ဖိထား။ သင်တာ သူ့ဟာ။', en: 'Hold Step back. The teaching is hers.' },
+  hbHint: { my: '"နောက်ဆုတ်ပေး" ကို ဖိထား။ သင်တာ သူ့အပိုင်း။', en: 'Hold Step back. The teaching is hers.' },
   hbBeats: [
     { cue: { my: '(အာကာ ဗန်းကို စောင်းကိုင်လိုက်တယ်။ ဒေါ်ခင်မေ့ ခွက်က ငွေ့ တက်လာတယ်…)', en: "(Arkar lifts the tray crooked. Daw Khin May's cup starts to steam…)" }, steamTo: 2, ms: 2600,
       then: { my: '…ဖြည်းဖြည်း။ ဗန်းကို နှစ်ဖက်ညီအောင် ကိုင်။', en: '…Slowly. Hold the tray level on both sides.' } },
@@ -139,7 +139,7 @@ export const L = {
   loafCarry: { my: 'မုန့်လုံးကို လှည်းဆီ ယူသွားမယ်။', en: "I'll take this loaf to the cart." },
   handsFull: { my: 'လက်ထဲမှာ တစ်လုံး ကိုင်ထားတုန်း။', en: "I'm already holding one." },
   ml2: [{ my: 'ကျေးဇူးပဲ ကျေးဇူးပဲ! ဒေါ်ဒေါ် မသိပါစေနဲ့နော်… ဟဲဟဲ။', en: "Thanks, thanks! Don't let Aunty know… heh." }],
-  mayaRow: [{ my: '(လမ်းတစ်လမ်းလုံး ကူကြတယ်။ ဘာလုပ်ရမလဲ ကျွန်မကို ဘယ်သူမှ မမေးကြဘူး။)', en: '(The whole street helped. Nobody asked me what to do.)' }],
+  mayaRow: [{ my: '(လမ်းတစ်လမ်းလုံး ဝိုင်းကူကြတယ်။ ဘာလုပ်ရမလဲ ကျွန်မကို ဘယ်သူမှ မမေးကြဘူး။)', en: '(The whole street helped. Nobody asked me what to do.)' }],
   em1: [
     { my: 'သူ ရယ်နေတယ်… ဒါပေမဲ့ မျက်လုံးက မရယ်ဘူး။', en: "He was laughing… but his eyes weren't." },
     { my: 'ညနေတန်းက နောက်ကျတဲ့ ညတစ်ညက ဆိုင်တွေ ပိတ်ကုန်ပြီ။ သူ မုန့်တစ်လုံး ချန်ထားပေးခဲ့တယ်။ ဘာမှ မပြောဘဲ။', en: "One night I was late from class and every shop was shut. He'd kept me a loaf. Didn't say a word." },
@@ -153,7 +153,7 @@ export const L = {
     { my: '"စိတ်မညစ်နဲ့လို့ ပြောလိုက်ပါ။"', en: '"Tell him to cheer up."' },
     { my: '"အဲဒီည မုန့်ချန်ပေးတုန်းက သူ ဘာတွေ ပြောခဲ့လဲ။"', en: '"That night he kept you a loaf: what did he say?"' },
   ],
-  emMaya0: [{ my: '(အကျင့်ဟောင်း။ သူ မုန့်ချန်ပေးခဲ့တာ ကျွန်မကို မဟုတ်ဘူး။ ဒါ အိမွန့်လမ်း။)', en: "(Old habit. It wasn't me he kept a loaf for. This is Ei Mon's road.)" }],
+  emMaya0: [{ my: '(အကျင့်ဟောင်း။ သူ မုန့်ချန်ပေးခဲ့တာ ကျွန်မကို မဟုတ်ဘူး။ ဒါ အိမွန့်အပိုင်း။)', en: "(Old habit. It wasn't me he kept a loaf for. This is Ei Mon's road.)" }],
   emCheer: [{ my: 'အဲဒါ ပြောရင် သူ ပြုံးပြပြီး ပြီးသွားမှာ။', en: "Then he'll just smile, and that'll be that." }],
   emAsk: [
     { my: '…ဘာမှ မပြောဘူး။ ချန်ထားပေးရုံပဲ။', en: '…Nothing. He just kept it for me.' },
@@ -162,7 +162,7 @@ export const L = {
   mayaTea: [{ my: '(လက်ဖက်ရည်အိုးကို အိမွန့်လက်ထဲ ထည့်ပေးလိုက်တယ်။ စကားတော့ ထည့်မပေးဘူး။)', en: "(Maya puts the pot of tea in Ei Mon's hands. No words to go with it.)" }],
   emTea: [
     { my: 'လက်ဖက်ရည်အိုး… ဒါဆို ထိုင်စရာ အကြောင်း ရှိသွားပြီ။', en: 'A pot of tea… then I have a reason to sit down.' },
-    { my: 'အစ်မ နားနားမှာ နေပေးနော်။ ပြောတာက ကျွန်မ ပြောမယ်။', en: "Stay close, sister? I'll do the talking." },
+    { my: 'အစ်မ အနားမှာ နေပေးနော်။ ပြောတာက ကျွန်မ ပြောမယ်။', en: "Stay close, sister? I'll do the talking." },
   ],
   teaGiven: { my: 'အိမွန့်လက်ထဲ', en: "In Ei Mon's hands" },
   emNotYet: [{ my: 'ခဏနေမှ ပြန်လာထိုင်မယ်။ လက်ဖက်ရည် နွေးနေသေးတယ်။', en: "I'll come and sit again in a while. The tea's still warm." }],
@@ -180,10 +180,10 @@ export const L = {
 
   // ---- 7. ambient (they hint, never point)
   arkarBefore: [
-    [{ my: 'ရွာကနေ ကိုယ့်ဘာသာ ရွေးလာတာ။ ဆယ့်ရှစ်နှစ်ပြီ။ မုန့်ဖုတ်ချင်လို့။ …ကိုယ်ရွေးတဲ့လမ်းမှာလည်း လေးတဲ့နေ့တွေ ရှိတာပဲ။', en: "I came from my village by my own choice. I'm eighteen. I want to bake. …Even a road you chose has its heavy days." }],
+    [{ my: 'ရွာကနေ ကိုယ့်ဘာသာ ရွေးလာတာ။ ဆယ့်ရှစ်နှစ်ပြီ။ မုန့်ဖုတ်ချင်လို့။ …ကိုယ်ရွေးတဲ့လမ်းမှာလည်း လေးလံတဲ့နေ့တွေ ရှိတာပဲ။', en: "I came from my village by my own choice. I'm eighteen. I want to bake. …Even a road you chose has its heavy days." }],
     [{ my: 'ဟဲဟဲ၊ အဆင်ပြေပါတယ်!', en: 'Heh, all good!' }],
   ],
-  arkarAfter: [{ my: 'လေးတာ အောက်ဆုံး။ ပြုံးပြနေစရာ မလိုတော့ဘူး။', en: 'Heavy at the bottom. No need to put on a smile.' }],
+  arkarAfter: [{ my: 'လေးတာ အောက်ဆုံး။ ဟန်ဆောင်ပြုံးနေစရာ မလိုတော့ဘူး။', en: 'Heavy at the bottom. No need to put on a smile.' }],
   emBefore: [{ my: '…ခေါက်ဆွဲ စားမလား။', en: '…Noodles?' }],
   emAfter: [{ my: 'မေးပြီးရင် နားထောင်။ အကြံက နောက်မှ။ ဒီနေ့ ကိုယ်တိုင် သိသွားတာ။', en: 'Ask, then listen. Advice comes after. I found that out myself today.' }],
   na: [
@@ -208,7 +208,7 @@ export const L = {
 
   // ---- 7. rumours and places checked
   proofs: {
-    keepto: { my: 'မီးဖိုတန်းက လူတွေ လှည်းကို ဝိုင်းကူကြတယ်။ ကိုယ့်ဟာကိုယ် မနေကြဘူး။', en: "The Row all helped with the cart. They don't keep to themselves." },
+    keepto: { my: 'မီးဖိုတန်းက လူတွေ လှည်းကို ဝိုင်းကူကြတယ်။ ကိုယ့်ဘာသာ မနေကြဘူး။', en: "The Row all helped with the cart. They don't keep to themselves." },
     nightbake: { my: 'မုန့်ဖို နေ့ခင်းမှာလည်း မီးမွှေးတယ်။ ခေါင်းတိုင် နှစ်ခုလုံး မီးခိုးတက်နေတယ်။', en: 'The ovens burn by day too. Both chimneys are smoking.' },
     childclass: { my: 'ညနေတန်းမှာ လူကြီးခုံတွေ ရှိတယ်။ ကလေးတွေချည်း မဟုတ်ဘူး။', en: "The evening class has grown-ups' benches. Not only children." },
     crease: { my: 'လမ်းကြားလေးထဲမှာ စက္ကူခေါက်ရိုး တကယ် ပြဲနေတယ်။', en: 'The paper really is split along the fold, up the little lane.' }, // WORLD
@@ -248,7 +248,7 @@ export const L = {
     { my: 'ဒီနေ့ ကိုယ်တိုင် သွားကြည့်ခဲ့တာ ဘာရှိလဲ။', en: 'What did you go and look at yourself today?' }, // true
   ],
   replyWrong: [
-    [{ my: '(ဒါ ကျွန်မ သူ့အစား ပြန်ဖြေနေတာပဲ။ မေးခွန်းနဲ့ ပြန်ဖြေမယ်။)', en: "(That's me answering for her again. I'll answer with a question.)" }],
+    [{ my: '(ဒါ ကျွန်မ သူ့အစား ပြန်ဖြေပေးနေတာပဲ။ မေးခွန်းနဲ့ ပြန်ဖြေမယ်။)', en: "(That's me answering for her again. I'll answer with a question.)" }],
     [{ my: '(ဒါ မေးခွန်းကို ပိတ်ပစ်လိုက်တာ။)', en: '(That just shuts the question down.)' }],
   ],
   boardDone: [{ my: '(ကျွန်မ မေးခွန်းလေး ချိတ်ခဲ့ပြီ။ တခြား စာရွက် သုံးရွက်မှာလည်း ခဲတံနဲ့ «?» လေးတွေ ပေါ်လာတယ်။)', en: '(My question is pinned up. Three other notes have little pencilled «?» marks now too.)' }],
@@ -264,7 +264,7 @@ export const L = {
     { my: '"မုန့်တိုက်က ပိုကောင်းတယ်။"', en: '"The bakery\'s better."' },
     { my: '"နှစ်နေရာလုံး ကိုယ်တိုင် ကြည့်ပြီးပြီလား။ ဘယ်နေရာမှာ နင့်လက် အလုပ်ဖြစ်မလဲ။"', en: '"Have you looked at both places yourself? Where would your hands be busy?"' },
   ],
-  ncTold: [{ my: '(ပြောလိုက်ရင် သူ ဒီနေ့လည်း ကျွန်မစကားကိုပဲ ကိုင်ပြီး လျှောက်မှာ။)', en: "(If I tell her, she'll walk on my words again today.)" }],
+  ncTold: [{ my: '(ပြောလိုက်ရင် သူ ဒီနေ့လည်း ကျွန်မစကားကိုပဲ မှီပြီး လျှောက်မှာ။)', en: "(If I tell her, she'll walk on my words again today.)" }],
   ncAsked: [
     { my: '…အစ်မက အခု မေးခွန်းပဲ ပြန်မေးတော့တာပဲ။', en: '…All you do now is ask me back.' },
     { my: 'ကောင်းပြီ။ ကိုယ်တိုင် သွားကြည့်မယ်။ …မကြိုက်ဘူးနော်။', en: "Fine. I'll go and look myself. …I don't like it, you know." },
@@ -276,7 +276,7 @@ export const L = {
   deskWest: [
     { my: 'မုန့်တိုက်ရဲ့ ခေါင်းတိုင် နှစ်ခုလုံးက မီးခိုး တက်နေတယ်။', en: "Smoke is rising from both of the bakery's chimneys." }, // true
     { my: 'ဒီက မုန့်ဖိုတွေ ညဘက်မှပဲ မီးမွှေးတာ။', en: 'The ovens here only burn at night.' },
-    { my: 'ဒီလမ်းမှာ ဘယ်သူမှ ဘယ်သူ့ကိုမှ မကူဘူး။', en: 'Nobody on this street helps anybody.' },
+    { my: 'ဒီလမ်းမှာ ဘယ်သူမှ ဘယ်သူ့ကိုမှ မကူညီဘူး။', en: 'Nobody on this street helps anybody.' },
   ],
   deskClass: [
     { my: 'ညနေတန်း ကျောက်သင်ပုန်းပေါ်မှာ မေးခွန်း တစ်ခု ရေးထားတယ်။', en: 'A question is chalked on the evening-class blackboard.' }, // true
@@ -286,28 +286,28 @@ export const L = {
   deskWrong: [{ my: '(ဒါ ကြားခဲ့တာ။ မျက်လုံးနဲ့ ပြန်ကြည့်ပါဦး။)', en: "(That's what I heard. Look again.)" }],
   noteWallNotes: [
     { my: 'ပေါင်မုန့် လုပ်နည်း — ဂျုံ၊ ရေ၊ တဆေး၊ ဆား၊ စောင့်ချိန်', en: 'Bread: flour, water, yeast, salt, and time' },
-    { my: 'ကြောင်ဖြူလေး ပျောက်နေတယ် — တွေ့ရင် ခေါက်ဆွဲဆိုင်ကို ပြောပါ', en: 'Lost: a little white cat. Tell the noodle shop' },
+    { my: 'ကြောင်ဖြူလေး ပျောက်နေတယ် — တွေ့ရင် ခေါက်ဆွဲဆိုင်ကို လာပြောပေးပါ', en: 'Lost: a little white cat. Tell the noodle shop' },
   ],
 
   // ---- 8.6 the reply letter, 9. the night page
-  replyLine: { my: 'လမ်းမေးလာရင် မေးခွန်းနဲ့ ပြန်ဖြေမယ်။ လမ်းက မေးတဲ့သူရဲ့ ခြေထောက်အောက်မှာ။', en: "When they ask me the way, I'll answer with a question. The road is under the asker's own feet." },
-  replyTitle: { my: 'ပြန်စာ နောက်ကျောစာမျက်နှာ · ခဲတံ', en: 'The reply, back page · pencil' },
-  nightQ: { my: 'ဒီနေ့အကြောင်း မှန်မှန်ကန်ကန် ဘယ်လို ရေးမလဲ။', en: 'How will she write today, truthfully?' },
+  replyLine: { my: 'လမ်းမေးလာရင် မေးခွန်းနဲ့ပဲ ပြန်ဖြေမယ်။ လမ်းဆိုတာ မေးတဲ့သူရဲ့ ခြေထောက်အောက်မှာပဲ ရှိတာ။', en: "When they ask me the way, I'll answer with a question. The road is under the asker's own feet." },
+  replyTitle: { my: 'ပြန်စာ နောက်ကျောစာမျက်နှာ · ခဲတံနဲ့', en: 'The reply, back page · pencil' },
+  nightQ: { my: 'ဒီနေ့အကြောင်း အမှန်အတိုင်း ဘယ်လို ရေးမလဲ။', en: 'How will she write today, truthfully?' },
   nightChoices: [
-    { my: 'ဒေါ်ခင်မေကို ကျွန်မ ပြင်ပေးလိုက်တယ်။ မောင်အာကာ့ကိုလည်း သူငယ်ချင်း ရှာပေးလိုက်တယ်။', en: 'I fixed Daw Khin May, and I found Maung Arkar a friend.' },
-    { my: 'ဒေါ်ခင်မေက ဆင်ခြေမပေးဘဲ ကိုယ့်အမှား ကိုယ်ပြင်တယ်။ အော်သံမပါတဲ့ ဗန်းက မုန့်လည်း အတူတူပဲ။ အိမွန်က မောင်အာကာ့ကို အရင်နားထောင်ပြီးမှ လမ်းပြတယ်။ ကတောက်ကဆ ဖြစ်တော့ ကိုယ့်အသံ ကိုယ်ပြင်ကြတယ်။', en: 'Daw Khin May put her own fault right, no excuses; the quiet tray\'s bread was the same. Ei Mon listened to Maung Arkar first, then showed him the way. When they squabbled, each mended their own tone.' },
-    { my: 'အော်တတ်တဲ့လူက ဘယ်တော့မှ မပြောင်းဘူး။ ရွာလွမ်းတဲ့ ကောင်လေးလည်း တစ်ယောက်တည်းပဲ ကျန်မှာ။', en: 'People who shout never change. And a homesick boy stays alone.' },
+    { my: 'ဒေါ်ခင်မေကို ကျွန်မ ပြုပြင်ပေးလိုက်တယ်။ မောင်အာကာ့ကိုလည်း သူငယ်ချင်း ရှာပေးလိုက်တယ်။', en: 'I fixed Daw Khin May, and I found Maung Arkar a friend.' },
+    { my: 'ဒေါ်ခင်မေက ဆင်ခြေမပေးဘဲ ကိုယ့်အမှား ကိုယ်ပြင်တယ်။ အော်သံမပါတဲ့ ဗန်းက မုန့်လည်း အတူတူပါပဲ။ အိမွန်က မောင်အာကာ့ကို အရင်နားထောင်ပေးပြီးမှ လမ်းပြတယ်။ ကတောက်ကဆ ဖြစ်ကြတော့ ကိုယ့်အသံ ကိုယ်ပြန်ထိန်းကြတယ်။', en: 'Daw Khin May put her own fault right, no excuses; the quiet tray\'s bread was the same. Ei Mon listened to Maung Arkar first, then showed him the way. When they squabbled, each mended their own tone.' },
+    { my: 'အော်တတ်တဲ့လူက ဘယ်တော့မှ မပြောင်းဘူး။ ရွာလွမ်းနေတဲ့ ကောင်လေးလည်း တစ်ယောက်တည်းပဲ ကျန်ခဲ့မှာ။', en: 'People who shout never change. And a homesick boy stays alone.' },
   ],
   nightWrong: [
-    [{ my: '(မဟုတ်ဘူး… သူ့အမှား သူကိုယ်တိုင် ပြင်တာ။ မောင်အာကာ့ကို မေးခဲ့တာ အိမွန်။)', en: '(No… she put her own fault right. It was Ei Mon who asked him.)' }],
+    [{ my: '(မဟုတ်ဘူး… သူ့အမှား သူကိုယ်တိုင် ပြင်သွားတာ။ မောင်အာကာ့ကို မေးခဲ့တာက အိမွန်ပါ။)', en: '(No… she put her own fault right. It was Ei Mon who asked him.)' }],
     [],
-    [{ my: '(မဟုတ်ဘူး… ဒီနေ့ ကိုယ့်မျက်လုံးနဲ့ မြင်ခဲ့တာ အဲဒါ မဟုတ်ဘူး။)', en: "(No… that isn't what I saw today with my own eyes.)" }],
+    [{ my: '(မဟုတ်ဘူး… ဒီနေ့ ကိုယ့်မျက်စိနဲ့ မြင်ခဲ့တာ အဲဒါ မဟုတ်ဘူး။)', en: "(No… that isn't what I saw today with my own eyes.)" }],
   ],
   sleepQ: { my: 'ဒီည မှတ်စုစာမျက်နှာလေး ဘယ်သူ့အိမ်မှာ အိပ်မလဲ။', en: "Whose house does tonight's notebook page sleep at?" },
-  stampText: { my: 'စာမျက်နှာ ၁၄ — ကိုယ့်ကြောင့်\nကိုယ့်မှာ မကောင်းတာရှိရင် ကောင်းအောင် ပြင်တာ ကိုယ့်တာဝန်။ တခြားသူ တစ်ယောက်အတွက်လည်း မှန်ကြောင်း ကိုယ်တိုင် တွေ့ခဲ့ပြီ။', en: 'Page 14 — Because of Me\nIf there is something bad in you, putting it right is your own duty. She saw for herself it holds for someone else too.' },
-  page15: { my: 'စာမျက်နှာ ၁၅ — ခဲတံနဲ့ပဲ ရှိသေးတယ်။ မနက်ဖြန် မောင်အာကာ တစ်ယောက်ယောက်ကို သတိထားမိမလား။', en: 'Page 15 — still in pencil. Tomorrow, will Maung Arkar notice someone?' },
+  stampText: { my: 'စာမျက်နှာ ၁၄ — ကိုယ့်ကြောင့်\nကိုယ့်မှာ မကောင်းတာရှိရင် ကောင်းအောင်ပြင်ဖို့ ကိုယ့်တာဝန်ပဲ။ တခြားသူ တစ်ယောက်အတွက်လည်း မှန်တယ်ဆိုတာ ကိုယ်တိုင် တွေ့ခဲ့ရပြီ။', en: 'Page 14 — Because of Me\nIf there is something bad in you, putting it right is your own duty. She saw for herself it holds for someone else too.' },
+  page15: { my: 'စာမျက်နှာ ၁၅ — ခဲတံနဲ့ပဲ ရေးထားတုန်း။ မနက်ဖြန် မောင်အာကာ တစ်ယောက်ယောက်ကို သတိထားမိလာမလား။', en: 'Page 15 — still in pencil. Tomorrow, will Maung Arkar notice someone?' },
   tomorrow: { my: 'နောက်တစ်နေ့ မနက် ရောက်ပြီ။', en: 'Morning comes.' },
-  mayaWrite: [{ my: 'ဒီနေ့အကြောင်း စာရေးခန်းမှာ ပြန်ရေးမှ ဖြစ်မယ်။', en: 'I should write today down at my Writing Room.' }],
+  mayaWrite: [{ my: 'ဒီနေ့အကြောင်း စာရေးခန်းထဲ ပြန်ရေးမှ ဖြစ်မယ်။', en: 'I should write today down at my Writing Room.' }],
 };
 
 /** Day 10 morning lines from tonight's house (day9-spec 9; Day 10's script reads them). */

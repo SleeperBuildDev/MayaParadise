@@ -52,7 +52,7 @@ export const myNum = (n) => String(n).replace(/\d/g, (d) => MY_DIGITS[d]);
 // come from Day 2's evening, crowd it by Day 6, stop growing, lose Ko Kaung's on Day 10, and by the last
 // pages one note is left
 const TT_NOTE = [{ my: 'မာရာ…', en: 'Maya…' }, { my: 'အစ်မ ရွေးပေးပါ။', en: 'You choose.' }, { my: '— တိုးတိုး', en: '— Toe Toe' }]; // DRAFT(my)
-const TOWN_NOTE = [{ my: 'မာရာ၊ ဒီတစ်ခါ ကျွန်တော်တို့က မေးမယ်။', en: 'Maya, this time we ask.' }, { my: 'ဒီည မာရာ ကိုယ်တိုင်ကော ဘာမီး ယူလာမလဲ။', en: 'What light will you bring tonight?' }]; // DRAFT(my), Day 15's note
+const TOWN_NOTE = [{ my: 'မာရာ၊ ဒီတစ်ခါ ကျွန်တော်တို့ အလှည့် — မေးမယ်နော်။', en: 'Maya, this time we ask.' }, { my: 'ဒီည မာရာ ကိုယ်တိုင်ကော ဘာမီး ယူလာမလဲ။', en: 'What light will you bring tonight?' }]; // DRAFT(my), Day 15's note
 const BOARD_DAYS = {
   1: {}, 2: {}, 3: { notes: 3, replies: 1 }, 4: { notes: 14, replies: 2 }, 5: { notes: 22, replies: 3 }, 6: { notes: 31, replies: 3 },
   7: { notes: 31, replies: 4 }, 8: { notes: 31, replies: 4 }, 9: { notes: 31, replies: 4 }, 10: { notes: 30, replies: 4, gap: true },
@@ -64,17 +64,17 @@ const L = {
   into: { my: 'အိတ်ထဲ ထည့်လိုက်ပြီ', en: 'Into the bag' },
   out: { my: 'ပေးလိုက်ပြီ', en: 'Handed over' },
   used: { my: 'သုံးလိုက်တယ်', en: 'Used' },
-  cargoNo: { my: 'ကားပေါ်မှာ ပစ္စည်း တင်ထားတုန်းပဲ။ အရင် ပို့ပြီးမှ စာမျက်နှာ လှန်မယ်။', en: "There's still something riding in the car. I'll deliver it before I turn any pages." },
-  carryNo: { my: 'လက်ထဲမှာ ကိုင်ထားတုန်းပဲ။ အရင် ချထားလိုက်ဦးမယ်။', en: "My hands are full. I'll set this down first." },
+  cargoNo: { my: 'ကားပေါ်မှာ ပစ္စည်း ကျန်နေသေးတယ်။ အရင် ပို့ပြီးမှ စာမျက်နှာ လှန်မယ်။', en: "There's still something riding in the car. I'll deliver it before I turn any pages." },
+  carryNo: { my: 'လက်ထဲမှာ ကိုင်ထားတုန်းပဲ။ အရင် ချလိုက်ဦးမယ်။', en: "My hands are full. I'll set this down first." },
   bag: { my: 'မာရာ့ အိတ်', en: "Maya's bag" },
   tabItems: { my: 'ပစ္စည်း', en: 'Things' },
   tabComp: { my: 'အဖော်လေးတွေ', en: 'Companions' },
   empty: { my: 'ဘာမှ မရှိသေးဘူး', en: 'Nothing yet' },
-  noComp: { my: 'စာမျက်နှာ တစ်မျက်နှာ ပြီးတိုင်း အဖော်လေး တစ်ကောင် ထွက်လာလိမ့်မယ်။', en: 'Each finished page lets one companion out.' },
+  noComp: { my: 'စာမျက်နှာ တစ်မျက်နှာ ပြီးတိုင်း အဖော်လေး တစ်ကောင် ထွက်လာမယ်။', en: 'Each finished page lets one companion out.' },
   stamps: { my: 'လက်တွေ့ စစ်ပြီး', en: 'Checked for real' },
   pot: { my: 'အိုးထဲ', en: 'in the pot' },
-  notWritten: (n) => ({ my: `စာမျက်နှာ ${myNum(n)} ကို မရေးရသေးဘူး။ လောလောဆယ် မြို့ထဲ လှည့်လည်ကြည့်နေမယ်နော်။`, en: `Page ${n} isn't written yet. I'll wander the town for now.` }),
-  rubbed: { my: 'ကိုယ်တိုင် စစ်ကြည့်တော့ မရှိဘူး။ ကလောင်နဲ့ ဖျက်လိုက်ပြီ။', en: "I checked it myself: it isn't there. Rubbed out with the quill." },
+  notWritten: (n) => ({ my: `စာမျက်နှာ ${myNum(n)} ကို မရေးရသေးဘူး။ လောလောဆယ် မြို့ထဲ လျှောက်ကြည့်နေမယ်နော်။`, en: `Page ${n} isn't written yet. I'll wander the town for now.` }),
+  rubbed: { my: 'ကိုယ်တိုင် စစ်ကြည့်တော့ မရှိဘူး။ ကလောင်နဲ့ ခြစ်ဖျက်လိုက်ပြီ။', en: "I checked it myself: it isn't there. Rubbed out with the quill." },
 };
 
 export function installApi(story, game, hooks = {}) {

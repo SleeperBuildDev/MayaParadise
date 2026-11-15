@@ -81,9 +81,16 @@ function mergeOutline(m, town = null) {
   for (const e of list(m.ROAD_EDGES)) ROAD_EDGES.push(town ? { ...e, town } : e);
   DESKS.push(...list(m.DESKS));
 }
+/** The still townsfolk once baked into the scenery (market-life.js `folk`, junction-folk.js `jFolk`, garden-town.js
+ * `gfFolk`, wharf-yards.js `wWorker`): owner 2026-11-15, "npcs that are standing still, like they are built like a
+ * building, not a npc. This one is standing on the road, that's not okay." They are dropped here, so no district
+ * draws one, and nothing else in the towns moves (the district files still place them, in the same order, so every
+ * seeded pass round them lays out as before). The town's people are the live ones: PEOPLE rows, the small-talk
+ * folk, the cast. */
+export const STILL_FOLK = new Set(['folk', 'jFolk', 'gfFolk', 'wWorker']);
 /** A district's heavy part: its buildings and props, people, keep-outs and new kinds. */
 function mergePack(m) {
-  ITEMS.push(...list(m.ITEMS));
+  ITEMS.push(...list(m.ITEMS).filter((it) => !STILL_FOLK.has(it.k)));
   SIGNS.push(...list(m.SIGNS));
   PEOPLE.push(...list(m.PEOPLE));
   OBSTACLES.push(...list(m.OBSTACLES));

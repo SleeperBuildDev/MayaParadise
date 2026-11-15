@@ -29,6 +29,7 @@ import { VoxelBuilder, jitter } from '../game/voxel.js';
 import { toon, addOutline, blobShadow } from '../game/toon.js';
 import { trace } from './acts/trace2.js';
 import { guide } from './acts/guide.js';
+import { cue } from './acts/cue.js';
 import { dryingShelf, pot } from './props2.js';
 import { parcelCart, markSheet, paperBoat, jobNotice, kilnSmoke, teaShop } from './props3.js';
 import { morningPost, nightPage, showSlip } from './post.js';
@@ -577,8 +578,8 @@ export async function create(story) {
       await D.say('dawohn', L.oh3, { face: 'think' });
       await D.say('dawohn', L.oh4, { face: 'think' });
       F('ohnAsked', true);
-      for (;;) {
-        const i = await D.choose(L.ohChoices);
+      for (const again = D.retry(); ;) {
+        const i = await again(L.ohChoices);
         if (i === 0) { await D.say('dawohn', L.ohToldYou, { face: 'hot' }); await D.say('maya', L.ohToldYouMaya, { face: 'think' }); continue; }
         if (i === 1) { await D.say('dawohn', L.ohNever, { face: 'sad' }); await D.say('maya', L.ohNeverMaya, { face: 'think' }); continue; }
         break;
@@ -872,6 +873,7 @@ export async function create(story) {
           picked = i - 3;
           ul.querySelectorAll('li').forEach((x) => x.classList.toggle('on', x === li));
           ask.textContent = tr(L.boardReplyQ);
+          C.set({ kind: 'many', delay: 5000, many: () => [...reps.children], label: { my: 'ပြန်စာ တစ်ခု ရွေးပါ', en: 'Pick a reply' } });
           reps.innerHTML = '';
           n.replies.forEach((r, k) => {
             const b = document.createElement('button');
@@ -892,7 +894,10 @@ export async function create(story) {
       ul.appendChild(li);
     });
     if (all.length > 3 && !F('board')) ask.textContent = tr(L.boardPin);
-    const close = () => { el.remove(); applyState(); };
+    // the cue: the notes Maya can answer glow alike, then the replies (which one is the player's choice)
+    const C = cue(el);
+    if (!F('board') && ul.querySelector('li.can')) C.set({ kind: 'many', delay: 5000, many: () => [...ul.querySelectorAll('li.can')], label: { my: 'စာတစ်စောင်ကို နှိပ်ပြီး ပြန်စာ ချိတ်ပါ', en: 'Tap a note to pin a reply' } });
+    const close = () => { C.stop(); el.remove(); applyState(); };
     el.querySelector('.x').addEventListener('click', (ev) => { ev.stopPropagation(); close(); });
     el.addEventListener('click', (ev) => { if (ev.target === el) close(); });
     document.getElementById('game').appendChild(el);

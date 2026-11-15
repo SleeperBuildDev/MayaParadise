@@ -260,7 +260,7 @@ export function installRoam(game, story, ow) {
       if (!rm.pts.length && !rm.hubOff) {
         for (let k = 0; k < 16 && rm.pts.length < 2; k++) {
           const a = (k / 16) * Math.PI * 2, r = k % 2 ? 1.1 : 1.7, x = rm.ax + Math.sin(a) * r, z = rm.az + Math.cos(a) * r;
-          if (solid(x, z, BODY) || roadDist(x, z) < 1.2 || rm.pts.some((p) => Math.hypot(p.x - x, p.z - z) < 1.2)) continue;
+          if (solid(x, z, BODY) || roadDist(x, z) < ROAD_KEEP - 0.05 || rm.pts.some((p) => Math.hypot(p.x - x, p.z - z) < 1.2)) continue;
           let ok = true;
           for (let i = 1; i <= 6 && ok; i++) if (solid(rm.ax + (x - rm.ax) * i / 6, rm.az + (z - rm.az) * i / 6, 0.15)) ok = false;
           if (ok) rm.pts.push({ x, z, ...frontAt(x, z), links: new Map() });
@@ -305,7 +305,7 @@ export function installRoam(game, story, ow) {
     G.ci = G.ci || 1;
     for (let n = 0; n < 30 && G.ci < G.q.length && cand.length <= 140; n++, G.ci++) {
       const k = G.q[G.ci], [x, z] = at(...ij(k));
-      if (Math.hypot(x - rm.hx, z - rm.hz) < 1.5 || solid(x, z, 0.36) || roadDist(x, z) < ROAD_KEEP - 0.4 || keepOut(x, z, e.id)) continue;
+      if (Math.hypot(x - rm.hx, z - rm.hz) < 1.5 || solid(x, z, 0.36) || roadDist(x, z) < ROAD_KEEP - 0.05 || keepOut(x, z, e.id)) continue; // (a stop: on the pavement, never at the road's edge)
       cand.push({ k, x, z });
     }
     if (G.ci < G.q.length && cand.length <= 140) return;
@@ -543,10 +543,30 @@ export function installRoam(game, story, ow) {
       rm.blockedT = 0;
       if (rm.kind === 'idle') { rm.state = 'look'; rm.t = rand(1, 2.5); if (rm.kindT !== 'ihome') rm.goHome = true; return; } // (idleStep tries the way home again)
       if (rm.passed?.length && rm.kindT !== 'back' && rm.from) { go(e, rm.from.x, rm.from.z, 'back', rm.passed.slice().reverse()); return; } // (back the way it came)
+      if (roadDist(pos.x, pos.z) < ROAD_KEEP - 0.3 && offRoadStep(e)) return; // (never left standing in the road: the nearest kerb first)
       rm.last = -3;
       if (rm.kindT !== 'anchor' && lineOk(rm.hx, rm.hz, pos.x, pos.z, rm.hubOff ? 0 : 1.3)) go(e, rm.hx, rm.hz, 'anchor');
       else { rm.state = 'idle'; rm.t = rand(1.5, 3); }
     }
+  }
+
+  /** stuck out on a road: walk to the nearest bit of clear pavement (up to 3.2 m), then plan on from there */
+  function offRoadStep(e) {
+    const pos = e.p.root.position;
+    let best = null;
+    for (let k = 0; k < 12; k++) {
+      const a = (k / 12) * Math.PI * 2, dx = Math.sin(a), dz = Math.cos(a);
+      for (let L = 0.3; L <= 3.2; L += 0.3) { // (from a short step: a narrow pavement under a shop front is a few tenths away)
+        const x = pos.x + dx * L, z = pos.z + dz * L;
+        if (solid(x, z, 0.2)) break; // (something in the way that side)
+        if (roadDist(x, z) < ROAD_KEEP - 0.1 || solid(x, z, BODY)) continue;
+        if (!best || L < best.L) best = { x, z, L };
+        break;
+      }
+    }
+    if (!best) return false;
+    go(e, best.x, best.z, 'dodge');
+    return true;
   }
 
   // ---- maya walks into them: a quick step aside
@@ -559,7 +579,8 @@ export function installRoam(game, story, ow) {
     const s = lat >= 0 ? 1 : -1; // (away from her line)
     for (const k of [s, -s]) {
       const tx = pos.x + -uz * k * 1.1, tz = pos.z + ux * k * 1.1;
-      if (!solid(tx, tz) && lineOk(pos.x, pos.z, tx, tz)) {
+      // (they stand there a moment after: never a step out onto the road, nor further into it)
+      if (!solid(tx, tz) && lineOk(pos.x, pos.z, tx, tz) && roadDist(tx, tz) >= Math.min(ROAD_KEEP - 0.3, roadDist(pos.x, pos.z) + 0.2)) {
         if (rm.state === 'chat' || rm.state === 'wait') endChat(e);
         setMood(e, null);
         go(e, tx, tz, 'dodge'); rm.t = 2.5; stats.dodges++;
@@ -587,7 +608,7 @@ export function installRoam(game, story, ow) {
     for (let k = 0; k < PER_FRAME && rm.tried < 36 && rm.pts.length < 3; k++, rm.tried++) {
       const a = rm.tried * 2.39996 + Math.random() * 0.4, r = 1.2 + Math.random() * (rm.R - 1.2);
       const x = rm.ax + Math.sin(a) * r, z = rm.az + Math.cos(a) * r;
-      if (solid(x, z, 0.42) || roadDist(x, z) < 1.5 || keepDoor(x, z) || rm.pts.some((p) => Math.hypot(p.x - x, p.z - z) < 1.2)) continue;
+      if (solid(x, z, 0.42) || roadDist(x, z) < ROAD_KEEP - 0.05 || keepDoor(x, z) || rm.pts.some((p) => Math.hypot(p.x - x, p.z - z) < 1.2)) continue;
       if (!lineOk(rm.ax, rm.az, x, z, 0.6)) continue;
       rm.pts.push({ x, z, ...frontAt(x, z) });
     }
@@ -686,9 +707,10 @@ export function installRoam(game, story, ow) {
       dodge(e); // (Maya walking straight at the pair: a step aside, then on with the talk)
       let o = null, od = 6.5;
       for (const q of people.values()) if (q !== e && q.paused && q.p?.root) { const p = q.p.root.position, d = Math.hypot(p.x - pos.x, p.z - pos.z); if (d < od) { o = q; od = d; } }
-      if (o && od > 2.3 && rm.state !== 'walk') { const p = o.p.root.position, k = (od - 1.6) / od; const tx = pos.x + (p.x - pos.x) * k, tz = pos.z + (p.z - pos.z) * k; if (lineOk(pos.x, pos.z, tx, tz)) go(e, tx, tz, 'dodge'); }
+      if (o && od > 2.3 && rm.state !== 'walk') { const p = o.p.root.position, k = (od - 1.6) / od; const tx = pos.x + (p.x - pos.x) * k, tz = pos.z + (p.z - pos.z) * k; if (lineOk(pos.x, pos.z, tx, tz) && roadDist(tx, tz) >= ROAD_KEEP - 0.2) go(e, tx, tz, 'dodge'); } // (never a step closer onto the road: they chat from the pavement)
       if (rm.state === 'walk' && rm.kindT === 'dodge') { walkStep(e, dt); return true; }
       if (rm.state === 'walk') rm.state = 'idle';
+      if (roadDist(pos.x, pos.z) < ROAD_KEEP - 0.3 && performance.now() > (rm.offT || 0)) { rm.offT = performance.now() + 1000; if (offRoadStep(e)) { walkStep(e, dt); return true; } } // (stopped for a word out in the road: onto the pavement first; tried once a second)
       if (o) e.home.h = Math.atan2(o.p.root.position.x - pos.x, o.p.root.position.z - pos.z);
       turnToward(root, e.home.h, dt, 5);
       e.p.lookAt(null);

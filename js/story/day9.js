@@ -355,8 +355,8 @@ export async function create(story) {
   async function boardScene() {
     if (F('board')) return say('maya', L.boardAgain, { face: 'smile' });
     await showLetter(game, L.note9, { sign: L.note9From });
-    for (;;) {
-      const i = await D.choose(L.replies9);
+    for (const again = D.retry(); ;) {
+      const i = await again(L.replies9);
       if (i === 2) break;
       await say('maya', L.replyWrong[i], { face: 'think' });
     }
@@ -459,8 +459,8 @@ export async function create(story) {
   async function kmOpen() {
     await say('khinmay', F('kmMet') ? L.kmAgain : L.km1, { face: F('kmMet') ? 'smile' : 'hot' });
     F('kmMet', true);
-    for (;;) {
-      const i = await D.choose(L.kmChoices);
+    for (const again = D.retry(); ;) {
+      const i = await again(L.kmChoices);
       if (i === 0) { F('kmWrongSaid', true); await say('khinmay', L.kmWrong, { face: 'hot', emote: 'fists' }); await say('maya', L.kmWrongMaya, { face: 'think' }); continue; }
       if (i === 1) { await say('maya', L.kmAgree, { face: 'think' }); continue; }
       break;
@@ -608,8 +608,8 @@ export async function create(story) {
   async function teaScene() {
     place('eimon', 'eimonD9');
     await say('eimon', L.em2, { face: 'worried' });
-    for (;;) {
-      const i = await D.choose(L.emChoices);
+    for (const again = D.retry(); ;) {
+      const i = await again(L.emChoices);
       if (i === 0) { await say('maya', L.emMaya0, { face: 'think' }); continue; }
       if (i === 1) { await say('eimon', L.emCheer, { face: 'sad' }); continue; }
       break;
@@ -695,8 +695,8 @@ export async function create(story) {
       spoke('naychi');
       if (F('ncMet')) return say('naychi', L.ncAfter, { face: 'think' });
       await say('naychi', L.nc1, { face: 'worried' });
-      for (;;) {
-        const i = await D.choose(L.ncChoices);
+      for (const again = D.retry(); ;) {
+        const i = await again(L.ncChoices);
         if (i === 2) break;
         await say('maya', L.ncTold, { face: 'think' });
       }
@@ -724,8 +724,8 @@ export async function create(story) {
       let ok = false;
       await hold(async () => {
         await say('maya', [L.deskQ], { face: 'think' });
-        for (;;) {
-          const i = await D.choose(q.lines);
+        for (const again = D.retry(); ;) {
+          const i = await again(q.lines);
           if (i === 0) { ok = true; break; }
           await say('maya', L.deskWrong, { face: 'think' });
         }

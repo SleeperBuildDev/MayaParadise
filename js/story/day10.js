@@ -330,8 +330,8 @@ export async function create(story) {
         await D.say('maya', [L.deskQ], { face: 'think' });
         const lines = d.id === 'clasp' ? L.deskClasp : L.deskKiln;
         const order = [0, 1, 2].sort(() => Math.random() - 0.5);
-        for (;;) {
-          const i = order[await D.choose(order.map((k) => lines[k]))];
+        for (const again = D.retry(); ;) {
+          const i = order[await again(order.map((k) => lines[k]))];
           if (i === 0) { ok = true; break; }
           await D.say('maya', L.deskWrong, { face: 'think' });
         }
@@ -370,8 +370,8 @@ export async function create(story) {
     if (!F('hpSit')) {
       F('hpMet', true);
       await D.say('hpohtaw', L.hp1, { face: 'hot', mood: 'hot' });
-      for (;;) {
-        const i = await D.choose(L.hpChoices);
+      for (const again = D.retry(); ;) {
+        const i = await again(L.hpChoices);
         if (i === 0) { await D.say('hpohtaw', L.hpArgue, { face: 'hot', emote: 'fists' }); await D.say('maya', L.hpArgueMaya, { face: 'think' }); continue; }
         if (i === 1) { await D.say('hpohtaw', L.hpAgree, { face: 'think' }); await D.say('maya', L.hpAgreeMaya, { face: 'think' }); continue; }
         break;
@@ -704,8 +704,8 @@ export async function create(story) {
       await D.say('maya', L.boardLook, { face: 'surprised' });
       if (F('board')) return;
       await D.say('maya', [L.gapQ], { face: 'think' });
-      for (;;) {
-        const i = await D.choose(L.gapChoices);
+      for (const again = D.retry(); ;) {
+        const i = await again(L.gapChoices);
         if (i === 0) { await D.say('maya', L.gapSeal, { face: 'think' }); continue; }
         if (i === 1) { await D.say('maya', L.gapAll, { face: 'think' }); continue; }
         break;

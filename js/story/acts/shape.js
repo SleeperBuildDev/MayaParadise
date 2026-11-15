@@ -19,7 +19,7 @@ const T = {
   centreOut: { my: 'ရွှံ့ ယိမ်းနေတယ် — အလယ်ကို ပြန်ဆွဲ', en: 'The clay is wobbling: bring it back to the middle' },
   pull: { my: 'အောက်ကနေ အပေါ်ကို ဖြည်းဖြည်းချင်း ဆွဲတင်ပါ', en: 'Drag upward, slowly and smoothly' },
   pullFast: { my: 'ဖြည်းဖြည်း… မြန်လွန်းရင် နံရံ လှိုင်းထတယ်', en: 'Gently… too fast and the wall ripples' },
-  hurry: { my: 'နေ စောင်းလာပြီ — အမြန် လုပ်ရတော့မယ်', en: 'The sun is sinking: no time, hurry' },
+  hurry: { my: 'နေ စောင်းလာပြီ — အချိန်မရှိတော့ဘူး၊ မြန်မြန်လုပ်မှ', en: 'The sun is sinking: no time, hurry' },
   potDone: { my: 'အိုး တစ်လုံး ပြီးပြီ', en: 'One pot done' },
   montage: { my: 'ကျန်တဲ့ အိုးတွေကို အလောတကြီး လုပ်နေတယ်…', en: 'Rushing out the rest…' },
   dry: { my: 'နေပူထဲမှာ အခြောက်ခံနေတယ်…', en: 'Drying in the sun…' },
@@ -604,8 +604,8 @@ export function shape({ title = '', hint = '', loads = [2, 3, 5], best = 2, roun
       const ok = cracked === 0 && quality >= 0.35;
       bi(endEl, cracked
         ? { my: `အိုး ${myNum(S.load)} လုံးထဲက ${myNum(cracked)} လုံး အက်ကွဲသွားတယ်။ အချိန်မလောက်လို့ အမြန် ခြောက်သွားတာ။`, en: `${cracked} of ${S.load} pots cracked. They dried too fast.` }
-        : ok ? { my: `အိုး ${myNum(S.load)} လုံးလုံး မကွဲမအက်ဘဲ ကောင်းကောင်း ကျန်တယ်။`, en: `All ${S.load} pots came out whole.` }
-          : { my: `အိုးတွေ မကွဲပေမဲ့ ပုံမကျဘူး၊ စောင်းနေတယ်။ ဖြည်းဖြည်းချင်း ပြန်ပုံသွင်းရမယ်။`, en: 'No pot cracked, but they came out lopsided. Shape them again, slowly.' }); // DRAFT(my)
+        : ok ? { my: `အိုး ${myNum(S.load)} လုံးလုံး မကွဲမအက်ဘဲ အကောင်းအတိုင်း ထွက်လာတယ်။`, en: `All ${S.load} pots came out whole.` }
+          : { my: `အိုးတွေ မကွဲပေမဲ့ ပုံမကျဘူး၊ စောင်းနေတယ်။ ဖြည်းဖြည်းချင်း ပြန်ပုံဖော်ရမယ်။`, en: 'No pot cracked, but they came out lopsided. Shape them again, slowly.' }); // DRAFT(my)
       endEl.dataset.tone = ok ? 'good' : 'warn';
       endEl.hidden = false;
       A.setHint({ my: 'နောက်တစ်နေ့ မနက် — အိုးတွေကို ကြည့်ရအောင်', en: 'Next morning: look at the pots' });
@@ -677,8 +677,30 @@ export function shape({ title = '', hint = '', loads = [2, 3, 5], best = 2, roun
       if (Math.abs(S.tilt - S.tiltTo) < 0.003) S.tilt = S.tiltTo;
       if (S.drop < 1) S.drop = Math.min(1, S.drop + dt * 3.2);
       step(dt);
+      if (S.phase !== cuePhase) cueFor(cuePhase = S.phase);
       draw();
       raf = requestAnimationFrame(frame);
+    }
+    // the "where do I act?" cue, one per phase (the load is the player's own choice: all three glow alike)
+    let cuePhase = '';
+    const onCv = (x, y) => { const r = cv.getBoundingClientRect(); return [r.left + x, r.top + y]; };
+    function cueFor(ph) {
+      if (S.auto) return A.cue.set(null);
+      if (ph === 'choose') return A.cue.set({ kind: 'many', many: () => [...loadsEl.children], label: { my: 'ဒီနေ့ အိုးဘယ်နှလုံး လုပ်မလဲ — တစ်ခု နှိပ်ပါ', en: 'How many pots today? Tap one' } });
+      if (ph === 'centre') {
+        return A.cue.set({ kind: 'drag', delay: 3000, when: () => S.drop >= 1,
+          at: () => { const { cx, y } = geo(); return onCv(cx + S.off.x, y + S.off.y); },
+          to: () => { const { cx, y, ringR } = geo(); return [...onCv(cx, y), ringR + 4]; },
+          label: { my: 'ရွှံ့ကို ဖိပြီး ဝိုင်းထဲ ဆွဲသွင်းထားပါ', en: 'Press the clay and drag it into the ring' } });
+      }
+      if (ph === 'pull') {
+        return A.cue.set({ kind: 'drag', delay: 3000,
+          at: () => { const { R, cx, y } = geo(); return onCv(cx, y - heightOf(S.h) * R * 0.4 + 6); },
+          to: () => { const { R, cx, y } = geo(); return [...onCv(cx, y - heightOf(1) * R * 0.4 - 4), 14]; },
+          label: { my: 'အောက်ကနေ အပေါ်ကို ဖြည်းဖြည်း ဆွဲတင်ပါ', en: 'Drag upward, slowly' } });
+      }
+      if (ph === 'end') return A.cue.set({ kind: 'tap', at: () => (nextBtn.hidden ? null : nextBtn) });
+      A.cue.set(null);
     }
     function step(dt) {
       const { ringR } = geo();

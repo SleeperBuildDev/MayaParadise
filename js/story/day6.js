@@ -392,8 +392,8 @@ export async function create(story) {
     if (r?.cancelled) return; // not yet: he waits at Little Jetty
     // W · what did I see, myself?
     await D.say('maya', [L.rideQ], { face: 'think' });
-    for (;;) {
-      const i = await D.choose(L.rideChoices);
+    for (const again = D.retry(); ;) {
+      const i = await again(L.rideChoices);
       if (i === 1) break;
       await D.say('maya', L.rideWrong[i], { face: 'think' });
     }
@@ -571,8 +571,8 @@ export async function create(story) {
     story.room?.set?.('slate3', false);
     await D.say('kophyo', L.kpHabit, { face: 'think' });
     await D.say('naychi', L.ncHabitQ, { face: 'think' });
-    for (;;) {
-      const i = await D.choose(L.habitChoices);
+    for (const again = D.retry(); ;) {
+      const i = await again(L.habitChoices);
       if (i === 2) break;
       await D.say('naychi', L.ncLean, { face: 'worried' });
       await D.say('maya', L.mayaLean, { face: 'think' });
@@ -682,8 +682,8 @@ export async function create(story) {
     await D.say('naychi', L.ncFound, { face: 'sad' });
     // W · her sorry: her words, the player picks which line is hers
     await D.say('maya', [L.sorryQ], { face: 'think' });
-    for (;;) {
-      const k = await D.choose(L.sorryChoices);
+    for (const again = D.retry(); ;) {
+      const k = await again(L.sorryPicks || L.sorryChoices); // the button is the gist; she says the full line (no echo)
       await D.say('naychi', [L.sorryChoices[k]], { face: k === 1 ? 'worried' : 'shy' });
       if (k === 1) break;
       await D.say('maungnge', L.sorryWrong[k], { face: 'think' });

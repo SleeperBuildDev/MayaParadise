@@ -45,12 +45,12 @@ const L = {
   letter: { my: 'အစ်မ… လူကြီးတွေရဲ့ ကမ္ဘာထဲ ခြေစ လှမ်းတော့မယ်။\nလမ်းမပျောက်အောင် မြေပုံလေး ရှိလား။', en: "Sister… I'm about to step into the grown-up world.\nIs there a map, so I don't get lost?" },
   maya1: [
     { my: 'မြေပုံ… ကျွန်မမှာ စာမျက်နှာ နှစ်ဆယ့်သုံးမျက်နှာ ရှိတယ်။ ကျွန်မအတွက်တော့ အလုပ်ဖြစ်ခဲ့တယ်။', en: 'A map… I have twenty-three pages. They worked for me.' },
-    { my: 'ဒါပေမဲ့ ကျွန်မ မဟုတ်တဲ့ တခြားသူအတွက်ရော ဖြစ်ပါ့မလား။', en: "But will they work for someone who isn't me?" },
+    { my: 'ဒါပေမဲ့ ကျွန်မ မဟုတ်တဲ့ တခြားသူတွေအတွက်ရော အလုပ်ဖြစ်ပါ့မလား။', en: "But will they work for someone who isn't me?" },
     { my: 'မပေးခင် ကိုယ်တိုင် အရင် စစ်ကြည့်မယ်။ ဒီနေ့ စာမျက်နှာ တစ်ကနေ စမယ်။', en: "Before I hand them over, I'll check them myself. Today I'll start with page one." },
   ],
   ww2: [
     { my: 'ဒါဆို ဒီမှတ်စုစာအုပ်နဲ့ ကလောင်လေး ယူသွား။ ကိုယ်တိုင်မြင်တာကိုပဲ ရွှေမင်နဲ့ ရေးနော်။', en: 'Then take this notebook and quill. Only write in gold what you have seen yourself.' },
-    { my: 'ဒါနဲ့… ဦးကျော်ညွန့်တို့ ဒီနေ့ စာအုပ်ကျောရိုး ပြန်ချုပ်နေကြတယ်။ သူ့ကူညီပေးတဲ့ ဖိုးသားလေးကတော့ တစ်နေကုန် ပျောက်နေတယ်တဲ့။', en: "Oh, and U Kyaw Nyunt is re-stitching the book's spine today. Little Pho Thar, who helps him, has been gone all day." },
+    { my: 'ဒါနဲ့… ဦးကျော်ညွန့်တို့ ဒီနေ့ စာအုပ်ကျောရိုး ပြန်ချုပ်နေကြတယ်။ သူ့ကို ကူပေးနေတဲ့ ဖိုးသားလေးကတော့ တစ်နေကုန် ပျောက်နေတယ်တဲ့။', en: "Oh, and U Kyaw Nyunt is re-stitching the book's spine today. Little Pho Thar, who helps him, has been gone all day." },
   ],
   wwLater: [{ my: 'ဦးကျော်ညွန့်လား။ စာကြည့်တိုက်ရှေ့ မြက်ခင်းမှာ စာအုပ်ကျောရိုး ချုပ်နေတယ်။', en: "U Kyaw Nyunt? On the lawn in front of the Library, stitching the book's spine." }],
   // U Kyaw Nyunt
@@ -79,61 +79,61 @@ const L = {
   ukComing: [{ my: 'ဖိုးသား ပြန်လာနေပြီလား မသိဘူး။ ခဏ စောင့်ကြည့်ရအောင်။', en: "Is Pho Thar on his way back? Let's wait a moment." }],
   // practice
   ukTeach: [
-    { my: 'ဒီ အစက်လေးတွေအတိုင်း လိုက်ချုပ်။ မြန်ဖို့ မလိုဘူး။ ဖြောင့်ဖို့ပဲ လိုတယ်။', en: "Follow the dots. You don't need to be fast, only straight." },
+    { my: 'ဒီအစက်လေးတွေအတိုင်း လိုက်ချုပ်နော်။ မြန်ဖို့ မလိုဘူး၊ ဖြောင့်ဖို့ပဲ လိုတယ်။', en: "Follow the dots. You don't need to be fast, only straight." },
   ],
-  traceTitle: { my: 'ဖိုးသားနဲ့ အတူ ချုပ်မယ်', en: 'Stitch with Pho Thar' },
-  traceHint: { my: 'ရွှေအစက်က စပြီး အစက်လေးတွေအတိုင်း ဖြည်းဖြည်း ဆွဲပါ', en: 'Start at the gold dot and trace the dots slowly' },
+  traceTitle: { my: 'ဖိုးသားနဲ့ အတူတူ ချုပ်မယ်', en: 'Stitch with Pho Thar' },
+  traceHint: { my: 'ရွှေရောင်အစက်က စပြီး အစက်လေးတွေအတိုင်း ဖြည်းဖြည်းချင်း ဆွဲပါ', en: 'Start at the gold dot and trace the dots slowly' },
   again: [
     [{ my: 'ကောက်သွားပြန်ပြီ…', en: 'Crooked again…' }],
-    [{ my: 'နည်းနည်းတော့ ပိုကောင်းလာတယ်…', en: 'A little better…' }],
+    [{ my: 'နည်းနည်းတော့ ပိုကောင်းလာပြီ…', en: 'A little better…' }],
   ],
-  ukAgain: { my: 'နောက်တစ်ခါ။ ပါရမီက အဓိက မဟုတ်ဘူး။', en: "Once more. The gift isn't the main thing." },
+  ukAgain: { my: 'နောက်တစ်ခေါက်။ ပါရမီက အဓိက မဟုတ်ပါဘူး။', en: "Once more. The gift isn't the main thing." },
   roundOk: [
-    [{ my: 'ဟယ်… ဒီတစ်ကြောင်း နည်းနည်းဖြောင့်တယ်။', en: 'Hey… this one is a bit straighter.' }],
+    [{ my: 'ဟယ်… ဒီတစ်ကြောင်းတော့ နည်းနည်း ဖြောင့်လာပြီ။', en: 'Hey… this one is a bit straighter.' }],
     [{ my: 'လက်က အရင်လောက် မတုန်တော့ဘူး။', en: "My hand isn't shaking like before." }],
-    [{ my: 'ဖြောင့်တယ်! ကျွန်တော် ချုပ်တာ ဖြောင့်တယ်!', en: "Straight! I stitched it straight!" }],
+    [{ my: 'ဖြောင့်သွားပြီ! ကျွန်တော် ချုပ်တာ ဖြောင့်သွားပြီ!', en: "Straight! I stitched it straight!" }],
   ],
   ukWin: [
-    { my: 'ညနေ ချုပ်ရိုးပြိုင်ပွဲ… ပထမဆုကတော့ ဖိုးသား။', en: "This evening's stitching contest… first prize goes to Pho Thar." },
-    { my: 'ပါရမီ ပါလို့ မဟုတ်ဘူး။ ထပ်ခါထပ်ခါ ချုပ်လို့ပဲ။', en: "Not because of a gift. Because he stitched again and again." },
+    { my: 'ညနေခင်း ချုပ်ရိုးပြိုင်ပွဲမှာ… ပထမဆု ရသွားသူကတော့ ဖိုးသားပါ။', en: "This evening's stitching contest… first prize goes to Pho Thar." },
+    { my: 'ပါရမီ ပါလို့ မဟုတ်ဘူး။ ထပ်ခါထပ်ခါ ကြိုးစားချုပ်လို့ပဲ။', en: "Not because of a gift. Because he stitched again and again." },
   ],
   // a breath after the practice: the fair comes up only when Maya talks to them again
-  ukRest: [{ my: 'ကဲ… ခဏ အမောဖြေကြဦး။ မနက်ဖြန် ပွဲတော်အကြောင်း ပြောစရာ ရှိသေးတယ်။', en: "Now… catch your breath a moment. There's still tomorrow's fair to talk about." }],
+  ukRest: [{ my: 'ကဲ… ခဏ အမောဖြေကြဦး။ မနက်ဖြန် ပွဲတော်အကြောင်း ပြောစရာ ကျန်သေးတယ်။', en: "Now… catch your breath a moment. There's still tomorrow's fair to talk about." }],
   // the fair: the black sheep's own choice
   ukFair: [
     { my: 'မနက်ဖြန် ပွဲတော်မှာ စားပွဲနှစ်လုံး ရှိမယ်။ ချုပ်ရိုးစားပွဲနဲ့ လေရဟတ်စားပွဲ။', en: "Tomorrow's fair has two tables: one for stitching, one for windmills." },
-    { my: 'တစ်ယောက် တစ်ခုပဲ ဝင်ပြိုင်လို့ရတယ်။', en: 'Each person may enter only one.' },
+    { my: 'တစ်ယောက်ကို တစ်ခုပဲ ဝင်ပြိုင်လို့ ရမယ်။', en: 'Each person may enter only one.' },
   ],
   ukFairAgain: [{ my: 'ကဲ… ဖိုးသား၊ စဉ်းစားပြီးပြီလား။', en: 'So… Pho Thar, have you thought it over?' }],
-  ukFairLater: [{ my: 'ကောင်လေးကို ခဏ စဉ်းစားခွင့်ပေးလိုက်ပါဦး။', en: 'Give the boy a little while to think.' }],
-  ptFairLater: [{ my: 'ခဏ စဉ်းစားပါရစေဦး…', en: 'Let me think a little longer…' }],
+  ukFairLater: [{ my: 'ကောင်လေးကို ခဏလောက် စဉ်းစားခွင့် ပေးလိုက်ပါဦး။', en: 'Give the boy a little while to think.' }],
+  ptFairLater: [{ my: 'ကျွန်တော့်ကို ခဏ စဉ်းစားခွင့်ပေးပါဦး…', en: 'Let me think a little longer…' }],
   // (his own decision at the fair is in talks/day1.js: it ends the talk)
-  ukSheep: [{ my: 'ချုပ်ရိုးဆရာ အိမ်ထဲက လေရဟတ်သမားလေးပေါ့။ သိုးမည်းလေး တစ်ကောင်ပဲ။ ကောင်းတဲ့ သိုးမည်းပါ။', en: "A windmill maker from a binder's house. A little black sheep. The good kind." }],
-  ptStuck: [{ my: 'ဒါပေမဲ့… ပွဲအတွက် လေရဟတ်အသစ်က မလည်ဘူး။', en: "But… my new windmill for the fair won't turn." }],
+  ukSheep: [{ my: 'ချုပ်ရိုးဆရာ အိမ်က လေရဟတ်သမားလေးပေါ့။ သိုးမည်းလေး တစ်ကောင်ပါပဲ။ ဒါပေမဲ့ ကောင်းတဲ့ သိုးမည်းလေးပါ။', en: "A windmill maker from a binder's house. A little black sheep. The good kind." }],
+  ptStuck: [{ my: 'ဒါပေမဲ့… ပွဲတော်အတွက် လုပ်ထားတဲ့ လေရဟတ်အသစ်က မလည်ဘူး ဖြစ်နေတယ်။', en: "But… my new windmill for the fair won't turn." }],
   foldTitle: { my: 'လေရဟတ် ခေါက်မယ်', en: 'Fold the windmill' },
-  foldHint: { my: 'ထောင့်တိုင်းကနေ အလယ်ကို ဖြည်းဖြည်း ခေါက်ပါ', en: 'Fold each corner to the centre, slowly' },
+  foldHint: { my: 'ထောင့်တိုင်းကနေ အလယ်ကို ဖြည်းဖြည်းချင်း ခေါက်ပါ', en: 'Fold each corner to the centre, slowly' },
   ptSpins: [
     { my: 'လည်ပြီ! ချုပ်ရိုးလိုပဲ… ထပ်ခါထပ်ခါ လုပ်မှ ရတာပဲ။', en: "It turns! Just like the stitches… it takes again and again." },
-    { my: 'ဒါ မာရာ့အတွက်။ ကျေးဇူးပါ။', en: "This one's for you, Maya. Thank you." },
+    { my: 'ဒါ မာရာ့အတွက်ပါ။ ကျေးဇူးတင်ပါတယ်။', en: "This one's for you, Maya. Thank you." },
   ],
-  mayaWrite: [{ my: 'ဒီနေ့အကြောင်း စာရေးခန်းမှာ ပြန်ရေးမှ ဖြစ်မယ်။', en: "I should write today down at my Writing Room." }],
-  ptAfter: [{ my: 'မနက်ဖြန် ပွဲတော်မှာ လေရဟတ်တွေ အများကြီး လည်နေတော့မှာ။', en: "Tomorrow there'll be windmills turning all over the fair." }],
+  mayaWrite: [{ my: 'ဒီနေ့အကြောင်း စာရေးခန်းထဲ ပြန်ရေးမှ ဖြစ်မယ်။', en: "I should write today down at my Writing Room." }],
+  ptAfter: [{ my: 'မနက်ဖြန် ပွဲတော်မှာ လေရဟတ်တွေ အများကြီး လည်နေတော့မှာပဲ။', en: "Tomorrow there'll be windmills turning all over the fair." }],
   ukAfter: [{ my: 'ကောင်လေး ကိုယ့်လမ်း ကိုယ်တွေ့ပြီ။', en: "The boy has found his own road." }],
   wwAfter: [{ my: 'ဖိုးသားကို တွေ့ပြီလား။ ပြုံးပြုံးလေး ပြန်လာတာ တွေ့လိုက်တယ်။', en: 'Found Pho Thar? I saw him come back smiling.' }],
   // night page
-  nightQ: { my: 'ဒီနေ့အကြောင်း မှန်မှန်ကန်ကန် ဘယ်လို ရေးမလဲ။', en: 'How will she write today, truthfully?' },
+  nightQ: { my: 'ဒီနေ့အကြောင်း အမှန်အတိုင်း ဘယ်လို ရေးမလဲ။', en: 'How will she write today, truthfully?' },
   nightChoices: [
     { my: 'ဖိုးသားက ပါရမီ ပါလာလို့ ချက်ချင်း တော်သွားတယ်။', en: 'Pho Thar suddenly found a gift and became good.' },
-    { my: 'ဖိုးသားက ထပ်ခါထပ်ခါ လေ့ကျင့်လို့ ဖြောင့်လာတယ်။ ပြီးတော့ သူ အချစ်ဆုံးလမ်းကို ကိုယ်တိုင် ရွေးတယ်။', en: 'Pho Thar practised again and again until his stitches ran straight. Then he chose the road he loves himself.' },
+    { my: 'ဖိုးသားက ထပ်ခါထပ်ခါ လေ့ကျင့်လို့ ဖြောင့်လာတယ်။ ပြီးတော့ သူ အချစ်ဆုံးလမ်းကို ကိုယ်တိုင် ရွေးခဲ့တယ်။', en: 'Pho Thar practised again and again until his stitches ran straight. Then he chose the road he loves himself.' },
     { my: 'ဖိုးသားက ဘယ်တော့မှ တော်လာမှာ မဟုတ်ဘူး။', en: 'Pho Thar will never be any good.' },
   ],
   nightWrong: [
-    [{ my: '(မဟုတ်ဘူး… ဒါ ချော့ပြောတာ။ ကိုယ်တိုင် မြင်ခဲ့တာက ဒီလို မဟုတ်ဘူး။)', en: "(No… that flatters. It isn't what I saw.)" }],
+    [{ my: '(မဟုတ်ဘူး… ဒါ မြှောက်ပြောတာ။ ကိုယ်တိုင် မြင်ခဲ့တာက ဒီလို မဟုတ်ဘူး။)', en: "(No… that flatters. It isn't what I saw.)" }],
     [],
     [{ my: '(မဟုတ်ဘူး… ဒါ အားလျှော့ပြောတာ။ ကိုယ်တိုင် မြင်ခဲ့တာက ဒီလို မဟုတ်ဘူး။)', en: "(No… that's too gloomy. It isn't what I saw.)" }],
   ],
   sleepQ: { my: 'ဒီည မှတ်စုစာမျက်နှာလေး ဘယ်သူ့အိမ်မှာ အိပ်မလဲ။', en: 'Whose house does tonight\'s notebook page sleep at?' },
-  stampText: { my: 'စာမျက်နှာ ၁ — ကျွန်မက သိုးမည်း\nတခြားသူ တစ်ယောက်အတွက်လည်း မှန်ကြောင်း ကိုယ်တိုင် တွေ့ခဲ့ပြီ။', en: 'Page 1 — I Am a Black Sheep\nShe saw for herself that it holds for someone else too.' },
+  stampText: { my: 'စာမျက်နှာ ၁ — ကျွန်မက သိုးမည်း\nတခြားသူ တစ်ယောက်အတွက်လည်း မှန်ကန်ကြောင်း ကိုယ်တိုင် တွေ့ခဲ့ပြီ။', en: 'Page 1 — I Am a Black Sheep\nShe saw for herself that it holds for someone else too.' },
   tomorrow: { my: 'နောက်တစ်နေ့ မနက် ရောက်ပြီ။ စာမျက်နှာ ၂ ဆက်သွားမယ်။', en: 'Morning comes. On to page 2.' },
 };
 
@@ -241,8 +241,8 @@ export async function create(story) {
   async function ptTalk() {
     const pt = story.people.get('phothar');
     await D.say('phothar', L.pt1, { face: 'sad', mood: 'down' });
-    for (;;) {
-      const i = await D.choose(L.ptChoices);
+    for (const again = D.retry(); ;) {
+      const i = await again(L.ptChoices);
       if (i === 0) { await D.say('phothar', L.ptGiveUp, { face: 'sad', emote: 'slump' }); await D.say('maya', L.ptGiveUpMaya, { face: 'think' }); continue; }
       if (i === 1) { await D.say('phothar', L.ptPressure, { face: 'hot', emote: 'fists' }); await D.say('maya', L.ptPressureMaya, { face: 'think' }); pt.p.setMood('down'); continue; }
       break;

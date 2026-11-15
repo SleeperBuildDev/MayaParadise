@@ -71,7 +71,7 @@ export function turnblock({ title = '', hint = '', glyph = '6', sides = [] } = {
         S.seen.add(side);
         buzz(16);
         setTimeout(() => { if (!A.closed()) showSay(side); }, 260);
-        if (S.seen.size >= 2 && doneBtn.hidden) setTimeout(() => { doneBtn.hidden = false; }, 900);
+        if (S.seen.size >= 2 && doneBtn.hidden) setTimeout(() => { doneBtn.hidden = false; cueStep(); }, 900);
       } else if (S.sayFor !== side) showSay(side);
     }
     function turnBy(dir = 1) {
@@ -81,6 +81,11 @@ export function turnblock({ title = '', hint = '', glyph = '6', sides = [] } = {
       sayEl.classList.add('out');
     }
     stage.querySelector('.tb-arrow').addEventListener('click', () => turnBy(1));
+    // the cue: the turn arrow until the other side has been seen, then the done button
+    const cueStep = () => A.cue.set(S.seen.size < 2
+      ? { kind: 'tap', at: stage.querySelector('.tb-arrow'), glow: false, r: 26, label: { my: 'တုံးကို လှည့်ကြည့်ပါ — မြှားကို နှိပ် (သို့) လှည့်ဆွဲပါ', en: 'Turn the block: tap the arrow or drag round' } }
+      : { kind: 'tap', at: () => (doneBtn.hidden ? null : doneBtn) });
+    cueStep();
     doneBtn.addEventListener('click', async () => { doneBtn.disabled = true; await A.seal(true); A.done({ ok: true, turns }); });
 
     // drag round the centre to turn

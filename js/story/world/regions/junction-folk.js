@@ -6,7 +6,8 @@
 // Every Burmese string is a draft for Maya.
 //
 // PROP:
-//   jFolk { pose, seed, woman?, top?, bottom?, load?, stool? }   a townsperson at work, still. pose:
+//   jFolk { pose, seed, woman?, top?, bottom?, load?, stool? }   a townsperson at work, still (RETIRED 2026-11-15: region.js
+//                STILL_FOLK drops it at merge). pose:
 //     'stand' | 'readStand' (a paper held open) | 'sell' (a paper held up to the street) | 'sweep' |
 //     'carry' (a tied bundle of papers on the shoulder) | 'head' (a flat basket on the head) | 'paste'
 //     (one arm up with the paste brush) | 'hang' (both arms up, pegging washing) | 'squat' | 'sit' | 'read'

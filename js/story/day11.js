@@ -396,8 +396,8 @@ export async function create(story) {
     F('p2.stall', stall);
     const other = stall === 'soup' ? 'upu' : 'sawyu';
     await say(other, stall === 'soup' ? L.otherDry : L.otherSoup, { face: 'sad' });
-    for (;;) {
-      const i = await D.choose(L.p2Choices);
+    for (const again = D.retry(); ;) {
+      const i = await again(L.p2Choices);
       if (i === 0) { await say('maya', L.p2Bad, { face: 'think' }); continue; }
       if (i === 1) { await say(other, other === 'upu' ? L.p2SamePu : L.p2SameSy, { face: 'hot' }); continue; }
       break;
@@ -433,8 +433,8 @@ export async function create(story) {
     return panChoice();
   }
   async function panChoice() {
-    for (;;) {
-      const i = await D.choose(L.p3Choices);
+    for (const again = D.retry(); ;) {
+      const i = await again(L.p3Choices);
       if (i === 0) { await say('maungpan', L.p3Told, { face: 'worried' }); story.people.get('maungpan')?.p.emote('slump'); continue; }
       if (i === 1) { row.lamps && call(game.audio, 'play', 'page'); await say('maya', L.p3Later, { face: 'think' }); continue; }
       break;
@@ -504,10 +504,9 @@ export async function create(story) {
     if (F('p5.out')) return say('sanshar', L.ssFollow, { face: 'smile' });
     await say('sanshar', L.ss1, { face: 'sad', mood: 'down' });
     await say('maya', L.ssAsk, { face: 'think' });
-    for (;;) {
-      const i = await D.choose(L.ssThoughts);
+    for (const again = D.retry(); ;) {
+      const i = await again(L.ssThoughts);
       if (i === 2) break;
-      await say('sanshar', [L.ssThoughts[i]], { face: 'sad' });
       await say('maya', L.ssWrong, { face: 'think' });
     }
     story.people.get('sanshar')?.p.setMood(null);
@@ -576,8 +575,8 @@ export async function create(story) {
   }
   async function p6Decision() {
     await say('cherry', L.ch2, { face: 'worried' });
-    for (;;) {
-      const i = await D.choose(L.p6Choices);
+    for (const again = D.retry(); ;) {
+      const i = await again(L.p6Choices);
       if (i === 0) { await say('cherry', L.p6Lower, { face: 'sad' }); continue; }
       if (i === 1) { await say('cherry', L.p6Find, { face: 'think' }); continue; }
       break;
@@ -874,7 +873,7 @@ export async function create(story) {
       if (story.talking || game.busy) return;
       const ok = await stage(async () => {
         await say('maya', [L.deskQ], { face: 'think' });
-        for (;;) { const i = await D.choose(L.desk); if (i === 0) break; await say('maya', L.deskWrong, { face: 'think' }); }
+        for (const again = D.retry(); ;) { const i = await again(L.desk); if (i === 0) break; await say('maya', L.deskWrong, { face: 'think' }); }
       });
       if (!ok) return;
       await lightDesk0.call(ow, d);
@@ -1025,7 +1024,7 @@ export async function create(story) {
       case 'd11stoolRed': return run(() => eat('soup', room));
       case 'd11stoolBlue': return run(() => eat('dry', room));
       case 'calendar': if (story.inRoom === 'eveningclass') return run(flipCalendar); return false;
-      case 'sill': return run(() => say('maya', F('p3.out') ? [{ my: '(ပြတင်းခုံ လွတ်သွားပြီ။ ဘူးလေး မရှိတော့ဘူး။)', en: '(The sill is bare. The tin has gone.)' }] : [{ my: '(ဘူးထဲမှာ မန်ကျည်းပင်လေး။ အောက်ခြေအပေါက်ကနေ အမြစ်တွေ ထွက်နေပြီ။)', en: '(A tamarind seedling in a tin. Roots poking out of the drain hole.)' }], { face: 'think' }));
+      case 'sill': return run(() => say('maya', F('p3.out') ? [{ my: '(ပြတင်းပေါက်ခုံ လွတ်သွားပြီ။ သံဘူးလေး မရှိတော့ဘူး။)', en: '(The sill is bare. The tin has gone.)' }] : [{ my: '(သံဘူးထဲမှာ မန်ကျည်းပင်လေး။ အောက်ခြေအပေါက်ကနေ အမြစ်တွေ ထွက်နေပြီ။)', en: '(A tamarind seedling in a tin. Roots poking out of the drain hole.)' }], { face: 'think' }));
       case 'practiceSheet': return run(() => look('sheet'));
       case 'songbook': return run(() => look('book'));
       case 'kettle': return run(() => sayAs(L.uncleName, LOOKS?.hearthuncle, F('p6') ? L.uncleAfter : L.uncleBefore));

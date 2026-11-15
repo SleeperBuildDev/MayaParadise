@@ -25,12 +25,12 @@ export const D1_CARDS = [
     id: 'stitch',
     lookalike: true,
     name: { my: 'ချုပ်ရိုးပဲ ဝင်ပါ', en: 'Enter stitching' },
-    line: { my: 'ချုပ်ရိုးပဲ ဝင်ပါ၊ ခုနကပဲ နိုင်ခဲ့တာ။', en: 'Enter stitching, you just won.' },
+    line: { my: 'ချုပ်ရိုးပဲ ဝင်ပြိုင်ပါ၊ ခုနကပဲ နိုင်ခဲ့တာလေ။', en: 'Enter stitching, you just won.' },
     shows: ['unknown'], // looks like it answers "doesn't know"…
     really: { my: 'သူ့အစား ရွေးပေးတာ', en: 'choosing for him' }, // …but it is this
     backfire: {
       they: { my: 'ဟုတ်… ဟုတ်ကဲ့…', en: 'Oh… okay…' },
-      maya: { my: '(ကျွန်မ သူ့အစား ရွေးပေးနေမိပြီ။ ဒါ သူ့လမ်းပဲ။) |', en: "(I'm choosing for him. It's his road.)" },
+      maya: { my: '(ကျွန်မ သူ့အစား ရွေးပေးနေမိပြီ။ ဒါ သူ့လမ်းပဲဟာ။)', en: "(I'm choosing for him. It's his road.)" },
     },
   },
 ];
@@ -45,17 +45,17 @@ export const TALK_D1_FAIR = {
   hand: D1_CARDS,
   tutorial: [
     { at: 'path', my: 'ဖိုးသားက သူ့လမ်းညွှန်တိုင်ဆီ ကိုယ်တိုင် လျှောက်ရမယ်။ မာရာက ဘေးကနေ ကူပေးရုံပဲ။', en: 'Pho Thar walks to his own signpost himself. Maya only helps from beside him.' },
-    { at: 'label', my: 'ခဲတံစာက အပြင်က မြင်ရတာ။ "ကြည့်" ရင် အမှန်ကို ရွှေမင်နဲ့ မြင်ရမယ်။ စိတ်အေး တစ်စက် ကုန်တယ်။', en: 'The pencil word is how it looks from outside. Look shows the truth in gold, for one calm.' },
-    { at: 'hand', my: 'လေ့ကျင့်ရင်း ရခဲ့တဲ့ စကားတွေပါ။ ကိုက်ရင် တစ်လှမ်း တိုးမယ်။ မကိုက်ရင် စိတ်အေး တစ်စက် လျော့မယ်။', en: 'Words you earned in the practice. One that fits moves him a step; one that does not costs a calm.' },
-    { at: 'steam', my: 'ခွက်က ငွေ့ သုံးကြောင်း တက်ရင် စကား နားမဝင်တော့ဘူး။ အရင် နားထောင်ပေးပါ။ |', en: 'Three wisps from his cup and words stop entering the ear. Listen first.' },
+    { at: 'label', my: 'ခဲတံစာက အပြင်ပန်း မြင်ရတာ။ "ကြည့်" လိုက်ရင် အမှန်ကို ရွှေမင်နဲ့ မြင်ရမယ်။ စိတ်အေး ၁ မှတ် ကုန်တယ်။', en: 'The pencil word is how it looks from outside. Look shows the truth in gold, for one calm.' },
+    { at: 'hand', my: 'လေ့ကျင့်ရင်း ရခဲ့တဲ့ စကားတွေပါ။ ကိုက်ရင် တစ်လှမ်း တိုးမယ်။ မကိုက်ရင် စိတ်အေး ၁ မှတ် လျော့မယ်။', en: 'Words you earned in the practice. One that fits moves him a step; one that does not costs a calm.' },
+    { at: 'steam', my: 'ခွက်ထဲက အငွေ့ သုံးကြောင်း တက်လာရင် စကား နားမဝင်တော့ဘူး။ အရင် နားထောင်ပေးပါ။', en: 'Three wisps from his cup and words stop entering the ear. Listen first.' },
   ],
   stones: [
     {
       lines: [
-        { my: 'ချုပ်ရိုးမှာ နိုင်ခဲ့ပြီ… ဒါပေမဲ့ လေရဟတ်… မာရာ၊ ကျွန်တော် ဘာရွေးရမလဲ။', en: 'I just won at stitching… but the windmills… Maya, which should I pick?', need: 'unknown', face: 'worried',
-          tell: { my: 'တကယ်ကို မဆုံးဖြတ်နိုင်သေးဘူး။ စားပွဲ နှစ်လုံးကို တလှည့်စီ ကြည့်နေတယ်။', en: 'He truly has not decided. His eyes go from one table to the other.' } },
-        { my: 'စားပွဲ နှစ်လုံး၊ တစ်ခုပဲ ရွေးရမယ်… ခေါင်းထဲမှာ လေရဟတ်လို လည်နေတယ်။', en: "Two tables, only one entry… my head's spinning like a windmill.", need: 'unknown', face: 'think',
-          tell: { my: 'ဘယ်ဟာ ပိုချစ်လဲ ကိုယ့်ကိုယ်ကို မမေးဖူးသေးဘူး။', en: 'He has never asked himself which one he loves more.' } },
+        { my: 'ချုပ်ရိုးမှာ နိုင်ခဲ့ပြီ… ဒါပေမဲ့ လေရဟတ်က… မာရာ၊ ကျွန်တော် ဘာရွေးရမလဲ။', en: 'I just won at stitching… but the windmills… Maya, which should I pick?', need: 'unknown', face: 'worried',
+          tell: { my: 'တကယ်ကို မဆုံးဖြတ်နိုင်သေးဘူး။ စားပွဲ နှစ်လုံးကို တစ်လှည့်စီ ကြည့်နေတယ်။', en: 'He truly has not decided. His eyes go from one table to the other.' } },
+        { my: 'စားပွဲ နှစ်လုံး၊ တစ်ခုပဲ ရွေးရမယ်… ခေါင်းထဲမှာ လေရဟတ်လို ချာချာလည်နေတယ်။', en: "Two tables, only one entry… my head's spinning like a windmill.", need: 'unknown', face: 'think',
+          tell: { my: 'ဘယ်ဟာ ပိုချစ်လဲ ကိုယ့်ကိုယ်ကိုယ် မမေးဖူးသေးဘူး။', en: 'He has never asked himself which one he loves more.' } },
       ],
     },
     {
@@ -63,14 +63,14 @@ export const TALK_D1_FAIR = {
         { my: 'ဘာရွေးရမှန်း… ကျွန်တော် မသိဘူး။', en: "I… don't know what to pick.", need: 'afraid', seems: 'unknown', face: 'worried',
           tell: { my: 'မျက်လုံးက ဦးကျော်ညွန့်ဆီ ခဏခဏ ရောက်သွားတယ်။ မသိလို့ မဟုတ်ဘူး… ဆရာ စိတ်ပျက်မှာ ကြောက်နေတာ။', en: "His eyes keep going to U Kyaw Nyunt. It isn't that he doesn't know… he's afraid of letting his teacher down." } },
         { my: 'ဆရာက နေ့တိုင်း သင်ပေးခဲ့တာ။ ချုပ်ရိုး မဝင်ရင် ဆရာ စိတ်မကောင်း ဖြစ်မှာ။', en: "He taught me every day. If I don't enter stitching, he'll be sad.", need: 'afraid', seems: 'cling', face: 'sad',
-          tell: { my: 'ဆရာ့ကို တွယ်တာလို့ မဟုတ်ဘူး။ ဆရာ စိတ်ပျက်မှာကို ကြောက်နေတာ။', en: "He isn't clinging to his teacher. He's afraid of disappointing him." } },
+          tell: { my: 'ဆရာ့ကို စွဲလမ်းနေလို့ မဟုတ်ဘူး။ ဆရာ စိတ်ပျက်မှာကို ကြောက်နေတာ။', en: "He isn't clinging to his teacher. He's afraid of disappointing him." } },
       ],
     },
     {
       lines: [
         { my: 'လေရဟတ်က ကလေးကစားစရာပဲတဲ့။ လူကြီးတွေ ပြောတာ။', en: 'Windmills are just toys, the grown-ups say.', need: 'given', seems: 'looksdown', face: 'sad', mood: 'down',
           tell: { my: 'လေရဟတ်ကို အထင်သေးတာ မဟုတ်ဘူး။ အိတ်ထဲက လေရဟတ်လေးကို တင်းတင်း ကိုင်ထားတယ်။ လက်လျှော့ချင်နေပြီ။', en: "He doesn't look down on windmills: he's holding the little one in his pocket tight. He's close to giving up on them." } },
-        { my: 'ချုပ်ရိုးတုန်းကလိုပဲ… ကျွန်တော် မတတ်ပါဘူးလို့ပဲ ထင်နေမိတယ်။ |', en: 'Like with the stitches… I keep thinking I just can\'t.', need: 'given', face: 'sad', mood: 'down',
+        { my: 'ချုပ်ရိုးတုန်းကလိုပဲ… ကျွန်တော် မလုပ်နိုင်ပါဘူးလို့ပဲ ထင်နေမိတယ်။', en: 'Like with the stitches… I keep thinking I just can\'t.', need: 'given', face: 'sad', mood: 'down',
           tell: { my: 'ချုပ်ရိုးမှာ "ပါရမီ မပါဘူး" လို့ ပြောခဲ့သလိုပဲ။', en: 'The same "I have no gift" he said about stitching.' } },
       ],
     },
@@ -81,7 +81,7 @@ export const TALK_D1_FAIR = {
   },
   // his own decision, in his own words
   decision: [
-    { my: 'လေရဟတ်။ ငယ်ငယ်ကတည်းက အချစ်ဆုံး။', en: "Windmills. I've loved them since I was little.", face: 'happy' },
-    { my: 'ချုပ်တတ်လာပြီဆိုလည်း… ကျွန်တော် ကိုယ်တိုင် ရွေးတာ။ လေရဟတ်။', en: 'Even if I can stitch now… I choose for myself. Windmills.', face: 'happy' },
+    { my: 'လေရဟတ်။ ငယ်ငယ်ကတည်းက အချစ်ဆုံးပဲ။', en: "Windmills. I've loved them since I was little.", face: 'happy' },
+    { my: 'ချုပ်တတ်လာပြီဆိုပေမဲ့… ကျွန်တော် ကိုယ်တိုင် ရွေးတာ။ လေရဟတ်ပဲ။', en: 'Even if I can stitch now… I choose for myself. Windmills.', face: 'happy' },
   ],
 };

@@ -159,8 +159,18 @@ export function trace({ title = '', hint = '', path = 'stitch', glyph = 'စာ'
       clock += dt;
       for (let i = 0; i < SN; i++) if (sDone[i]) sAnim[i] = Math.min(1, sAnim[i] + dt * 2.6);
       for (const s of seeds) s.t = Math.min(1, s.t + dt * 3.2);
+      const nextS = finished ? -1 : sDone.findIndex((d) => !d);
+      if (nextS !== cueS) cueStroke(cueS = nextS);
       draw();
       raf = requestAnimationFrame(frame);
+    }
+    // the cue: a finger walks the next unfinished stroke, from its gold dot
+    let cueS = -2;
+    function cueStroke(si) {
+      if (si < 0) return A.cue.set(null);
+      const pts = geo.strokes[si];
+      A.cue.set({ kind: 'trace', r: 12, path: () => { const b = cv.getBoundingClientRect(); return pts.map((p) => [b.left + p[0], b.top + p[1]]); },
+        label: { my: 'ရွှေအစက်ကနေ စပြီး အစက်လေးတွေအတိုင်း ဆွဲပါ', en: 'Start at the gold dot and follow the dots' } });
     }
     function draw() {
       g.clearRect(0, 0, W, H);

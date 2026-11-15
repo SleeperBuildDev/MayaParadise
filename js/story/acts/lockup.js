@@ -106,6 +106,9 @@ export function lockup({ title = '', hint = '', caller = null, setter = null, li
       S.calling = false; S.ready = true;
       callEl.classList.remove('calling');
       callEl.classList.add('ready');
+      // the cue: every block left in the tray glows alike (finding the called one is the player's reading)
+      A.cue.set({ kind: 'many', when: () => S.ready && !S.busy && S.phase === 'set', many: () => blocks.filter((x) => !x.set).map((x) => x.el),
+        label: { my: 'ခေါ်လိုက်တဲ့ စာလုံးတုံးကို ရှာနှိပ်ပါ (ဇောက်ထိုးဖြစ်နေရင် တစ်ချက်နှိပ်ပြီး လှည့်ပါ)', en: 'Find and tap the called block (upside down? tap once to turn it)' } });
     }
     async function tap(b) {
       if (b.set || S.busy || S.phase !== 'set' || A.closed()) return;
@@ -144,6 +147,7 @@ export function lockup({ title = '', hint = '', caller = null, setter = null, li
         return;
       }
       mistakes++;
+      A.cue.wrong();
       await fly(b.el, sl.el, false);
       A.shake(b.el, 'ak-wiggle');
       if (wrong) { callP.textContent = ''; bi(callP, wrong); callEl.classList.remove('ready'); callEl.classList.add('said'); }
@@ -173,6 +177,8 @@ export function lockup({ title = '', hint = '', caller = null, setter = null, li
       qbar.hidden = false;
       A.setHint(T.quoin);
       chase.classList.add('quoin');
+      A.cue.set({ kind: 'hold', at: holdBtn, glow: false, when: () => !S.holding && S.phase === 'quoin',
+        label: { my: 'ဖိထားပြီး ရွှေကွက်ထဲ ရောက်မှ လွှတ်ပါ', en: 'Press and hold; let go in the gold' } });
     }
     const press = (e) => { e?.preventDefault?.(); if (S.phase !== 'quoin' || S.holding) return; S.holding = true; S.q = 0; holdBtn.classList.add('down'); chase.classList.remove('bow', 'rattle'); };
     const release = () => { if (!S.holding) return; S.holding = false; holdBtn.classList.remove('down'); judge(); };
@@ -187,6 +193,7 @@ export function lockup({ title = '', hint = '', caller = null, setter = null, li
       const v = S.q;
       if (v >= band[0] && v <= band[1]) {
         S.phase = 'done';
+        A.cue.set(null);
         chase.classList.add('locked');
         A.setHint(T.locked, 'good');
         buzz(30);

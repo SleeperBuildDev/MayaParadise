@@ -441,8 +441,8 @@ export async function create(story) {
     await D.say('yeyint', [L.yyStuck[1]], { face: 'sad' });
     await D.say('hninwai', L.hwLine, { face: 'smile' });
     await D.say('maya', [L.wQ], { face: 'think' });
-    for (;;) {
-      const i = await D.choose(L.wChoices);
+    for (const again = D.retry(); ;) {
+      const i = await again(L.wChoices);
       if (i === 2) break;
       await D.say('yeyint', L.wWrong[i], { face: 'think' });
     }
@@ -492,8 +492,8 @@ export async function create(story) {
     labels.dispose();
     game.ui.cinema(true);
     await D.say('maya', [L.headQ], { face: 'think' });
-    for (;;) {
-      const i = await D.choose(L.headChoices);
+    for (const again = D.retry(); ;) {
+      const i = await again(L.headChoices);
       if (i === 2) break;
       await D.say('maya', [L.headWrong], { face: 'think' });
     }
@@ -878,8 +878,8 @@ export async function create(story) {
     call(R?.parts?.slates, 'show', true);
     hutPair();
     await D.say('naychi', L.ncOrderQ, { face: 'think' });
-    for (;;) {
-      const i = await D.choose(L.ncOrderChoices);
+    for (const again = D.retry(); ;) {
+      const i = await again(L.ncOrderChoices);
       if (i === 2) break;
       if (i === 0) { await D.say('naychi', L.ncByNumber, { face: 'think' }); await D.say('maya', L.ncByNumberMaya, { face: 'think' }); }
       else { await D.say('naychi', L.ncMaya, { face: 'worried' }); await D.say('maya', L.ncMayaMaya, { face: 'think' }); }
@@ -951,7 +951,7 @@ export async function create(story) {
         const ok = await runScene(async () => {
           await D.say('maya', [L.deskFoldQ], { face: 'think' });
           const choices = [L.deskFold[0], L.deskFold[1], F('bridge') ? L.deskFoldAfter : L.deskFold[2]];
-          for (;;) { const i = await D.choose(choices); if (i === 2) break; await D.say('maya', [L.deskWrong], { face: 'think' }); }
+          for (const again = D.retry(); ;) { const i = await again(choices); if (i === 2) break; await D.say('maya', [L.deskWrong], { face: 'think' }); }
         });
         if (!ok) return;
         await lightDesk0.call(ow, d);

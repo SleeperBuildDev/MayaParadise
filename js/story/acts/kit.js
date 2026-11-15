@@ -5,7 +5,9 @@
 //
 //   const A = openAct({ title, hint, kind, resolve, onCancel })
 //   A.body (put the act here)  A.setHint(o)  A.shake(el)  await A.seal(ok)  A.done(result)
+//   A.cue (acts/cue.js: the gentle "tap here" ring / finger after ~4 s idle; set per step)
 import { tr, lang } from '../../game/ui.js';
+import { cue } from './cue.js';
 
 export const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 export const myNum = (n) => (lang() === 'en' ? String(n) : String(n).replace(/\d/g, (d) => '၀၁၂၃၄၅၆၇၈၉'[d]));
@@ -64,6 +66,8 @@ export function openAct({ title = '', hint = '', kind = '', resolve, onCancel } 
 
   const A = {
     wrap, card, host, hintEl, body: wrap.querySelector('.ak-body'), closed: () => closed, onKey: null,
+    // the "where do I act?" cue (acts/cue.js): A.cue.set({ kind, at, ... }) per step, A.cue.wrong() on a miss
+    get cue() { return this._cue || (this._cue = cue(wrap)); },
     setHint(o, tone = '') {
       bi(hintEl, o);
       hintEl.dataset.tone = tone;
