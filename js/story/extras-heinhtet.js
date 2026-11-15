@@ -228,6 +228,31 @@ export function installHeinHtet(game, story, ow) {
     if (s.b.w > 0 && h.point.y > 0.12 && h.point.distanceTo(s.a) < 4) return true;
     return false;
   }
+  // A hit that hides him: on something drawn, not an outline / sprite / points, not a person, Maya or the car, and
+  // not cut away by the see-through hole.
+  const hides = (h) => h.object.visible && !h.object.userData?.isOutline && !h.object.isSprite && !h.object.isPoints && !isMine(h.object) && !cutAway(h);
+  // The same objects, the same per-object raycasts and the same test on each hit as three's intersectObjects(scene
+  // children, recursive) + hits.some(hides), only cheaper (perf pass 2, 2026-11-15: 10-15 ms a call at 4x CPU, 40-60 ms
+  // when a meet looked at four townsfolk in one frame): no raycast on what can never hide him (a person's, Maya's or
+  // the car's whole subtree; a hidden object, an outline, a sprite or points: their children still are tested, as
+  // three does), no sorting, and it stops at the first hit that hides him.
+  const rayHits = [];
+  function blocked(list) {
+    const maya = game.maya.root, car = game.car?.root;
+    for (let i = 0; i < list.length; i++) {
+      const o = list[i];
+      if (o.userData?.isPerson || o === maya || o === car) continue;
+      if (o.layers.test(ray.layers) && o.visible && !o.userData?.isOutline && !o.isSprite && !o.isPoints) {
+        rayHits.length = 0;
+        const r = o.raycast(ray, rayHits);
+        for (let k = 0; k < rayHits.length; k++) if (hides(rayHits[k])) { rayHits.length = 0; return true; }
+        rayHits.length = 0;
+        if (r === false) continue; // (three: no children then)
+      }
+      if (o.children.length && blocked(o.children)) return true;
+    }
+    return false;
+  }
   function seen(x, z) {
     const c = game.camera.position;
     for (const y of [1.25, 0.75, 0.3]) {
@@ -235,8 +260,20 @@ export function installHeinHtet(game, story, ow) {
       const d = v.distanceTo(c);
       ray.set(c, rd.copy(v).sub(c).normalize());
       ray.far = d - 0.4; ray.camera = game.camera;
+      if (blocked(scene.children)) return false;
+    }
+    return true;
+  }
+  /** (tests) the first version: every hit in the scene, then the same test */
+  function seenRef(x, z) {
+    const c = game.camera.position;
+    for (const y of [1.25, 0.75, 0.3]) {
+      v.set(x, y, z);
+      const d = v.distanceTo(c);
+      ray.set(c, rd.copy(v).sub(c).normalize());
+      ray.far = d - 0.4; ray.camera = game.camera;
       const hits = ray.intersectObjects(scene.children, true);
-      if (hits.some((h) => h.object.visible && !h.object.userData?.isOutline && !h.object.isSprite && !h.object.isPoints && !isMine(h.object) && !cutAway(h))) return false;
+      if (hits.some(hides)) return false;
     }
     return true;
   }
@@ -639,6 +676,15 @@ export function installHeinHtet(game, story, ow) {
    * is too tight to cross (a lane between walls), up or down the screen past her. Spread over frames (a few
    * ms a frame), so a long search never makes a long frame. */
   const nextFrame = () => sleep(0);
+  // the same for a meet's and a walk-up's search (a sight check or a way out at a time; the rest next frame)
+  let paceT = 0;
+  const paceFrom = () => { paceT = performance.now(); };
+  async function pace(ms = 4) {
+    if (performance.now() - paceT <= ms) return;
+    await nextFrame();
+    camBasis();
+    paceT = performance.now();
+  }
   async function planCross(kind, o = {}) {
     camBasis();
     const mp = mayaXZ();
@@ -685,9 +731,11 @@ export function installHeinHtet(game, story, ow) {
     cands.sort((a, b) => (b.road - a.road) * 0.4 + (across(b) - across(a)));
     const dg = (stats.plan = { cands: cands.length, view: 0, clear: 0, seen: 0, big: 0, a: 0, b: 0, frames: 0 });
     let t0 = performance.now();
-    const tStart = clock;
+    const tStart = clock, budget = o.budgetMs ?? 7;
+    // (within one spot too: its sight check and each way off screen can be a few ms each at 4x CPU, perf pass 2)
+    const more = async () => { if (performance.now() - t0 > budget) { await nextFrame(); camBasis(); t0 = performance.now(); } };
     for (const c of cands) {
-      if (performance.now() - t0 > (o.budgetMs ?? 7)) { // (no long frame: the rest next frame)
+      if (performance.now() - t0 > budget) { // (no long frame: the rest next frame)
         if (++dg.frames > 24 || clock - tStart > 1.2) { dg.timeout = true; break; }
         await nextFrame();
         camBasis();
@@ -699,12 +747,15 @@ export function installHeinHtet(game, story, ow) {
       dg.clear++;
       if (!bigEnough(c.x, c.z)) continue;
       dg.big++;
+      await more();
       if (!seen(c.x, c.z)) continue;
       dg.seen++;
       const s = Math.random() < 0.5 ? 1 : -1;
+      await more();
       const a = c.road ? roadOff(c.edge, c.s, -s, c.lat, opt) : extendOff(c.x, c.z, -c.dx * s, -c.dz * s, opt);
       if (!a) continue;
       dg.a++;
+      await more();
       const b = c.road ? roadOff(c.edge, c.s, s, c.lat, opt) : extendOff(c.x, c.z, c.dx * s, c.dz * s, opt);
       if (!b) continue;
       dg.b++;
@@ -714,8 +765,10 @@ export function installHeinHtet(game, story, ow) {
     }
     return null;
   }
-  /** a stop beside someone (left or right of them on screen, so both faces show) and the ways in and out */
-  function planBeside(target, o = {}) {
+  /** a stop beside someone (left or right of them on screen, so both faces show) and the ways in and out (spread
+   * over frames; o.now: all in this frame, as a walk-up needs: she stands still from the frame it starts) */
+  async function planBeside(target, o = {}) {
+    const step = o.now ? null : pace;
     camBasis();
     const tp = target.root ? target.root.position : target;
     const sides = Math.random() < 0.5 ? [1, -1] : [-1, 1];
@@ -724,11 +777,14 @@ export function installHeinHtet(game, story, ow) {
       for (const tilt of [0, 0.35, -0.35]) {
         const dx = cam.rx * Math.cos(tilt) - cam.fx * Math.sin(tilt), dz = cam.rz * Math.cos(tilt) - cam.fz * Math.sin(tilt);
         const sx = tp.x + dx * gap * sd, sz = tp.z + dz * gap * sd;
-        if (!clearAt(sx, sz, { ...o, stand: true }) || !inView(sx, sz, [0.12, 0.26, 0.88, 0.84]) || !bigEnough(sx, sz) || !seen(sx, sz)) continue;
+        if (!clearAt(sx, sz, { ...o, stand: true }) || !inView(sx, sz, [0.12, 0.26, 0.88, 0.84]) || !bigEnough(sx, sz)) continue;
+        if (step) await step();
+        if (!seen(sx, sz)) continue;
         // in: from further out on the same side (or from above / below on screen)
         const ins = [[dx * sd, dz * sd], [dx * sd * 0.7 + cam.fx * 0.7, dz * sd * 0.7 + cam.fz * 0.7], [dx * sd * 0.7 - cam.fx * 0.7, dz * sd * 0.7 - cam.fz * 0.7], [cam.fx, cam.fz]];
         for (const [ix, iz] of ins) {
           const il = Math.hypot(ix, iz) || 1;
+          if (step) await step();
           const a = extendOff(sx, sz, ix / il, iz / il, o);
           if (!a) continue;
           const stand = { x: sx, z: sz };
@@ -736,6 +792,7 @@ export function installHeinHtet(game, story, ow) {
           const outs = [[-dx * sd * 0.55 + cam.fx * 0.85, -dz * sd * 0.55 + cam.fz * 0.85], [-dx * sd * 0.55 - cam.fx * 0.85, -dz * sd * 0.55 - cam.fz * 0.85], [cam.fx, cam.fz], [-cam.fx, -cam.fz], [ix, iz]];
           for (const [ox, oz] of outs) {
             const ol = Math.hypot(ox, oz) || 1;
+            if (step) await step();
             const b = extendOff(sx, sz, ox / ol, oz / ol, o);
             if (b) return { a: a[a.length - 1], stand, b: b[b.length - 1], inPts: [...a.slice().reverse(), stand], outPts: [stand, ...b] };
           }
@@ -837,7 +894,10 @@ export function installHeinHtet(game, story, ow) {
     if (spec.job) { const role = (e.cast?.role?.en || '').toLowerCase(); if (String(spec.job).split(/\s+/).some((j) => j.length > 3 && role.includes(j.toLowerCase()))) s += 2; }
     return s;
   }
-  function meetCandidates(town) {
+  /** the townsfolk near and in view (lazy: the camera's sight of each is left to the caller, which tests it only for
+   * the best ones, a few a frame: four sight checks in one frame were a 40-60 ms frame at 4x CPU) and the meets that
+   * fit them, best first */
+  function meetCandidates(town, lazy = false) {
     const mp = mayaXZ();
     const out = [];
     for (const e of story.people.values()) {
@@ -845,7 +905,7 @@ export function installHeinHtet(game, story, ow) {
       if (e === story.talkWith || e.ctl || e.walking || e.hidden || e.paused || e.indoor) continue;
       const p = e.p.root.position;
       const d = Math.hypot(p.x - mp.x, p.z - mp.z);
-      if (d > 18 || d < 1.5 || !inView(p.x, p.z, [0.08, 0.22, 0.92, 0.84]) || !seen(p.x, p.z)) continue;
+      if (d > 18 || d < 1.5 || !inView(p.x, p.z, [0.08, 0.22, 0.92, 0.84]) || (!lazy && !seen(p.x, p.z))) continue;
       out.push({ e, d });
     }
     out.sort((a, b) => a.d - b.d);
@@ -868,11 +928,32 @@ export function installHeinHtet(game, story, ow) {
     const mp = mayaXZ(), town = o.town || districtAt(mp.x, mp.z);
     // (the town chatter may be mid-line: he pauses it and waits for the line to end; only her own thought stops him)
     if (!town || chatterArriving()) return miss('meet:busy');
-    let cands = meetCandidates(town);
+    let cands = meetCandidates(town, true);
     if (o.id) cands = cands.filter((c) => c.m.id === o.id);
-    let pl = null, c = null;
-    for (const cc of cands.slice(0, 6)) { pl = planBeside(cc.e.p, { allow: cc.e }); if (pl) { c = cc; break; } }
-    if (!c) return miss(cands.length ? 'meet:path' : 'meet:nobody');
+    // (the same six best seen ones as when every one was sight-checked first: the order among the seen is the same)
+    let pl = null, c = null, tried = 0;
+    const sight = new Map();
+    paceFrom();
+    for (const cc of cands) {
+      if (tried >= 6) break;
+      let ok = sight.get(cc.e);
+      if (ok === undefined) {
+        await pace();
+        const p = cc.e.p.root.position;
+        ok = !!cc.e.p.root.parent && seen(p.x, p.z);
+        sight.set(cc.e, ok);
+      }
+      if (!ok) continue;
+      tried++;
+      const e = cc.e, p0x = e.p.root.position.x, p0z = e.p.root.position.z;
+      pl = await planBeside(e.p, { allow: e });
+      // (the search is spread over frames now: a person who set off, was taken by a talk or left meanwhile is no
+      // longer a meet; the plan was made beside where they stood)
+      if (pl && (e === story.talkWith || e.ctl || e.walking || e.hidden || e.paused || e.indoor || !e.p.root.parent || e.p.root.visible === false
+        || Math.hypot(e.p.root.position.x - p0x, e.p.root.position.z - p0z) > 0.25)) pl = null;
+      if (pl) { c = cc; break; }
+    }
+    if (!c) return miss(tried ? 'meet:path' : 'meet:nobody');
     if (!o.force && (blockedWhy() || chatterArriving())) return miss('meet:gate');
     const { e, m } = c;
     const t = onStage(pl.a, 'meet', town);
@@ -927,7 +1008,7 @@ export function installHeinHtet(game, story, ow) {
     if (!wu) return miss('walkup:none');
     const mp = mayaXZ(), town = districtAt(mp.x, mp.z);
     story.foot?.walker?.stop?.();
-    const pl = planBeside(mp, { gap: 1.15, noMaya: false, mayaR: 1.0 });
+    const pl = await planBeside(mp, { gap: 1.15, noMaya: false, mayaR: 1.0, now: true });
     if (!pl) return miss('walkup:path');
     const t = onStage(pl.a, 'walkup', town);
     h.walk[wu.id] = save.day || 1; h.walkDay = save.day || 1; persistSoon();
@@ -1458,6 +1539,8 @@ export function installHeinHtet(game, story, ow) {
       get force() { return force; },
       set force(on) { force = !!on; },
       plan: (kind = 'pass') => planCross(kind),  // (a Promise: the search is spread over frames)
+      seen: (x, z) => seen(x, z),
+      seenRef: (x, z) => seenRef(x, z),
       planCar: (kind = 'dash') => planCarCross(kind),
       whyNot: () => ({ ...whyNot }),
       meets: () => { const mp = mayaXZ(); const t = districtAt(mp.x, mp.z); return meetCandidates(t).map((c) => `${c.m.id}<-${c.e.id}`); },

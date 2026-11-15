@@ -24,7 +24,7 @@ import * as THREE from '../game/three.js';
 import { tr } from '../game/ui.js';
 import { createChatter } from './chatter/index.js';
 import { SMALLTALK } from './chatter/smalltalk.js';
-import { createPerson } from './people.js';
+import { createPersonSteps } from './people.js';
 import { castById } from './cast.js';
 import { PEOPLE as REGION_PEOPLE, REGION_FILES, regionAt, bookDist } from './world/region.js';
 import { DOORS } from './doors.js';
@@ -350,15 +350,16 @@ export function installChatter(game, story, ow) {
     for (const d of [].concat(m.DESKS || [])) add(d);
   }
   for (const p of REGION_PEOPLE) { keepSpots.push(p); if (p.job?.spot) keepSpots.push(p.job.spot); }
-  function freeAt(x, z, why = null) {
+  /** near: { doors, spots } already cut down to those that can be within reach of the spots asked about (viewSpot) */
+  function freeAt(x, z, why = null, near = null) {
     const no = (k) => { if (why) why[k] = (why[k] || 0) + 1; return false; };
     const mp = mayaXZ();
     if (Math.hypot(x - mp.x, z - mp.z) < KEEP.maya) return no('maya');
     if (ow?.space && ow.space.collides(x, z, 0.5)) return no('solid');
     const rd = ow?.net?.nearest?.(x, z);
     if (rd && rd.dist < KEEP.road) return no('road');
-    for (const d of Object.values(DOORS)) if (d && Math.hypot(x - d.x, z - d.z) < KEEP.door) return no('door');
-    for (const s of keepSpots) if (Math.hypot(x - s.x, z - s.z) < KEEP.spot) return no('spot');
+    for (const d of near ? near.doors : Object.values(DOORS)) if (d && Math.hypot(x - d.x, z - d.z) < KEEP.door) return no('door');
+    for (const s of near ? near.spots : keepSpots) if (Math.hypot(x - s.x, z - s.z) < KEEP.spot) return no('spot');
     for (const e of story.people.values()) {
       const p = e.p?.root?.position;
       if (p && Math.hypot(x - p.x, z - p.z) < (e.folk ? 1.2 : KEEP.person)) return no('person');
@@ -485,8 +486,15 @@ export function installChatter(game, story, ow) {
       cands.push({ x: g.x, z: g.z, d, s: Math.abs(d - 8) + (inArea ? 0 : 6) + Math.random() * 4 });
     }
     cands.sort((p, q) => p.s - q.s);
+    // (every spot here is within VIEW.far of her: a door or a story spot farther than that plus its keep-clear
+    // distance cannot be too near any of them, so freeAt looks only at the rest: the same answers, a fraction of
+    // the work; perf pass 2)
+    const near = {
+      doors: Object.values(DOORS).filter((d) => d && Math.hypot(d.x - mp.x, d.z - mp.z) <= VIEW.far + KEEP.door + 0.01),
+      spots: keepSpots.filter((p) => Math.hypot(p.x - mp.x, p.z - mp.z) <= VIEW.far + KEEP.spot + 0.01),
+    };
     for (const c of cands) {
-      if (!freeAt(c.x, c.z, why)) continue;
+      if (!freeAt(c.x, c.z, why, near)) continue;
       if (grace > 0) return { x: c.x, z: c.z, from: null };
       const from = walkInFrom(c.x, c.z);
       if (from) return { x: c.x, z: c.z, from };
@@ -522,28 +530,40 @@ export function installChatter(game, story, ow) {
     return { look, name };
   }
   let folkSeq = 0;
-  function spawnFolk(area, x, z, h) {
+  /** a passer-by, made a step at a time (a generator: the person's parts and geometry a frame each, people.js
+   * createPersonSteps; returns the folk entry, or null). held: added hidden (pairHeld), shown by unhold(). ok: asked
+   * once more as it is added (a spot picked out of sight a few frames ago may have come into the frame meanwhile:
+   * then nobody comes, as nobody pops up in front of her). Dropped half-made (job.return()): its slot is let go. */
+  function* spawnFolkSteps(area, x, z, h, held = false, ok = null) {
     const id = `folk:${area.key}:${folkSeq++}`;
     if (dayOwns(id)) return null;
     const slot = folkSlot(area.d); // one of the town's own walk-around people (same slot: same name, same look)
-    const R = seeded(hashName(`${area.d}#${slot}`));
-    const { look, name } = lookFor(R, area.d, slot);
-    const roles = ROLES[area.d] || ROLES.home;
-    const [ren, rmy] = look.age === 'child' ? ['kid', 'ကလေး'] : look.top === 'school' ? ['pupil', 'ကျောင်းသား'] : roles[Math.floor(R() * roles.length)];
-    const p = createPerson(look);
-    p.root.position.set(x, 0, z);
-    p.root.rotation.y = h;
-    p.root.userData.isPerson = true;
-    game.world.scene.add(p.root);
-    const cast = { id, name, role: { en: ren, my: rmy }, look, ambient: true, hello: pick(HELLOS.filter(fitsNow)) };
-    const e = { id, cast, name, p, home: { x, z, h }, ob: { type: 'circle', x, z, r: p.radius || 0.3, person: id }, onTalk: null, walking: null, folk: area.key, town: area.d, slot };
-    e.onTalk = async () => {
-      const hello = pick(HELLOS.filter(fitsNow));
-      await story.dialog.say(id, hello, { face: 'smile' });
-    };
-    story.people.set(id, e);
-    folk.set(id, e);
-    return e;
+    let made = false;
+    try {
+      const R = seeded(hashName(`${area.d}#${slot}`));
+      const { look, name } = lookFor(R, area.d, slot);
+      const roles = ROLES[area.d] || ROLES.home;
+      const [ren, rmy] = look.age === 'child' ? ['kid', 'ကလေး'] : look.top === 'school' ? ['pupil', 'ကျောင်းသား'] : roles[Math.floor(R() * roles.length)];
+      const p = yield* createPersonSteps(look);
+      if (ok && !ok()) { p.dispose?.(); return null; }
+      p.root.position.set(x, 0, z);
+      p.root.rotation.y = h;
+      p.root.userData.isPerson = true;
+      if (held) p.root.visible = false;
+      game.world.scene.add(p.root);
+      const cast = { id, name, role: { en: ren, my: rmy }, look, ambient: true, hello: pick(HELLOS.filter(fitsNow)) };
+      const e = { id, cast, name, p, home: { x, z, h }, ob: { type: 'circle', x, z, r: p.radius || 0.3, person: id }, onTalk: null, walking: null, folk: area.key, town: area.d, slot, pairHeld: held };
+      e.onTalk = async () => {
+        const hello = pick(HELLOS.filter(fitsNow));
+        await story.dialog.say(id, hello, { face: 'smile' });
+      };
+      story.people.set(id, e);
+      folk.set(id, e);
+      made = true;
+      return e;
+    } finally {
+      if (!made) releaseFolkSlot(area.d, slot);
+    }
   }
   function dropFolk(id) {
     const e = folk.get(id);
@@ -559,7 +579,21 @@ export function installChatter(game, story, ow) {
   let spawnT = 1.5, overT = 0, grace = 5, lastMp = null, stillT = 0, lastMp0 = null, lastD = null;
   const camDir = new THREE.Vector3();
   const stats = { spawned: {}, dropped: 0, peak: 0, callsAtSpawn: [] };
+  // Folk coming (one, or a pair) are made over several frames, one step a frame: each person's parts and geometry
+  // (spawnFolkSteps), then the second one's spot and person. Two createPerson calls and their spot searches in one
+  // frame were a 13-50 ms frame at 4x CPU (perf pass 2, 2026-11-15). The first of a pair that would stand in sight
+  // at once (no walk in) stays hidden until the second is there, so the two still appear together; the rest of the
+  // folk round (drops, the next spawn) waits while a job runs. A room, the book or a day that wants the streets
+  // empty drops the job (half-made people are let go).
+  let job = null;
+  const unhold = (e) => { if (e?.pairHeld) { e.pairHeld = false; e.p.root.visible = true; } };
   function tickFolk(dt) {
+    if (job) {
+      const j = job;
+      job = null;
+      if (story.inRoom || game.mode !== 'world' || dayOwns('ambientFolk')) j.return();
+      else if (!j.next().done) { job = j; return; }
+    }
     spawnT -= dt;
     if (spawnT > 0) return;
     spawnT = 0.5;
@@ -643,28 +677,35 @@ export function installChatter(game, story, ow) {
     if (!spot && spotOn && (grace > 0 || Math.hypot(spotOn.x - mp.x, spotOn.z - mp.z) > 22)) spot = spotOn;
     if (!spot) { stats.miss = (stats.miss || 0) + 1; return; }
     const h0 = Math.atan2(mp.x - spot.x, mp.z - spot.z) + rand(-1.2, 1.2);
-    const e1 = spawnFolk(a, spot.x, spot.z, h0);
-    if (!e1) return;
-    stats.spawned[a.d] = (stats.spawned[a.d] || 0) + 1;
-    stats.callsAtSpawn.push(calls);
-    if (stats.callsAtSpawn.length > 20) stats.callsAtSpawn.shift();
-    // a second one, chatting with the first
-    if (need >= 2 && folk.size < cap()) {
-      for (let i = 0; i < 10; i++) {
-        const ang = Math.random() * Math.PI * 2, rr = rand(1.3, 1.9);
-        const x = spot.x + Math.cos(ang) * rr, z = spot.z + Math.sin(ang) * rr;
-        if (districtAt(x, z) !== a.d && !(a.d === 'home' && bookDist(x, z) <= 0)) continue;
-        if (!freeAt(x, z)) continue;
-        const e2 = spawnFolk(a, x, z, Math.atan2(spot.x - x, spot.z - z));
-        if (e2) {
-          e1.home.h = Math.atan2(x - spot.x, z - spot.z);
-          e1.p.root.rotation.y = e1.home.h;
-          stats.spawned[a.d]++;
+    const pair = need >= 2, outAtPick = !ptOnScreen(spot.x, spot.z);
+    const stillOut = (x, z) => () => !outAtPick || !ptOnScreen(x, z);
+    job = (function* () {
+      const e1 = yield* spawnFolkSteps(a, spot.x, spot.z, h0, pair && !outAtPick, stillOut(spot.x, spot.z));
+      if (!e1) return;
+      try {
+        stats.spawned[a.d] = (stats.spawned[a.d] || 0) + 1;
+        stats.callsAtSpawn.push(calls);
+        if (stats.callsAtSpawn.length > 20) stats.callsAtSpawn.shift();
+        // a second one, chatting with the first
+        if (pair && folk.size < cap()) {
+          yield;
+          if (folk.get(e1.id) !== e1 || folk.size >= cap()) return;
+          for (let i = 0; i < 10; i++) {
+            const ang = Math.random() * Math.PI * 2, rr = rand(1.3, 1.9);
+            const x = spot.x + Math.cos(ang) * rr, z = spot.z + Math.sin(ang) * rr;
+            if (districtAt(x, z) !== a.d && !(a.d === 'home' && bookDist(x, z) <= 0)) continue;
+            if (!freeAt(x, z)) continue;
+            const e2 = yield* spawnFolkSteps(a, x, z, Math.atan2(spot.x - x, spot.z - z), false, stillOut(x, z));
+            if (e2) {
+              e1.home.h = Math.atan2(x - spot.x, z - spot.z);
+              e1.p.root.rotation.y = e1.home.h;
+              stats.spawned[a.d]++;
+            }
+            break;
+          }
         }
-        break;
-      }
-    }
-    stats.peak = Math.max(stats.peak, folk.size);
+      } finally { unhold(e1); stats.peak = Math.max(stats.peak, folk.size); }
+    })();
   }
   /** the area (or the town) Maya stands by, for in-view folk: { key, d, id, x, z, r, town? } or null */
   function hereArea(mp) {
@@ -706,25 +747,33 @@ export function installChatter(game, story, ow) {
     const s1 = (lone && viewSpot(a, mp, lone)) || viewSpot(a, mp);
     if (!s1) { stats.viewMiss = (stats.viewMiss || 0) + 1; spawnT = 1.5; return false; }
     const h1 = Math.atan2(mp.x - s1.x, mp.z - s1.z) + rand(-1.2, 1.2);
-    const e1 = spawnFolk(a, s1.x, s1.z, h1);
-    if (!e1) return false;
-    if (s1.from) walkIn(e1, s1.from);
-    stats.spawned[a.d] = (stats.spawned[a.d] || 0) + 1;
-    stats.inView = (stats.inView || 0) + 1;
-    stats.callsAtSpawn.push(callsNow());
-    if (stats.callsAtSpawn.length > 20) stats.callsAtSpawn.shift();
     const face = (e, at) => { e.home.h = Math.atan2(at.x - e.home.x, at.z - e.home.z); if (!e.walkIn) e.p.root.rotation.y = e.home.h; };
-    if (lone) face(e1, lone);
-    else if (need >= 2 && folk.size < cap()) {
-      const s2 = viewSpot(a, mp, s1);
-      const e2 = s2 && spawnFolk(a, s2.x, s2.z, 0);
-      if (e2) {
-        if (s2.from) walkIn(e2, s2.from);
-        face(e2, s1); face(e1, s2);
-        stats.spawned[a.d]++; stats.inView++;
-      }
-    }
-    stats.peak = Math.max(stats.peak, folk.size);
+    const pair = !lone && need >= 2;
+    job = (function* () {
+      const e1 = yield* spawnFolkSteps(a, s1.x, s1.z, h1, pair && !s1.from, () => !s1.from || offFrame(s1.from.x, s1.from.z));
+      if (!e1) return;
+      try {
+        if (s1.from) walkIn(e1, s1.from);
+        stats.spawned[a.d] = (stats.spawned[a.d] || 0) + 1;
+        stats.inView = (stats.inView || 0) + 1;
+        stats.callsAtSpawn.push(callsNow());
+        if (stats.callsAtSpawn.length > 20) stats.callsAtSpawn.shift();
+        if (lone) face(e1, lone);
+        else if (pair && folk.size < cap()) {
+          yield;
+          if (folk.get(e1.id) !== e1 || folk.size >= cap()) return;
+          const s2 = viewSpot(a, mp, s1);
+          if (!s2) return;
+          yield;
+          const e2 = yield* spawnFolkSteps(a, s2.x, s2.z, 0, false, () => !s2.from || offFrame(s2.from.x, s2.from.z));
+          if (e2) {
+            if (s2.from) walkIn(e2, s2.from);
+            face(e2, s1); face(e1, s2);
+            stats.spawned[a.d]++; stats.inView++;
+          }
+        }
+      } finally { unhold(e1); stats.peak = Math.max(stats.peak, folk.size); }
+    })();
     spawnT = 2; // (let them walk in before looking again)
     return true;
   }

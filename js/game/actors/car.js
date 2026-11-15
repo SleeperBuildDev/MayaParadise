@@ -649,7 +649,9 @@ export function createCar(opts = {}) {
   hop.name = 'carHop';
   root.add(hop);
 
-  const wheels = new THREE.InstancedMesh(wheelGeo, VC(), 4);
+  // (its own copy of the shared vertex-colour toon material: drawn instanced right after the plain body with the same
+  // material object, three worked out the program again at each switch, garbage every frame; perf pass 2, 2026-11-15)
+  const wheels = new THREE.InstancedMesh(wheelGeo, VC().clone(), 4);
   wheels.name = 'carWheels';
   wheels.userData.dynamic = true;
   hop.add(wheels);

@@ -252,6 +252,16 @@ export function fontsReady() {
  * Burmese needs line-height >= 1.6 so stacked vowel marks are not clipped.
  */
 export function signTexture(lines, opts = {}) {
+  const it = signTextureSteps(lines, opts);
+  for (;;) { const r = it.next(); if (r.done) return r.value; }
+}
+/**
+ * The same sign, drawn a step at a time (a generator: yields after the board and after each line of text, returns
+ * the texture), for a caller that spreads it over frames (stream.js: a new chunk's signs). A line of Burmese text
+ * drawn the first time (its glyphs) cost 2-8 ms at 4x CPU throttle, a whole sign up to ~25 ms (perf pass 2,
+ * 2026-11-15). The same drawing calls in the same order as signTexture(): the same pixels.
+ */
+export function* signTextureSteps(lines, opts = {}) {
   const { width = 512, height = 256, bg = PALETTE.cream, border = PALETTE.goldDeep, radius = 28, color: ink = PALETTE.ink, borderWidth = 10 } = opts;
   const cv = document.createElement('canvas');
   cv.width = width;
@@ -273,6 +283,7 @@ export function signTexture(lines, opts = {}) {
   g.textAlign = 'center';
   g.textBaseline = 'middle';
   for (const l of lines) {
+    yield;
     const size = l.size ?? 48;
     g.font = `${l.weight ?? 700} ${size}px ${l.font ?? FONT_MY}`;
     g.fillStyle = l.color ?? ink;

@@ -25,6 +25,7 @@
 import * as THREE from '../../game/three.js';
 import { BOOK } from '../../game/world/world.js';
 import { bookDist } from './region.js';
+import { depthTwin } from '../../game/shadows.js';
 
 const FAR_BITS = 20, FAR_PAINT = 40;
 /** The layer mask a copied original is given: no camera draws it (and the shadow pass skips it too). */
@@ -316,10 +317,36 @@ export function homeBookBudget(world) {
     info.ms = Math.round(performance.now() - t0);
   }
 
+  // A batch draws with a copy of its material of its own (one per source material, with or without per-piece
+  // colours), kept in step with the source every frame: the source is still drawn plain elsewhere (the car's body,
+  // the clouds...), and one material drawn in turn plain and batched (or batched with and without colours) had its
+  // program worked out again at each switch, garbage every frame (perf pass 2, 2026-11-15). Not for see-through or
+  // custom-shader materials (those stay shared, as before).
+  const matTwins = new Map(); // source -> [twin without colours, twin with]
+  function batchMaterial(src, colors) {
+    const own = (src.isMeshToonMaterial || src.isMeshBasicMaterial || src.isMeshLambertMaterial) && !src.transparent
+      && src.onBeforeCompile === THREE.Material.prototype.onBeforeCompile && !Object.prototype.hasOwnProperty.call(src, 'customProgramCacheKey');
+    if (!own) return src;
+    let pair = matTwins.get(src);
+    if (!pair) matTwins.set(src, (pair = [null, null]));
+    const k = colors ? 1 : 0;
+    if (!pair[k]) { const t = src.clone(); t.__src = src; t.__srcVer = src.version; pair[k] = t; }
+    return pair[k];
+  }
+  function followSource(t) {
+    const src = t.__src;
+    if (!src) return;
+    if (src.version !== t.__srcVer) { t.copy(src); t.__srcVer = src.version; t.needsUpdate = true; return; }
+    if (t.color && src.color) t.color.copy(src.color);
+    if (t.emissive && src.emissive) { t.emissive.copy(src.emissive); t.emissiveIntensity = src.emissiveIntensity; }
+    t.opacity = src.opacity;
+    t.visible = src.visible;
+  }
+
   function makeBatch(name, material, recs, { cast, receive, sort, rank = -1 }) {
     let nInst = 0, nV = 0, nI = 0;
     for (const r of recs) for (const g of r.geos) { nInst += r.n; nV += g.attributes.position.count; nI += g.index ? g.index.count : 0; }
-    const mesh = new THREE.BatchedMesh(nInst, nV, nI, material);
+    const mesh = new THREE.BatchedMesh(nInst, nV, nI, batchMaterial(material, recs.some((r) => r.obj.isInstancedMesh && r.obj.instanceColor)));
     mesh.name = name;
     mesh.frustumCulled = false; // (each piece is culled on its own, for the camera and for the sun)
     mesh.perObjectFrustumCulled = true;
@@ -339,7 +366,9 @@ export function homeBookBudget(world) {
       r.vis = false;
       if (r.obj.isInstancedMesh && r.obj.instanceColor) B.colors = true;
     }
+    if (cast) depthTwin(mesh, B.colors ? 'colors' : ''); // (a shadow depth material of its own kind: shadows.js)
     mesh.onBeforeRender = function (renderer, sc, camera, geometry, mat, group) {
+      followSource(mat);
       try {
         if (rank >= 0) ranks(renderer, camera);
         sync(B, renderer, false);

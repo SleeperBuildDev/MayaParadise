@@ -750,6 +750,14 @@ const _q = new THREE.Quaternion();
 export const LIVE_PEOPLE = new Map();
 
 export function createPerson(spec = {}) {
+  const it = createPersonSteps(spec);
+  for (;;) { const r = it.next(); if (r.done) return r.value; }
+}
+/** The same person, made a step at a time (a generator: yields after the parts and bones and after each of the two
+ * geometries, returns what createPerson returns), for a caller that spreads it over frames (extras-chatter.js: a
+ * passer-by, 6-22 ms at 4x CPU throttle in one go; perf pass 2, 2026-11-15). Nothing shared is taken before the
+ * last step (the face atlas, the outline material), so a caller may drop it between steps. */
+export function* createPersonSteps(spec = {}) {
   const B = buildParts(spec);
   const root = new THREE.Group();
   root.name = spec.name || 'person';
@@ -795,8 +803,11 @@ export function createPerson(spec = {}) {
     add(0, gy + 0.02, gz, 0.06, 0.014, 0.012);
   }
   const material = toon('#ffffff', { vertexColors: true, skinned: true });
+  yield;
   const bodyGeo = buildGeometry(B.parts, false);
+  yield;
   const outGeo = buildGeometry(B.parts, true);
+  yield;
   const mesh = new THREE.SkinnedMesh(bodyGeo, material);
   mesh.add(bones.hips);
   body.add(mesh);

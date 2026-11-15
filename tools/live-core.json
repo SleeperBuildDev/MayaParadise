@@ -1,7 +1,7 @@
 {
- "note": "Lazy-town mode (?lazy=1) first-playable set for a new Day-1 player, measured (fast 3G, gzip) by agent A: every request that finished before window.__mwGame && window.__story. Paths are site-root relative, with the query the page asks for. Saves elsewhere also need their start town(s) (FILES in js/story/world/regions/outlines.js), which the SW can take from rest.",
+ "note": "Lazy-town mode (?lazy=1) first-playable set for a new Day-1 player, measured (fast 3G, gzip) by agent A: every request that finished before window.__mwGame && window.__story. Paths are site-root relative, with the query the page asks for. Saves elsewhere also need their start town(s) (FILES in js/story/world/regions/outlines.js), which the SW can take from rest. Added by hand (not measured): the mode switch and the first-time game intro (modeswitch.js, intro.js, intro-lines.js, townintro.js), which a new Day-1 player loads at once. Added 2026-11-16 (measured on the live build: a Day-1 switch from website mode still fetched them from the network before the game was ready): feet.js, barks-story.js, rayindex.js, roam.js, acts/cue.js, hints.js, blobpool.js, sound/bank-worker.js, minimap.js, hints/day1.js, img/icon-192.png.",
  "measuredReadyMs": 16650,
- "count": 90,
+ "count": 105,
  "raw": 2909366,
  "gzip": 1114424,
  "core": [
@@ -94,6 +94,21 @@
   "js/story/talks/day1.js",
   "js/story/sound/fx.js",
   "js/story/sound/songs.js",
-  "js/story/extras-ui.js"
+  "js/story/extras-ui.js",
+  "js/game/modeswitch.js",
+  "js/story/intro.js",
+  "js/story/intro-lines.js",
+  "js/story/world/townintro.js",
+  "js/story/world/feet.js",
+  "js/story/barks-story.js",
+  "js/story/world/rayindex.js",
+  "js/story/roam.js",
+  "js/story/acts/cue.js",
+  "js/story/hints.js",
+  "js/story/world/blobpool.js",
+  "js/story/sound/bank-worker.js",
+  "js/story/world/minimap.js",
+  "js/story/hints/day1.js",
+  "img/icon-192.png"
  ]
 }

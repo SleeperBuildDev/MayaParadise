@@ -192,6 +192,10 @@ function buildWindowLights(root) {
   const paneMat = new THREE.MeshBasicMaterial({ color: '#FFC46E', transparent: true, opacity: 0, depthWrite: false, toneMapped: false, fog: true, vertexColors: true });
   const haloTex = discTexture('rgba(255,200,120,0.9)', 'rgba(255,170,90,0.3)', 0.38);
   const haloMat = new THREE.MeshBasicMaterial({ map: haloTex, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false, fog: true, side: THREE.DoubleSide });
+  // (one pass, not three's two for a see-through double-sided material: each halo is a flat quad, drawn once either
+  // way, and added light does not care about order. The two passes flagged the material for a new program twice
+  // per mesh per frame, garbage that ended in GC pauses; perf pass 2, 2026-11-15)
+  haloMat.forceSinglePass = true;
   const spillMat = new THREE.MeshBasicMaterial({ map: haloTex, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false, fog: true });
   const isActor = (o) => { for (let q = o; q; q = q.parent) if (/car|maya/i.test(q.name || '')) return true; return false; };
   const meshes = [];
@@ -460,6 +464,9 @@ export function buildHeadlightBeams({ spread = 0.9, length = 5.5 } = {}) {
     return t;
   })();
   const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide, toneMapped: false });
+  // (one pass, as the window halos: flat additive quads look the same either way, and three's two passes for a
+  // see-through double-sided material re-worked its program key 4 times a frame at night; perf pass 2 verify)
+  mat.forceSinglePass = true;
   const geo = new THREE.PlaneGeometry(spread * 2, length).rotateX(-Math.PI / 2).translate(0, 0, length / 2);
   for (const x of [-0.42, 0.42]) {
     const beam = new THREE.Mesh(geo, mat);

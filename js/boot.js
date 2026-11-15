@@ -63,13 +63,62 @@ if (!info) {
   if (crashed) safeSet('mw-tier', 'low');
 }
 
+// The mode switch's turning page stays up on the page it lands on until the game draws (no flash of the cover
+// page in between): html.mw-turn shows it, endTurnCover() fades it. The live build (tools/build-live.mjs) puts
+// the same rule into dist/index.html's <head> (TURN_CSS is read from this file), so it is there at the first paint.
+const TURN_CSS = 'html.mw-turn body::after{content:var(--mw-turn-msg,"");position:fixed;inset:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;background:repeating-linear-gradient(180deg,transparent 0 27px,rgba(70,110,170,.13) 27px 28px),linear-gradient(90deg,#EFE6D0 0%,#F7F1E1 12%,#FBF7EC 70%,#EDE3CB 100%);box-shadow:inset 0 0 60px rgba(120,90,40,.18);font:600 19px/1.7 "Noto Sans Myanmar",system-ui,sans-serif;color:#6B4A1E;transition:opacity .35s ease}html.mw-turn.mw-turn-out body::after{opacity:0}';
+function startTurnCover(msg) {
+  const d = document.documentElement;
+  if (!document.getElementById('mw-turn-style')) {
+    const st = document.createElement('style');
+    st.id = 'mw-turn-style';
+    st.textContent = TURN_CSS;
+    document.head.appendChild(st);
+  }
+  if (msg && !d.style.getPropertyValue('--mw-turn-msg')) d.style.setProperty('--mw-turn-msg', JSON.stringify(String(msg)));
+  d.classList.add('mw-turn');
+}
+function endTurnCover() {
+  const d = document.documentElement;
+  if (!d.classList.contains('mw-turn')) return;
+  // (two frames: the game's first picture is on screen before the page lifts)
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    d.classList.add('mw-turn-out');
+    setTimeout(() => d.classList.remove('mw-turn', 'mw-turn-out'), 400);
+  }));
+}
+
+// The mode switch (js/game/modeswitch.js) landed here, or the visitor came BACK to a page they left with it and the
+// browser loaded it afresh: start by itself (they already tapped Play once; no second cover). Read once, then cleared.
+function switchedHere() {
+  let s = null;
+  try { s = JSON.parse(sessionStorage.getItem('mw-switch') || 'null'); } catch { s = null; }
+  const here = location.pathname + location.search;
+  if (s && s.to === here && Date.now() - s.t < 60000) {
+    startTurnCover(s.msg);
+    try { sessionStorage.removeItem('mw-switch'); sessionStorage.setItem('mw-switch-came', JSON.stringify({ from: s.from, to: s.to })); } catch { /* ignore */ }
+    return true;
+  }
+  let auto = false;
+  try { auto = !!history.state?.mwAuto; } catch { auto = false; }
+  if (auto) startTurnCover();
+  return auto;
+}
+
 let starting = false;
-async function start({ autoplay = false } = {}) {
+async function start({ autoplay = false, switched = false } = {}) {
   if (starting || !info) return;
   starting = true;
   playBtn.disabled = true;
-  // Audio must be unlocked inside the tap itself; the game reuses this context.
-  if (!autoplay) {
+  // Audio must be unlocked inside the tap itself; the game reuses this context. (After the mode switch there is no
+  // tap on this page, but browsers that remember the visitor's tap on the site let the sound start anyway; where
+  // they do not, the game's first tap unlocks it.)
+  if (switched) {
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (AC) { window.__mwAudioCtx = window.__mwAudioCtx || new AC(); window.__mwAudioCtx.resume?.().catch?.(() => {}); }
+    } catch { /* sound is optional */ }
+  } else if (!autoplay) {
     try {
       const AC = window.AudioContext || window.webkitAudioContext;
       if (AC) { window.__mwAudioCtx = window.__mwAudioCtx || new AC(); window.__mwAudioCtx.resume(); }
@@ -91,7 +140,7 @@ async function start({ autoplay = false } = {}) {
     const storyEarly = story && lazy ? import('./story/story.js?v=1') : null;
     storyEarly?.catch(() => {});
     const { startGame } = await import('./game/main.js?v=6');
-    const game = await startGame({ tier: pickTier(info), onProgress: setP, audioCtx: window.__mwAudioCtx || null, startHash: story ? '' : location.hash.slice(1), autoplay, story });
+    const game = await startGame({ tier: pickTier(info), onProgress: setP, audioCtx: window.__mwAudioCtx || null, startHash: story ? '' : location.hash.slice(1), autoplay, story, switched });
     if (story) {
       const { createStory } = await (storyEarly || import('./story/story.js?v=1'));
       game.story = await createStory(game);
@@ -99,8 +148,12 @@ async function start({ autoplay = false } = {}) {
     clearInterval(creep);
     setP(1);
     window.__mwGame = game;
+    endTurnCover();
+    // the Game | Website switch at the top right of Maya's book world (both modes)
+    import('./game/modeswitch.js').then((m) => m.installModeSwitch(game)).catch((e) => console.warn('mode switch', e));
   } catch (err) {
     clearInterval(creep);
+    endTurnCover();
     console.error(err);
     sessionStorage.removeItem('mw-running');
     starting = false;
@@ -113,4 +166,8 @@ async function start({ autoplay = false } = {}) {
 playBtn.addEventListener('click', () => start());
 document.addEventListener('mw:play', () => { window.scrollTo(0, 0); start(); });
 window.addEventListener('pagehide', () => sessionStorage.removeItem('mw-running'));
-if (params.get('play') === '1' && info) start({ autoplay: true });
+if (info && switchedHere()) start({ autoplay: true, switched: true });
+else {
+  endTurnCover(); // (no autostart here after all, e.g. no WebGL: the cover page shows)
+  if (params.get('play') === '1' && info) start({ autoplay: true });
+}

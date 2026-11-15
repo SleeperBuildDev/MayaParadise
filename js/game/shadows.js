@@ -58,6 +58,7 @@ function applyRole(o, role, minCaster) {
   if (role) {
     o.castShadow = role === 'both' || role === 'cast';
     o.receiveShadow = role === 'both' || role === 'receive';
+    if (o.castShadow) depthTwin(o);
     return;
   }
   const unlit = mats.every(isUnlit);
@@ -72,6 +73,27 @@ function applyRole(o, role, minCaster) {
   o.getWorldScale(_s);
   const r = (g.boundingSphere?.radius || 0) * Math.max(_s.x, _s.y, _s.z);
   o.castShadow = r >= minCaster;
+  if (o.castShadow) depthTwin(o);
+}
+
+/**
+ * The sun's shadow pass draws every caster without a depth material of its own with one shared depth material of
+ * three's. Drawn in turn by plain, instanced, batched and skinned casters, that material had its program worked out
+ * again at each switch (several times a frame: garbage, GC pauses; perf pass 2, 2026-11-15). An instanced, batched
+ * or skinned caster gets a copy of its own kind instead (variant: a batch with per-piece colours is a kind of its
+ * own): the same shader, the same depth. (Not when three would
+ * make a per-material copy anyway: clipping, displacement, alpha-tested maps.)
+ */
+const DEPTH_TWINS = {};
+export function depthTwin(o, variant = '') {
+  if (!o?.isMesh || o.customDepthMaterial) return;
+  const kind = o.isInstancedMesh ? 'instanced' : o.isBatchedMesh ? 'batched' + variant : o.isSkinnedMesh ? 'skinned' : null;
+  if (!kind) return;
+  for (const m of Array.isArray(o.material) ? o.material : [o.material]) {
+    if (!m || (m.clipShadows && m.clippingPlanes?.length) || (m.displacementMap && m.displacementScale !== 0)
+      || (m.alphaMap && m.alphaTest > 0) || (m.map && m.alphaTest > 0) || m.alphaToCoverage) return;
+  }
+  o.customDepthMaterial = DEPTH_TWINS[kind] ||= new THREE.MeshDepthMaterial();
 }
 
 /** Back-compat: opaque lit meshes in an object cast (and receive) shadows. */

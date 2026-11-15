@@ -11,7 +11,7 @@
 //   st.stats()                 { loaded, queued, tris }
 //   st.dispose()
 import * as THREE from '../../game/three.js';
-import { basic, toon, addOutline, signTexture, signMesh } from '../../game/toon.js';
+import { basic, toon, addOutline, signTextureSteps, signMesh } from '../../game/toon.js';
 import { markShadows } from '../../game/shadows.js';
 import { chunkJob, treeGeo, chunkOf, CELL } from './build.js';
 import { CHUNK, GRID, ITEMS, REGIONS, LAZY, LOADED, regionReady } from './region.js';
@@ -294,6 +294,23 @@ export function createStreamer({ scene, net, edges, shadows = false, low = false
   // made all at once, in the frame its build job ended, they cost up to ~22 ms at 2x CPU throttle, a hitch a few
   // times a minute while she walked and for a few seconds after she stopped (perf pass, 2026-11-15). Nothing is
   // shown until the last piece is there: the group joins the scene whole, as before.
+  // the canvases of the signs drawn last (the newest SIGN_KEEP): a chunk dropped and built again later (back and
+  // forth between towns) gets a texture of the same canvas, with nothing drawn again
+  const signCanvases = new Map(), SIGN_KEEP = 16;
+  function signCanvas(key, tex) {
+    if (tex) {
+      signCanvases.set(key, tex.image);
+      if (signCanvases.size > SIGN_KEEP) signCanvases.delete(signCanvases.keys().next().value);
+      return tex;
+    }
+    const cv = signCanvases.get(key);
+    if (!cv) return null;
+    signCanvases.delete(key); signCanvases.set(key, cv); // (the newest again)
+    const t = new THREE.CanvasTexture(cv); // (as toon.js signTexture makes it)
+    t.colorSpace = THREE.SRGBColorSpace;
+    t.anisotropy = 4;
+    return t;
+  }
   function* finish(ch) {
     const group = ch.part = new THREE.Group();
     group.name = `chunk ${ch.key}`;
@@ -322,8 +339,13 @@ export function createStreamer({ scene, net, edges, shadows = false, low = false
     }
     const signMeshes = ch.partSigns = [];
     for (const s of ch.out.signs) {
-      const tex = signTexture(s.lines.map((l) => ({ text: l.text, size: l.size, weight: l.weight, font: l.font === 'serif' ? '"Cormorant Garamond", Georgia, serif' : undefined, color: l.color })),
-        { width: s.width || 512, height: s.height || 160, bg: s.bg === undefined ? '#F6F0E2' : s.bg, border: s.border === undefined ? '#A47A2C' : s.border, radius: 18, borderWidth: s.border === null ? 0 : 8 });
+      // (each line of its text a slice of its own: toon.js signTextureSteps; a chunk built again later reuses the
+      // canvas it drew, signCanvas)
+      const lines = s.lines.map((l) => ({ text: l.text, size: l.size, weight: l.weight, font: l.font === 'serif' ? '"Cormorant Garamond", Georgia, serif' : undefined, color: l.color }));
+      const opts = { width: s.width || 512, height: s.height || 160, bg: s.bg === undefined ? '#F6F0E2' : s.bg, border: s.border === undefined ? '#A47A2C' : s.border, radius: 18, borderWidth: s.border === null ? 0 : 8 };
+      const key = JSON.stringify([lines, opts]);
+      let tex = signCanvas(key);
+      if (!tex) { tex = yield* signTextureSteps(lines, opts); signCanvas(key, tex); }
       const m = signMesh(tex, s.w, s.h);
       m.position.set(s.x, s.y, s.z);
       m.rotation.y = s.ry || 0;

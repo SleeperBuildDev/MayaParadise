@@ -45,7 +45,8 @@
 // story's people, talk system and acts run as outdoors: story.foot points at the room walker while inside.
 import * as THREE from '../game/three.js';
 import { tr } from '../game/ui.js';
-import { BARKS } from '../game/strings.js';
+import { BARKS, LINES } from '../game/strings.js';
+import { applyStoryBarks } from './barks-story.js';
 import { FOOT_VIEW, CAR_VIEW, ROOM_VIEW } from './onfoot.js';
 import * as REGION from './world/region.js';
 import { createPerson } from './people.js';
@@ -766,6 +767,8 @@ export async function createDoors(game, story) {
       const b = game.barks, up = b.update.bind(b);
       b.update = (d) => (cur ? undefined : up(d));
       b.doorsWrapped = true;
+      // the website's own situations (sheets, gold circles, "thanks for visiting") swapped for game lines
+      applyStoryBarks(BARKS, LINES);
       // ...and outdoors the story never points the way: drop the site lines that name a place to go
       // ("Shall we visit {place}?", "Turn back?") or a button to press (story mode only: site mode never loads this file)
       for (const [k, lines] of Object.entries(BARKS)) {

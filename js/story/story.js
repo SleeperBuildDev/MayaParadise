@@ -578,8 +578,14 @@ export async function createStory(game) {
   whole().then(() => import('./extras-houses.js')).then(({ installHouses }) => installHouses(game, story)).catch((e) => console.error('extras houses', e)); // everyday houses to walk into
   whole().then(() => import('./extras-chatter.js')).then(({ installChatter }) => installChatter(game, story, openWorld)).catch((e) => console.error('extras chatter', e)); // town chatter, small talk, ambient folk
   whole().then(() => import('./extras-heinhtet.js')).then(({ installHeinHtet }) => installHeinHtet(game, story, openWorld)).catch((e) => console.error('extras heinhtet', e)); // Ko Hein Htet, the man in the red suit who is always running
-  // the day's opening runs on its own (it waits for the player's taps)
-  Promise.resolve().then(() => story.day?.start?.()).then(setModeIcon).catch((e) => console.error('story start', e));
+  // the day's opening runs on its own (it waits for the player's taps); the very first time on this device, Maya's
+  // intro to the book plays first (intro.js: a fresh Day 1 only, once; ?intro=1 plays it again)
+  const firstIntro = () => import('./intro.js').then((m) => (m.introWanted(save, params) ? m.playIntro(game, story, { force: params.get('intro') === '1' }) : null))
+    .catch((e) => console.error('intro', e));
+  const wantIntro = params.get('intro') === '1' || (save.day === 1 && !save.flags?.['d1.letter'] && !params.has('nointro') && params.get('intro') !== '0');
+  story.starting = true; // (until the day's opening is over: the mode switch stays away meanwhile)
+  Promise.resolve().then(() => (wantIntro ? firstIntro() : null)).then(() => story.day?.start?.()).then(setModeIcon).catch((e) => console.error('story start', e))
+    .finally(() => { story.starting = false; });
   void CAST; void lang;
   return story;
 }

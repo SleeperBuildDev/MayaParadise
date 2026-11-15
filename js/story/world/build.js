@@ -1315,7 +1315,9 @@ function cuts(q, e, W, net) {
   q.cutL = net.onOtherRoad(q.x + q.nx * (W - 0.09), q.z + q.nz * (W - 0.09), e, -0.15);
   q.cutR = net.onOtherRoad(q.x - q.nx * (W - 0.09), q.z - q.nz * (W - 0.09), e, -0.15);
 }
-function roadsInChunk(f, net, x0, z0, x1, z1, ownEdges, ctx) {
+// (a generator: a slice of the chunk job per road that draws here; all of them in one slice were 13-15 ms at 4x CPU
+// throttle with a few long roads crossing, perf pass 2, 2026-11-15. The same calls in the same order: the same geometry)
+function* roadsInChunk(f, net, x0, z0, x1, z1, ownEdges, ctx) {
   const W = ROAD.width / 2;
   const P = { x: 0, y: 0, z: 0 }, T = { x: 0, z: 0 };
   for (const e of ownEdges) {
@@ -1328,7 +1330,7 @@ function roadsInChunk(f, net, x0, z0, x1, z1, ownEdges, ctx) {
     const y = ROADTOP + (e.bias || 0);
     const step = 0.5;
     const n = Math.max(2, Math.ceil(e.length / step));
-    let prev = null;
+    let prev = null, drew = false;
     for (let i = 0; i <= n; i++) {
       const s = (e.length * i) / n;
       sampleAt(e, s, P, T);
@@ -1341,6 +1343,7 @@ function roadsInChunk(f, net, x0, z0, x1, z1, ownEdges, ctx) {
         const mx = (prev.x + cur.x) / 2, mz = (prev.z + cur.z) / 2;
         const torn = tear && mx > tear[0] - 0.3 && mx < tear[2] + 0.3 && mz > tear[1] - 0.25 && mz < tear[3] + 0.25;
         if (!torn && mx >= x0 && mx < x1 && mz >= z0 && mz < z1) {
+          drew = true;
           cuts(prev, e, W, net); cuts(cur, e, W, net);
           const pt = (q, off, yy) => [q.x + q.nx * off, yy, q.z + q.nz * off];
           f.quad(pt(prev, W, y), pt(prev, -W, y), pt(cur, -W, y), pt(cur, W, y), C.cream, 0, 1, 0);
@@ -1384,6 +1387,7 @@ function roadsInChunk(f, net, x0, z0, x1, z1, ownEdges, ctx) {
       }
       prev = cur;
     }
+    if (drew) yield;
   }
 }
 
@@ -1510,7 +1514,7 @@ export function* chunkJob(chunk, ctx) {
   for (const reg of REGIONS) { if (ctx.regionOk && !ctx.regionOk(reg)) continue; groundRegion(ground, reg, x0, z0, x1, z1, tears); regionEdges(ground, reg, x0, z0, x1, z1); }
   yield;
   gk(ground, GK.decal);
-  roadsInChunk(ground, ctx.net, x0, z0, x1, z1, edges, ctx);
+  yield* roadsInChunk(ground, ctx.net, x0, z0, x1, z1, edges, ctx);
   for (const e of edges) {
     if (e.box.maxX < x0 - 4 || e.box.minX > x1 + 4 || e.box.maxZ < z0 - 4 || e.box.minZ > z1 + 4) continue;
     if (e.style === 'deck') deckDressing(solidFor, e, x0, z0, x1, z1);

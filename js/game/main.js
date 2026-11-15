@@ -252,7 +252,7 @@ class Game {
     } else if (params.get('room')) {
       await this.enterPlace(params.get('room'), { fast: true, push: false });
       if (params.get('station')) this.goToStation(params.get('station'), { instant: true });
-    } else if (!params.has('nointro') && !this.opts.story) {
+    } else if (!params.has('nointro') && !this.opts.story && !this.opts.switched) { // (switched: arrived from the game by the mode switch)
       this.intro();
     }
     history.replaceState({ mw: 'root' }, '', location.pathname + location.search + (startStation ? `#${startStation}` : startPlace ? `#${startPlace}` : ''));
@@ -632,7 +632,7 @@ class Game {
   }
 
   idleCheck() {
-    if (this.idleShown || this.busy || this.ui.sheetOpen || this.ui.dialogOpen) return;
+    if (this.opts.story || this.idleShown || this.busy || this.ui.sheetOpen || this.ui.dialogOpen) return; // (story: "tap a place, Maya drives you there" is the website's tip)
     if (performance.now() - this.lastInput > 12000) {
       this.idleShown = true;
       call(this.maya, 'emote', 'lookAround');
@@ -874,7 +874,7 @@ class Game {
     if (push && this.roomPushed) { this.ignorePop++; history.back(); }
     else history.replaceState({ mw: 'root' }, '', location.pathname + location.search);
     this.roomPushed = false;
-    if (this.visitedPlaces.size === PLACES.length && !store('mw-all-done')) {
+    if (!this.opts.story && this.visitedPlaces.size === PLACES.length && !store('mw-all-done')) {
       store('mw-all-done', '1');
       setTimeout(() => this.react('cheer', 'star', LINES.allVisited), 600);
     }
