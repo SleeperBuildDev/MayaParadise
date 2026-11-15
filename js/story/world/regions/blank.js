@@ -181,8 +181,8 @@ export const DESKS = [
 // The lodge's people about their evening (Days 13-14 script them indoors; otherwise they are out here).
 export const PEOPLE = [
   ...FOLK_PEOPLE, // travellers at their work round the lodge (blank-folk.js; they appear once cast.js lists them)
-  { id: 'dawpwint', x: 129.4, z: -5.3, heading: 0, hello: { my: 'လာ သမီး။ ရေနွေးကြမ်း တစ်ခွက် သောက်သွားဦး။', en: 'Come, dear. Have a cup of plain tea before you go.' },
-    job: { area: { x: 130.4, z: -4.3, r: 2.6 }, spot: { x: 128.8, z: -5.7, h: 0 }, mood: 'sweep', workChance: 0.6, workFor: [6, 12] } },
+  { id: 'dawpwint', x: 129.0, z: -4.1, heading: 0, hello: { my: 'လာ သမီး။ ရေနွေးကြမ်း တစ်ခွက် သောက်သွားဦး။', en: 'Come, dear. Have a cup of plain tea before you go.' },
+    job: { area: { x: 130.4, z: -4.3, r: 2.6 }, spot: { x: 129.0, z: -4.1, h: 0 }, mood: 'sweep', workChance: 0.6, workFor: [6, 12] } },
   { id: 'pyaesone', x: 136.9, z: -6.6, heading: -0.4, hello: { my: 'ကျွန်တော့် မြေပုံမှာ ဒီရွက် မပါသေးဘူး။', en: "This leaf isn't on my map yet." },
     job: { area: { x: 136.4, z: -5.9, r: 1.4 }, spot: { x: 137.0, z: -6.7, h: -0.5 }, mood: 'read', workChance: 0.6, workFor: [6, 11] } },
   { id: 'shwesin', x: 122.2, z: -6.0, heading: Math.PI, hello: { my: 'ဒီမှာ အဝတ်လှမ်းရင် မြန်မြန်ခြောက်တယ်။ နေက တစ်နေကုန် နိမ့်နိမ့်လေး။', en: 'Washing dries fast here. The sun stays low all day.' },

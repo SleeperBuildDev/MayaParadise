@@ -355,7 +355,7 @@ class Game {
     // world: the sun's shadow covers exactly what the camera sees (texel-snapped); rooms: fitted once
     if (this.mode === 'world') this.worldShadow?.fitCamera?.(this.camera);
     if (this.heroLight && this.mode === 'world') {
-      const p = this.worldWalk ? this.maya.root.getWorldPosition(this.tmp2) : this.car.root.position;
+      const p = this.mayaOut() ? this.maya.root.getWorldPosition(this.tmp2) : this.car.root.position;
       this.heroLight.position.set(p.x, this.car.root.position.y, p.z);
     }
     if (this.day.update(dt)) this.applyDayLook();
@@ -404,8 +404,15 @@ class Game {
       this.birds.update(dt, t, w);
     }
     this.lead.set(Math.sin(st.heading), 0, Math.cos(st.heading)).multiplyScalar(Math.min(4, Math.abs(st.speed) * 0.4));
-    this.rig.setTarget(this.worldWalk ? this.maya.root.getWorldPosition(this.tmp) : this.car.root.position, this.lead);
+    this.rig.setTarget(this.mayaOut() ? this.maya.root.getWorldPosition(this.tmp) : this.car.root.position, this.lead);
     call(this.audio, 'engine', this.busy ? 0 : Math.min(1, Math.abs(st.speed) / 10));
+  }
+
+  /** Maya out of the car in the world: walking to or from it (worldWalk), or between two steps of that walk (worldWalk
+   * is empty for a frame between them, and while her landing after the hop out plays): the camera stays on her then
+   * (it jumped to the car for that frame and back, a jolt in the middle of getting in or out). */
+  mayaOut() {
+    return !!this.worldWalk || (this.busy && this.maya.root.parent === this.world.scene);
   }
 
   syncCar(dt) {

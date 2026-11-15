@@ -13,15 +13,27 @@
 // frame a walker takes one step with one collision test, and steers round the others, Maya and the car (sidestep,
 // keeping right head on). No meshes: walking is the person's own walk cycle.
 //
-// Never touched: the story cast and anyone a day uses (day.owns(id), a scripted walk or ctl, a job the day set
-// with story.setJob, story.talkWith). A person Maya is walking up to (story.approach) stands still for her.
+// Points round corners: when few straight lines leave the hub (a fenced yard, a narrow pavement, a shop front on the
+// kerb) a small grid search adds points with their way (corners) from the hub; a keeper boxed in by the stall gets
+// the way out from its region row (roamExit, e.g. market.js Ko Yaung / Daw Pyone). A walk stuck on a corner walks
+// back the way it came; someone standing inside a solid steps out of it.
+//
+// The story cast between scenes ('idle', idleStep): short strolls (under 3 m) from where the day left them, and
+// back on that spot whenever the story may want them: any scene / talk / act / intro, the hint line about them,
+// Maya within 7 m (14 m in the car), small talk, a tap. A day's job (story.setJob) stays story.js's lifeStep; the
+// stroll comes between. Never: a scripted walk or ctl (the day moves them: home is wherever it leaves them),
+// seated, lying, up off the ground, hidden. A person Maya is walking up to (story.approach) stands still for her.
+// Far walkers (60 m+) step every 4th frame.
 // story.update calls e.roam(dt, near) for a person who has one (and no ctl / scripted walk, no talk running).
 //
 //   installRoam(game, story, ow)   once, after the open world is made. story.roam = { stats, debug }
 import { DOORS } from './doors.js';
 import { PEOPLE as REGION_PEOPLE, regionAt } from './world/region.js';
+import { LIVE_PEOPLE } from './people.js';
 
-const R_REGION = 9, R_FOLK = 7; // patch radius round the anchor (m)
+const R_REGION = 9, R_FOLK = 7, R_IDLE = 2.6; // patch radius round the anchor (m); R_IDLE: the cast's short wanders (under 3 m: day7.js puts back anyone 3 m off their place)
+const IDLE_HOLD = 7, IDLE_HOLD_CAR = 14; // the cast stand on their spot while Maya is this near (on foot / in the car)
+const BUSY_CLASSES = /\b(cinema|talking|choosing|acting|ti-flying|ti-naming)\b/; // (hints.js: a scene covers the play)
 const ROAD_KEEP = 1.8; // metres from a road's centre line (the road is 2.4 wide): pavement only
 const BODY = 0.3; // a walker's clearance
 const PTS = 5, CANDS = 80, PER_FRAME = 3; // waypoints wanted, candidates tried, candidates checked a frame
@@ -51,8 +63,11 @@ export function installRoam(game, story, ow) {
   };
 
   // ---- where nobody loiters: doors and everyone's own spots (a person's own job spot is fine for them)
+  // (the doors' list kept for half a second: the scan below drops it; DOORS grows as the houses near her go live)
+  let doors = null;
+  const doorList = () => doors || (doors = Object.values(DOORS));
   function keepOut(x, z, self) {
-    for (const d of Object.values(DOORS)) if (d && Math.hypot(x - d.x, z - d.z) < 2.2) return true;
+    for (const d of doorList()) if (d && Math.hypot(x - d.x, z - d.z) < 2.2) return true;
     for (const pl of game.world?.places || []) if (pl.door && Math.hypot(x - pl.door.x, z - pl.door.z) < 2.2) return true;
     for (const p of REGION_PEOPLE) {
       if (p.id === self) continue;
@@ -84,26 +99,57 @@ export function installRoam(game, story, ow) {
   }
 
   // ---- who roams
+  // 'region' / 'folk': their own few streets (below). 'idle': everyone else standing about between scenes (the
+  // story cast, a day's people, a region person a day took off their work): short wanders within R_IDLE of where
+  // the day left them, and back on that spot, facing the same way, whenever the story may want them (idleStep).
   function freeKind(e) {
-    if (!e?.p?.root || !e.p.root.parent || e.hidden || e.indoor || e.scriptedOnce || e.noRoam) return null;
+    if (!e?.p?.root || !e.p.root.parent || e.p.root.visible === false || e.hidden || e.indoor || e.noRoam) return null;
     if (e.folk) return dayOwns(e.id) || dayOwns('folk:' + e.folk) ? null : 'folk';
     const row = rowOf(e.id);
-    if (!row || dayOwns(e.id)) return null;
-    if (e.job && row.job && e.job !== row.job) return null; // a day gave them other work
-    if (!e.job && row.job) return null;
-    return 'region';
+    if (row && !e.scriptedOnce && !dayOwns(e.id) && (e.job ? !row.job || e.job === row.job : !row.job)) return 'region';
+    if (e.fake || e.noIdle) return null; // (a day's job: story.js's lifeStep keeps it; idleStep takes them for a stroll between)
+    if (e.roam) return e.rm?.kind === 'idle' ? 'idle' : null;
+    return idleOk(e) ? 'idle' : null;
+  }
+  /** Fit for short wanders: standing on the ground (not seated, lying, up a ladder or on a stage), the arms
+   *  down or in a job pose we can tell (then the pose is put back on their return). */
+  function idleOk(e) {
+    const root = e.p.root, now = performance.now();
+    if (e.rmCool > now || e.ctl || e.walking || e.walkIn || e.paused) return false;
+    if (Math.abs(root.rotation.x) > 0.05 || Math.abs(root.rotation.z) > 0.05 || root.position.y > 0.3) return false;
+    const L = LIVE_PEOPLE.get(root);
+    if (L && L.hips.position.y < L.hipY - 0.08) return false; // (seated)
+    if (!e.job && moodOf(e) === undefined) return false; // (a day's job: lifeStep puts its pose back itself)
+    return true;
+  }
+  /** The held job pose, read off the arms (people.js keeps the mood to itself): a mood name, null (arms down)
+   *  or undefined (something we cannot put back: an emote, a carry). */
+  function moodOf(e) {
+    const b = e.p.bones;
+    if (!b?.armL) return null;
+    const lx = b.armL.rotation.x, rx = b.armR.rotation.x, lz = b.armL.rotation.z;
+    if (lx > -0.45 && rx > -0.45) return null;
+    if (rx < -2.0 && lx > -0.5) return 'play';
+    if (lx < -1.1 && rx < -1.1 && lz < -0.25) return 'read';
+    if (lx < -0.7 && rx < -0.7 && lx > -1.25 && rx > -1.25 && Math.abs(lz + 0.15) < 0.06) return 'work';
+    return undefined;
   }
   function attach(e, kind) {
     const row = kind === 'region' ? rowOf(e.id) : null;
     const s = row?.job?.spot;
-    const ax = s ? s.x : e.home.x, az = s ? s.z : e.home.z;
+    const pos = e.p.root.position;
+    const ax = kind === 'idle' ? pos.x : s ? s.x : e.home.x, az = kind === 'idle' ? pos.z : s ? s.z : e.home.z;
     const age = e.cast?.look?.age || 'adult';
     const sp = SPEED[age] || SPEED.adult;
     const rm = {
-      kind, ax, az, ah: s?.h ?? e.home.h, dist: districtOf(ax, az), R: kind === 'region' ? R_REGION : R_FOLK, hx: null, hz: null,
+      kind, ax, az, ah: kind === 'idle' ? e.p.root.rotation.y : s?.h ?? e.home.h, dist: districtOf(ax, az), R: kind === 'region' ? R_REGION : kind === 'idle' ? R_IDLE : R_FOLK, hx: null, hz: null,
       pts: [], tried: 0, speed: rand(sp[0], sp[1]), state: 'idle', t: rand(0.5, 3), tx: 0, tz: 0, kindT: null,
       blockedT: 0, dodge: null, last: -1, worked: false, partner: null, walked: 0,
     };
+    if (kind === 'idle') {
+      Object.assign(rm, { state: 'home', t: rand(6, 14), hx: ax, hz: az, rx: ax, rz: az, exit: [], hubOff: false, lx: pos.x, lz: pos.z, h0x: e.home.x, h0z: e.home.z, pose: e.job ? null : moodOf(e), speed: rm.speed * 0.8 });
+      if (e.job) { rm.job0 = e.job; rm.t = rand(10, 22); const s = e.job.spot; if (s) { rm.ax = rm.hx = s.x; rm.az = rm.hz = s.z; } } // (round the job spot)
+    }
     e.rm = rm;
     e.roam = (dt, near) => step(e, dt, near);
     stats.attached++;
@@ -111,7 +157,8 @@ export function installRoam(game, story, ow) {
   function detach(e) {
     if (!e.roam) return;
     e.roam = null;
-    if (e.rm?.mood) e.p.setMood?.(e.baseMood ?? null);
+    if (e.rm?.kind === 'idle' && e.rm.pose && e.rm.state !== 'home') e.p.setMood?.(e.rm.pose); // (their job pose back)
+    else if (e.rm?.mood) e.p.setMood?.(e.baseMood ?? null);
     if (e.rm?.partner?.rm?.partner === e) { e.rm.partner.rm.partner = null; }
     e.rm = null;
     stats.detached++;
@@ -127,6 +174,13 @@ export function installRoam(game, story, ow) {
   function hub(e) {
     const rm = e.rm;
     let B = rm.bfs;
+    // (a keeper boxed in by the stall: the row gives the way out itself, roamExit [[x, z], ...] from the spot, the
+    // last corner being the hub; it may squeeze past a crate or through a stall's open back, so it walks it loose)
+    const ex = rowOf(e.id)?.roamExit;
+    if (!B && ex?.length && rm.kind === 'region') {
+      rm.exit = ex.map(([x, z]) => ({ x, z })); rm.hx = rm.exit[rm.exit.length - 1].x; rm.hz = rm.exit[rm.exit.length - 1].z; rm.hubOff = true; rm.exitLoose = true;
+      return;
+    }
     if (!B) {
       // (open already: roomy, as the search below asks; a spot clear by only 0.42 m left one Market keeper with no
       // clear line anywhere, standing all day)
@@ -198,6 +252,8 @@ export function installRoam(game, story, ow) {
     if (rm.tried >= CANDS || rm.pts.length >= PTS) {
       // (an open spot with no clear line out of it, stalls all round: search for a hub after all, once)
       if (!rm.pts.length && !rm.hubOff && !rm.forceHub) { rm.forceHub = true; rm.hx = rm.hz = null; rm.tried = 0; return; }
+      // (few straight lines out of the hub: stalls, fences, a lane's corner. Points round the corners as well)
+      if (rm.pts.length < 3 && !rm.gridDone) { gridPts(e); return; }
       // (no clear line anywhere from the hub: the hub itself, so a keeper still steps out from the stall now and then)
       if (!rm.pts.length && rm.hubOff) rm.pts.push({ x: rm.hx, z: rm.hz, ...frontAt(rm.hx, rm.hz), links: new Map() });
       // (no way out at all: a step or two along the stall and back, so nobody stands frozen all day)
@@ -214,12 +270,77 @@ export function installRoam(game, story, ow) {
     }
   }
 
+  // ---- points round corners: a small breadth-first search on a half-metre grid from the hub (7 m round it, a few
+  // dozen cells a call, once), then the reachable cells farthest apart become points, each with its way from the hub
+  // (corners only) as pt.via. Walks to and from such a point follow its way (choose); nothing else changes.
+  const GN = 14;
+  function gridPts(e) {
+    const rm = e.rm;
+    let G = rm.grid;
+    // (cross: next to nothing on this side, a shop front on the kerb: over the street to the other pavement as well)
+    if (!G) G = rm.grid = { prev: new Map([[K0, -1]]), pass: new Map([[K0, true]]), q: [K0], h: 0, cross: rm.pts.length < 2 };
+    const at = (i, j) => [rm.hx + i * HC, rm.hz + j * HC];
+    const passable = (i, j) => {
+      const k = key(i, j);
+      let v = G.pass.get(k);
+      if (v === undefined) {
+        const [x, z] = at(i, j), nearJob = Math.hypot(x - rm.ax, z - rm.az) < 1.3;
+        v = !solid(x, z, nearJob ? 0.12 : 0.26) && (nearJob || G.cross || roadDist(x, z) >= 1.0);
+        G.pass.set(k, v);
+      }
+      return v;
+    };
+    for (let n = 0; n < 12 && G.h < G.q.length; n++) { // (a dozen cells a call: up to ~100 tests, no hitch)
+      const k = G.q[G.h++], [i, j] = ij(k);
+      for (const [di, dj] of N8) {
+        const a = i + di, b = j + dj, k2 = key(a, b);
+        if (Math.abs(a) > GN || Math.abs(b) > GN || G.prev.has(k2) || !passable(a, b)) continue;
+        if (di && dj && (!passable(i + di, j) || !passable(i, j + dj))) continue;
+        G.prev.set(k2, k); G.q.push(k2);
+      }
+    }
+    if (G.h < G.q.length && G.q.length < 500) return;
+    // the roomy cells, a few dozen a call (keepOut looks at every door and job spot: never all at once)
+    const cand = G.cand || (G.cand = []);
+    G.ci = G.ci || 1;
+    for (let n = 0; n < 30 && G.ci < G.q.length && cand.length <= 140; n++, G.ci++) {
+      const k = G.q[G.ci], [x, z] = at(...ij(k));
+      if (Math.hypot(x - rm.hx, z - rm.hz) < 1.5 || solid(x, z, 0.36) || roadDist(x, z) < ROAD_KEEP - 0.4 || keepOut(x, z, e.id)) continue;
+      cand.push({ k, x, z });
+    }
+    if (G.ci < G.q.length && cand.length <= 140) return;
+    // the farthest-apart of them (from the hub and the points already there)
+    const have = [{ x: rm.hx, z: rm.hz }, ...rm.pts];
+    while (rm.pts.length < PTS && cand.length) {
+      let best = null, bd = 1.6;
+      for (const c of cand) { let d = 99; for (const h of have) d = Math.min(d, Math.hypot(c.x - h.x, c.z - h.z)); if (d > bd) { bd = d; best = c; } }
+      if (!best) break;
+      cand.splice(cand.indexOf(best), 1);
+      const path = [];
+      for (let c = G.prev.get(best.k); c !== K0 && c != null; c = G.prev.get(c)) path.push(c);
+      path.reverse();
+      const via = [];
+      for (let m = 0; m < path.length; m++) {
+        const [a, b] = ij(path[m]), [a0, b0] = m ? ij(path[m - 1]) : [0, 0], [a1, b1] = m < path.length - 1 ? ij(path[m + 1]) : ij(best.k);
+        if (a - a0 === a1 - a && b - b0 === b1 - b) continue; // (straight on: not a corner)
+        via.push({ x: rm.hx + a * HC, z: rm.hz + b * HC });
+      }
+      const pt = { x: best.x, z: best.z, ...frontAt(best.x, best.z), links: new Map(), via };
+      rm.pts.push(pt); have.push(pt);
+    }
+    rm.grid = null; rm.gridDone = true; stats.grid = (stats.grid || 0) + 1;
+  }
+
   // ---- maya and the car, measured once a frame
   const M = { x: 0, z: 0, vx: 0, vz: 0, sp: 0, on: false }, C = { x: 0, z: 0, vx: 0, vz: 0, sp: 0 };
   let mPrev = null, cPrev = null;
+  let gameEl = null;
   function sense(dt) {
     const mp = game.maya?.root?.position, cp = game.car?.root?.position;
     M.on = !!story.foot?.active;
+    // (a scene, a talk, an act, a town intro or the car's get-in / get-out: the cast stay on their spots)
+    gameEl = gameEl || document.getElementById('game');
+    M.busy = !!(game.busy || story.talking || story.townIntro || story.introActive || story.cutscene || (gameEl && BUSY_CLASSES.test(gameEl.className)));
     if (mp) {
       if (mPrev && dt > 0) { M.vx = (mp.x - mPrev.x) / dt; M.vz = (mp.z - mPrev.z) / dt; M.sp = Math.hypot(M.vx, M.vz); if (M.sp > 12) M.sp = M.vx = M.vz = 0; }
       M.x = mp.x; M.z = mp.z; mPrev = { x: mp.x, z: mp.z };
@@ -238,12 +359,12 @@ export function installRoam(game, story, ow) {
     e.p.lookAt(v);
   }
   function stand(e, dt) { e.p.update(dt, { speed: 0 }); }
-  function setMood(e, m) { if (e.rm.mood === m) return; e.rm.mood = m; e.p.setMood(m || (e.baseMood ?? null)); }
+  function setMood(e, m) { if (e.rm.kind === 'idle' || e.rm.mood === m) return; e.rm.mood = m; e.p.setMood(m || (e.baseMood ?? null)); }
 
   // ---- what next
   function freeToMeet(o, e) {
     const r = o.rm;
-    return o !== e && r && !r.partner && r.state !== 'work' && !o.paused && o !== story.talkWith && !o.ctl && !o.walking && !(r.meetCd > performance.now()) && r.lastMet !== e;
+    return o !== e && r && r.kind !== 'idle' && !r.partner && r.state !== 'work' && !o.paused && o !== story.talkWith && !o.ctl && !o.walking && !(r.meetCd > performance.now()) && r.lastMet !== e;
   }
   function choose(e) {
     const rm = e.rm, pos = e.p.root.position;
@@ -279,13 +400,22 @@ export function installRoam(game, story, ow) {
       if (rm.hubOff && rm.last === -1) return go(e, rm.ax, rm.az, 'job', 'in'); // (at the hub: the way in)
       if (rm.last === -1 || rm.last === -2 || lineOk(rm.ax, rm.az, pos.x, pos.z, 1.3)) return go(e, rm.ax, rm.az, 'job');
       if (rm.hubOff && lineOk(rm.hx, rm.hz, pos.x, pos.z)) return go(e, rm.ax, rm.az, 'job', 'in');
+      const q = rm.last >= 0 ? rm.pts[rm.last] : null; // (at a point round a corner: back its way, then in)
+      if (q?.via) return go(e, rm.ax, rm.az, 'job', [...q.via.slice().reverse(), ...(rm.hubOff ? rm.exit.slice().reverse() : [{ x: rm.hx, z: rm.hz }])]);
     }
     rm.worked = false;
     if (!rm.pts.length) { rm.state = 'idle'; rm.t = rand(3, 6); return; }
     // a waypoint: straight from here when the line is clear, else back by the anchor first
     const order = rm.pts.map((p, i) => i).filter((i) => i !== rm.last).sort(() => Math.random() - 0.5);
+    const S = { x: rm.hx, z: rm.hz }, q = rm.last >= 0 ? rm.pts[rm.last] : null, qBack = q?.via ? [...q.via.slice().reverse(), S] : null;
     for (const i of order) {
       const p = rm.pts[i];
+      if (p.via) { // (a point round a corner: from the hub along its way; from another point back by the hub)
+        const r = rm.last === -1 || (rm.last === -2 && !rm.hubOff) ? p.via : rm.last === -2 ? [...rm.exit, ...p.via] : q ? [...(qBack || [S]), ...p.via] : null;
+        if (r) { rm.next = i; return go(e, p.x, p.z, 'wp', r); }
+        continue;
+      }
+      if (qBack) { rm.next = i; return go(e, p.x, p.z, 'wp', qBack); } // (from a point round a corner to a straight one: by the hub)
       // (from the anchor every point is clear; between two points the answer is kept; from elsewhere, look now)
       // (from the job spot behind a stall: out through the hub)
       if (rm.last === -2 && rm.hubOff) { rm.next = i; return go(e, p.x, p.z, 'wp', 'out'); }
@@ -293,14 +423,19 @@ export function installRoam(game, story, ow) {
       if (ok === undefined) { ok = lineOk(pos.x, pos.z, p.x, p.z); if (rm.last >= 0) rm.pts[rm.last].links.set(i, ok); }
       if (ok) { rm.next = i; return go(e, p.x, p.z, 'wp'); }
     }
-    // nothing straight from here: back to the hub (every point has a clear line from it)
-    go(e, rm.hx, rm.hz, 'anchor');
+    // nothing straight from here: back to the hub (every point has a clear line from it, or its own way)
+    go(e, rm.hx, rm.hz, 'anchor', qBack);
   }
   /** walk to (x, z); via 'out' / 'in': along the way out of the job spot first (out to the hub / in from it) */
+  // (via may also be the corners themselves: a grid point's way, below. Every walk keeps where it set off from and
+  // the corners passed, so a walk that gets stuck on a corner walks back the way it came instead of standing)
   function go(e, x, z, kind, via = null) {
-    const rm = e.rm;
+    const rm = e.rm, pos = e.p.root.position;
     rm.state = 'walk'; rm.tx = x; rm.tz = z; rm.kindT = kind; rm.t = 25; rm.blockedT = 0;
-    rm.route = via && rm.hubOff && rm.exit?.length ? (via === 'out' ? rm.exit.slice() : rm.exit.slice().reverse()) : null;
+    rm.narrow = Array.isArray(via);
+    if (kind !== 'back') rm.loose = !!rm.exitLoose && (via === 'out' || via === 'in' || kind === 'job' || (rm.last === -2 && rm.hubOff)); // (on the keeper's own way out) // (a grid way: cells clear by 0.26 m, so the steps test a slimmer body)
+    rm.route = Array.isArray(via) ? via.slice() : via && rm.hubOff && rm.exit?.length ? (via === 'out' ? rm.exit.slice() : rm.exit.slice().reverse()) : null;
+    if (kind !== 'back') { rm.from = { x: pos.x, z: pos.z, last: rm.last }; rm.passed = []; }
   }
   function work(e) {
     const rm = e.rm, J = e.job;
@@ -310,6 +445,8 @@ export function installRoam(game, story, ow) {
   }
   function arrive(e) {
     const rm = e.rm;
+    if (rm.kind === 'idle') return idleArrive(e);
+    if (rm.kindT === 'back') { rm.last = rm.from?.last ?? -3; rm.state = 'idle'; rm.t = rand(0.6, 1.5); return; }
     if (rm.kindT === 'job') return work(e);
     if (rm.kindT === 'anchor') { rm.last = -1; rm.state = 'idle'; rm.t = rand(0.6, 2); return; }
     if (rm.kindT === 'meet') {
@@ -338,7 +475,7 @@ export function installRoam(game, story, ow) {
     const via = rm.route?.length ? rm.route[0] : null;
     let dx = (via ? via.x : rm.tx) - pos.x, dz = (via ? via.z : rm.tz) - pos.z;
     const d = Math.hypot(dx, dz);
-    if (d < 0.12) { if (via) { rm.route.shift(); e.p.update(dt, { speed: rm.speed * 0.6 }); return; } arrive(e); stand(e, dt); return; }
+    if (d < 0.12) { if (via) { rm.passed?.push(rm.route.shift()); e.p.update(dt, { speed: rm.speed * 0.6 }); return; } arrive(e); stand(e, dt); return; }
     dx /= d; dz /= d;
     // the nearest thing ahead in the lane
     let side = 0, stop = false;
@@ -372,21 +509,41 @@ export function installRoam(game, story, ow) {
     if (sp > 0) {
       const nx = pos.x + vx * sp * dt, nz = pos.z + vz * sp * dt;
       // (a sidestep may leave the checked line: test the step, and keep off the road)
-      const br = Math.hypot(nx - rm.ax, nz - rm.az) < 1.3 ? 0.12 : BODY; // (round a job spot behind a counter)
-      if (!solid(nx, nz, br) && (!side || roadDist(nx, nz) >= ROAD_KEEP - 0.5)) {
+      const dj = Math.hypot(nx - rm.ax, nz - rm.az);
+      const br = rm.loose && dj < 2.6 ? -1 : dj < 1.3 ? 0.12 : rm.narrow ? 0.2 : BODY; // (round a job spot behind a counter; -1: the keeper's own way out, through the stall's open back)
+      if ((br < 0 || !solid(nx, nz, br)) && (!side || roadDist(nx, nz) >= ROAD_KEEP - 0.5)) {
         pos.x = nx; pos.z = nz; moved = true;
       } else if (side) {
         const ax = pos.x + dx * sp * dt, az = pos.z + dz * sp * dt; // (no room to the side: straight on, if that is clear)
-        if (!stop && !solid(ax, az, br)) { pos.x = ax; pos.z = az; moved = true; }
+        if (!stop && (br < 0 || !solid(ax, az, br))) { pos.x = ax; pos.z = az; moved = true; }
+      }
+      // (standing in something already, put there by a day, a spawn or a squeeze: a step that does not go into its
+      // core is a step out of it; from deep inside, any step)
+      if (!moved && (br < 0 || (solid(pos.x, pos.z, br) && (!solid(nx, nz, 0.02) || solid(pos.x, pos.z, 0.02))))) { pos.x = nx; pos.z = nz; moved = true; }
+    }
+    if (moved) { e.ob.x = pos.x; e.ob.z = pos.z; rm.walked += sp * dt; stats.walkM += sp * dt; rm.blockedT = Math.max(0, rm.blockedT - dt); rm.stuckT = 0; }
+    else {
+      rm.blockedT += dt; rm.stuckT = (rm.stuckT || 0) + dt;
+      // (wedged for good, walk after walk: back on the hub, but only out of sight, never a pop in view)
+      if (rm.stuckT > 15 && rm.kind !== 'idle' && rm.hx != null && game.camera) {
+        const v = e.rmV || (e.rmV = pos.clone());
+        v.set(pos.x, 1, pos.z).project(game.camera);
+        if (v.z > 1 || Math.abs(v.x) > 1.2 || Math.abs(v.y) > 1.2) {
+          pos.x = e.ob.x = rm.hx; pos.z = e.ob.z = rm.hz; rm.last = -1; rm.state = 'idle'; rm.t = rand(0.5, 1.5); rm.stuckT = 0; rm.route = null;
+          stats.unstuck = (stats.unstuck || 0) + 1;
+          e.p.update(dt, { speed: 0 });
+          return;
+        }
       }
     }
-    if (moved) { e.ob.x = pos.x; e.ob.z = pos.z; rm.walked += sp * dt; stats.walkM += sp * dt; rm.blockedT = Math.max(0, rm.blockedT - dt); }
-    else rm.blockedT += dt;
     e.p.update(dt, { speed: moved ? sp : 0 });
     // stuck (someone stands in the way for good, or a sidestep ran into a corner): somewhere else instead
     if (rm.blockedT > 2.5 || rm.t <= 0) {
       if (rm.kindT === 'meet') endChat(e);
-      rm.blockedT = 0; rm.last = -3;
+      rm.blockedT = 0;
+      if (rm.kind === 'idle') { rm.state = 'look'; rm.t = rand(1, 2.5); if (rm.kindT !== 'ihome') rm.goHome = true; return; } // (idleStep tries the way home again)
+      if (rm.passed?.length && rm.kindT !== 'back' && rm.from) { go(e, rm.from.x, rm.from.z, 'back', rm.passed.slice().reverse()); return; } // (back the way it came)
+      rm.last = -3;
       if (rm.kindT !== 'anchor' && lineOk(rm.hx, rm.hz, pos.x, pos.z, rm.hubOff ? 0 : 1.3)) go(e, rm.hx, rm.hz, 'anchor');
       else { rm.state = 'idle'; rm.t = rand(1.5, 3); }
     }
@@ -412,16 +569,105 @@ export function installRoam(game, story, ow) {
     return false;
   }
 
+  // ---- the cast between scenes ('idle'): a few steps from their spot and back, never while the story may want them
+  // Home is where the day left them (position and facing); a day that moves them (a walk, a ctl, a new spot) makes
+  // that the new home. They stand on it (story.js's own standing: notice Maya, face home.h) during any scene, talk,
+  // act or intro, while Maya is within IDLE_HOLD m on foot (IDLE_HOLD_CAR in the car), while the hint line is about
+  // them, while small talk or a tap holds them, and while seated. Out of those: 6-14 s at home, then a stroll to one
+  // of up to 3 points within R_IDLE (each with a clear straight line from home), a look round, and home again.
+  let hintWho = null;
+  function idleHeld(e, mdist) {
+    if (M.busy || e === story.talkWith || e.paused || e.roamHold > performance.now() || (hintWho && hintWho === e.id)) return true;
+    return M.on ? mdist < IDLE_HOLD : Math.hypot(C.x - e.p.root.position.x, C.z - e.p.root.position.z) < IDLE_HOLD_CAR;
+  }
+  function buildIdle(e) {
+    const rm = e.rm;
+    if (budget <= 0) return;
+    budget--;
+    for (let k = 0; k < PER_FRAME && rm.tried < 36 && rm.pts.length < 3; k++, rm.tried++) {
+      const a = rm.tried * 2.39996 + Math.random() * 0.4, r = 1.2 + Math.random() * (rm.R - 1.2);
+      const x = rm.ax + Math.sin(a) * r, z = rm.az + Math.cos(a) * r;
+      if (solid(x, z, 0.42) || roadDist(x, z) < 1.5 || keepDoor(x, z) || rm.pts.some((p) => Math.hypot(p.x - x, p.z - z) < 1.2)) continue;
+      if (!lineOk(rm.ax, rm.az, x, z, 0.6)) continue;
+      rm.pts.push({ x, z, ...frontAt(x, z) });
+    }
+    if (rm.tried >= 36 || rm.pts.length >= 3) rm.built = true;
+  }
+  function keepDoor(x, z) {
+    for (const d of doorList()) if (d && Math.hypot(x - d.x, z - d.z) < 2.0) return true;
+    for (const pl of game.world?.places || []) if (pl.door && Math.hypot(x - pl.door.x, z - pl.door.z) < 2.0) return true;
+    return false;
+  }
+  function idleArrive(e) {
+    const rm = e.rm;
+    if (rm.kindT === 'ihome') {
+      rm.state = 'home'; rm.t = e.job ? rand(14, 28) : rand(6, 14); rm.goHome = false;
+      if (e.job) e.life = null; // (story.js's lifeStep starts afresh from here: its walker set where she stands)
+      if (rm.pose) e.p.setMood?.(rm.pose); // (back at work)
+      return;
+    }
+    rm.state = 'look'; rm.t = rand(2.5, 6);
+  }
+  // (a day's job, story.js's lifeStep: it keeps them while 'home' (work, its own few steps); a stroll starts from
+  // wherever that left them and comes back there, then lifeStep starts afresh from it)
+  function idleStep(e, dt, near, mdist) {
+    const rm = e.rm, root = e.p.root, pos = root.position, jobCast = !!e.job;
+    // a day moved them (or gave them a new home or a new job): that is home now
+    // (detached for a few seconds: the next scan takes the new spot as home, if they are still fit for it)
+    const moved = (!jobCast || rm.state !== 'home') && Math.hypot(pos.x - rm.lx, pos.z - rm.lz) > 0.3;
+    if (moved || (jobCast ? e.job !== rm.job0 : Math.hypot(e.home.x - rm.h0x, e.home.z - rm.h0z) > 0.3)) { detach(e); e.rmCool = performance.now() + 6000; return false; }
+    const L = LIVE_PEOPLE.get(root);
+    if (L && L.hips.position.y < L.hipY - 0.08) rm.seatT = performance.now() + 4000; // (a day's tick sat them down)
+    const held = idleHeld(e, mdist) || rm.seatT > performance.now();
+    if (rm.state === 'home') {
+      if (!rm.built) buildIdle(e);
+      rm.t -= dt;
+      if (held) rm.t = Math.max(rm.t, rand(2, 4));
+      if (rm.t <= 0 && rm.pts.length && !(jobCast && e.life?.state === 'walk')) {
+        let i = Math.floor(Math.random() * rm.pts.length);
+        if (i === rm.lastPt && rm.pts.length > 1) i = (i + 1) % rm.pts.length;
+        const p = rm.pts[i];
+        if (!jobCast || Math.hypot(pos.x - rm.ax, pos.z - rm.az) < 0.3 || lineOk(pos.x, pos.z, p.x, p.z, 0.6)) {
+          rm.lastPt = i; rm.rx = pos.x; rm.rz = pos.z;
+          if (rm.pose) e.p.setMood?.(null); // (the job pose put down for the walk)
+          if (jobCast) { e.p.setMood?.(e.baseMood ?? null); if (e.life) e.life.mood = null; }
+          go(e, p.x, p.z, 'iwp');
+        } else rm.t = rand(2, 4);
+      } else if (rm.t <= 0) rm.t = rand(4, 8);
+      if (rm.state === 'home') { rm.lx = pos.x; rm.lz = pos.z; return false; } // (standing at home: story.js's own standing)
+    }
+    if ((held || rm.goHome) && !(rm.state === 'walk' && rm.kindT === 'ihome')) { go(e, rm.rx, rm.rz, 'ihome'); rm.goHome = false; }
+    if (rm.state === 'walk') {
+      const sp0 = rm.speed;
+      if (held) rm.speed = Math.max(sp0, 1.25); // (wanted back: a brisk step)
+      walkStep(e, dt);
+      rm.speed = sp0;
+      if (M.on && mdist < 3.2) headAt(e, M.x, M.z); else e.p.lookAt(null); // (home: story.js turns them to home.h)
+    } else {
+      const p = rm.pts[rm.lastPt];
+      if (p) turnToward(root, p.h, dt, 3);
+      if (M.on && mdist < 3.2) headAt(e, M.x, M.z); else if (p?.shop) headAt(e, pos.x + Math.sin(p.h) * 1.5, pos.z + Math.cos(p.h) * 1.5); else e.p.lookAt(null);
+      stand(e, dt);
+      rm.t -= dt;
+      if (rm.t <= 0) go(e, rm.rx, rm.rz, 'ihome');
+    }
+    rm.lx = pos.x; rm.lz = pos.z;
+    return true;
+  }
+
   function step(e, dt, near) {
     const t0 = performance.now();
     try { return step1(e, dt, near); }
     catch (err) { if (!stats.err) console.error('roam', e.id, err); stats.err = (stats.err || 0) + 1; detach(e); e.noRoam = true; return false; } // (never break the frame: this one just stops roaming)
-    finally { stats.acc += performance.now() - t0; }
+    finally { const ms = performance.now() - t0; stats.acc += ms; if (ms > 4) stats.spike = { id: e.id, ms: +ms.toFixed(1), st: e.rm?.state, k: e.rm?.kindT, built: !!e.rm?.built, grid: !!e.rm?.grid, bfs: !!e.rm?.bfs }; }
   }
   function step1(e, dt, near) {
     const rm = e.rm;
     if (!rm || story.inRoom) return false;
     const root = e.p.root, pos = root.position;
+    // (far from Maya, off every screen: a step every 4th frame, with the frames' time, keeps the CPU down)
+    if (Math.abs(M.x - pos.x) + Math.abs(M.z - pos.z) > 60) { rm.dtAcc = (rm.dtAcc || 0) + dt; rm.fk = (rm.fk || 0) + 1; if (rm.fk % 4) return true; dt = Math.min(0.12, rm.dtAcc); rm.dtAcc = 0; }
+    if (rm.kind === 'idle') return idleStep(e, dt, near, Math.hypot(M.x - pos.x, M.z - pos.z));
     if (!rm.built) build(e);
     rm.t -= dt;
     const mdist = Math.hypot(M.x - pos.x, M.z - pos.z);
@@ -494,8 +740,10 @@ export function installRoam(game, story, ow) {
     scanT -= dt || 0;
     if (scanT > 0) return;
     scanT = 0.5;
+    doors = null;
+    try { hintWho = story.hints?.current?.()?.who || null; } catch { hintWho = null; }
     for (const e of people.values()) {
-      if (e.walking || (e.ctl && !e.walkIn)) { if (e.roam) detach(e); if (!e.folk) e.scriptedOnce = true; continue; } // (a day moves them now: theirs from here on)
+      if (e.walking || (e.ctl && !e.walkIn)) { if (e.roam) detach(e); if (!e.folk) e.scriptedOnce = true; e.rmCool = performance.now() + 8000; continue; } // (a day moves them now: theirs from here on)
       if (e.walkIn || e.ctl) continue;
       const kind = freeKind(e);
       if (kind && !e.roam) attach(e, kind);

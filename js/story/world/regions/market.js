@@ -574,8 +574,10 @@ export const MK = {
 const job = (x, z, h, r, mood = 'work', workChance = 0.8, workFor = [6, 14]) => ({ area: { x, z, r }, spot: { x, z, h }, mood, workChance, workFor });
 export const PEOPLE = [
   { id: 'kyar', x: 3.9, z: 262.7, heading: -0.4, hello: { my: 'ကိုယ့်လယ်က ဆန်လေ။ ဘယ်ကို ပေးမလဲ ကိုယ် ရွေးပြီးပြီ။', en: "Rice from my own field. I've chosen where it goes." }, job: job(3.9, 262.7, -0.4, 1.4, 'work', 0.7, [6, 12]) },
-  { id: 'yaung', x: 11.75, z: STALL_Z - 0.3, heading: 0, hello: { my: 'မာရာ့လမ်း! လမ်းမပျောက်ချင်ရင် မာရာ့နောက် လိုက်!', en: "Maya's Way! Don't want to get lost? Follow Maya!" }, job: job(11.75, STALL_Z - 0.3, 0, 0.35) },
-  { id: 'pyone', x: 21.2, z: STALL_Z - 0.3, heading: 0, hello: { my: 'ဆိုင်ရှေ့ ပိတ်မရပ်နဲ့! စာအိတ် မရွေးရင် ဘေးဖယ်။', en: "Don't block my stall! Not choosing envelopes? Move aside." }, job: job(21.2, STALL_Z - 0.3, 0, 1.0) },
+  { id: 'yaung', x: 11.75, z: STALL_Z - 0.3, heading: 0, hello: { my: 'မာရာ့လမ်း! လမ်းမပျောက်ချင်ရင် မာရာ့နောက် လိုက်!', en: "Maya's Way! Don't want to get lost? Follow Maya!" }, job: job(11.75, STALL_Z - 0.3, 0, 0.35),
+    roamExit: [[11.4, STALL_Z + 0.02], [10.15, STALL_Z + 0.02], [9.75, STALL_Z - 0.5], [9.75, STALL_Z - 1.7]] }, // (roam.js: out past the crate, round the stall's west end)
+  { id: 'pyone', x: 21.2, z: STALL_Z - 0.3, heading: 0, hello: { my: 'ဆိုင်ရှေ့ ပိတ်မရပ်နဲ့! စာအိတ် မရွေးရင် ဘေးဖယ်။', en: "Don't block my stall! Not choosing envelopes? Move aside." }, job: job(21.2, STALL_Z - 0.3, 0, 1.0),
+    roamExit: [[21.2, STALL_Z - 1.5]] }, // (roam.js: out by the stall's open back; nothing hangs there for envelopes)
   { id: 'pwapwa', x: 12.6, z: 295.8, heading: 0, hello: { my: 'သနပ်ခါး ကိုယ့်လက်နဲ့ သွေးမှ မွှေးတယ်။ သူများ သွေးပေးတာ စောင့်နေရင် နေကုန်သွားမယ်။', en: "Thanaka smells sweetest ground by your own hand. Wait for someone else to grind it and the day is gone." }, job: job(12.6, 295.8, 0, 0.9, 'work', 0.85, [8, 16]) },
   { id: 'thiri', x: 15.4, z: 295.95, heading: 0, hello: { my: 'စာတိုက်အလံ မြင့်လာမလား မသိဘူး…', en: 'I wonder if the post-office flag will go up…' }, job: job(15.4, 295.95, 0.2, 1.2, 'read', 0.6, [5, 10]) },
   { id: 'khwarnyo', x: CB(0) + 0.55, z: CARV.z + 1.85, heading: 0, hello: { my: 'သုံးဆယ့်ရှစ်… သုံးဆယ့်ကိုး… စမ်းတုံး လေးဆယ်ပြည့်ရင် ပြိုင်ပွဲ တင်မယ်။', en: "Thirty-eight… thirty-nine… at forty trial blocks I'll enter the contest." }, job: job(CB(0) + 0.55, CARV.z + 1.85, 0, 0.2, 'work', 0.9, [10, 20]) },

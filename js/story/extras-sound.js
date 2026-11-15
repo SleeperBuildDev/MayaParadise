@@ -129,6 +129,31 @@ export function installSound(game, story, ow) {
     if (now - candT >= DISTRICT_DWELL) { settled = d; candDist = null; sting('arrive', d); }
   }
 
+  // ---- crowded street: on foot outdoors with many townsfolk close by, the music turns to 'area:crowd'
+  // (owner: the old crowd-voice beds sounded scary; they are gone, the music carries the bustle instead).
+  // Hysteresis so it does not flip while people walk in and out: on at CROWD_ON people held 3 s, off at
+  // CROWD_OFF or fewer held 6 s (or at once when she drives off / goes inside).
+  const CROWD_R = 14, CROWD_ON = 5, CROWD_OFF = 2;
+  let crowdOn = false, crowdT = 0, crowdN = 0, crowdLast = -1;
+  function crowdStep(now, onFoot) {
+    if (!onFoot) { crowdOn = false; crowdT = 0; return; }
+    if (now - crowdLast < 0.5) return; // count twice a second
+    crowdLast = now;
+    const mp = game.maya.root.position;
+    let n = 0;
+    for (const e of story.people?.values?.() || []) {
+      const r = e?.p?.root;
+      if (!r?.parent || !r.visible || e.hidden || e.indoor) continue;
+      const dx = r.position.x - mp.x, dz = r.position.z - mp.z;
+      if (dx * dx + dz * dz < CROWD_R * CROWD_R) n++;
+    }
+    crowdN = n;
+    const want = crowdOn ? n > CROWD_OFF : n >= CROWD_ON;
+    if (want === crowdOn) { crowdT = 0; return; }
+    crowdT += 0.5;
+    if (crowdT >= (crowdOn ? 6 : 3)) { crowdOn = want; crowdT = 0; }
+  }
+
   function tick(dt) {
     clock += dt;
     acc += dt;
@@ -152,9 +177,10 @@ export function installSound(game, story, ow) {
     const rain = !!save.weather;
     let c = cue;
     if (!c && save.day === 12 && rain && !room && (mode === null || mode === 'scene')) c = 'd12rain';
+    crowdStep(clock, !room && game.mode === 'world' && !!(story.foot?.active || game.worldWalk));
     const s = {
       district, zone, room, mode, cue: c, tension: mode === 'talk' ? tension : 0,
-      speaking: !!game.ui?.dialogOpen, period: game.day?.period, hour: game.day?.hour, rain,
+      speaking: !!game.ui?.dialogOpen, period: game.day?.period, hour: game.day?.hour, rain, crowd: crowdOn,
     };
     arrival(clock, !room && game.mode === 'world', district);
     scape.update(acc, s);
@@ -181,7 +207,7 @@ export function installSound(game, story, ow) {
   // would land as a hitch the moment she walks into the market or a song starts. So it is all built ahead, one
   // piece per idle slot (quickly while the loading screen still shows): the loops of the town she is in first,
   // then the other loops, then every instrument. ~0.9 s of work in all on a desktop, ~11 MB of buffers.
-  const HEAVY_LOOPS = ['babble', 'kids', 'murmur', 'fire', 'trickle', 'cicada', 'crickets', 'loom', 'brown', 'pink'];
+  const HEAVY_LOOPS = ['fire', 'trickle', 'cicada', 'crickets', 'loom', 'brown', 'pink'];
   // then every instrument over its whole range (one instrument per slot; the pad, ~95 ms, in two halves)
   const NOTE_ITEMS = [['pad', 30, 64], ['pad', 66, 100], ...INSTRUMENTS.filter((i) => i !== 'pad').map((i) => [i, 30, 100])];
   let warmQ = null, warmed = 0, worker = null, workerGot = 0;
@@ -266,7 +292,7 @@ export function installSound(game, story, ow) {
     cue(name = null) { cue = name || null; log.push({ t: +clock.toFixed(1), cueSet: cue }); },
     get cueName() { return cue; },
     sting,
-    state() { const R = scape.state; return R ? { music: R.music, layers: scape.stats()?.layers, amb: R.amb, mode: modeOf(), cue: R.cue, district: R.district, zone: R.zone, room: R.room, period: R.period } : null; },
+    state() { const R = scape.state; return R ? { crowd: crowdOn, crowdN, music: R.music, layers: scape.stats()?.layers, amb: R.amb, mode: modeOf(), cue: R.cue, district: R.district, zone: R.zone, room: R.room, period: R.period } : null; },
     /** Main-thread cost and the audio work rate since the last call. */
     cpu() {
       const st = scape.stats();

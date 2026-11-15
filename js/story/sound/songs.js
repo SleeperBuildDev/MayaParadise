@@ -127,6 +127,18 @@ export const SONGS = {
       { t: 'hit', i: 'wood', v: 0.05, steps: [12] },
       { t: 'hit', i: 'siShort', m: 96, v: 0.03, steps: [4] },
     ] },
+  // crowded streets (owner: no crowd noise; a livelier song instead): plays on foot where many townsfolk are near
+  'area:crowd': { level: 1.05, name: 'Busy street', vibe: 'cheerful, bustling, friendly faces', bpm: 116, steps: 16, swing: 0.12, seed: 1111,
+    scale: S(60, 'majp'), chords: [C(48, 'M'), C(53, 'M'), C(45, 'm7'), C(55, 's4')],
+    parts: [
+      { t: 'lead', i: 'marimba', v: 0.19, rh: RH.skip, w: 0.18 },
+      { t: 'arp', i: 'pattala', v: 0.05, every: 2, pat: [0, 2, 1, 2], oct: 12, w: 0.12 },
+      { t: 'bass', i: 'bass', v: 0.13, steps: [0, 6, 8, 14], deg: [0, 0, 2, 0] },
+      { t: 'hit', i: 'wood', v: 0.07, steps: [4, 12] },
+      { t: 'hit', i: 'shaker', v: 0.045, steps: [2, 6, 10, 14] },
+      { t: 'hit', i: 'kick', m: 36, v: 0.13, steps: [0, 8] },
+      { t: 'pad', i: 'pad', v: 0.025, w: 0.3 },
+    ], night: { lead: 'harp', leadVol: 0.2 } },
   'area:jetties': { level: 1.4, name: 'Boards over clouds', vibe: 'drifting, open, far-off', bpm: 58, steps: 12, spb: 3, seed: 1202,
     scale: S(64, 'minp'), chords: [C(52, 'm7'), C(48, 'M7'), C(50, 's2'), C(47, 's4')],
     parts: [

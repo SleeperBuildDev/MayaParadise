@@ -280,13 +280,16 @@ export function buildGenericRoom(opts = {}) {
     st.room.scene.add(p.root);
     const id = `r${i}`;
     const spot = st.spot(id, s.x, s.z, s.h);
-    if (s.lie == null) st.room.obstacles.push({ type: 'circle', x: s.x, z: s.z, r: s.seat != null && s.seat < 0.1 ? 0.42 : 0.3 });
+    const ob = s.lie == null ? { type: 'circle', x: s.x, z: s.z, r: s.seat != null && s.seat < 0.1 ? 0.42 : 0.3 } : null;
+    if (ob) st.room.obstacles.push(ob);
     const tags = [...(JOB_TAGS[s.job] || [])];
     if (s.role === 'elder') tags.push('elder');
     if (s.role === 'child') tags.push('kid');
     const name = folkName({ district, house: opts.id ?? `g:${district}:${seed % 100000}`, slot: i, age: look.age, woman: ['bun', 'long', 'braid', 'bob', 'pony'].includes(look.hair) }); // own name, one town only, the same each visit
-    residents.push({ id, name, p, job: s.job, doing: JOB_NAMES[s.job] || JOB_NAMES.idle, role: s.role, look, spot, seat: s.seat, lie: s.lie, talk: { group: district, jobs: tags } });
+    residents.push({ id, name, p, job: s.job, doing: JOB_NAMES[s.job] || JOB_NAMES.idle, role: s.role, look, spot, seat: s.seat, lie: s.lie, talk: { group: district, jobs: tags },
+      ob, home: { x: s.x, z: s.z, h: s.h }, mood, w: s.lie == null && s.job !== 'nap' ? { state: 'job', t: 4 + Math.random() * 16, tx: 0, tz: 0 } : null });
   });
+  const roomObs = st.room.obstacles, hw = st.hw, hd = st.hd;
 
   const base = st.result({});
   const title = kind === 'workshop' ? TRADE_TITLES[trade] || KIND_TITLES.workshop : KIND_TITLES[kind];
@@ -298,11 +301,14 @@ export function buildGenericRoom(opts = {}) {
     residents,
     cast: [], // (doors.js: no story cast here; the residents are the room's own)
     talk: { group: district },
+    /** Debug: the residents' walks ({ id, state, t, held }). */
+    wanderState: () => residents.map((r) => ({ id: r.id, job: r.job, st: r.w?.state ?? null, t: r.w ? +r.w.t.toFixed(1) : null, held: r.w ? held(r) : null, at: [+r.p.root.position.x.toFixed(2), +r.p.root.position.z.toFixed(2)] })),
     update(dt, t) {
       base.update(dt, t);
       for (const r of residents) {
-        r.p.update(dt, { speed: 0 });
-        if (r.seat != null) seatPose(r.p, r.seat);
+        const walking = r.w ? wander(r, dt) : false;
+        if (!walking) r.p.update(dt, { speed: 0 });
+        if (r.seat != null && (!r.w || r.w.state === 'job')) seatPose(r.p, r.seat);
       }
     },
     dispose() {
@@ -310,6 +316,74 @@ export function buildGenericRoom(opts = {}) {
       base.dispose();
     },
   };
+
+  // ---- the residents get up now and then (owner: "townfolks are standing still"): a few steps about the room
+  // (0.9-2.2 m from their place, on clear floor with a clear straight line, never through furniture or each other),
+  // a look round, and back to work (their job pose, and the seat for those who sit). They stand still while Maya is
+  // right by them or a talk / room chatter plays. No meshes, a few dozen distance tests a pick.
+  function freeAt(r, x, z, rad) {
+    if (Math.abs(x) > hw - 0.4 || z < -hd + 0.4 || z > hd - 0.55) return false;
+    for (const o of roomObs) {
+      if (o === r.ob) continue;
+      if (o.type === 'circle') { if (Math.hypot(x - o.x, z - o.z) < o.r + rad) return false; }
+      else if (o.minX != null && x > o.minX - rad && x < o.maxX + rad && z > o.minZ - rad && z < o.maxZ + rad) return false;
+    }
+    for (const q of residents) if (q !== r && Math.hypot(x - q.p.root.position.x, z - q.p.root.position.z) < 0.7) return false;
+    return true;
+  }
+  function lineFree(r, x0, z0, x1, z1) {
+    const L = Math.hypot(x1 - x0, z1 - z0), n = Math.max(1, Math.ceil(L / 0.2));
+    for (let i = 1; i <= n; i++) {
+      const x = x0 + ((x1 - x0) * i) / n, z = z0 + ((z1 - z0) * i) / n;
+      if (Math.hypot(x - r.home.x, z - r.home.z) < 0.6) continue; // (getting up from the seat / the work place)
+      if (!freeAt(r, x, z, 0.26)) return false;
+    }
+    return true;
+  }
+  function held(r) {
+    const S = globalThis.__story, m = globalThis.__mwGame?.maya?.root?.position, q = r.p.root.position;
+    return !!(S?.talking || S?.chatter?.busy || (m && Math.hypot(m.x - q.x, m.z - q.z) < 1.5));
+  }
+  function wrapA(a) { return Math.atan2(Math.sin(a), Math.cos(a)); } // (a declaration: these run after the return above)
+  function wander(r, dt) {
+    const W = r.w, root = r.p.root, pos = root.position;
+    W.t -= dt;
+    if (W.state === 'job') {
+      if (W.t > 0 || held(r)) return false;
+      for (let k = 0; k < 10; k++) {
+        const a = Math.random() * PI * 2, d = 0.9 + Math.random() * 1.3, x = r.home.x + Math.sin(a) * d, z = r.home.z + Math.cos(a) * d;
+        if (freeAt(r, x, z, 0.3) && lineFree(r, r.home.x, r.home.z, x, z)) { W.state = 'out'; W.tx = x; W.tz = z; W.t = 12; r.p.setMood(null); return false; }
+      }
+      W.t = 5 + Math.random() * 8; // (no room just now: later)
+      return false;
+    }
+    if (W.state === 'look') {
+      if (W.t <= 0 && !held(r)) { W.state = 'in'; W.tx = r.home.x; W.tz = r.home.z; W.t = 12; }
+      r.p.update(dt, { speed: 0 });
+      return true;
+    }
+    // walking out ('out') or back ('in'); standing still while held (the clock waits too)
+    if ((W.state === 'out' || W.state === 'in') && held(r)) { W.t += dt; r.p.update(dt, { speed: 0 }); return true; }
+    const dx = W.tx - pos.x, dz = W.tz - pos.z, d = Math.hypot(dx, dz);
+    if (d < 0.06 || W.t <= 0) {
+      if (W.state === 'out') { W.state = 'look'; W.t = 3 + Math.random() * 5; }
+      else { pos.x = r.home.x; pos.z = r.home.z; W.state = 'settle'; }
+    }
+    if (W.state === 'settle') { // (turned back to the work, then the pose)
+      root.rotation.y += wrapA(r.home.h - root.rotation.y) * Math.min(1, dt * 6);
+      if (Math.abs(wrapA(r.home.h - root.rotation.y)) < 0.05) { root.rotation.y = r.home.h; W.state = 'job'; W.t = 14 + Math.random() * 18; if (r.mood) r.p.setMood(r.mood); return false; }
+      r.p.update(dt, { speed: 0 });
+      return true;
+    }
+    if (W.state !== 'out' && W.state !== 'in') { r.p.update(dt, { speed: 0 }); return true; }
+    const want = Math.atan2(dx, dz);
+    root.rotation.y += wrapA(want - root.rotation.y) * Math.min(1, dt * 7);
+    const sp = Math.min(0.6, d * 2) * Math.max(0.2, Math.cos(wrapA(want - root.rotation.y)));
+    pos.x += (dx / d) * sp * dt; pos.z += (dz / d) * sp * dt;
+    if (r.ob) { r.ob.x = pos.x; r.ob.z = pos.z; }
+    r.p.update(dt, { speed: sp });
+    return true;
+  }
 }
 
 /** A ROOMS-style spec for one door from doorsForItems (story.doors.registerRooms({ [door.room]: spec })). */

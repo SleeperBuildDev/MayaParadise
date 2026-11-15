@@ -1087,5 +1087,21 @@ const mentions = {
     pairs: [],
   },
 };
+// IN USE (owner, 2026-11-15: "it feels like most people talk about him, reduce it"): only these mention lines (their
+// number in the town's `lines` above, counting from 0) and pairs (by id) go into the town chatter. The others stay
+// here, kept for later: swap a number in or out to change which ones the townsfolk say. A town without `use` would
+// put all of its lines in. extras-heinhtet.js also keeps each town quiet about him for a few minutes after one.
+const MENTIONS_IN_USE = {
+  home: { lines: [0, 1, 3], pairs: ['mn-hm-early'] },
+  exercise: { lines: [1, 2, 5], pairs: ['mn-ex-pot'] },
+  envelope: { lines: [0, 2, 4], pairs: [] },
+  market: { lines: [1, 3, 8], pairs: ['mn-mk-jacket'] },
+  wharf: { lines: [1, 2, 5], pairs: ['mn-wh-somewhere'] },
+  junction: { lines: [0, 3, 5], pairs: ['mn-jn-sorry'] },
+  hearth: { lines: [0, 3, 4, 8], pairs: ['mn-hr-jacket'] },
+  garden: { lines: [0, 3, 4], pairs: ['mn-gd-still'] },
+  blank: { lines: [0, 2, 3], pairs: [] },
+};
+for (const [d, use] of Object.entries(MENTIONS_IN_USE)) if (mentions[d]) mentions[d].use = use;
 
 export default { solo, towns, maya: { walkup, carBlock, carDash, bye }, sing, mentions };

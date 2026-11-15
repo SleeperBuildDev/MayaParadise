@@ -23,7 +23,7 @@ import { createSpace, createOpenWalker } from './walker.js';
 import { createDesks } from './desks.js';
 import { createFeet } from './feet.js';
 import { createSeen, openMap, pageTurn } from './map.js';
-import { itemObstacles, chunkOf, tearRect, homeBookBudget } from './build.js';
+import { itemObstacles, chunkOf, tearRect, homeBookBudget, isArt } from './build.js';
 import { ITEMS, REGIONS, ROAD_EDGES, PEOPLE, BRIDGE, EXTENT, GATES, OBSTACLES, ART as REG_ART, PROP as REG_PROP, bookDist } from './region.js';
 
 const call = (o, fn, ...a) => (o && typeof o[fn] === 'function' ? o[fn](...a) : undefined);
@@ -141,6 +141,7 @@ export async function createOpenWorld(game, story) {
   let nearSaved = null;
   const streamer = createStreamer({
     scene: world.scene, net, edges, shadows: !!game.shadowsOn, low: game.tier === 'low', cut,
+    shadowArea: game.worldShadowBounds || null, // (the patch the sun's shadow map covers: blocks cast while their shadow can land in it)
     extraGlows: () => desks.glows(deskGlows),
     onReady: (ch) => spawnFor(ch),
     onGone: (ch) => dropFor(ch),
@@ -290,10 +291,64 @@ export async function createOpenWorld(game, story) {
         if (u.ax === undefined) continue;
         let hide = false;
         for (const sl of slots) if (sl.key !== null && sl.fade > 0.5 && Math.abs(sl.x - u.ax) + Math.abs(sl.z - u.az) < 0.02) hide = true;
-        if (!hide && near > 0 && u.tall) hide = ((u.ax - cam.x) * dx + (u.az - cam.z) * dz) / l2 < near - 0.05;
+        if (!hide && u.tall) {
+          // (an item easing across the near line: its sign goes, or comes back, half-way through its grain)
+          const ne = nearEasing.get(anchorKey(u.ax, u.az));
+          hide = ne ? ne.f > 0.5 : near > 0 && ((u.ax - cam.x) * dx + (u.az - cam.z) * dz) / l2 < near - 0.05;
+        }
         m.visible = !hide;
       }
     }
+  }
+
+  // ---- the near part of the walking view (cutaway.js clears tall things anchored there): an item crossing that
+  // line used to go (or come back) in one frame: a house beside her as she walked past it, every house in the lower
+  // half of the screen when she got out of the car or back in. Now the line itself glides when it switches on and
+  // off (NEAR_RATE), and each item that crosses it eases through the grain over NEAR_EASE_T (up to NEAR_EASE at once;
+  // more than that, the ones farthest from her just switch, as before).
+  const NEAR_EASE_T = 0.3, NEAR_RATE = 2.4; // seconds; the line's glide (fraction of camera -> her per second)
+  const NEAR_EASE = cut.nearSlots || 0; // (cutaway.js; 0 from a cutaway.js a browser still holds from before: every item just switches)
+  const anchorKey = (x, z) => Math.round(x * 50) * 1e7 + Math.round(z * 50);
+  const nearItems = []; // every item the near line can clear (buildings and the low homes marked `cut`)
+  const addNear = (list) => { for (const it of list) if (isArt(it.k) || REG_PROP[it.k]?.cut) nearItems.push(it); };
+  addNear(ITEMS);
+  const nearEasing = new Map(); // anchorKey -> { x, z, on, f, seen }
+  const nearSlot = [];
+  let nearCur = 0, nearFrame = 0;
+  function nearCandidate(x, z, A, dx, dz, l2, n, p, dt, frame) {
+    const k = anchorKey(x, z);
+    const on = n > 0 && ((x - A.x) * dx + (z - A.z) * dz) / l2 < n - 0.05;
+    let s = nearEasing.get(k);
+    if (!s) { nearEasing.set(k, (s = { x, z, on, f: on ? 1 : 0, seen: frame, d: 0 })); return; }
+    s.seen = frame;
+    s.on = on;
+    const want = on ? 1 : 0;
+    if (s.f !== want) s.f = want > s.f ? Math.min(1, s.f + dt / NEAR_EASE_T) : Math.max(0, s.f - dt / NEAR_EASE_T);
+    if (s.f > 0 && s.f < 1) { s.d = Math.abs(x - p.x) + Math.abs(z - p.z); nearSlot.push(s); }
+  }
+  function updateNear(dt, A, p, n) {
+    const frame = ++nearFrame;
+    const dx = p.x - A.x, dz = p.z - A.z, l2 = Math.max(dx * dx + dz * dz, 1e-3);
+    // (the box round her takes in the camera too: it stands 15-35 m south of her)
+    const x0 = Math.min(A.x, p.x) - 24, x1 = Math.max(A.x, p.x) + 24, z0 = Math.min(A.z, p.z) - 24, z1 = Math.max(A.z, p.z) + 12;
+    nearSlot.length = 0;
+    for (const it of nearItems) if (it.x > x0 && it.x < x1 && it.z > z0 && it.z < z1) nearCandidate(it.x, it.z, A, dx, dz, l2, n, p, dt, frame);
+    for (const kind in streamer.pools) for (const it of streamer.pools[kind].list) if (it.x > x0 && it.x < x1 && it.z > z0 && it.z < z1) nearCandidate(it.x, it.z, A, dx, dz, l2, n, p, dt, frame);
+    for (const [k, s] of nearEasing) if (s.seen !== frame) nearEasing.delete(k);
+    // the ones nearest her get the slots; the rest switch at once (as the line alone would draw them)
+    if (nearSlot.length > NEAR_EASE) { nearSlot.sort((a, b) => a.d - b.d); for (let i = NEAR_EASE; i < nearSlot.length; i++) nearSlot[i].f = nearSlot[i].on ? 1 : 0; }
+    for (let k = 0; k < NEAR_EASE; k++) {
+      const s = nearSlot[k];
+      if (s && k < nearSlot.length) cut.nearEase?.(k, s.x, s.z, s.f); else cut.nearEase?.(k, 0, 0, -1);
+    }
+  }
+  // her: walking (or on her way to or from the car door, between the steps of that walk: game.worldWalk is
+  // empty for a frame between them, and for the half second her landing takes after the hop out), or seated
+  function mayaAfoot() {
+    if (story.foot?.active || game.worldWalk) return true;
+    const r = game.maya.root, c = game.car?.root;
+    if (!game.busy || !c || r.parent === game.car.seat) return false;
+    return Math.hypot(r.position.x - c.position.x, r.position.z - c.position.z) < 8;
   }
 
   // ---- camera spots for the desk scenes: away from buildings, with a clear look at the desk
@@ -324,7 +379,7 @@ export async function createOpenWorld(game, story) {
     createWalker: (spawn) => createOpenWalker(space, spawn),
     bounds: { minX: EXTENT.x0, maxX: EXTENT.x1, minZ: EXTENT.z0, maxZ: EXTENT.z1 },
     focus() {
-      if (story.foot?.active || game.worldWalk) return game.maya.root.getWorldPosition(focus);
+      if (mayaAfoot()) return game.maya.root.getWorldPosition(focus);
       return focus.copy(game.car.root.position);
     },
     update(dt, t) {
@@ -351,15 +406,22 @@ export async function createOpenWorld(game, story) {
       const cast = away < 6 || ow.overviewOn;
       if (cast !== bookCasting && (cast || away > 8)) { bookCasting = cast; for (const m of bookCasters) m.castShadow = cast; }
       // see through whatever stands between the camera and her (or the car)
-      const walking = story.foot?.active || game.worldWalk;
+      const walking = mayaAfoot();
       // (not during a talk: the two-shot picks a clear side by itself, and a hole by the lens would show as grain)
       const cutting = ow.cutOn && away > 1 && !(story.talking && !ow.deskScene);
       // the near part of the walking view: tall things anchored more than NEAR_CLEAR metres in front of her (towards
       // the lens) go whole. A fixed fraction (0.55) of a phone's long portrait view left the low homes across the lane
       // standing, their roofs a dark slab over the bottom half of the screen
       const camL = Math.hypot(game.camera.position.x - p.x, game.camera.position.z - p.z);
-      const nearCut = cutting && walking ? Math.max(0.55, 1 - NEAR_CLEAR / Math.max(camL, 1)) : 0;
+      const nearWant = cutting && walking ? Math.max(0.55, 1 - NEAR_CLEAR / Math.max(camL, 1)) : 0;
+      // (the line glides on and off: from the lens out to her when she gets out of the car, back when she gets in;
+      // the items it crosses ease through the grain, updateNear)
+      if (nearWant > 0 && nearCur === 0) nearCur = 0.06; // (it starts just in front of the lens)
+      nearCur = nearCur < nearWant ? Math.min(nearWant, nearCur + NEAR_RATE * dt) : Math.max(nearWant, nearCur - NEAR_RATE * dt);
+      if (nearWant === 0 && nearCur < 0.07) nearCur = 0;
+      const nearCut = nearCur;
       cut.set(game.camera.position, cutAt.set(p.x, walking ? 0.9 : 0.8, p.z), cutting ? 1 : 0, nearCut);
+      updateNear(dt, game.camera.position, p, nearCut);
       // (blockers also during talks: the two-shot may still have a wall or a crown between it and her)
       updateBlockers(dt, ow.cutOn && away > 1, game.camera.position, p, walking ? 1.3 : 1.2);
       updateSigns(game.camera.position, p, nearCut);
@@ -548,6 +610,7 @@ export async function createOpenWorld(game, story) {
       space.add(obstacles);
       for (const [k, v] of Object.entries(REG_ART)) if (v?.h) TALL_H[k] = v.h;
       addTall(items);
+      addNear(items);
       const t1 = performance.now();
       streamer.addItems(items);
       const t2 = performance.now();

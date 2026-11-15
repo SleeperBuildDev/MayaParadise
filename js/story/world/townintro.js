@@ -295,7 +295,9 @@ export function installTownIntro(game, story, opts = {}) {
     const ours = (fn, ...a) => { mine = true; try { return own[fn].apply(rig, a); } finally { mine = false; } };
     for (const fn of ['shot', 'pin', 'release', 'snap']) {
       own[fn] = rig[fn];
-      const w = function (...a) { if (!mine && ti.playing) { foreign = true; interrupt(); } return own[fn].apply(this, a); };
+      // (a foreign snap leaves the rig's pin alone: our glide's pin would then hold the camera up there for good,
+      // the town gone from under it; a foreign shot, pin or release replaces or clears the pin itself)
+      const w = function (...a) { if (!mine && ti.playing) { foreign = true; interrupt(); if (fn === 'snap') rig.unpin?.(); } return own[fn].apply(this, a); };
       w.tiWrap = true;
       rig[fn] = w;
     }

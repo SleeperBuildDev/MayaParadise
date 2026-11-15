@@ -53,15 +53,21 @@ const TOWNS = ['home', 'exercise', 'envelope', 'market', 'wharf', 'junction', 'h
 const ANIMS_STOP = ['checkWatch', 'catchBreath', 'stretch', 'pocketSearch', 'spin', 'tieShoe', 'fanSelf', 'juggle', 'trip', 'facepalm', 'shrug'];
 
 // ---- tuning (seconds, metres)
-const GAP = [45, 100]; // between appearances (eligible outdoor time only)
-const FIRST = [18, 40];
-const TOWN_NEW = [10, 22]; // a town she has just come into: he turns up there soon (after her arrival thought)
+// (owner 2026-11-15, "reduce the frequency of ko Hein Htet": about 3x rarer than the first tuning, GAP [45, 100],
+// FIRST [18, 40], every new town [10, 22], walk-up chance 0.16 after 200 s, block 0.05 every 2 days)
+const GAP = [190, 380]; // between appearances (eligible outdoor time only; measured ~3x rarer than [45, 100])
+const FIRST = [60, 120];
+const TOWN_NEW = [25, 50]; // a town she has just come into: now and then he turns up there soon (after her arrival thought)
+const TOWN_NEW_CHANCE = 0.35; // ...only the first time she comes into that town this session, and only this often
 const MEET_WAIT = 25; // a meet with nobody near: keep looking this long (she walks on), then a pass instead
 const SHARE = { dash: 0.44, meet: 0.36 }; // the rest: pass
 const SING = { pass: 0.5, meet: 0.12, dash: 0.14 };
-const WALKUP = { after: 200, every: 15, chance: 0.16, fromDay: 2 };
+const WALKUP = { after: 360, every: 15, chance: 0.05, fromDay: 2 };
 const DASH_GAP = [180, 900]; // car dash: 3-15 min of actual driving time (owner)
-const BLOCK = { fromDay: 2, everyDays: 2, check: 5, chance: 0.05, minDrive: 120, speed: 4.6 };
+const BLOCK = { fromDay: 2, everyDays: 3, check: 5, chance: 0.03, minDrive: 120, speed: 4.6 };
+// MENTIONS: the townsfolk's gossip about him is a small spice (owner 2026-11-15): only the lines / pairs lines.js marks
+// `use`, and after one is said the town keeps quiet about him for a while (a pair counts for more)
+const MENTION = { gap: [150, 260], pairGap: [600, 900], pairFirst: [240, 480], open: 0.5, pairOpen: 0.3, recheck: 15, nearSame: 9 };
 // his own 4 calls on top of the frame stay under the cap the town chatter keeps (72), never past the triangle budget
 const CALL_CAP = 68, CALL_LEAVE = 80, TRI_CAP = 152000;
 const SPEED = { jog: 3.2, run: 4.4, dash: [4.8, 6], sprint: 6 };
@@ -1196,6 +1202,7 @@ export function installHeinHtet(game, story, ow) {
   let auto = true; // (tests) false: no natural appearances, only the ones a test calls
   let pending = false; // an appearance is being planned (spread over frames) or played
   let townQuiet = 0, lastTown = null, meetWant = 0;
+  const townsSeen = new Set(); // (this session)
   function chooseKind() {
     if (driving()) return 'dash';
     const r = Math.random();
@@ -1262,11 +1269,16 @@ export function installHeinHtet(game, story, ow) {
       }
     }
     tickBubbles(dt);
-    // a town she has just come into: he turns up there soon (he is in every town), after her arrival thought
+    // a town she has just come into: now and then he turns up there soon (he is in every town), after her arrival
+    // thought (only her first time in that town this session, and not every time: owner, "reduce the frequency")
     townQuiet = Math.max(0, townQuiet - dt);
     const town = !story.inRoom && game.mode === 'world' ? districtAt(mp.x, mp.z) : null;
     if (town && town !== lastTown) {
-      if (lastTown !== null || clock > 3) { townQuiet = 6; nextIn = Math.min(nextIn, rand(TOWN_NEW[0], TOWN_NEW[1])); meetWant = 0; }
+      if (lastTown !== null || clock > 3) {
+        townQuiet = 6; meetWant = 0;
+        if (!townsSeen.has(town) && Math.random() < TOWN_NEW_CHANCE) nextIn = Math.min(nextIn, rand(TOWN_NEW[0], TOWN_NEW[1]));
+      }
+      townsSeen.add(town);
       lastTown = town;
     }
     if (cur || pending || !auto) return;
@@ -1323,7 +1335,55 @@ export function installHeinHtet(game, story, ow) {
   story.ticks.push((dt) => { try { tick(dt); } catch (e) { console.error('heinhtet tick', e); offStage('abort'); } });
 
   // ---- MENTIONS: the townsfolk talk about him (town chatter lines and pairs)
+  // A small spice, never the talk of the town (owner, 2026-11-15): only the lines / pairs lines.js marks in use
+  // (mentions[town].use), and each one carries a gate the chatter reads as its own day filter (`days`: [] = not now,
+  // so the chatter simply skips it): shut for MENTION.gap s after any of them is said (MENTION.pairGap after a pair, a
+  // pair being four bubbles about him; no pair in the first MENTION.pairFirst s), shut while the one who last said one
+  // stands near her (not the same mouth again), and otherwise open only now and then (a coin flip every
+  // MENTION.recheck s: a low weight; a pair needs a second, rarer flip).
   let mentionsIn = false;
+  const ment = { t: 0, next: 0, nextPair: rand(MENTION.pairFirst[0], MENTION.pairFirst[1]), open: false, pairOpen: false, openT: 0, lastWho: null, texts: new Set(), lastLog: null, primed: false, said: 0, pairs: 0, byTown: {} };
+  function mentionShut(kind) {
+    if (ment.t < ment.next || (kind === 'pair' && ment.t < ment.nextPair)) return true;
+    if (ment.lastWho) {
+      const e = story.people?.get?.(ment.lastWho) || story.chatterExtras?.folk?.get?.(ment.lastWho);
+      const p = e?.p?.root?.position, mp = mayaXZ();
+      if (p && Math.hypot(p.x - mp.x, p.z - mp.z) < MENTION.nearSame) return true;
+    }
+    return !ment.open || (kind === 'pair' && !ment.pairOpen);
+  }
+  /** the chatter's own day filter, made a gate: [] while shut (the line or pair is skipped), else its real days */
+  function gated(o, kind) {
+    const own = o.days;
+    Object.defineProperty(o, 'days', { enumerable: true, configurable: true, get: () => (mentionShut(kind) ? [] : own) });
+    return o;
+  }
+  /** what the chatter said since the last look (chatter.log): one of his mentions shuts the gate for a while */
+  function watchMentions(dt) {
+    ment.t += dt;
+    ment.openT -= dt;
+    if (ment.openT <= 0) { ment.openT = MENTION.recheck; ment.open = Math.random() < MENTION.open; ment.pairOpen = Math.random() < MENTION.pairOpen; }
+    const L = story.chatter?.log;
+    if (!L?.length) return;
+    const top = L[L.length - 1];
+    if (!ment.primed) { ment.primed = true; ment.lastLog = top; return; }
+    if (top === ment.lastLog) return;
+    const fresh = [];
+    for (let i = L.length - 1; i >= 0 && L[i] !== ment.lastLog; i--) fresh.push(L[i]);
+    ment.lastLog = top;
+    for (const e of fresh.reverse()) {
+      if (!ment.texts.has(e.my) && !ment.texts.has(e.en)) continue;
+      ment.said++;
+      const mp = mayaXZ(), d = districtAt(mp.x, mp.z) || '?';
+      ment.byTown[d] = (ment.byTown[d] || 0) + 1;
+      const who = String(e.who || '');
+      if (e.kind === 'pair' && !who.includes('+')) continue; // (the rest of a pair already counted)
+      if (e.kind === 'pair') { ment.pairs++; ment.next = ment.t + rand(MENTION.pairGap[0], MENTION.pairGap[1]); ment.nextPair = ment.next; ment.lastWho = who.split('+')[0] || null; }
+      else { ment.next = ment.t + rand(MENTION.gap[0], MENTION.gap[1]); ment.lastWho = who || null; }
+      ment.open = false; ment.openT = MENTION.recheck;
+    }
+  }
+  story.ticks.push((dt) => { try { if (dt) watchMentions(Math.min(dt, 0.1)); } catch (e) { console.error('heinhtet mentions tick', e); } });
   function mentionTable() {
     const out = {};
     const flat = (l) => {
@@ -1338,9 +1398,12 @@ export function installHeinHtet(game, story, ow) {
     };
     for (const [d, m] of Object.entries(LINES.mentions || {})) {
       if (!TOWNS.includes(d)) continue;
-      const town = (m.lines || []).map((l, i) => { const f = flat(l); if (f) f.id = `hh-m:${d}:${i}`; return f; }).filter(Boolean);
-      const pairs = (m.pairs || []).filter((p) => !p.when || !(p.when.time || p.when.weather === 'dry'))
-        .map((p) => ({ id: p.id, who: p.who || ['*', '*'], lines: p.lines.map(flat).filter(Boolean), ...(p.when ? { when: p.when } : {}) }));
+      const use = m.use || null; // (lines.js: the ones in use; the rest are kept there, unused)
+      const town = (m.lines || []).map((l, i) => { if (use && !(use.lines || []).includes(i)) return null; const f = flat(l); if (f) f.id = `hh-m:${d}:${i}`; return f && gated(f, 'line'); }).filter(Boolean);
+      const pairs = (m.pairs || []).filter((p) => (!use || (use.pairs || []).includes(p.id)) && (!p.when || !(p.when.time || p.when.weather === 'dry')))
+        .map((p) => ({ id: p.id, who: p.who || ['*', '*'], lines: p.lines.map(flat).filter(Boolean), when: gated({ ...(p.when || {}) }, 'pair') }));
+      for (const l of town) { ment.texts.add(l.my); ment.texts.add(l.en); }
+      for (const p of pairs) for (const l of p.lines) { ment.texts.add(l.my); ment.texts.add(l.en); }
       out[d] = { town, pairs };
     }
     return out;
@@ -1375,7 +1438,7 @@ export function installHeinHtet(game, story, ow) {
     carDash: (id, o = {}) => testCall('carDash', { id, ...o }),
     stats() {
       const avg = (a) => (a.length ? +(a.reduce((x, y) => x + y, 0) / a.length).toFixed(1) : null);
-      return { ...stats, avgCallsBefore: avg(stats.callsBefore), avgCallsWith: avg(stats.callsWith), maxCallsWith: stats.callsWith.length ? Math.max(...stats.callsWith) : null, maxTrisWith: stats.trisWith.length ? Math.max(...stats.trisWith) : null, lastFrameCalls: callsNow(), lastFrameTris: trisNow(), meetsUsed: Object.keys(save.hh?.meets || {}), mentions: mentionsIn };
+      return { ...stats, avgCallsBefore: avg(stats.callsBefore), avgCallsWith: avg(stats.callsWith), maxCallsWith: stats.callsWith.length ? Math.max(...stats.callsWith) : null, maxTrisWith: stats.trisWith.length ? Math.max(...stats.trisWith) : null, lastFrameCalls: callsNow(), lastFrameTris: trisNow(), meetsUsed: Object.keys(save.hh?.meets || {}), mentions: mentionsIn, mentionsSaid: { lines: ment.said, pairs: ment.pairs, byTown: { ...ment.byTown }, shutFor: +Math.max(0, ment.next - ment.t).toFixed(1), open: ment.open } };
     },
     leave() { if (cur) leaving = true; },
     gone() { offStage('abort'); },

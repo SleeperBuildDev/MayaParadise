@@ -30,7 +30,7 @@ const OUTLINE_R = 46; // a cell farther than this from the camera drops its outl
 const SHADOW_R = 14; // only cells this close to the focus cast the sun's shadow (painted shadows do the rest)
 const SCAN = 0.25; // seconds between culling passes
 
-export function createStreamer({ scene, net, edges, shadows = false, low = false, cut = null, extraGlows = null, onReady = null, onGone = null, offPaper = null }) {
+export function createStreamer({ scene, net, edges, shadows = false, low = false, cut = null, extraGlows = null, onReady = null, onGone = null, offPaper = null, shadowArea = null }) {
   const root = new THREE.Group();
   root.name = 'openWorld';
   scene.add(root);
@@ -100,33 +100,50 @@ export function createStreamer({ scene, net, edges, shadows = false, low = false
       it._ry ??= ((it.x * 12.9898 + it.z * 78.233) % 6.283);
       it._ph ??= (it.x * 0.37 + it.z * 0.21) % 6.283;
     }
-    cullTrees();
+    cullTrees(true);
   }
+  // a tree's pose this frame: its turn, and a little sway (update() writes every drawn tree's each frame)
+  let swayAt = 0;
+  const poseTree = (it, t) => m4.compose(p.set(it.x, 0, it.z), q.setFromEuler(e.set(Math.sin(t * 0.9 + it._ph) * 0.018, it._ry, Math.sin(t * 0.7 + it._ph * 1.3) * 0.022, 'YXZ')), sc.setScalar(it.s || 1));
   // only the trees the camera can see (or whose shadow may fall into view), inside the haze
+  // (checked again just before each draw with the camera of that very frame (viewNow): checked only every SCAN
+  // with the camera of the frame before, the trees at the screen's edge popped in late while the camera swung
+  // between the car's view and the walking view, and a tree just off screen took its shadow on screen with it)
   const frustum = new THREE.Frustum(), pv = new THREE.Matrix4(), sph = new THREE.Sphere();
   let viewOk = false, viewFar = 1e9;
   const camAt = new THREE.Vector3();
-  function cullTrees() {
+  const treeBuf = [];
+  function cullTrees(force = false) {
     for (const kind in pools) {
       const P = pools[kind];
-      P.list.length = 0;
+      const L = treeBuf;
+      L.length = 0;
       for (const it of P.all) {
         if (viewOk) {
           const s = it.s || 1;
           if (Math.hypot(it.x - camAt.x, it.z - camAt.z) > viewFar + 4) continue;
           sph.center.set(it.x, 2.2 * s, it.z); sph.radius = 4.5 * s;
-          if (!frustum.intersectsSphere(sph)) continue;
+          if (!frustum.intersectsSphere(sph)) {
+            // its shadow: the crown (about 4 m up) laid along the sun onto the ground
+            sph.center.set(it.x + sunX * 3.2 * s, 0.5, it.z + sunZ * 3.2 * s); sph.radius = 3.4 * s + Math.hypot(sunX, sunZ) * 1.6 * s;
+            if (!shadows || !frustum.intersectsSphere(sph)) continue;
+          }
         }
-        P.list.push(it);
+        L.push(it);
       }
-      P.list.forEach((it, k) => P.mesh.setMatrixAt(k, m4.compose(p.set(it.x, 0, it.z), q.setFromEuler(e.set(0, it._ry, 0)), sc.setScalar(it.s || 1))));
+      let same = !force && L.length === P.list.length;
+      for (let k = 0; same && k < L.length; k++) if (L[k] !== P.list[k]) same = false;
+      if (same) continue;
+      P.list.length = 0;
+      for (const it of L) P.list.push(it);
+      P.list.forEach((it, k) => P.mesh.setMatrixAt(k, poseTree(it, swayAt)));
       P.mesh.count = P.outline.count = P.list.length;
       P.mesh.instanceMatrix.needsUpdate = true;
       P.mesh.computeBoundingSphere();
       P.outline.computeBoundingSphere();
     }
   }
-  /** Per culling pass: outlines off far away, shadows cast only near the focus, nothing past the haze. */
+  /** Per culling pass: outlines off far away, shadows cast only where the sun's shadow map is drawn, nothing past the haze. */
   function cullCells(fx, fz, fogFar) {
     for (const ch of chunks.values()) {
       if (ch.state !== 'ready' || !ch.cells) continue;
@@ -135,8 +152,20 @@ export function createStreamer({ scene, net, edges, shadows = false, low = false
         // (view depth is at most ~10% shorter than the distance inside a phone's narrow view)
         c.near = dc * 0.9 < fogFar + 2;
         c.mesh.visible = c.near && c.inView !== false;
-        if (c.outline) c.outline.visible = dc < OUTLINE_R;
-        if (c.cast) c.mesh.castShadow = Math.hypot(Math.max(c.x0 - fx, 0, fx - c.x1), Math.max(c.z0 - fz, 0, fz - c.z1)) < SHADOW_R;
+        c.inked = dc < OUTLINE_R;
+        if (c.outline) c.outline.visible = c.inked && c.boxSeen !== false;
+        if (!c.cast) continue;
+        if (shadowArea && !shadowArea.isEmpty()) {
+          // a block casts while its shadow can land inside the patch the sun's shadow map covers (index.js moves it
+          // with her; main.js fits the map to the view inside it). Only within SHADOW_R of her, a whole block of
+          // houses took its shadows on and off at once, 14 m up the street in the middle of the screen, as she walked.
+          // (a block off screen with its shadow off screen is not drawn at all: viewCells)
+          const h = Math.min(c.box ? c.box.max.y : 8, 30), ox = sunX * h, oz = sunZ * h;
+          const a = shadowArea;
+          // (4 m to spare: the patch moves on between two passes, up to 2.5 m at the car's top speed)
+          c.mesh.castShadow = Math.min(c.x0, c.x0 + ox) - 4 < a.max.x && Math.max(c.x1, c.x1 + ox) + 4 > a.min.x
+            && Math.min(c.z0, c.z0 + oz) - 4 < a.max.z && Math.max(c.z1, c.z1 + oz) + 4 > a.min.z;
+        } else c.mesh.castShadow = Math.hypot(Math.max(c.x0 - fx, 0, fx - c.x1), Math.max(c.z0 - fz, 0, fz - c.z1)) < SHADOW_R;
       }
     }
   }
@@ -145,10 +174,51 @@ export function createStreamer({ scene, net, edges, shadows = false, low = false
   // A block that casts the sun's shadow stays while that shadow can fall into view (its box swept along the sun).
   const vFr = new THREE.Frustum(), vM = new THREE.Matrix4(), vBox = new THREE.Box3(), vSun = new THREE.Vector3(), vTgt = new THREE.Vector3();
   let sun = null, sunScan = 0;
+  let sunX = 0, sunZ = 0; // the sun's shadow offset on the ground per metre of height (viewCells keeps it current)
+  // The view test runs again right before the scene is drawn, with the camera this frame is drawn from: update()
+  // runs before the camera rig moves the camera, so its test used the frame before's, and while the camera swung
+  // (the car's view <-> the walking view, a turn) a block at the screen's edge was left out for a frame.
+  let viewCam = null, viewLive = true;
+  // A block kept only for the shadow it lays into view (its own box off screen) is drawn into the sun's map but not
+  // on screen: three.js lists what the camera draws before it draws the sun's map, so it is hidden for that list and
+  // shown again for the shadow pass (one draw call a frame each, not two).
+  const shadowOnly = [];
+  const shadowHooked = new WeakSet();
+  function hookShadowPass(renderer) {
+    const sm = renderer?.shadowMap;
+    if (!sm || shadowHooked.has(sm)) return;
+    shadowHooked.add(sm);
+    const render0 = sm.render;
+    sm.render = function () {
+      for (const c of shadowOnly) c.mesh.visible = true;
+      shadowOnly.length = 0;
+      return render0.apply(this, arguments);
+    };
+  }
+  const beforeRender0 = scene.onBeforeRender;
+  scene.onBeforeRender = function (renderer, sc0, camera) {
+    if (typeof beforeRender0 === 'function') beforeRender0.apply(this, arguments);
+    for (const c of shadowOnly) c.mesh.visible = true; // (a frame whose shadow pass did not run)
+    shadowOnly.length = 0;
+    if (!viewLive || !viewOk || !camera || camera !== viewCam || hold || !api.viewCull) return;
+    try {
+      camAt.setFromMatrixPosition(camera.matrixWorld);
+      frustum.setFromProjectionMatrix(pv.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
+      cullTrees();
+      viewCells(camera);
+      if (shadows && renderer?.shadowMap?.enabled) {
+        hookShadowPass(renderer);
+        for (const ch of chunks.values()) {
+          if (ch.state !== 'ready' || !ch.cells) continue;
+          for (const c of ch.cells) if (c.mesh.visible && !c.boxSeen) { c.mesh.visible = false; shadowOnly.push(c); }
+        }
+      }
+    } catch (err) { viewLive = false; console.warn('stream view', err); }
+  };
   function showAll() {
     for (const ch of chunks.values()) {
       if (ch.state !== 'ready' || !ch.cells) continue;
-      for (const c of ch.cells) { c.inView = true; c.mesh.visible = c.near !== false; }
+      for (const c of ch.cells) { c.inView = true; c.boxSeen = true; c.mesh.visible = c.near !== false; if (c.outline) c.outline.visible = c.inked !== false; }
       for (const o of ch.group.children) if (o.name === 'ground') o.visible = true;
     }
   }
@@ -161,20 +231,31 @@ export function createStreamer({ scene, net, edges, shadows = false, low = false
       const dn = Math.max(0.12, -vTgt.y);
       sx = vTgt.x / dn; sz = vTgt.z / dn;
     }
+    sunX = sx; sunZ = sz;
     vFr.setFromProjectionMatrix(vM.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
-    const M = 1.5; // (the camera may still move a little after this, this frame)
+    const M = 1.5; // (a margin: the sun's map is fitted to the view with a texel's slack, and edges may round)
     for (const ch of chunks.values()) {
       if (ch.state !== 'ready' || !ch.cells) continue;
       for (const c of ch.cells) {
         if (!c.box) { const g = c.mesh.geometry; if (!g.boundingBox) g.computeBoundingBox(); c.box = g.boundingBox.clone().applyMatrix4(c.mesh.matrixWorld); }
         vBox.copy(c.box).expandByScalar(M);
         let seen = vFr.intersectsBox(vBox);
+        // (a block kept only for the shadow it lays into view: its ink hull is off screen, and casts nothing)
+        c.boxSeen = seen;
+        if (c.outline) c.outline.visible = c.inked !== false && seen;
         if (!seen && c.mesh.castShadow) {
           const h = Math.min(c.box.max.y, 30), ox = sx * h, oz = sz * h;
           vBox.min.x = Math.min(c.box.min.x, c.box.min.x + ox) - M; vBox.max.x = Math.max(c.box.max.x, c.box.max.x + ox) + M;
           vBox.min.z = Math.min(c.box.min.z, c.box.min.z + oz) - M; vBox.max.z = Math.max(c.box.max.z, c.box.max.z + oz) + M;
           vBox.min.y = -0.5; vBox.max.y = c.box.max.y + M;
-          seen = vFr.intersectsBox(vBox);
+          // (only the part of that shadow inside the patch the sun's map covers can show: the long evening shadows of
+          // blocks far off the side of the screen kept them all drawn for nothing)
+          const a = shadowArea && !shadowArea.isEmpty() ? shadowArea : null;
+          if (a) {
+            vBox.min.x = Math.max(vBox.min.x, a.min.x - M); vBox.max.x = Math.min(vBox.max.x, a.max.x + M);
+            vBox.min.z = Math.max(vBox.min.z, a.min.z - M); vBox.max.z = Math.min(vBox.max.z, a.max.z + M);
+          }
+          seen = (!a || (vBox.min.x <= vBox.max.x && vBox.min.z <= vBox.max.z)) && vFr.intersectsBox(vBox);
         }
         c.inView = seen;
         c.mesh.visible = c.near !== false && seen;
@@ -357,6 +438,7 @@ export function createStreamer({ scene, net, edges, shadows = false, low = false
           cullTrees();
           cullCells(x, z, fogFar);
         } else viewOk = false;
+        viewCam = camera;
         if (!camera || hold || !api.viewCull) showAll();
         for (const ch of chunks.values()) {
           if (!ch.useful) continue;
@@ -379,13 +461,10 @@ export function createStreamer({ scene, net, edges, shadows = false, low = false
       swayT += dt;
       if (low && swayT < 0.06) return;
       swayT = 0;
+      swayAt = t;
       for (const kind in pools) {
         const P = pools[kind];
-        for (let k = 0; k < P.list.length; k++) {
-          const it = P.list[k];
-          q.setFromEuler(e.set(Math.sin(t * 0.9 + it._ph) * 0.018, it._ry, Math.sin(t * 0.7 + it._ph * 1.3) * 0.022, 'YXZ'));
-          P.mesh.setMatrixAt(k, m4.compose(p.set(it.x, 0, it.z), q, sc.setScalar(it.s || 1)));
-        }
+        for (let k = 0; k < P.list.length; k++) P.mesh.setMatrixAt(k, poseTree(P.list[k], t));
         if (P.list.length) P.mesh.instanceMatrix.needsUpdate = true;
       }
     },
@@ -405,6 +484,7 @@ export function createStreamer({ scene, net, edges, shadows = false, low = false
       return out;
     },
     dispose() {
+      viewLive = false;
       for (const ch of chunks.values()) drop(ch);
       for (const kind in pools) { pools[kind].mesh.geometry.dispose(); pools[kind].mesh.dispose(); pools[kind].outline.dispose(); }
       glows.geometry.dispose(); glows.dispose();

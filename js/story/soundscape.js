@@ -49,7 +49,8 @@ export function resolve(s = {}) {
   const room = s.room || null, rtype = room ? ROOM_TYPE[room] || 'home' : null;
   const period = s.period || periodOf(s.hour ?? 12), night = period === 'night';
   const cue = s.cue || MODE_CUE[s.mode] || null;
-  const music = cue ? 'cue:' + cue : rtype ? ROOM_SONG[rtype] || 'room:' + rtype : Z ? 'area:' + Z : district ? 'town:' + district : null;
+  // s.crowd: many townsfolk around Maya outdoors -> the livelier street song (owner: music, not crowd noise)
+  const music = cue ? 'cue:' + cue : rtype ? ROOM_SONG[rtype] || 'room:' + rtype : s.crowd ? 'area:crowd' : Z ? 'area:' + Z : district ? 'town:' + district : null;
   const amb = {};
   const town = district ? `${district}:${night ? 'night' : 'day'}` : null;
   if (rtype) {

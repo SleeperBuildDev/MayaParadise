@@ -49,7 +49,9 @@ const TOWN_FAR = [23, 29], TOWN_R = 22, TOWN_MIN = 11; // no area near: a pair o
 // A portrait phone sees a narrow, tall slice: a spot just past its sides is never seen while she stands, so the folk
 // stand in its up / down space (up the street ahead of her, or between her and the controls), clear of the HUD, and
 // walk in from the nearer side edge (a few steps): nobody pops up in front of her. Screen fractions of the view.
-const VIEW = { top: 0.17, bot: 0.8, side: 44, near: 4.1, far: 22, tries: 48, walk: [1.05, 1.3], walkMax: 9, offFor: 4 };
+const VIEW = { top: 0.17, bot: 0.8, side: 44, near: 4.1, far: 22, tries: 48, walk: [1.05, 1.3], walkMax: 9, offFor: 12 };
+// (offFor: the folk roam now (roam.js), in and out of the frame; at 4 s a stroll past the edge recycled them, a new
+// person built every few seconds while she stood: 12 s lets them come back into view first)
 
 // DRAFT(my): everyday things an everyday house's residents say (to the air, or to a visitor). Never a task or a
 // way to go; no lesson needed (it is just home life).
