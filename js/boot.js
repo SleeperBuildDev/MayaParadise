@@ -22,15 +22,19 @@ function pickTier(info) {
   const forced = params.get('tier') || safeGet('mw-tier');
   if (['low', 'mid', 'high'].includes(forced)) return forced;
   const r = info.renderer;
-  const mem = navigator.deviceMemory || 4;
-  const cores = navigator.hardwareConcurrency || 4;
+  const mem = navigator.deviceMemory || 4; // (Safari does not report it: 4)
   const mobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+  // owner, 2026-11-16: nearly every phone plays on high graphics; only the very old ones step down.
+  // Every iPhone / iPad (iPadOS says "Macintosh" but has touch) runs high; the game lowers its own pixel ratio if a phone struggles,
+  // and a crash on the last run (mw-running) still forces low (below).
+  const apple = /iPhone|iPad|iPod/i.test(navigator.userAgent) || (/Macintosh/i.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
+  if (apple) return 'high';
   if (/SwiftShader|llvmpipe|Software/i.test(r)) return 'low';
-  if (/Mali-4|Mali-T[67]|Mali-G(31|51|52)|PowerVR (Rogue )?GE8|Adreno \(TM\) (3\d\d|50\d)|Adreno (3\d\d|50\d)/i.test(r) || mem <= 2 || cores <= 4) return mobile ? 'low' : 'mid';
-  // Flagship phone GPUs (Snapdragon 865 and newer, recent Mali/Immortalis, Samsung Xclipse) get the
-  // best quality too; the game still lowers its pixel ratio by itself if a phone struggles.
-  if (mobile && /Adreno \(TM\) (6[5-9]\d|[7-9]\d\d)|Mali-G(7[1-9]|7\d\d|9\d\d)|Immortalis|Xclipse/i.test(r) && mem >= 4 && cores >= 8) return 'high';
-  return mobile ? 'mid' : 'high';
+  // very old phone GPUs (Mali-4xx / T6xx-T7xx / G31 / G51 / G52, PowerVR GE8xxx, Adreno 3xx / 50x) or 2 GB or less of memory
+  if (/Mali-4|Mali-T[67]|Mali-G(31|51|52)|PowerVR (Rogue )?GE8|Adreno \(TM\) (3\d\d|50\d)|Adreno (3\d\d|50\d)/i.test(r) || mem <= 2) return mobile ? 'low' : 'mid';
+  // older middle phones (Adreno 51x-54x) or 3 GB of memory: middle graphics
+  if (mobile && (mem <= 3 || /Adreno \(TM\) 5[1-4]\d|Adreno 5[1-4]\d/i.test(r))) return 'mid';
+  return 'high';
 }
 
 // Graphics choice on the cover (Auto / Lite / Best). Stored as mw-tier; Auto clears it.
