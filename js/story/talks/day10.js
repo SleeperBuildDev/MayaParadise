@@ -19,13 +19,13 @@ export const D10_HP_CARDS = [
     line: l('လမ်းကိုလည်း နွယ်ညွန့်လေးလိုပဲ ထိရုံထိပြီး လွှတ်ထားလိုက်ရင်ရော ဦး။', 'What if you touched the lane like the tendril, Uncle, and let it go?'),
     answers: ['cling'], from: l('နွယ်ညွန့်တွေဆီက ရခဲ့တာ', 'from the tendrils'), onlyIf: 'd10.tendrils' },
   { id: 'take', name: l('ကိုယ့်ဟာကိုယ်ပဲ နားထောင်', "Listen to what's yours"),
-    line: l('ဦးနဲ့ ဆိုင်တာကိုပဲ နားထောင်ပြီး ကျန်တာ အဝေး လွင့်ပါစေဆိုရင်… တံခါး ဖွင့်ဖွင့် ပိတ်ပိတ် စိတ်က အတူတူ ငြိမ်နေမလား။', "If you took in only what's yours and let the rest blow past… open or shut, would your mind stay just as still?"),
+    line: l('ဦးနဲ့ ဆိုင်တာကိုပဲ နားထောင်ပြီး ကျန်တာ အဝေး လွင့်ပါစေဆိုရင်… တံခါး ဖွင့်ဖွင့် ပိတ်ပိတ် စိတ်က အတူတူ အေးချမ်းနေမလား။', "If you took in only what's yours and let the rest blow past… open or shut, would your mind stay just as still?"),
     answers: ['unknown'], from: l('လမ်းက စကားသံတွေဆီက ရခဲ့တာ', "from the lane's voices"), onlyIf: 'd10.lanes' },
   { id: 'c:ember', companion: 'ember', onlyIf: 'companion:ember', name: l('မီးခဲအေးလေး', 'Cooled Ember'),
     line: l('မီးခဲကို ကိုင်ထားရင် ကိုယ့်လက်ပဲ အရင်လောင်တယ်။ ချထားလိုက်လို့ ရပါတယ်။', 'Hold an ember and your own hand burns first. You can set it down.'),
     answers: ['hot'], from: l('မီးခဲအေးလေး', 'the Cooled Ember') },
   { id: 'c:earth', companion: 'earth', onlyIf: 'companion:earth', name: l('မြေကြီးလေး', 'Little Earth'),
-    line: l('မြေကြီးလိုပေါ့… ချီးမွမ်းလည်း ဒီနေရာပဲ၊ ကဲ့ရဲ့လည်း ဒီနေရာပဲ။', 'Like the earth… praised, it stays put; blamed, it stays put.'),
+    line: l('မြေကြီးလိုပေါ့… ချီးမွမ်းလည်း ဒီနေရာပဲ၊ အပြစ်တင်လည်း ဒီနေရာပဲ။', 'Like the earth… praised, it stays put; blamed, it stays put.'),
     answers: ['unknown'], from: l('မြေကြီးလေး', 'Little Earth') },
   { id: 'openup', lookalike: true, name: l('တံခါး ဖွင့်လိုက်', 'Open the gate'),
     line: l('တံခါး ဖွင့်လိုက်ပါ ဦး။ လူတွေနဲ့ နေမှ ပျော်မှာပါ။', "Open the gate, Uncle. You'll only be happy among people."),
@@ -34,7 +34,7 @@ export const D10_HP_CARDS = [
       maya: l('(သူ့တံခါးကို ကျွန်မ ဆွဲဖွင့်ချင်မိတယ်။)', '(I wanted to pull his gate open myself.)') } },
   { id: 'shutout', lookalike: true, pencil: true, rumour: 'hates', name: l('လူတွေကို ပိတ်ထား', 'Keep them out'),
     line: l('ဦး မှန်ပါတယ်။ လူဆိုတာ မကောင်းဘူး။ အကုန် ပိတ်ထားလိုက်ပါ။', "You're right, Uncle. People are no good. Keep every one of them out."),
-    shows: ['hot'], really: l('အေးသလိုလိုနဲ့ နာကြည်းချက်ကို မီးမွှေးပေးတာ', 'a grudge fanned, passing for calm'),
+    shows: ['hot'], really: l('စိတ်အေးသလိုလိုနဲ့ မကျေနပ်ချက်ကို မီးမွှေးပေးတာ', 'a grudge fanned, passing for calm'),
     backfire: { they: l('…ဟုတ်တယ်။ (လမ်းကို ပိုပြီး စိုက်ကြည့်တယ်။)', '…Right. (He stares at the lane even harder.)'),
       maya: l('(လူတွေပြောတဲ့ "လူမုန်းတယ်" ကို မစစ်ဘဲ ယုံလိုက်မိတယ်။)', '(I believed "he hates people" without checking.)') } },
 ];
@@ -55,13 +55,13 @@ export const TALK_D10_HPOHTAW = {
     { lines: [
       { my: 'ငါ အေးဆေးပါ။ …ဒါနဲ့ ပါဆယ်ပို့တဲ့ ကောင်လေး ဖြတ်သွားပြီလား။ ဒီအချိန်ဆို ဖြတ်နေကျပဲ။', en: "I'm perfectly calm. …Has the parcel boy gone by yet? He usually passes about now.", need: 'cling', seems: 'own', face: 'think',
         tell: l('အေးနေတာ မဟုတ်ဘူး။ ခေါင်းက လမ်းဘက် ခဏခဏ လှည့်သွားတယ်။ တံခါးတိုင်ပေါ်က ပေါင်မုန့်ကိုလည်း ကြည့်နေတယ်။ ပိတ်ထားတဲ့ လမ်းကိုပဲ စိတ်က ရစ်ပတ်နေတာ။', "Not calm. His head keeps turning to the lane, and to the loaf on the post. He's wound round the very lane he locked out.") },
-      { my: 'လမ်းပေါ်က ဘာပြောလဲ… ညလုံးပေါက် ကြားယောင်နေတယ်။', en: 'What the lane says… I hear it all night.', need: 'cling', seems: 'hot', face: 'sad',
+      { my: 'လမ်းပေါ်က ဘာပြောလဲ… တစ်ညလုံး ကြားယောင်နေတယ်။', en: 'What the lane says… I hear it all night.', need: 'cling', seems: 'hot', face: 'sad',
         tell: l('ဒေါသထွက်တာ မဟုတ်ဘူး။ ကြားရုံ မဟုတ်ဘဲ စိတ်ထဲ အကုန် သိမ်းထားတာ။', "Not anger. He didn't just hear it; he took every word inside.") },
     ] },
     { lines: [
       { my: 'တံခါးဖွင့်ရင် လူတွေ ဝင်ပြီး ရစ်ပတ်မယ်။ ပိတ်ထားရင် ဒီမှာ ထိုင်စောင့်ကြည့်နေရမယ်။ ဘာလုပ်ရမှန်း မသိတော့ဘူး။', en: "Open it and they come in winding. Shut it and I sit here watching for them. I don't know what to do.", need: 'unknown', seems: 'afraid', face: 'worried',
         tell: l('ကြောက်တာ မဟုတ်ဘူး။ တံခါး နှစ်မျိုးပဲ သိတယ်၊ ဖွင့်တာနဲ့ ပိတ်တာ။ တတိယနည်းလမ်း မမြင်ဖူးသေးဘူး။', 'Not fear. He knows two kinds of gate, open and shut. He has never seen a third way.') },
-      { my: 'ဘာမှ ထာဝရ မတည်မြဲဘူးဆိုတာ သိတယ်။ ဒါတောင် လမ်းကို ကြည့်နေတုန်းပဲ။', en: 'I know nothing stays for ever. And I still watch the lane.', need: 'unknown', face: 'think', heard: true },
+      { my: 'ဘာမှ အမြဲတမ်း မတည်မြဲဘူးဆိုတာ သိတယ်။ ဒါတောင် လမ်းကို ကြည့်နေတုန်းပဲ။', en: 'I know nothing stays for ever. And I still watch the lane.', need: 'unknown', face: 'think', heard: true },
     ] },
     { lines: [ // his stone: no card moves it; hold Step back
       { my: 'ဒီတံခါး… ဘယ်လို ထားရမလဲ။', en: 'This gate… how should I leave it?', need: 'own', seems: 'unknown', face: 'think',
@@ -123,7 +123,7 @@ export const TALK_D10_KOPHYO = {
     ] },
     { lines: [
       { my: 'ဦးကြည်ငြိမ်းကတော့ အိမ်ကြီးထဲမှာ အေးအေးဆေးဆေး အိပ်နေရမှာပဲ။', en: 'U Kyi Nyein must sleep easy up in that big house.', need: 'unknown', seems: 'envy', face: 'think',
-        tell: l('မနာလိုတာ မဟုတ်ဘူး။ တံခါးပေါက်ကနေ စက္ကူဆိုင်ဘက်ကို ခဏခဏ လှမ်းကြည့်နေတယ်။ ချမ်းသာရင် အေးချမ်းမယ်လို့ပဲ ထင်ခဲ့တာ။', 'Not envy. He keeps looking out of the door toward the store. He always thought rich meant at ease.') },
+        tell: l('မနာလိုတာ မဟုတ်ဘူး။ တံခါးပေါက်ကနေ စက္ကူဆိုင်ဘက်ကို ခဏခဏ လှမ်းကြည့်နေတယ်။ ချမ်းသာရင် စိတ်ချမ်းသာမယ်လို့ပဲ ထင်ခဲ့တာ။', 'Not envy. He keeps looking out of the door toward the store. He always thought rich meant at ease.') },
     ] },
     { lines: [ // his: his own question
       { my: 'ရေဖျန်းလိုက်ရင်… ဒီည ကျွန်တော်လည်း သူ့လို ထိုင်စောင့်နေရမှာလား။', en: 'If I wet it… would I sit up tonight like him?', need: 'own', seems: 'unknown', face: 'think',
@@ -160,7 +160,7 @@ export const D10_KO_CARDS = [
     answers: ['given'], from: l('သိုးမည်းလေး', 'the Black Sheep') },
   { id: 'five', lookalike: true, name: l('ငါးလုံး မှန်တယ်', 'Five is right'),
     line: l('ငါးလုံး မှန်ပါတယ်။ ကျွန်မ အာမခံတယ်။', 'Five is right. I promise.'),
-    shows: ['unknown'], really: l('သူ့အဖြေပေါ် ကိုယ့်တံဆိပ် ခတ်ပေးတာ', 'stamping my seal on his answer') },
+    shows: ['unknown'], really: l('သူ့အဖြေပေါ် ကိုယ့်နာမည် တပ်ပေးတာ', 'stamping my seal on his answer') },
 ];
 
 export const TALK_D10_KAUNG = {
@@ -171,7 +171,7 @@ export const TALK_D10_KAUNG = {
   stones: [
     { lines: [
       { my: 'ဒါဆို… ငါးလုံးဆိုတာ မှန်ရဲ့လား မာရာ။ မှန်တယ်လို့ ပြောပေးပါလား။', en: "So… is five right, Maya? Will you tell me it's right?", need: 'own', seems: 'unknown', face: 'think',
-        tell: l('မသိလို့ မဟုတ်ဘူး။ ထုပ်ပိုးခုံပေါ်က အိုးငါးလုံးကို ကြည့်ပြီး ပြုံးနေတယ်။ သိပြီးသား။ မာရာ့တံဆိပ်ပဲ လိုချင်နေတာ။', "It isn't that he doesn't know. He's smiling at the five pots on the packing bench. He knows. He only wants Maya's seal on it.") },
+        tell: l('မသိလို့ မဟုတ်ဘူး။ ထုပ်ပိုးခုံပေါ်က အိုးငါးလုံးကို ကြည့်ပြီး ပြုံးနေတယ်။ သိပြီးသား။ မာရာ့ထောက်ခံချက်ပဲ လိုချင်နေတာ။', "It isn't that he doesn't know. He's smiling at the five pots on the packing bench. He knows. He only wants Maya's seal on it.") },
     ] },
     { lines: [
       { my: '…ဟုတ်ပြီ။ ကိုယ့်လက်ကို ကိုယ်ပဲ အသိဆုံးပဲ။', en: '…Right. My own hands know best.', need: 'own', face: 'happy' },

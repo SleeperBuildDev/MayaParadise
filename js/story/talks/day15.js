@@ -31,11 +31,11 @@ export const D15_NC_CARDS = [
   { id: 'c:key', companion: 'key', name: { my: 'သော့က ကိုယ့်လက်ထဲ', en: 'The key is yours' },
     line: { my: 'သော့က နေခြည့်လက်ထဲမှာ ရှိပြီးသား။ ကျွန်မလက်ထဲမှာ မဟုတ်ဘူး။', en: "The key's already in your hand. Not in mine." },
     answers: ['cling'], from: { my: 'သော့လေး', en: 'the Little Key' } },
-  { id: 'c:tendril', companion: 'tendril', name: { my: 'ဆက်ပါ၊ မနွယ်ပါနဲ့', en: "Connect, don't entwine" },
+  { id: 'c:tendril', companion: 'tendril', name: { my: 'အတူရှိပါ၊ မရစ်ပတ်ပါနဲ့', en: "Connect, don't entwine" },
     line: { my: 'အတူ ရှိမယ်။ ဒါပေမဲ့ နေခြည့်စကားကို ကျွန်မ ဝင်မပတ်တော့ဘူး။', en: "We'll be together. But I won't wind myself round your words any more." },
     answers: ['cling'], from: { my: 'နွယ်ညွန့်လေး', en: 'the Tendril' } },
   { id: 'c:stage', companion: 'stage', name: { my: 'သူ့ဇာတ်ခုံ', en: "It's their stage" },
-    line: { my: 'ဒီည ကြိုဆိုစကားက နေခြည့် ဇာတ်ခုံ။ ကျွန်မက ပရိသတ်ထဲမှာ။', en: "Tonight the welcome is your stage. I'm in the audience." },
+    line: { my: 'ဒီည ကြိုဆိုစကားက နေခြည့် ဇာတ်ခုံ။ ကျွန်မက ကြည့်တဲ့သူထဲမှာ။', en: "Tonight the welcome is your stage. I'm in the audience." },
     answers: ['cling', 'afraid'], from: { my: 'ဇာတ်ခုံလေး', en: 'the Little Stage' } },
   { id: 'justonce', lookalike: true, name: { my: 'ဒီတစ်ခါပဲ ရေးပေးမယ်', en: "Just this once, I'll write it" },
     line: { my: 'ကဲပါ၊ ဒီတစ်ခါပဲ အစ်မ ရေးပေးလိုက်မယ်။', en: "Oh, go on. Just this once, I'll write it for you." },
@@ -45,7 +45,7 @@ export const D15_NC_CARDS = [
   // only while rumour `speech` is unchecked (after Day 6, an unchecked rumour sits in the hand as a pencil look-alike)
   { id: 'mayasays', lookalike: true, pencil: true, rumour: 'speech', name: { my: '"မာရာ ပြောမယ်"', en: '"Maya will say it"' },
     line: { my: 'ဒီည ကျွန်မက လူတိုင်းကို လမ်းညွှန် ပြောမှာလေ။ နေခြည်က တိုတိုလေးပဲ ပြောရင် ရပါတယ်။', en: "Tonight I'm giving everyone advice anyway. You only need to say a few words." },
-    shows: ['afraid'], really: { my: 'မစစ်ရသေးတဲ့ ကောလာဟလ', en: 'a rumour nobody checked' },
+    shows: ['afraid'], really: { my: 'မစစ်ဆေးရသေးတဲ့ သတင်းစကား', en: 'a rumour nobody checked' },
     backfire: { they: { my: 'ဒါဆို ကျွန်မစကား မလိုတော့ဘူးပေါ့…', en: "Then my words aren't needed…" },
       maya: { my: '(ပွဲစဉ်ဘုတ်ကို ကိုယ်တိုင် မဖတ်ရသေးဘဲ ပြောလိုက်မိပြီ။)', en: '(I said it without reading the programme myself.)' } } },
 ];
@@ -70,7 +70,7 @@ export const TALK_D15_NAYCHI = {
     ] },
     { lines: [
       { my: 'အစ်မက အမြဲ ဘာပြောရမလဲ သိတာပဲ။ ဒီတစ်ခါ နောက်ဆုံးပါ… ရေးပေးပါလား။', en: 'You always know what to say. This is the last time… will you write it?', need: 'cling', seems: 'unknown', face: 'sad', steam: 1,
-        tell: { my: 'စာရွက်ကို မကမ်းဘူး။ ခဲတံကိုပဲ ကမ်းနေတယ်။ မသိလို့ မဟုတ်ဘူး။ ပြန်မှီချင်နေတာ။', en: "She holds out the pencil, not the paper. It isn't that she doesn't know. She wants to lean again." } },
+        tell: { my: 'စာရွက်ကို မကမ်းဘူး။ ခဲတံကိုပဲ ကမ်းနေတယ်။ မသိလို့ မဟုတ်ဘူး။ ပြန်မှီခိုချင်နေတာ။', en: "She holds out the pencil, not the paper. It isn't that she doesn't know. She wants to lean again." } },
       { my: 'နေ့လယ်တစ်နေကုန် စောင့်ခဲ့တဲ့နေ့ကို သတိရတယ်… ဒါပေမဲ့ ဒီနေ့ ကြောက်တယ်။', en: "I remember the day I waited all afternoon… but today I'm scared.", need: 'cling', seems: 'afraid', face: 'sad', heard: true },
     ] },
     { lines: [ // theirs: no card moves it; hold Step back
@@ -89,6 +89,6 @@ export const TALK_D15_NAYCHI = {
   },
   decision: [
     { my: 'ကိုယ်တိုင် မြင်ခဲ့တာကိုပဲ ကိုယ့်စကားနဲ့ ပြောမယ်။', en: "I'll say what I saw myself, in my own words.", face: 'happy' },
-    { my: 'အစ်မ၊ ပရိသတ်ထဲကနေ နားထောင်ပေးနော်။ ရှေ့က မဟုတ်ဘူး။', en: 'Sister, listen from the crowd, all right? Not from the front.', face: 'happy' },
+    { my: 'အစ်မ၊ ကြည့်တဲ့သူတွေထဲကနေ နားထောင်ပေးနော်။ ရှေ့က မဟုတ်ဘူး။', en: 'Sister, listen from the crowd, all right? Not from the front.', face: 'happy' },
   ],
 };

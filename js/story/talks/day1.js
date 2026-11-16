@@ -45,9 +45,9 @@ export const TALK_D1_FAIR = {
   hand: D1_CARDS,
   tutorial: [
     { at: 'path', my: 'ဖိုးသားက သူ့လမ်းညွှန်တိုင်ဆီ ကိုယ်တိုင် လျှောက်ရမယ်။ မာရာက ဘေးကနေ ကူပေးရုံပဲ။', en: 'Pho Thar walks to his own signpost himself. Maya only helps from beside him.' },
-    { at: 'label', my: 'ခဲတံစာက အပြင်ပန်း မြင်ရတာ။ "ကြည့်" လိုက်ရင် အမှန်ကို ရွှေမင်နဲ့ မြင်ရမယ်။ စိတ်အေး ၁ မှတ် ကုန်တယ်။', en: 'The pencil word is how it looks from outside. Look shows the truth in gold, for one calm.' },
+    { at: 'label', my: 'ခဲတံစာက အပြင်ပန်း မြင်ရတာ။ "ကြည့်" လိုက်ရင် အမှန်ကို ရွှေမင်နဲ့ မြင်ရမယ်။ စိတ်အေး ၁ မှတ် ကုန်မယ်။', en: 'The pencil word is how it looks from outside. Look shows the truth in gold, for one calm.' },
     { at: 'hand', my: 'လေ့ကျင့်ရင်း ရခဲ့တဲ့ စကားတွေပါ။ ကိုက်ရင် တစ်လှမ်း တိုးမယ်။ မကိုက်ရင် စိတ်အေး ၁ မှတ် လျော့မယ်။', en: 'Words you earned in the practice. One that fits moves him a step; one that does not costs a calm.' },
-    { at: 'steam', my: 'ခွက်ထဲက အငွေ့ သုံးကြောင်း တက်လာရင် စကား နားမဝင်တော့ဘူး။ အရင် နားထောင်ပေးပါ။', en: 'Three wisps from his cup and words stop entering the ear. Listen first.' },
+    { at: 'steam', my: 'ခွက်ထဲက အငွေ့ သုံးကြောင်း တက်လာရင် ဘာပြောပြော နားမဝင်တော့ဘူး။ အရင် နားထောင်ပေးပါ။', en: 'Three wisps from his cup and words stop entering the ear. Listen first.' },
   ],
   stones: [
     {
@@ -63,15 +63,15 @@ export const TALK_D1_FAIR = {
         { my: 'ဘာရွေးရမှန်း… ကျွန်တော် မသိဘူး။', en: "I… don't know what to pick.", need: 'afraid', seems: 'unknown', face: 'worried',
           tell: { my: 'မျက်လုံးက ဦးကျော်ညွန့်ဆီ ခဏခဏ ရောက်သွားတယ်။ မသိလို့ မဟုတ်ဘူး… ဆရာ စိတ်ပျက်မှာ ကြောက်နေတာ။', en: "His eyes keep going to U Kyaw Nyunt. It isn't that he doesn't know… he's afraid of letting his teacher down." } },
         { my: 'ဆရာက နေ့တိုင်း သင်ပေးခဲ့တာ။ ချုပ်ရိုး မဝင်ရင် ဆရာ စိတ်မကောင်း ဖြစ်မှာ။', en: "He taught me every day. If I don't enter stitching, he'll be sad.", need: 'afraid', seems: 'cling', face: 'sad',
-          tell: { my: 'ဆရာ့ကို စွဲလမ်းနေလို့ မဟုတ်ဘူး။ ဆရာ စိတ်ပျက်မှာကို ကြောက်နေတာ။', en: "He isn't clinging to his teacher. He's afraid of disappointing him." } },
+          tell: { my: 'ဆရာ့ကို အရမ်းခင်တွယ်နေလို့ မဟုတ်ဘူး။ ဆရာ စိတ်ပျက်မှာကို ကြောက်နေတာ။', en: "He isn't clinging to his teacher. He's afraid of disappointing him." } },
       ],
     },
     {
       lines: [
         { my: 'လေရဟတ်က ကလေးကစားစရာပဲတဲ့။ လူကြီးတွေ ပြောတာ။', en: 'Windmills are just toys, the grown-ups say.', need: 'given', seems: 'looksdown', face: 'sad', mood: 'down',
-          tell: { my: 'လေရဟတ်ကို အထင်သေးတာ မဟုတ်ဘူး။ အိတ်ထဲက လေရဟတ်လေးကို တင်းတင်း ကိုင်ထားတယ်။ လက်လျှော့ချင်နေပြီ။', en: "He doesn't look down on windmills: he's holding the little one in his pocket tight. He's close to giving up on them." } },
+          tell: { my: 'လေရဟတ်ကို အထင်သေးတာ မဟုတ်ဘူး။ အိတ်ထဲက လေရဟတ်လေးကို တင်းတင်း ဆုပ်ကိုင်ထားတယ်။ လက်လျှော့ချင်နေပြီ။', en: "He doesn't look down on windmills: he's holding the little one in his pocket tight. He's close to giving up on them." } },
         { my: 'ချုပ်ရိုးတုန်းကလိုပဲ… ကျွန်တော် မလုပ်နိုင်ပါဘူးလို့ပဲ ထင်နေမိတယ်။', en: 'Like with the stitches… I keep thinking I just can\'t.', need: 'given', face: 'sad', mood: 'down',
-          tell: { my: 'ချုပ်ရိုးမှာ "ပါရမီ မပါဘူး" လို့ ပြောခဲ့သလိုပဲ။', en: 'The same "I have no gift" he said about stitching.' } },
+          tell: { my: 'ချုပ်ရိုးတုန်းက "ကျွန်တော် မလုပ်တတ်ဘူး" လို့ ပြောခဲ့သလိုပဲ။', en: 'The same "I have no gift" he said about stitching.' } },
       ],
     },
   ],

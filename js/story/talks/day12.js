@@ -51,7 +51,7 @@ export const D12_HT_CARDS = [
 export const D12_HT_RUMOUR = {
   id: 'r-onlyme', lookalike: true, pencil: true, rumour: 'onlyme', name: L('ကြားခဲ့တာ (ခဲတံ)', 'Heard (pencil)'),
   line: L('မိုးက ဦးဦးခြံကိုပဲ ရွာတာတဲ့။', 'They say the rain fell on your plot alone.'),
-  shows: ['hot'], really: L('မစစ်ရသေးတဲ့ ကောလာဟလ', 'a rumour nobody checked'),
+  shows: ['hot'], really: L('မစစ်ဆေးရသေးတဲ့ သတင်းစကား', 'a rumour nobody checked'),
   backfire: { they: L('တွေ့လား! လူတိုင်း သိတယ်! ငါ့ကိုပဲ!', 'See! Everyone knows! Only me!'),
     maya: L('(ကိုယ်တိုင် မစစ်ရသေးတာကို ပြောလိုက်မိပြီ။ ဘေးခြံကို အရင် ကြည့်ရမှာ။)', "(I repeated what I hadn't checked. I should have looked next door first.)") },
 };
@@ -128,14 +128,14 @@ export const D12_OHN_CARDS = [
     answers: ['hot'], from: L('ခေါက်စာလေး', 'the Folded Note') },
   { id: 'bepatient', lookalike: true, name: L('သည်းခံလိုက်ပါ', 'Just be patient'),
     line: L('ထားလိုက်ပါ ဒေါ်ဒေါ်။ သည်းခံလိုက်ရင် ပြီးတာပဲ။', "Let it go, aunty. Be patient and it's over."),
-    shows: ['given', 'hot'], really: L('အသိဉာဏ် မပါတဲ့ သည်းခံခြင်း', 'patience without good sense'),
+    shows: ['given', 'hot'], really: L('စဉ်းစားဉာဏ် မပါတဲ့ သည်းခံခြင်း', 'patience without good sense'),
     backfire: { they: L('ဟုတ်ပါတယ်… ထားလိုက်မယ်။ (အပြင်က ချိန်ခွင်မှာ ကလေးမလေး ပိုက်ဆံ ပေးလိုက်ပြီ။)', "Yes… I'll let it go. (Outside at the scale, the girl hands over her money.)"),
-      maya: L('(သည်းခံတာ ကောင်းပေမဲ့ အသိဉာဏ် မပါရင် နောက်လူ ထပ်ခံရတယ်။)', '(Patience is good, but without good sense the next one gets cheated.)') } },
+      maya: L('(သည်းခံတာ ကောင်းပေမဲ့ စဉ်းစားဉာဏ် မပါရင် နောက်လူ ထပ်ခံရတယ်။)', '(Patience is good, but without good sense the next one gets cheated.)') } },
   { id: 'tellhim', lookalike: true, name: L('သွားပြောလိုက်', 'Go tell him off'),
     line: L('သွား! ဘယ်လိုလူလဲဆိုတာ လူအများရှေ့မှာ ပြောလိုက်!', 'Go on! Tell him what he is, in front of everyone!'),
     shows: ['given'], really: L('ပါးစပ် ညစ်ပတ်ခံတာ', 'dirtying your own mouth'),
     backfire: { they: L('(ဒေါ်အုန်း ထရပ်တယ်။ အိုးဖုံး ဒေါင်းခနဲ ခုန်တယ်။) …အဲဒီလိုလူအတွက် ကျွန်မ ပါးစပ် အညစ်မခံဘူး။', "(Daw Ohn half rises; the lid bangs.) …I won't dirty my mouth over a man like that."),
-      maya: L('(အပူကို ပိုထည့်ပေးလိုက်မိပြီ။)', '(I just added heat.)') } },
+      maya: L('(ဒေါသအပူကို ပိုထည့်ပေးလိုက်မိပြီ။)', '(I just added heat.)') } },
 ];
 
 const ohnCard = (id) => D12_OHN_CARDS.find((c) => c.id === id);

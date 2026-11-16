@@ -25,7 +25,7 @@ export const D13_EM_CARDS = [
   {
     id: 'guest', companion: 'cup',
     name: { my: 'မဖိတ်တဲ့ ဧည့်သည်', en: 'The uninvited guest' },
-    line: { my: 'ဒီအပူက မဖိတ်ဘဲ ရောက်လာတဲ့ ဧည့်သည်ပဲ။ လက်ခံလိုက်။ နောက်တစ်နာရီ ဘာလုပ်မလဲကတော့ ကိုယ် ရွေးတာ။', en: 'This heat is a guest nobody invited. Take it in. What you do in the next hour is yours to choose.' },
+    line: { my: 'ဒီဒေါသအပူက မဖိတ်ဘဲ ရောက်လာတဲ့ ဧည့်သည်ပဲ။ လက်ခံလိုက်။ နောက်တစ်နာရီ ဘာလုပ်မလဲကတော့ ကိုယ် ရွေးတာ။', en: 'This heat is a guest nobody invited. Take it in. What you do in the next hour is yours to choose.' },
     answers: ['hot', 'afraid'],
     from: { my: 'လက်ခံခွက်', en: 'the Guest Cup' },
     flag: 'companion:cup',
@@ -47,8 +47,8 @@ export const D13_EM_CARDS = [
   },
   {
     id: 'mine',
-    name: { my: 'ကိုယ့်တုံ့ပြန်မှု ကိုယ့်တာဝန်', en: 'My reply is mine' },
-    line: { my: 'သူတို့လုပ်တာ သူတို့တာဝန်။ ပြန်လုပ်မလား မလုပ်ဘူးလား ဆိုတာကတော့ မင်းတာဝန်။', en: 'What they did is theirs to answer for. Whether you do it back is yours.' },
+    name: { my: 'ကိုယ့်တုံ့ပြန်မှု ကိုယ့်အပိုင်း', en: 'My reply is mine' },
+    line: { my: 'သူတို့လုပ်တာ သူတို့အပိုင်း။ ပြန်လုပ်မလား မလုပ်ဘူးလား ဆိုတာကတော့ မင်းအပိုင်း။', en: 'What they did is theirs to answer for. Whether you do it back is yours.' },
     answers: ['cling', 'hot'],
     from: { my: 'အိမွန်ရဲ့ တတိယ ခြင်း', en: "from Ei Mon's third basket" },
     flag: 'd13.sorted', // earned from her third basket (5.5)
@@ -101,7 +101,7 @@ export const TALK_D13_EIMON = {
   stones: [
     { lines: [
       { my: 'ဒီည သူတို့ဖုံးကို လှပ်မယ်။ လမ်းပေါ် ထောင်ပြမယ်။ ရယ်ကြပါစေ။', en: "Tonight I'll lift their covers. Hold them up in the street. Let people laugh.", need: 'hot', seems: 'looksdown', face: 'hot', steam: 1,
-        tell: { my: 'သူတို့ကို အထင်သေးတာ မဟုတ်ဘူး။ လက်နှစ်ဖက်က ဖုံးနှစ်ခုကို ဖိထားတယ်။ ပူနေပေမဲ့ တစ်ခုမှ မလှပ်ရသေးဘူး။', en: "Not contempt. Both hands hold the two covers down. She's burning, and she hasn't lifted either." } },
+        tell: { my: 'သူတို့ကို အထင်သေးတာ မဟုတ်ဘူး။ လက်နှစ်ဖက်က ဖုံးနှစ်ခုကို ဖိထားတယ်။ ဒေါသထွက်နေပေမဲ့ တစ်ခုမှ မလှပ်ရသေးဘူး။', en: "Not contempt. Both hands hold the two covers down. She's burning, and she hasn't lifted either." } },
       { my: 'ကျွန်မ ခံစားရသလို သူတို့လည်း ခံစားရမှ မျှတမှာ။', en: "It's only fair if they feel what I felt.", need: 'hot', face: 'hot', heard: true },
     ] },
     { lines: [
@@ -115,7 +115,7 @@ export const TALK_D13_EIMON = {
     ] },
     { lines: [
       { my: 'ဒါပေမဲ့… တစ်ခါလောက်တော့ သူတို့ကို နာစေချင်သေးတယ်။', en: "Still… I'd like them to hurt, just once.", need: 'cling', seems: 'hot', face: 'worried', steam: 1,
-        tell: { my: 'မဆူတော့ဘူး။ နာကျင်မှုကို လွှတ်မပေးချင်တာ။ လွှတ်လိုက်ရင် ဘာမှ မဖြစ်ခဲ့သလို ဖြစ်မှာ ကြောက်လို့။', en: "She isn't boiling now. She's holding on to the hurt, afraid that letting go means it never mattered." } },
+        tell: { my: 'စိတ်မဆူတော့ဘူး။ နာကျင်မှုကို လွှတ်မပေးချင်တာ။ လွှတ်လိုက်ရင် ဘာမှ မဖြစ်ခဲ့သလို ဖြစ်မှာ ကြောက်လို့။', en: "She isn't boiling now. She's holding on to the hurt, afraid that letting go means it never mattered." } },
       { my: 'မေ့လိုက်ရင် သူတို့ နိုင်သွားသလို ဖြစ်မှာ။', en: "If I let it go, it's like they won.", need: 'cling', face: 'sad', heard: true },
     ] },
     { lines: [ // hers: the decision
@@ -156,7 +156,7 @@ export const D13_PS_CARDS = [
   {
     id: 'twoways', companion: 'beetle', // the Six-Nine Beetle (ch 13)
     name: { my: 'နှစ်မျိုး ဖတ်လို့ရ', en: 'Reads two ways' },
-    line: { my: 'ဆိုင်းဘုတ် တစ်ခုတည်းကို ဟောပြောတာလို့လည်း ဖတ်လို့ရတယ်။ အိမ်စည်းကမ်းလို့လည်း ဖတ်လို့ရတယ်။ မဆုံးဖြတ်ခင် စမ်းကြည့်။', en: 'One board can read as preaching or as house rules. Test it before you decide which.' },
+    line: { my: 'ဆိုင်းဘုတ် တစ်ခုတည်းကို တရားဟောသလိုလည်း ဖတ်လို့ရတယ်။ အိမ်စည်းကမ်းလို့လည်း ဖတ်လို့ရတယ်။ မဆုံးဖြတ်ခင် စမ်းကြည့်။', en: 'One board can read as preaching or as house rules. Test it before you decide which.' },
     answers: ['unknown', 'afraid'],
     from: { my: '၆-၉ ပိုး', en: 'the Six-Nine Beetle' },
   },
@@ -167,7 +167,7 @@ export const D13_PS_CARDS = [
     shows: ['looksdown'],
     really: { my: 'ကိုယ်တိုင် မစမ်းရဘဲ လက်ခံခိုင်းတာ', en: 'asking them to accept it without testing it' },
     backfire: {
-      they: { my: 'အဲဒါပဲ။ ဟောပြန်ပြီ။', en: 'There it is. Preaching again.' },
+      they: { my: 'အဲဒါပဲ။ တရားဟောပြန်ပြီ။', en: 'There it is. Preaching again.' },
       maya: { my: '(စမ်းခွင့် မပေးဘဲ လက်ခံခိုင်းနေမိတယ်။)', en: '(I asked them to accept it instead of letting them test it.)' },
     },
   },
@@ -195,7 +195,7 @@ export const TALK_D13_PYAESONE = {
   hand: D13_PS_CARDS,
   stones: [
     { lines: [
-      { my: 'ငယ်ငယ်က ကျွန်တော့်ကို "ဒါလုပ်ရမယ်၊ ဟိုဟာ မလုပ်ရဘူး" နဲ့ နေ့တိုင်း ဟောခဲ့ကြတာ။ ဒီကလေးတွေကို ထပ်မခံစေချင်ဘူး။', en: '"Do this, don\'t do that": I got lectured every day as a kid. I don\'t want these two getting it too.', need: 'afraid', seems: 'looksdown', face: 'hot',
+      { my: 'ငယ်ငယ်က ကျွန်တော့်ကို "ဒါလုပ်ရမယ်၊ ဟိုဟာ မလုပ်ရဘူး" နဲ့ နေ့တိုင်း ဆုံးမခဲ့ကြတာ။ ဒီကလေးတွေကို ထပ်မခံစေချင်ဘူး။', en: '"Do this, don\'t do that": I got lectured every day as a kid. I don\'t want these two getting it too.', need: 'afraid', seems: 'looksdown', face: 'hot',
         tell: { my: 'ဆိုင်းဘုတ်ကို အထင်သေးတာ မဟုတ်ဘူး။ မိုးနဲ့ ရွှေစင်ကို ခဏခဏ လှည့်ကြည့်တယ်။ သူတို့ကို ကာကွယ်ချင်နေတာ။', en: "He doesn't look down on the board. He keeps glancing at Moe and Shwe Sin. He wants to shield them." } },
     ] },
     { lines: [

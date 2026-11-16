@@ -27,7 +27,7 @@ export const D11_NC_CARDS = [
     answers: ['afraid'], from: { my: 'စာတို ၆', en: 'note 6' } },
   // ch 7 Cool Cloud, worded as Day 9 words it ("goodwill doesn't burn")
   { id: 'cool', companion: 'cloud', name: { my: 'စေတနာက မပူဘူး', en: "Goodwill doesn't burn" },
-    line: { my: 'ဒေါ်ငြိမ်းကို ကောင်းစေချင်တာ အစစ်ဆိုရင် နံရံရဲ့ အပူကို ငှားစရာ မလိုဘူး။', en: "If you truly wish Daw Nyein well, you don't need to borrow the wall's heat." },
+    line: { my: 'ဒေါ်ငြိမ်းကို ကောင်းစေချင်တာ အစစ်ဆိုရင် နံရံရဲ့ ဒေါသအပူကို ငှားစရာ မလိုဘူး။', en: "If you truly wish Daw Nyein well, you don't need to borrow the wall's heat." },
     answers: ['hot'], from: { my: 'တိမ်အေး', en: 'the Cool Cloud' } },
   // ch 15 Two-Seat Bench, new today (pencil), Day 14's wording; fits her fear, which she has not said yet
   { id: 'bench', companion: 'bench', name: { my: 'ပြောပါ၊ နားထောင်နေတယ်', en: "Say it, I'm listening" },
@@ -45,7 +45,7 @@ export const D11_NC_CARDS = [
     line: { my: 'နေခြည့်သော့ နေခြည့်လည်ပင်းမှာ ရှိတယ်လေ။ ကျွန်မလက်ထဲမှာ မဟုတ်ဘူး။', en: 'Your key hangs round your own neck, Nay Chi. Not in my hand.' },
     answers: ['cling'], from: { my: 'သော့လေး', en: 'the Little Key' } },
   { id: 'tendril', companion: 'tendril', name: { my: 'ထိပြီးရင် လွှတ်', en: 'Touch, then let go' }, // ch 16 Tendril, new today, pencil
-    line: { my: 'ကျွန်မ ဘေးမှာ ရှိတယ်။ ဒါပေမဲ့ နေခြည့်ကို မနွယ်ဘူး။', en: "I'm beside you. But I won't wind round you." },
+    line: { my: 'ကျွန်မ ဘေးမှာ ရှိတယ်။ ဒါပေမဲ့ နေခြည့်ကို မရစ်ပတ်ဘူး။', en: "I'm beside you. But I won't wind round you." },
     answers: ['cling'], from: { my: 'နွယ်ညွန့်လေး', en: 'the Tendril' } },
   { id: 'once', companion: 'sheep', name: { my: 'နောက်တစ်ခါ', en: 'Once more' }, // ch 1 Black Sheep (line per the review: apart from the crowd, in a good way)
     line: { my: 'အုပ်စုနဲ့ မတူတာ ကောင်းတဲ့ဘက်မှာဆို ရပါတယ်။ မှားရင် နောက်တစ်ခါ ပြန်ကြိုးစားရုံပဲ။', en: "Standing apart from the crowd is fine when it's the good side. If you get it wrong, just try once more." },
@@ -53,9 +53,9 @@ export const D11_NC_CARDS = [
   // pencil look-alike from an unchecked rumour (review: player audit); only while d11.rumour.wall is unchecked
   { id: 'pins', lookalike: true, pencil: true, rumour: 'wall', unless: 'd11.rumour.wall', name: { my: 'လူတိုင်း ကပ်ထားတာပဲ', en: 'Everyone pinned it' },
     line: { my: 'လူသုံးဆယ်လောက် ပင်ထိုးထားတာ မှန်လို့နေမှာပေါ့။', en: 'Thirty people pinned it. It must be right.' },
-    shows: ['unknown'], really: { my: 'မစစ်ရသေးတာကို ဆင့်ပြောတာ', en: 'passing on what nobody checked' },
+    shows: ['unknown'], really: { my: 'မစစ်ဆေးရသေးတာကို ဆင့်ပြောတာ', en: 'passing on what nobody checked' },
     backfire: { they: { my: 'ဒါဆို… ကိုဒိုးကို ပေးရမှာပေါ့။ (ဖဲကြိုးကို ထုတ်တယ်။)', en: 'Then… I have to give it to Ko Doe. (She takes out the ribbon.)' },
-      maya: { my: '(ပင်အပ်အရေအတွက်က အမှန်တရားကို မတိုင်းနိုင်ဘူး။)', en: "(Counting pins doesn't measure what's true.)" } } },
+      maya: { my: '(ပင်အပ်အရေအတွက်က အမှန်တရားကို မဆုံးဖြတ်နိုင်ဘူး။)', en: "(Counting pins doesn't measure what's true.)" } } },
 ];
 
 export const TALK_D11_NAYCHI = {

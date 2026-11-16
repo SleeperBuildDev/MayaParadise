@@ -20,9 +20,9 @@ export const D3_SN_CARDS = [
     answers: ['envy', 'looksdown'], from: { my: 'နှစ်ယောက်လုံးကို ကြည့်ပြီး ရခဲ့တာ', en: 'from looking at them both' } },
   { id: 'wouldnt', lookalike: true, name: { my: 'နားလည်မှာ မဟုတ်ပါဘူး', en: "You Wouldn't Understand" }, // leaves the hand for good tonight
     line: { my: 'ပါဆယ်ပေါ်ကစာတွေကို သူ့အစား ဖတ်ပေးလိုက်ရုံပဲ။ သူ နားလည်မှာ မဟုတ်ပါဘူး။', en: "Just read the parcels for him. He wouldn't understand anyway." },
-    shows: ['unknown'], really: { my: 'ကူညီသလိုနဲ့ နှိမ့်ချတာ', en: 'talking down that passes for help' },
+    shows: ['unknown'], really: { my: 'ကူညီသလိုနဲ့ အထင်သေးတာ', en: 'talking down that passes for help' },
     backfire: { they: { my: 'ဟုတ်တယ်မလား။ အစ်မတောင် အဲဒီလို ထင်တာပဲ။ ဒါဆို ဘာလို့ အပင်ပန်းခံနေမှာလဲ။', en: 'Right? Even you think so. Then why bother?' },
-                maya: { my: '(ကူညီမယ်ဆိုပြီး သူ့ကို နှိမ့်ချပြောမိပြီ။ သူ မသိသေးတာပါ၊ မသိနိုင်တာ မဟုတ်ဘူး။)', en: "(Meaning to help, I talked down to him. He doesn't know yet. It isn't that he can't.)" } } },
+                maya: { my: '(ကူညီမယ်ဆိုပြီး သူ့ကို အထင်သေးပြောမိပြီ။ သူ မသိသေးတာပါ၊ မသိနိုင်တာ မဟုတ်ဘူး။)', en: "(Meaning to help, I talked down to him. He doesn't know yet. It isn't that he can't.)" } } },
   { id: 'why', onlyIf: 'companion:parrot', name: { my: 'ဘာကြောင့်လဲ', en: 'Why?' }, // the Why-Parrot: a new question in every talk
     line: { my: 'သူ ဘာလို့ ထုပ်ပိုးစက္ကူ လိုချင်တာလဲ စဉ်းစားကြည့်ဖူးလား။', en: 'Have you wondered why he wanted wrapping paper?' },
     answers: ['unknown'], from: { my: 'ဘာကြောင့်ကြက်တူရွေး', en: 'the Why-Parrot' } },
@@ -43,12 +43,12 @@ export const TALK_D3_SUNWE = {
   steam: 3, calm: 4, turns: 8, // starts hot: two Listens before any card can enter the ear
   hand: D3_SN_CARDS,
   tutorial: [
-    { at: 'steam', my: 'စုနွယ့်ခွက်က အငွေ့ သုံးကြောင်း တက်နေတယ်။ ဒေါသပူနေသရွေ့ ဘယ်စကားမှ နားထဲ မဝင်ဘူး။ အရင် နားထောင်ပေးလိုက်ပါ။', en: "Su Nwe's cup shows three wisps. While she's hot, no words enter the ear. Listen first." },
+    { at: 'steam', my: 'စုနွယ့်ခွက်က အငွေ့ သုံးကြောင်း တက်နေတယ်။ ဒေါသထွက်နေတုန်း ဘာပြောပြော နားထဲ မဝင်ဘူး။ အရင် နားထောင်ပေးလိုက်ပါ။', en: "Su Nwe's cup shows three wisps. While she's hot, no words enter the ear. Listen first." },
   ],
   stones: [
     { lines: [
       { my: 'သူက ကျွန်မ အမှတ်စာရွက်ကို ထုပ်ပိုးစက္ကူတဲ့။ ကျွန်မတို့နဲ့ အဆင့်အတန်းချင်း မတူဘူး။', en: 'He called my marks sheet wrapping paper. He is not on our level.', need: 'hot', seems: 'looksdown', face: 'hot',
-        tell: { my: 'အထင်သေးတာထက် ရှက်ပြီး နာနေတာ။ နားရွက်လေးတွေ နီနေတယ်။ လှောင်ခံရတယ် ထင်နေတာ။', en: 'More hurt than scornful. Her ears are red. She thinks she was mocked.' } },
+        tell: { my: 'အထင်သေးတာထက် ရှက်ပြီး နာနေတာ။ နားရွက်လေးတွေ နီနေတယ်။ အလှောင်ခံရတယ် ထင်နေတာ။', en: 'More hurt than scornful. Her ears are red. She thinks she was mocked.' } },
       { my: 'တစ်တန်းလုံး စာကျက်ပြီး ရခဲ့တဲ့ စာရွက်လေ။', en: 'I studied all term for that sheet.', need: 'hot', face: 'sad', heard: true },
     ] },
     { lines: [
@@ -82,7 +82,7 @@ export const D3_NC_CARDS = [
     line: { my: 'စာရွက်နှစ်ရွက်လုံး ဘာလို့ သိမ်းထားတာလဲ။ တစ်ခုစီမှာ ဘာက ဆွဲဆောင်နေလဲ။', en: 'Why keep both papers? What pulls you to each one?' },
     answers: ['unknown'], from: { my: 'ဘာကြောင့်ကြက်တူရွေး', en: 'the Why-Parrot' } },
   { id: 'sorted', flag: 'd3.card.sorted', name: { my: 'စာခွဲတဲ့အခါ', en: 'When you sort the post' },
-    line: { my: 'စာတွေကို အစီအစဉ်တကျ ခွဲရရင် နေခြည် အရမ်းပျော်တယ်လို့ မဝင့်ဝါ ပြောတယ်။', en: 'Ma Wint War says you light up when you get letters into order.' },
+    line: { my: 'စာတွေကို သေသေချာချာ ခွဲရရင် နေခြည် အရမ်းပျော်တယ်လို့ မဝင့်ဝါ ပြောတယ်။', en: 'Ma Wint War says you light up when you get letters into order.' },
     answers: ['unknown'], from: { my: 'မဝင့်ဝါ ပြောပြခဲ့တာ', en: 'from Ma Wint War' } },
   { id: 'once', onlyIf: 'companion:sheep', name: { my: 'နောက်တစ်ခါ', en: 'Once more' }, // the Black Sheep
     line: { my: 'မှားရင်လည်း ပြန်ပြင်လို့ ရပါတယ်။ နောက်တစ်ခါ ထပ်ကြိုးစားရုံပဲ။', en: 'If it turns out wrong, you can put it right. You just try once more.' },
@@ -90,7 +90,7 @@ export const D3_NC_CARDS = [
   // Maya's own answers. On stones 0-1 they answer nothing (a plain miss: she isn't asking yet).
   // On stone 2 they are the whole hand (handAt): playing one answers for her.
   { id: 'shed', name: { my: 'ပုံနှိပ်ရုံ', en: 'The printing shed' },
-    line: { my: 'ပုံနှိပ်ရုံကို ရွေးလိုက်။ စာလုံးတွေ အစီအစဉ်တကျ စီရတာ နေခြည်နဲ့ လိုက်တယ်။', en: 'Take the printing shed. Setting letters in rows suits you.' },
+    line: { my: 'ပုံနှိပ်ရုံကို ရွေးလိုက်။ စာလုံးတွေ သေသေချာချာ စီရတာ နေခြည်နဲ့ လိုက်တယ်။', en: 'Take the printing shed. Setting letters in rows suits you.' },
     answers: [], leanLine: { my: 'ပုံနှိပ်ရုံ! ဒါဆို ပြီးပြီ။ မာရာ ပြောတာပဲ၊ မှားမှာ မဟုတ်ဘူး။', en: "The shed! Then it's settled. Maya said so. It can't be wrong." } },
   { id: 'square', name: { my: 'ကြော်ငြာရင်ပြင်', en: 'The notice square' },
     line: { my: 'ကြော်ငြာရင်ပြင်ကို ရွေးလိုက်။ လူတွေကြားမှာ နေရတာ နေခြည် ကြိုက်တယ်မလား။', en: "Take the notice square. You like being among people, don't you?" },
@@ -108,7 +108,7 @@ export const TALK_D3_NAYCHI = {
   hand: D3_NC_CARDS,
   stones: [
     { lines: [
-      { my: 'ပုံနှိပ်တဲက စာစီ အလုပ်သင် လိုတယ်။ ကြော်ငြာကွင်းက သတင်းကပ်သူ လိုတယ်။ နှစ်ခုလုံး တံတားဖွင့်မှ စမယ်။', en: 'The printing shed wants an apprentice typesetter. The notice square wants someone to paste up the news. Both start when the bridge opens.', need: 'unknown', face: 'think',
+      { my: 'ပုံနှိပ်ရုံက စာစီ အလုပ်သင် လိုတယ်။ ကြော်ငြာရင်ပြင်က သတင်းကပ်သူ လိုတယ်။ နှစ်ခုလုံး တံတားဖွင့်မှ စမယ်။', en: 'The printing shed wants an apprentice typesetter. The notice square wants someone to paste up the news. Both start when the bridge opens.', need: 'unknown', face: 'think',
         tell: { my: 'စာရွက်နှစ်ရွက်လုံး ထောင့်တွေ နူးနေပြီ။ အကြိမ်ကြိမ် ပြန်ဖတ်ထားတာကိုး။', en: 'Both papers have gone soft at the corners. She has read them over and over.' } },
       { my: 'ပုံနှိပ်ရုံက မင်နံ့ကို ကြိုက်တယ်… ရင်ပြင်ထဲက လူတွေကိုလည်း ကြိုက်တယ်…', en: 'I like the smell of ink at the shed… and I like the people in the square…', need: 'unknown', face: 'think', heard: true },
     ] },
@@ -119,7 +119,7 @@ export const TALK_D3_NAYCHI = {
     ] },
     { lines: [
       { my: 'အစ်မက နေရာတိုင်း ရောက်ဖူးတယ်။ ဘယ်ဟာလဲ ပြောလိုက်ပါ။ မာရာ ပြောတဲ့အတိုင်း လုပ်မယ်။', en: "Sister, you've been everywhere. Just tell me which. I'll do whatever Maya says.", need: 'own', seems: 'unknown', face: 'happy',
-        tell: { my: 'သူ့လက်မက ပုံနှိပ်ရုံ စာရွက်ကို တဖြည်းဖြည်း ပွတ်သပ်နေတယ်။ တစ်စိတ်တစ်ပိုင်းက ရွေးပြီးသား။', en: 'Her thumb keeps smoothing the shed notice. Part of her has already chosen.' } }, // for Day 11
+        tell: { my: 'သူ့လက်မက ပုံနှိပ်ရုံ စာရွက်ကို တဖြည်းဖြည်း ပွတ်နေတယ်။ စိတ်တစ်ဝက်က ရွေးပြီးသား။', en: 'Her thumb keeps smoothing the shed notice. Part of her has already chosen.' } }, // for Day 11
     ] },
   ],
   react: {

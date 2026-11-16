@@ -36,7 +36,7 @@ export const D14_TT_CARDS = [
   // the pencil rumour card: only while `essay` is unchecked (talk.js drops it once proof:essay is in the bag)
   { id: 'copied', lookalike: true, pencil: true, rumour: 'essay', name: { my: 'ကူးထားတာလား', en: 'Did you copy it?' },
     line: { my: 'စာကြည့်တိုက်စာအုပ်ထဲက ကူးထားတာလို့ ကြားတယ်။ ဟုတ်လား။', en: 'I heard you copied it from a library book. Did you?' },
-    shows: ['unknown'], really: { my: 'မစစ်ရသေးတဲ့ ကောလာဟလ', en: 'a rumour not yet checked' },
+    shows: ['unknown'], really: { my: 'မစစ်ဆေးရသေးတဲ့ သတင်းစကား', en: 'a rumour not yet checked' },
     backfire: { they: { my: 'ကျွန်တော် မကူးဘူး! ကျွန်တော့် ပဲပင်အကြောင်း ကျွန်တော် ရေးတာ!', en: "I didn't copy! I wrote about my own beans!" },
                 maya: { my: '(မစစ်ရသေးဘဲ ကြားတာကို ပြန်ပြောမိပြီ။)', en: "(I repeated something I hadn't checked.)" } } },
 ];
@@ -61,9 +61,9 @@ export const TALK_D14_TOETOE = {
     ] },
     { lines: [
       { my: 'ပြီးတော့ ဆရာမတို့၊ မောင်ငယ်တို့က နာမည်ကျော်တွေ မှ မဟုတ်တာ။ စာအုပ်ထဲမှာ နာမည်ကျော်တွေပဲ ပါတာ။', en: "And Teacher and Maung Nge aren't famous. Books only list famous people.", need: 'unknown', seems: 'looksdown', face: 'think',
-        tell: { my: 'သူတို့ကို အထင်သေးတာ မဟုတ်ဘူး။ ဆရာမ၊ သူငယ်ချင်းကလည်း ကိုးကားလို့ ရတယ်ဆိုတာ တကယ် မသိသေးတာ။', en: "He doesn't look down on them. He truly doesn't know a teacher or a friend can be a source." } },
+        tell: { my: 'သူတို့ကို အထင်သေးတာ မဟုတ်ဘူး။ ဆရာမ၊ သူငယ်ချင်းဆီက ရတာလို့လည်း ထည့်ရေးလို့ ရတယ်ဆိုတာ တကယ် မသိသေးတာ။', en: "He doesn't look down on them. He truly doesn't know a teacher or a friend can be a source." } },
       // ch 3: the world is the biggest school, the snack shop included (p26–30; Day 2 he worked out change there)
-      { my: 'အမ်းငွေ တွက်တတ်တာ မုန့်ဆိုင်က ချိန်ခွင်နားမှာ သင်ခဲ့တာ။ မုန့်ဆိုင်ကို ကိုးကားလို့ ရလား။ မရဘူးမလား။', en: "I learned to work out change at the snack-shop scale. You can't list a snack shop, right?", need: 'unknown', face: 'think', heard: true },
+      { my: 'အမ်းငွေ တွက်တတ်တာ မုန့်ဆိုင်က ချိန်ခွင်နားမှာ သင်ခဲ့တာ။ မုန့်ဆိုင်နာမည် ထည့်ရေးလို့ ရလား။ မရဘူးမလား။', en: "I learned to work out change at the snack-shop scale. You can't list a snack shop, right?", need: 'unknown', face: 'think', heard: true },
     ] },
     { lines: [ // his: whom to name
       { my: 'ဒါဆို… ကျွန်တော် ဘယ်သူ့ဆီက ရခဲ့လဲ… ခဏ၊ စဉ်းစားပါရစေ။', en: 'So… who did I get it from… wait, let me think.', need: 'own', face: 'think',

@@ -34,7 +34,7 @@ export const D2_TT_CARDS = [
     line: { my: 'ပဲပင်က ဘာလို့သေတာလဲ အစ်မ ပြောပြမယ်။ မှတ်ထားနော်။', en: "I'll tell you why the beans died. Remember it." },
     shows: ['unknown'], really: { my: 'သူ့ကိုယ်တိုင် တွေ့ရမယ့်ဟာကို ယူသွားတာ', en: 'taking away what he could find himself' },
     backfire: { they: { my: 'ဟုတ်ကဲ့… နောက်ထပ် အလွတ်ကျက်စရာ တစ်ကြောင်း တိုးလာပြန်ပြီ။', en: 'Okay… one more line to learn by heart.' },
-                maya: { my: '(ကျွန်မ အဖြေပေးလိုက်တော့ သူ့စူးစမ်းချင်စိတ် ငြိမ်သွားတယ်။)', en: '(I gave the answer, and his curiosity went quiet.)' } } },
+                maya: { my: '(ကျွန်မ အဖြေပေးလိုက်တော့ သူ့သိချင်စိတ် ပျောက်သွားတယ်။)', en: '(I gave the answer, and his curiosity went quiet.)' } } },
 ];
 
 export const TALK_D2_TOETOE = {
@@ -80,7 +80,7 @@ export const TALK_D2_TOETOE = {
 };
 
 export const D2_OHN_CARDS = [
-  { id: 'same', name: { my: 'နည်းတူ၊ လက်မတူ', en: 'Same way, different hands' },
+  { id: 'same', name: { my: 'နည်းတူပေမဲ့ လက်မတူဘူး', en: 'Same way, different hands' },
     line: { my: 'ဆရာ့နည်းက ဒေါ်ဒေါ့်လက်နဲ့ ကိုက်ခဲ့တာ။ မိချိုရဲ့လက်က တခြားလက်လေ။', en: "Your master's way fitted your hands. Mi Cho's are different hands." },
     answers: ['cling'], from: { my: 'စင်နှစ်ခုကို ကြည့်ပြီး ရခဲ့တာ', en: 'from looking at both shelves' }, onlyIf: 'd2.looked' },
   { id: 'thanks', name: { my: 'ကျေးဇူးက မပျက်ဘူး', en: 'The thanks stay' },
@@ -114,7 +114,7 @@ export const TALK_D2_DAWOHN = {
   stones: [
     { lines: [
       { my: 'ငါ့ဆရာက ပထမအပတ်ကတည်းက တစ်နေ့ ဆယ့်နှစ်လုံး ခိုင်းတာ။ ငါ့စင်ကို ကြည့်။', en: 'My master gave me twelve a day from the first week. Look at my shelf.', need: 'cling', seems: 'looksdown', face: 'think',
-        tell: { my: 'မိချိုကို အထင်သေးတာ မဟုတ်ဘူး။ စပယ်ပန်းကုံး တင်ထားတဲ့ အိုးထိန်းစက်ကို လက်နဲ့ ထိနေတယ်။ သူ့ကို လူဖြစ်စေခဲ့တဲ့ နည်းကို ဆုပ်ကိုင်ထားတာ။', en: "She isn't looking down on Mi Cho. Her hand rests on the jasmine wheel. She's holding on to the way that made her." } },
+        tell: { my: 'မိချိုကို အထင်သေးတာ မဟုတ်ဘူး။ စပယ်ပန်းကုံး တင်ထားတဲ့ အိုးလုပ်တဲ့ဘီးကို လက်နဲ့ ထိနေတယ်။ သူ့ကို တော်လာစေခဲ့တဲ့ နည်းကို ဆုပ်ကိုင်ထားတာ။', en: "She isn't looking down on Mi Cho. Her hand rests on the jasmine wheel. She's holding on to the way that made her." } },
       { my: 'အိုးကောင်းရဖို့ နာနာပုတ်ရတယ်။ ဒါ ဆရာ့စကားပဲ။', en: '"A good pot takes a hard beating." My master\'s words.', need: 'cling', face: 'think', heard: true },
     ] },
     { lines: [
@@ -124,7 +124,7 @@ export const TALK_D2_DAWOHN = {
     { lines: [
       { my: 'တခြားနည်းနဲ့ သင်ရင်… ငါ့ဆရာ မှားတယ်လို့ ပြောသလို ဖြစ်မှာပေါ့။', en: "If I teach her another way… it's like saying my master was wrong.", need: 'afraid', seems: 'hot', face: 'worried', heard: true,
         tell: { my: 'ဒေါသ မဟုတ်ဘူး။ ကျေးဇူးမသိတတ်သလို ဖြစ်မှာ ကြောက်နေတာ။', en: "Not anger. She's afraid of seeming ungrateful." } },
-      { my: 'ဆရာ မရှိတော့ပေမဲ့ ငါ့လက်ထဲမှာ သူ့နည်း ရှိနေတုန်းပဲ။', en: "He's long gone from this yard, but his way is still in my hands.", need: 'afraid', seems: 'cling', face: 'sad' },
+      { my: 'ဆရာ မရှိတော့ပေမဲ့ ငါ့လက်ထဲမှာ သူ့နည်း ကျန်နေတုန်းပဲ။', en: "He's long gone from this yard, but his way is still in my hands.", need: 'afraid', seems: 'cling', face: 'sad' },
     ] },
     { lines: [
       { my: 'ပြီးတော့… တခြားနည်း ငါ မသိဘူး။ မိချိုက ငါ့ရဲ့ ပထမဆုံး တပည့်ပဲ။', en: "And… I don't know any other way. Mi Cho is the first pupil I've ever had.", need: 'unknown', seems: 'given', face: 'think',

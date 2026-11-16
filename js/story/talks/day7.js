@@ -35,12 +35,12 @@ export const D7_YY_CARDS = [
     line: { my: 'မင်းက တကယ် ထူးခြားတယ်။ ပြဇာတ် အခန်းတိုင်းမှာ မင်းကို လိုအပ်တယ်။', en: 'You really are special. The play needs you in every scene.' },
     shows: ['afraid'], really: { my: 'ဇာတ်လိုက်ဖြစ်ချင်စိတ်ကို မြှောက်ပေးတာ', en: 'flattery that feeds the wish to be the lead' },
     backfire: { they: { my: 'ဟုတ်တယ်မလား! ဒါဆို အခန်းတိုင်းမှာ မနှစ်က မိန့်ခွန်း ပြန်ပြောမယ်!', en: "Right?! Then I'll say last year's speech in every scene!" },
-                maya: { my: '(သူ့ကို ဖိစီးနေတဲ့အရာကိုပဲ ကျွန်မ ထပ်ကျွေးလိုက်မိပြီ။)', en: '(I just fed the very thing that weighs on him.)' } } },
+                maya: { my: '(သူ့ကို စိတ်ဖိစီးနေစေတဲ့အရာကိုပဲ ကျွန်မ ထပ်ကျွေးလိုက်မိပြီ။)', en: '(I just fed the very thing that weighs on him.)' } } },
   // pencil rumour look-alike: in the hand only while rumour `prize` is unchecked (player review)
   { id: 'rumour:prize', lookalike: true, pencil: true, rumour: 'noprize', unless: 'bag:proof:noprize || d7.rumour.prize',
     name: { my: 'ဆု ထပ်ယူလိုက်', en: 'Win the prize again' },
     line: { my: 'ဒီညလည်း အကောင်းဆုံး သရုပ်ဆောင်ဆု ထပ်ယူလိုက်ပေါ့။', en: 'Win best actor again tonight, then.' },
-    shows: ['cling'], really: { my: 'မစစ်ဆေးရသေးတဲ့ ကောလာဟလကို ဆက်ပြောတာ', en: "passing on a rumour you haven't checked" },
+    shows: ['cling'], really: { my: 'မစစ်ဆေးရသေးတဲ့ သတင်းစကားကို ဆက်ပြောတာ', en: "passing on a rumour you haven't checked" },
     backfire: { they: { my: 'ဆု ရှိတယ်ဆိုရင်… ဇာတ်လိုက်က ကျွန်တော်ပဲ ဖြစ်ရမယ်!', en: "If there's a prize… then the lead has to be me!" },
                 maya: { my: '(ဆုရှိမရှိ ကျွန်မ ကိုယ်တိုင် မမေးရသေးဘူး။)', en: '(I never asked whether there is a prize.)' } } },
   // replaces rumour:prize once `proof:noprize` is in the bag; fits by itself when he repeats the rumour
@@ -66,12 +66,12 @@ export const TALK_D7_YEYINT = {
     ] },
     { lines: [
       { my: 'ခုံသယ်တာ တခြားသူတွေ အလုပ်ပါ။ ကျွန်တော်က မတူဘူးလေ။', en: "Carrying benches is for the others. I'm different.", need: 'afraid', seems: 'looksdown', face: 'hot', steam: 1,
-        tell: { my: 'သူတို့ကို အထင်သေးတာ မဟုတ်ဘူး။ အတူ ရယ်မောပြီး ခုံသယ်နေကြတာကို ခဏခဏ လှည့်ကြည့်နေတယ်။ သူပါ ဝင်သယ်ရင် သူတို့လို သာမန်လူပဲ ဖြစ်သွားမှာ စိုးနေတာ။', en: "He doesn't look down on them. He keeps glancing at the line laughing as they carry. If he carried too, he'd be just one of them, and that scares him." } },
+        tell: { my: 'သူတို့ကို အထင်သေးတာ မဟုတ်ဘူး။ အတူ ရယ်မောပြီး ခုံသယ်နေကြတာကို ခဏခဏ လှည့်ကြည့်နေတယ်။ သူပါ ဝင်သယ်ရင် သူတို့လို သာမန်လူပဲ ဖြစ်သွားမှာ စိုးရိမ်နေတာ။', en: "He doesn't look down on them. He keeps glancing at the line laughing as they carry. If he carried too, he'd be just one of them, and that scares him." } },
       { my: 'ဇာတ်လိုက်က ခုံမသယ်ဘူး။ လူတိုင်း သိတယ်။', en: "The lead doesn't carry benches. Everyone knows that.", need: 'afraid', seems: 'looksdown', face: 'hot' },
     ] },
     { lines: [
       { my: 'အခန်းတိုင်းမှာ "မာရာ" မပါရင်… ကျွန်တော် မပါရင်… စင်ပေါ်မှာ ကျွန်တော် ဘာမှ မဟုတ်တော့ဘူး။', en: 'If "Maya" isn\'t in every scene… if I\'m not… then up there I\'m nobody.', need: 'afraid', face: 'sad', heard: true,
-        tell: { my: 'စိတ်ကောက်နေတာ မဟုတ်ဘူး။ "ဘာမှ မဟုတ်" ဆိုတဲ့စကားကို တကယ်ဖြစ်မှာ စိုးသလို တိုးတိုးလေး ပြောနေတာ။', en: 'Not sulking. He says "nobody" very quietly, as if it might be true.' } },
+        tell: { my: 'စိတ်ကောက်နေတာ မဟုတ်ဘူး။ "ဘာမှ မဟုတ်" ဆိုတဲ့စကားကို တကယ်ဖြစ်မှာ စိုးရိမ်သလို တိုးတိုးလေး ပြောနေတာ။', en: 'Not sulking. He says "nobody" very quietly, as if it might be true.' } },
     ] },
     { lines: [
       { my: 'ဒါဆို စင်ပေါ်မှာ ကျွန်တော် ဘာလုပ်ရမလဲ။ ဇာတ်လိုက်ကလွဲရင် ဘာအပိုင်းမှ မသိဘူး။', en: "Then what do I do on stage? I don't know any part but the lead.", need: 'unknown', seems: 'hot', face: 'think',
@@ -80,7 +80,7 @@ export const TALK_D7_YEYINT = {
     ] },
     { lines: [
       { my: 'မိန့်ခွန်း တစ်ခုတည်းကို သုံးနှစ် ပြောခဲ့တယ်။ ကျွန်တော် တခြားဟာ မတတ်တော့ဘူး ထင်တယ်။', en: "Three years, the same speech. Maybe I can't do anything else.", need: 'given', seems: 'cling', face: 'sad', mood: 'down',
-        tell: { my: 'မိန့်ခွန်းကို တွယ်တာနေတာ မဟုတ်တော့ဘူး။ ငြီးငွေ့နေပြီ။ ကိုယ်ပိုင်စကား ရှာဖို့ လက်လျှော့ချင်နေတာ။', en: "He isn't clinging to the speech any more. He's tired of it, and close to giving up on finding his own." } },
+        tell: { my: 'မိန့်ခွန်းကို တွယ်တာနေတာ မဟုတ်တော့ဘူး။ ပျင်းငြီးနေပြီ။ ကိုယ်ပိုင်စကား ရှာဖို့ လက်လျှော့ချင်နေတာ။', en: "He isn't clinging to the speech any more. He's tired of it, and close to giving up on finding his own." } },
     ] },
   ],
   react: {

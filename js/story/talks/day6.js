@@ -17,13 +17,13 @@ export const D6_TH_CARDS = [
     line: { my: 'ဒီခေါက်မှာ လူတိုင်းကို "နေကောင်းလား" လို့ အော်နှုတ်ဆက်တယ်နော်။ ကြိမ်ဆိပ်က အဘိုးကြီး တစ်ယောက်ပဲ ဘာမှ မရဘူး။', en: 'On this run you called "keeping well!" to everyone. Only the old man on Cane Jetty got nothing.' },
     answers: ['unknown'], from: { my: 'ဖောင်ပေါ်ကနေ ကိုယ်တိုင် မြင်ခဲ့တာ', en: 'seen from the raft' } },
   { id: 'cloud', onlyIf: 'companion:cloud', companion: 'cloud', name: { my: 'တိမ်အေး', en: 'Cool Cloud' }, // ch 7's companion: fits nothing today
-    line: { my: 'ကောင်းစေချင်တဲ့စိတ်က ပူမလောင်ဘူး။ စိတ်အေးအေး ထားလိုက်။', en: "Goodwill doesn't burn. Keep it cool." },
+    line: { my: 'ကောင်းစေချင်တဲ့စိတ်က ဒေါသမဖြစ်ဘူး။ စိတ်အေးအေး ထားလိုက်။', en: "Goodwill doesn't burn. Keep it cool." },
     answers: ['hot'], from: { my: 'တိမ်အေးလေး', en: 'the Cool Cloud' } },
   { id: 'ignore', lookalike: true, name: { my: 'ဂရုမစိုက်နဲ့', en: 'Just Ignore Them' },
     line: { my: 'ဂရုမစိုက်နဲ့။ သူ့ကို မရှိတဲ့လူလိုပဲ သဘောထားလိုက်။', en: "Don't mind him. Treat him as if he isn't there." },
-    shows: ['hot'], really: { my: 'အေးဆေးသလိုနဲ့ လူကို ဖယ်ကြဉ်ထားတာ', en: 'freezing someone out that passes for calm' },
+    shows: ['hot'], really: { my: 'စိတ်အေးသလိုနဲ့ လူကို ဖယ်ကြဉ်ထားတာ', en: 'freezing someone out that passes for calm' },
     backfire: { they: { my: 'အဲဒါ ကျွန်တော် လုပ်နေတာပဲလေ။ မှန်တယ်ဆိုရင်… ဆက်ကျော်သွားမယ်။', en: "That's what I already do. If it's right… I'll keep skipping him." },
-                maya: { my: '(မရှိတဲ့လူလို ဆက်ဆံတာ အေးဆေးတာ မဟုတ်ဘူး။ ဆက်ဆံပုံ နှစ်မျိုး ဖြစ်သွားတာ။)', en: "(Treating him as if he isn't there isn't calm. It's two ways of treating people.)" } } },
+                maya: { my: '(မရှိတဲ့လူလို ဆက်ဆံတာ စိတ်အေးတာ မဟုတ်ဘူး။ ဆက်ဆံပုံ နှစ်မျိုး ဖြစ်သွားတာ။)', en: "(Treating him as if he isn't there isn't calm. It's two ways of treating people.)" } } },
   { id: 'fish', onlyIf: 'companion:fish', companion: 'fish', name: { my: 'ရေဆန်ငါး', en: 'Upstream Fish' }, // ch 2's companion, lifted off this morning
     line: { my: 'ရေစီးက မမျှတဘူး။ ဘယ်လို ကူးမလဲကတော့ ကိုယ့်ရွေးချယ်မှုပဲ။', en: "The stream isn't fair. How you swim it is yours." },
     answers: ['envy', 'given'], from: { my: 'ရေဆန်ငါးလေး', en: 'the Upstream Fish' } },
@@ -33,9 +33,9 @@ export const D6_TH_CARDS = [
   { id: 'seedling', onlyIf: 'companion:seedling', companion: 'seedling', name: { my: 'မရသေးပျိုးပင်', en: 'Not-Yet Seedling' }, // ch 5's companion
     line: { my: 'မရသေးဘူး။', en: 'Not yet.' },
     answers: ['given'], from: { my: 'မရသေးပျိုးပင်လေး', en: 'the Not-Yet Seedling' } },
-  { id: 'grudge', lookalike: true, pencil: true, rumour: 'grudge', name: { my: 'အငြိုး ဖြေလိုက်', en: 'Let the grudge go' },
-    line: { my: 'အငြိုးတွေ ဖြေလိုက်ပါ။ ဒေါသက ကိုယ့်ကိုပဲ ပူလောင်စေတာ။', en: 'Let your grudge go. Anger only burns you.' },
-    shows: ['hot'], really: { my: 'မစစ်ဆေးရသေးတဲ့ ကောလာဟလကို ပြန်ပြောတာ', en: 'repeating a rumour nobody checked' },
+  { id: 'grudge', lookalike: true, pencil: true, rumour: 'grudge', name: { my: 'အငြိုးကို လွှတ်ချလိုက်', en: 'Let the grudge go' },
+    line: { my: 'အငြိုးတွေကို လွှတ်ချလိုက်ပါ။ ဒေါသက ကိုယ့်ကိုပဲ ပူလောင်စေတာ။', en: 'Let your grudge go. Anger only burns you.' },
+    shows: ['hot'], really: { my: 'မစစ်ဆေးရသေးတဲ့ သတင်းစကားကို ပြန်ပြောတာ', en: 'repeating a rumour nobody checked' },
     backfire: { they: { my: 'အငြိုး ဟုတ်လား။ ကျွန်တော် ဘာအငြိုးမှ မရှိဘူး! ဘယ်သူ ပြောတာလဲ။', en: "A grudge? I haven't got any grudge! Who said that?" },
                 maya: { my: '(အထမ်းသမားတွေ ပြောတာကို ကိုယ်တိုင် မစစ်ဆေးဘဲ ပြန်ပြောမိပြီ။)', en: '(I repeated the porters without looking myself.)' } } },
 ];

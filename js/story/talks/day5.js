@@ -15,16 +15,16 @@ export const D5_KL_CARDS = [
     line: { my: 'ကံ မဟုတ်ပါဘူး။ တစ်ညကို တစ်တုံး၊ အတုံး လေးဆယ် ထွင်းခဲ့တာ။ ကျွန်မ ကိုယ်တိုင် မြင်ခဲ့တယ်။', en: "It wasn't luck. One a night, forty blocks. I saw them myself." },
     answers: ['unknown'], from: { my: 'ခွာညိုရဲ့ အိတ်ထဲမှာ မြင်ခဲ့တာ', en: "seen in Khwar Nyo's bag" } },
   { id: 'burns', name: { my: 'ကိုယ့်ကိုယ်ကိုယ်ပဲ အရင်လောင်', en: 'It burns you first' },
-    line: { my: 'ဒီအတွေးက ခွာညိုကို မလောင်ဘူး။ ကိုလွင့်ကိုပဲ လောင်နေတာ။ မီးဖိုတောင် ငြိမ်းသွားပြီ။', en: "That thought doesn't burn her. It burns you. Even your brazier has gone out." },
+    line: { my: 'ဒီအတွေးက ခွာညိုကို မထိခိုက်ဘူး။ ကိုလွင့်ကိုပဲ ထိခိုက်နေတာ။ မီးဖိုတောင် ငြိမ်းသွားပြီ။', en: "That thought doesn't burn her. It burns you. Even your brazier has gone out." },
     answers: ['hot'], from: { my: 'အေးစက်နေတဲ့ ခုံမှာ မြင်ခဲ့တာ', en: 'seen at the cold bench' } },
   { id: 'bothfine', name: { my: 'နှစ်ဖက်လုံး အဆင်ပြေမှ', en: 'Both sides' },
     line: { my: 'တစ်ယောက်တည်း အဆင်ပြေရင် မှန်တဲ့ရွေးချယ်မှု မဟုတ်ဘူးလေ။ သူလည်း အဆင်ပြေ၊ ကိုလွင်လည်း အဆင်ပြေမှ။', en: "If only one of you is fine, it isn't the right choice. She's fine, and you're fine: then it is." },
     answers: ['cling'], from: { my: 'သူ့ကို အလုပ်ခေါ်တဲ့ စာကို ဖတ်ပြီး', en: 'from reading her offer letter' } },
   { id: 'cool', companion: 'cloud', name: { my: 'အေးအေးလေး ကောင်းစေချင်', en: 'A cool wish' }, // the Cool Cloud
-    line: { my: 'ကောင်းစေချင်တဲ့စိတ်က ဘာမှ ပြန်မတောင်းဘူး။ ပြန်မတောင်းတော့ ပူလောင်စရာ မရှိတော့ဘူး။', en: "Wishing someone well asks nothing back. Asking nothing, it doesn't burn." },
+    line: { my: 'ကောင်းစေချင်တဲ့စိတ်က ဘာမှ ပြန်မတောင်းဘူး။ ပြန်မတောင်းတော့ စိတ်ပူလောင်စရာ မရှိတော့ဘူး။', en: "Wishing someone well asks nothing back. Asking nothing, it doesn't burn." },
     answers: ['cling', 'hot'], from: { my: 'တိမ်အေးလေး', en: 'the Cool Cloud' } },
   { id: 'pot', companion: 'pot', name: { my: 'ကိုယ့်အိုး အရင်', en: 'Your own pot first' }, // the Little Pot: his goodwill pot is the empty one (ch 6 p47)
-    line: { my: 'သူများအိုး မဖြည့်ခင် ကိုယ့်အိုး ပြည့်ရမယ်။ ထွင်းတံ ရှိတယ်၊ လက်ရာ ရှိတယ်။ ခန်းနေတာ စေတနာအိုးပဲ။', en: "Before you fill someone else's pot, your own must be full. You have the gouges and the hand. It's the goodwill that's run dry." },
+    line: { my: 'သူများအိုး မဖြည့်ခင် ကိုယ့်အိုး ပြည့်ရမယ်။ ထွင်းတံ ရှိတယ်၊ လက်ရာ ရှိတယ်။ ခန်းနေတာ စေတနာပဲ။', en: "Before you fill someone else's pot, your own must be full. You have the gouges and the hand. It's the goodwill that's run dry." },
     answers: ['hot'], from: { my: 'အိုးလေး', en: 'the Little Pot' } },
   { id: 'lucky', lookalike: true, name: { my: 'ကံကောင်းလိုက်တာနော်', en: 'Lucky You' }, // leaves every hand for good at the end of ch 10
     line: { my: 'ခွာညိုက ကံကောင်းလိုက်တာနော်။', en: "Lucky Khwar Nyo, isn't she." },
@@ -33,9 +33,9 @@ export const D5_KL_CARDS = [
                 maya: { my: '(ကံလို့ ပြောလိုက်တော့ သူ ကြိုးစားထားတဲ့ အတုံးလေးဆယ်ကို ဖျက်ပစ်လိုက်သလို ဖြစ်သွားပြီ။)', en: '(Calling it luck rubbed out her forty blocks.)' } } },
   { id: 'ignore', lookalike: true, name: { my: 'မရှိသလို နေလိုက်', en: 'Just Ignore Them' },
     line: { my: 'သူ့ကို မေ့ပစ်လိုက်ပါ။ မရှိသလိုပဲ နေလိုက်။', en: "Forget her. Act as if she isn't there." },
-    shows: ['hot', 'cling'], really: { my: 'အေးဆေးသလိုနဲ့ ချန်ထားတာ', en: 'freezing someone out that passes for calm' },
+    shows: ['hot', 'cling'], really: { my: 'စိတ်အေးသလိုနဲ့ ဖယ်ကြဉ်တာ', en: 'freezing someone out that passes for calm' },
     backfire: { they: { my: 'မရှိသလို နေရမယ် ဟုတ်လား။ သူ့အတုံးက ကျွန်တော့် ခုံပေါ်မှာလေ!', en: "As if she isn't there? Her block is on my bench!" },
-                maya: { my: '(မျက်နှာလွှဲခိုင်းတာ အပူကို ဖုံးထားရုံပဲ ရှိတယ်။)', en: '(Looking away only covers the heat.)' } } },
+                maya: { my: '(မျက်နှာလွှဲခိုင်းတာ ဒေါသအပူကို ဖုံးထားရုံပဲ ရှိတယ်။)', en: '(Looking away only covers the heat.)' } } },
 ];
 
 export const TALK_D5_KOLWIN = {
@@ -54,7 +54,7 @@ export const TALK_D5_KOLWIN = {
     ] },
     { lines: [
       { my: 'ကျွန်တော် အေးအေးဆေးဆေးပါ။ ဘာမှ မခံစားရဘူး။', en: "I'm perfectly calm. I don't feel a thing.", need: 'hot', seems: 'given', face: 'think', steam: 1,
-        tell: { my: 'စိတ်အေးနေတာ မဟုတ်ဘူး။ မေးရိုး တင်းနေတယ်။ မီးဖိုက ငြိမ်းပေမဲ့ ရင်ထဲမှာ ပူနေတယ်။', en: "Not calm. His jaw is tight. The brazier's out, but he's burning inside." } },
+        tell: { my: 'စိတ်အေးနေတာ မဟုတ်ဘူး။ မေးရိုး တင်းနေတယ်။ မီးဖိုက ငြိမ်းပေမဲ့ ရင်ထဲမှာ ဒေါသပူနေတယ်။', en: "Not calm. His jaw is tight. The brazier's out, but he's burning inside." } },
       { my: 'ညတိုင်း သူ့လက်ရာပုံစံကို တွေးပြီး အိပ်မပျော်ဘူး။', en: "Every night I think of her design and can't sleep.", need: 'hot', face: 'sad', heard: true },
     ] },
     { lines: [
@@ -80,7 +80,7 @@ export const TALK_D5_KOLWIN = {
 
 export const D5_TH_CARDS = [
   { id: 'mine', name: { my: 'ကိုယ်ရွေးလို့ရတာ', en: 'Mine to choose' },
-    line: { my: 'မြစ်ကို ဘယ်သူမှ မရွေးခဲ့ဘူး။ ဒါပေမဲ့ လှော်မလား မျောမလားကတော့ မင်း ရွေးချယ်လို့ ရတယ်။', en: "Nobody chose the stream. But steer or drift: that's yours to choose." },
+    line: { my: 'မြစ်ကို ဘယ်သူမှ မရွေးခဲ့ဘူး။ ဒါပေမဲ့ လှော်မလား မျောမလားကတော့ မင်း ရွေးလို့ ရတယ်။', en: "Nobody chose the stream. But steer or drift: that's yours to choose." },
     answers: ['given'], from: { my: 'သူ့စာရင်းကို ပြန်စီပြီး ရခဲ့တာ', en: 'from re-sorting his list' } },
   { id: 'bail', name: { my: 'သူတို့လည်း ရေပက်ထုတ်ရတယ်', en: 'They bail too' },
     line: { my: 'ဒီမနက် ကူးတို့ပေါ်မှာလည်း ရေပက်ထုတ်နေရတယ်။ ခက်ခဲတာ မင်းတစ်ယောက်တည်း မဟုတ်ဘူး။', en: "They were bailing on the ferry this morning. You're not the only one it's hard for." },
@@ -99,9 +99,9 @@ export const D5_TH_CARDS = [
     answers: ['given', 'afraid'], from: { my: 'သိုးမည်းလေး', en: 'the Black Sheep' } },
   { id: 'blame', lookalike: true, name: { my: 'မြစ်ရဲ့အပြစ်', en: "The stream's fault" },
     line: { my: 'မြစ်ကြီးက မတရားတာပါ။ မင်းအပြစ် လုံးဝ မဟုတ်ဘူး။', en: "The stream's unfair. None of it is your fault." },
-    shows: ['given', 'afraid'], really: { my: 'အပြစ်ကို တစ်ခုခုပေါ် ပုံချတာ', en: 'heaping the blame on something' },
+    shows: ['given', 'afraid'], really: { my: 'အပြစ်ကို တစ်ခုခုပေါ် လွှဲချတာ', en: 'heaping the blame on something' },
     backfire: { they: { my: 'ဒါဆို ဘာလုပ်ဖို့ လိုသေးလဲ။', en: 'So why do anything?' },
-                maya: { my: '(အပြစ်တင်စရာ ပေးလိုက်တော့ သူ ပိုမျောပါသွားတယ်။)', en: '(Give him something to blame, and he drifts further.)' } } },
+                maya: { my: '(အပြစ်တင်စရာ ပေးလိုက်တော့ သူ ပိုမျောသွားတယ်။)', en: '(Give him something to blame, and he drifts further.)' } } },
   { id: 'race', lookalike: true, name: { my: 'ပြိုင်လှော်', en: 'Race them' },
     line: { my: 'ကူးတို့ကို ပြိုင်လှော်ပြလိုက်။ အရှုံးပေးခိုင်းလိုက်!', en: 'Race the ferry. Make them lose!' },
     shows: ['given', 'envy'], really: { my: 'မြစ်ကို ရန်သူလုပ်တာ', en: 'turning the stream into an enemy' },
@@ -120,10 +120,10 @@ export const TALK_D5_THIHA = {
     { lines: [
       { my: 'အမေ ဖာထားတဲ့ ဖောင်နဲ့၊ ဒီဆိပ်ကနေ? ဘယ်လိုမှ မဖြစ်နိုင်ဘူး။', en: "With Mum's patched raft, from this jetty? No chance.", need: 'given', seems: 'envy', face: 'sad', mood: 'down',
         tell: { my: 'ကူးတို့ကို မနာလိုတာ မဟုတ်ဘူး။ ထိုးဝါးကို ရေထဲ မထိုးတော့တာ ကြာပြီ။ လက်လျှော့ထားတာ။', en: "Not envy of the ferry. It's been ages since his pole touched the water. He's given up." } },
-      { my: 'မျောနေတာ ပိုလွယ်တယ်။ မြစ်က ရောက်ချင်ရာ ပို့ပေးမှာပဲ။', en: 'Drifting\'s easier. The stream takes you somewhere anyway.', need: 'given', face: 'sad' },
+      { my: 'မျောနေတာ ပိုလွယ်တယ်။ ရေစီးက ရောက်ချင်ရာ ပို့ပေးမှာပဲ။', en: 'Drifting\'s easier. The stream takes you somewhere anyway.', need: 'given', face: 'sad' },
     ] },
     { lines: [
-      { my: 'ကူးတို့က ချောချောမောမော သွားနေတာ။ ကျွန်တော်တို့ကျမှ ရုန်းကန်နေရတာ။', en: 'The ferry glides. Only we have to struggle.', need: 'unknown', seems: 'hot', face: 'think',
+      { my: 'ကူးတို့က အေးအေးဆေးဆေး သွားနေတာ။ ကျွန်တော်တို့ကျမှ ရုန်းကန်နေရတာ။', en: 'The ferry glides. Only we have to struggle.', need: 'unknown', seems: 'hot', face: 'think',
         tell: { my: 'ဒေါသ မဟုတ်ဘူး။ ကူးတို့ပေါ်က ရေပက်ခွက်ကို မမြင်ဖူးသေးလို့ ပြောတာ။', en: "Not anger. He just hasn't seen the bucket on the ferry." } },
       { my: 'ဒီမြစ်ပေါ်မှာ ကျွန်တော်တို့ပဲ ကံဆိုးတာ။', en: "We're the only unlucky ones on this stream.", need: 'unknown', seems: 'hot', face: 'think', heard: true },
     ] },

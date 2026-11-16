@@ -35,7 +35,7 @@ export const D9_KM_CARDS = [
                 maya: { my: '(သူ့အမှားကို ကောင်းကွက်နဲ့ ဖုံးပေးလိုက်မိပြီ။)', en: '(I just covered her fault with her good.)' } } },
   { id: 'useless', lookalike: true, name: { my: 'အော်တာ အလကားပဲ', en: 'Shouting does nothing' },
     line: { my: 'အော်ပြီး သင်တာ ဘာမှ မရပါဘူး ဒေါ်ဒေါ်။', en: 'Teaching by shouting gets you nowhere, Aunty.' },
-    shows: ['unknown'], really: { my: 'မှန်တာကို ငြင်းတာ: သူ တကယ် တတ်မြောက်လာတယ်', en: 'denying what is true: he does learn' },
+    shows: ['unknown'], really: { my: 'မှန်တာကို ငြင်းတာ: သူ တကယ် တတ်လာတယ်', en: 'denying what is true: he does learn' },
     backfire: { they: { my: 'ဘာမှ မရဘူး? မုန့်တွေကို ကြည့်စမ်း!', en: 'Nowhere? Look at those loaves!' },
                 maya: { my: '(သူ တတ်လာတာ ကျွန်မ ကိုယ်တိုင် မြင်ခဲ့တယ်။ မှားပြောမိပြီ။)', en: '(I saw with my own eyes that he learns. I said it wrong.)' } } },
 ];
@@ -186,12 +186,12 @@ export const D9_SQ_CARDS = [
     answers: ['envy'], from: { my: 'သူလည်းကိုယ်လည်း ဖဲကြိုး', en: 'the Two-Tailed Ribbon' } },
   { id: 'sideHer', lookalike: true, name: { my: 'အိမွန် မှန်တယ်', en: "Ei Mon's right" },
     line: { my: 'အာကာ၊ အိမွန် ပြောတာ မှန်တယ်လေ။ နားထောင်လိုက်ပါ။', en: "Arkar, Ei Mon's right. Just listen to her." },
-    shows: ['unknown'], really: { my: 'တစ်ဖက်သတ် လိုက်တာ', en: 'taking a side' },
+    shows: ['unknown'], really: { my: 'တစ်ဖက်သတ် ဘက်လိုက်တာ', en: 'taking a side' },
     backfire: { they: { my: 'ဒါဆို ကျွန်တော်ပဲ မှားတာပေါ့။ အမြဲတမ်း။', en: "So it's me who's wrong. As always." },
-                maya: { my: '(ဘက်လိုက်လိုက်မိပြီ။ ကတောက်ကဆတ်က ပိုကြီးသွားတယ်။)', en: '(I took a side. The squabble just got bigger.)' } } },
+                maya: { my: '(ဘက်လိုက်လိုက်မိပြီ။ ရန်ဖြစ်တာက ပိုကြီးသွားတယ်။)', en: '(I took a side. The squabble just got bigger.)' } } },
   { id: 'sideHim', lookalike: true, name: { my: 'သူ့ကို မအော်နဲ့', en: "Don't snap at him" },
     line: { my: 'အိမွန်၊ အာကာ့ကို မအော်ပါနဲ့ဟာ။ မနက်ကတည်းက ပင်ပန်းနေတာ။', en: "Ei Mon, don't snap at Arkar. He's been worn out since morning." },
-    shows: ['hot'], really: { my: 'တစ်ဖက်သတ် လိုက်တာ', en: 'taking a side' },
+    shows: ['hot'], really: { my: 'တစ်ဖက်သတ် ဘက်လိုက်တာ', en: 'taking a side' },
     backfire: { they: { my: 'ငါက ကူမလို့ပါ! ဒါဆို ငါက လူဆိုးပေါ့။', en: "I was trying to help! So I'm the bad one." },
                 maya: { my: '(ဘက်လိုက်လိုက်မိပြီ။)', en: '(I took a side.)' } } },
 ];
@@ -204,7 +204,7 @@ export const TALK_D9_SQUABBLE = {
   theirs: [2, 3],
   hand: D9_SQ_CARDS,
   tutorial: [
-    { at: 'acts', my: 'ရန်ပွဲ မဟုတ်ဘူး၊ ကတောက်ကဆတ်လေးပဲ။ ဘယ်သူ့ဘက်မှ မလိုက်ဘဲ နှစ်ယောက်လုံး စိတ်အေးအောင် လုပ်ပေး။ ကိုယ့်လေသံ ကိုယ်ပြင်တာကတော့ သူတို့အပိုင်း။', en: 'Not a fight, a squabble. Take no side; cool them both. Mending their own tone is theirs.' },
+    { at: 'acts', my: 'ရန်ပွဲ မဟုတ်ဘူး၊ စကားများကြတာလေးပဲ။ ဘယ်သူ့ဘက်မှ မလိုက်ဘဲ နှစ်ယောက်လုံး စိတ်အေးအောင် လုပ်ပေး။ ကိုယ့်လေသံ ကိုယ်ပြင်တာကတော့ သူတို့အပိုင်း။', en: 'Not a fight, a squabble. Take no side; cool them both. Mending their own tone is theirs.' },
   ],
   stones: [
     { lines: [
