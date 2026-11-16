@@ -102,10 +102,10 @@ export function resolve(s = {}) {
 }
 
 const irCache = new WeakMap();
-function reverbIR(ctx) {
+function reverbIR(ctx, lite) {
   let ir = irCache.get(ctx);
   if (ir) return ir;
-  const len = Math.floor(ctx.sampleRate * 1.9);
+  const len = Math.floor(ctx.sampleRate * (lite ? 0.55 : 1.9)); // lite: a short room, a fraction of the convolver's work
   ir = ctx.createBuffer(2, len, ctx.sampleRate);
   for (let ch = 0; ch < 2; ch++) {
     const d = ir.getChannelData(ch);
@@ -117,7 +117,7 @@ function reverbIR(ctx) {
 }
 
 /** The engine on any AudioContext (live or Offline). dest: the node it plays into. */
-export function createScape(ctx, dest, { volume = 0.38, solo = null, fallback = false } = {}) {
+export function createScape(ctx, dest, { volume = 0.38, solo = null, fallback = false, lite = false } = {}) {
   const bank = getBank(ctx);
   const master = ctx.createGain(); master.gain.value = volume; master.connect(dest);
   const musicBus = ctx.createGain(), tone = ctx.createBiquadFilter(), musicDuck = ctx.createGain();
@@ -127,7 +127,7 @@ export function createScape(ctx, dest, { volume = 0.38, solo = null, fallback = 
   ambBus.connect(ambDuck); ambDuck.connect(master);
   const stingBus = ctx.createGain(); stingBus.gain.value = 0.6; stingBus.connect(master); // ~6 dB over the music, not 10
   const verbIn = ctx.createGain(), conv = ctx.createConvolver();
-  conv.buffer = reverbIR(ctx); verbIn.gain.value = 0.9; verbIn.connect(conv); conv.connect(master);
+  conv.buffer = reverbIR(ctx, lite); verbIn.gain.value = 0.9; verbIn.connect(conv); conv.connect(master);
   const E = { ctx, bank, verb: verbIn, dest: ambBus, fallback }; // fallback: live game (a song plays a part's `alt` until its instrument is warmed)
   if (solo) { // previews only: hear one bus (its reverb included) to measure the balance
     const keep = { music: musicDuck, amb: ambDuck, sting: stingBus }[solo];
@@ -191,21 +191,22 @@ export function createScape(ctx, dest, { volume = 0.38, solo = null, fallback = 
     layers.delete(L.key);
   }
   // ---- the events budget (all layers and emit() share it; no allocation) ----
-  const evTimes = new Float64Array(EV_PER_MIN), alive = new Float64Array(EV_ALIVE), lastAt = Object.create(null);
+  const EVM = lite ? 8 : EV_PER_MIN, EVA = lite ? 2 : EV_ALIVE; // lite (weak phones): fewer one-shots at once
+  const evTimes = new Float64Array(EVM), alive = new Float64Array(EVA), lastAt = Object.create(null);
   let evI = 0, speaking = false;
   evTimes.fill(-1e9);
   /** May a one-shot `name` start at t? (books it if so; `dur` is filled in by fire()) */
   function allow(name, t) {
     const cd = COOLDOWN[name] ?? 3;
     if (t - (lastAt[name] ?? -1e9) < cd) return -1;
-    if (FREE.has(name)) { lastAt[name] = t; return EV_ALIVE; }
+    if (FREE.has(name)) { lastAt[name] = t; return EVA; }
     if (speaking && Math.random() < 0.6) return -1;
     if (t - evTimes[evI] < 60) return -1; // the oldest of the last EV_PER_MIN is under a minute old
     let slot = -1;
-    for (let i = 0; i < EV_ALIVE; i++) if (alive[i] <= t) { slot = i; break; }
+    for (let i = 0; i < EVA; i++) if (alive[i] <= t) { slot = i; break; }
     if (slot < 0) return -1;
     lastAt[name] = t;
-    evTimes[evI] = t; evI = (evI + 1) % EV_PER_MIN;
+    evTimes[evI] = t; evI = (evI + 1) % EVM;
     return slot;
   }
   function fire(name, t, v, opts, dest) {
@@ -213,7 +214,7 @@ export function createScape(ctx, dest, { volume = 0.38, solo = null, fallback = 
     if (slot < 0) return 0;
     E.dest = dest;
     const d = FX[name](E, t, v, opts) || 1;
-    if (slot < EV_ALIVE) alive[slot] = t + d;
+    if (slot < EVA) alive[slot] = t + d;
     counts.events++;
     return d;
   }
@@ -378,7 +379,7 @@ export function createSoundscape(audio, opts = {}) {
       if (!core) {
         const ctx = audio.context, out = audio.output;
         if (!ctx || !out) return;
-        core = createScape(ctx, out, { volume: vol, fallback: true });
+        core = createScape(ctx, out, { volume: vol, fallback: true, lite: !!opts.lite });
         core.update(dt, s, { fade: 1.5 });
         return;
       }

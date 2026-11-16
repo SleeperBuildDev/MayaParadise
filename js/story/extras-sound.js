@@ -67,7 +67,9 @@ export function installSound(game, story, ow) {
   if (params.get('sound') === '0' || params.get('music') === '0') { story.sound = { cue() {}, sting() {}, state: () => null, log: [], cpu: () => null }; return story.sound; }
 
   for (const [id, type] of Object.entries(SITE_ROOMS)) if (!ROOM_TYPE[id]) ROOM_TYPE[id] = type;
-  const scape = createSoundscape(game.audio);
+  // weak phones: a lighter soundscape (short reverb, fewer one-shots at once)
+  const lite = game.tier === 'low' || (navigator.deviceMemory || 8) <= 3 || (navigator.hardwareConcurrency || 8) <= 4;
+  const scape = createSoundscape(game.audio, { lite });
   let bankReady = false; const WARM_MAX = 15; // (s) see tick
   const save = story.save;
   const gameEl = document.getElementById('game') || document.body;
