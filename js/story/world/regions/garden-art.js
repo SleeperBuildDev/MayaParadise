@@ -8,7 +8,7 @@
 //   GARDEN_FIT_ART   gdKilnYard (kiln shed + packing room), gdHall (drying hall), gdHpHouse (U Hpo Htaw's garden
 //                    house), gdGateArch (the creeper arch over the clasp road)
 //   GARDEN_FIT_PROP  gdPotRack, gdHandcart, gdBaskets, gdClayHeap, gdSeedStand, gdTubs, gdSignPost, gdStool
-import { shade, rng } from '../kit.js';
+import { shade, rng, pane } from '../kit.js';
 import { K, SH, obBox, obCircle } from '../art/garden.js';
 
 // ---------------------------------------------------------------------------------
@@ -33,6 +33,7 @@ function tinGable(g, W, D, y0, rise, col, { over = 0.4, rust = 0, seed = 1, gabl
 function win(g, x, y, z, w, h, shut, { shutters = true, lit = false, curtain = null, box = null } = {}) {
   g.box(x, y, z, w + 0.14, h + 0.14, 0.08, K.white);
   g.box(x, y, z + 0.02, w, h, 0.06, lit ? '#F6D58E' : K.glass);
+  pane(g, x, y, z + 0.02, w, h, 0.06, 1, lit);
   if (curtain) g.box(x - w * 0.22, y + 0.02, z + 0.055, w * 0.42, h * 0.92, 0.02, curtain);
   g.box(x, y, z + 0.06, 0.04, h, 0.03, K.white);
   g.box(x, y + 0.03, z + 0.06, w, 0.04, 0.03, K.white);
@@ -183,6 +184,7 @@ function hall(g, f, it, ctx) {
   for (let x = -W / 2 + 1.0; x <= W / 2 - 0.9; x += 1.7) {
     if (Math.abs(x - DX) < DW / 2 + 1.35) continue;
     g.box(x, 1.65, FZ + 0.01, 1.0, 0.85, 0.06, '#5B4636');
+    pane(g, x, 1.65, FZ + 0.01, 1.0, 0.85, 0.06); // (lit, it glows between the slats)
     for (let k = 0; k < 5; k++) g.boxR(x, 1.32 + k * 0.17, FZ + 0.06, 0.92, 0.03, 0.12, K.teal, -0.5, 0, 0);
     g.box(x, 1.17, FZ + 0.1, 1.14, 0.06, 0.18, K.woodD);
   }

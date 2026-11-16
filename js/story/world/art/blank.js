@@ -15,7 +15,7 @@
 //   prints(g, f, it)           faint pencil footprints along it.pts (world points): where people walked
 //   restBench(g, f, it)        a plank bench with a cup and a cloth bundle, for whoever walks the path
 //   dusk(g, f, it)             a very soft warm wash on the paper (the leaf sits under a low sunset)
-import { shade, rng } from '../kit.js';
+import { shade, rng, pane } from '../kit.js';
 import { jitter } from '../../../game/voxel.js';
 
 const W = {
@@ -138,6 +138,7 @@ export function lodge(g, f, it, ctx) {
   // ---- windows: a warm lit room behind, mullions, sill, head, shutters swung open
   WIN.forEach((x, i) => {
     g.boxMin(x - WW / 2, WY0, ZF - 0.05, x + WW / 2, WY1, ZF - 0.03, i % 2 ? W.lit : W.litD);
+    pane(g, x, (WY0 + WY1) / 2, ZF - 0.04, WW, WY1 - WY0, 0.02, 1, true);
     if (i === 0) g.box(x - 0.2, WY0 + 0.3, ZF - 0.02, 0.2, 0.42, 0.01, '#B8834E'); // a cloth hung inside
     if (i === 1) { g.box(x + 0.15, WY0 + 0.28, ZF - 0.02, 0.2, 0.22, 0.01, '#5A4636'); g.box(x + 0.15, WY0 + 0.44, ZF - 0.02, 0.16, 0.14, 0.01, '#5A4636'); } // someone's back
     if (i === 3) { g.box(x - 0.18, WY0 + 0.1, ZF + 0.12, 0.3, 0.17, 0.12, '#3C3A36'); g.box(x - 0.24, WY0 + 0.1, ZF + 0.185, 0.08, 0.08, 0.01, W.goldL); g.box(x - 0.1, WY0 + 0.24, ZF + 0.1, 0.02, 0.18, 0.02, W.iron); } // the radio on the sill
@@ -158,6 +159,7 @@ export function lodge(g, f, it, ctx) {
   });
   // a small lit window in the east end wall
   g.boxMin(X + 0.04, WY0, -1.85, X + 0.07, WY1, -1.05, W.litD);
+  pane(g, X + 0.055, (WY0 + WY1) / 2, -1.45, 0.8, WY1 - WY0, 0.03, 2, true);
   for (const z of [-1.9, -1.0]) g.box(X + 0.08, (WY0 + WY1) / 2, z, 0.06, WY1 - WY0 + 0.1, 0.07, W.woodD);
   g.box(X + 0.1, WY0 - 0.04, -1.45, 0.14, 0.05, 1.0, W.woodL);
   g.box(X + 0.08, (WY0 + WY1) / 2, -1.45, 0.05, WY1 - WY0, 0.04, W.woodD);

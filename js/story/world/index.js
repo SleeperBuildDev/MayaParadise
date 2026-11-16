@@ -163,6 +163,8 @@ export async function createOpenWorld(game, story) {
   const feet = createFeet(game, { streamer, net });
   desks.onGlowChange = () => streamer.refreshGlows();
   streamer.refreshGlows();
+  // the towns' lit windows are light sources for the night shadows too (as the lamps: nightshadow.js glowSource)
+  if (streamer.windows) game.nightShadow?.addSource(streamer.windows.source);
   // the sun's shadow: main.js fits it to the camera's view, clamped to a box. On the book that box is
   // the book; out on the land it is a patch round her (the haze hides the far ground anyway, and a
   // small patch keeps the shadow sharp and the shadow pass cheap)
@@ -375,7 +377,9 @@ export async function createOpenWorld(game, story) {
     });
   }
   // canvas signs are their own meshes: hide the sign of a building that is faded out, so it never hangs in the air
+  // (and the lit windows of a faded building, windowlights.js: a lit pane must not hang in the air either)
   function updateSigns() {
+    streamer.windows?.cut(slots);
     for (const ch of streamer.chunks.values()) {
       if (ch.state !== 'ready' || !ch.signMeshes) continue;
       for (const m of ch.signMeshes) {
@@ -393,7 +397,7 @@ export async function createOpenWorld(game, story) {
     let any = glowHidden;
     for (const sl of slots) if (sl.key !== null && sl.fade > 0.5 && SIGHT.get(sl.key)) any = true;
     if (!any) return;
-    const E = G.instanceMatrix.array;
+    const E = G.instanceMatrix.array, GS = G.userData.size;
     let changed = false;
     glowHidden = false;
     for (let i = 0; i < G.count; i++) {
@@ -406,7 +410,7 @@ export async function createOpenWorld(game, story) {
       }
       if (hide) glowHidden = true;
       if (hide === (E[o] === 0)) continue;
-      G.setMatrixAt(i, glowM4.compose(glowP.set(x, E[o + 13], z), glowQ, glowS.set(hide ? 0 : 0.26, hide ? 0 : 0.3, hide ? 0 : 0.26)));
+      G.setMatrixAt(i, glowM4.compose(glowP.set(x, E[o + 13], z), glowQ, hide ? glowS.set(0, 0, 0) : glowS.set(GS ? GS[i * 2] : 0.26, GS ? GS[i * 2 + 1] : 0.3, GS ? GS[i * 2] : 0.26)));
       changed = true;
     }
     if (changed) G.instanceMatrix.needsUpdate = true;

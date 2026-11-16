@@ -9,7 +9,7 @@
 //
 // The water: boats float on a cloud-stream whose surface is WATER_Y (-0.6) below the quay (props4.js's jetty
 // uses the same level), so a day can drop props4.js's moving raft / ferry onto the same berths.
-import { shade, rng } from '../kit.js';
+import { shade, rng, pane, bulb, wallLantern, glowAt } from '../kit.js';
 import { PALETTE } from '../../../game/toon.js';
 import { jitter } from '../../../game/voxel.js';
 
@@ -54,6 +54,7 @@ function vboards(g, x0, x1, y0, y1, z, col, seed, bw = 0.5) {
 function win(g, x, y, z, w, h, col, flap = false) {
   g.box(x, y, z, w + 0.16, h + 0.16, 0.08, C.woodD);
   g.box(x, y, z + 0.012, w, h, 0.08, C.dark);
+  pane(g, x, y, z + 0.012, w, h, 0.08);
   g.box(x, y, z + 0.05, 0.04, h, 0.04, C.woodD);
   g.box(x, y - h / 2 - 0.07, z + 0.08, w + 0.26, 0.06, 0.16, C.woodD);
   if (flap) {
@@ -159,7 +160,7 @@ const SHUT = [C.teal, C.indigo, C.maroon, C.ochre, C.rust];
 
 /** A wharf stilt house: posts, plank walls, a front veranda with steps, thatch or zinc roof, and the
  * things of a riverside home round it (nets, a fish trap, jars, firewood, a boat under the floor). */
-function wStilt(g, f, it) {
+function wStilt(g, f, it, ctx) {
   const W = it.w, D = it.d, r = rng(it.seed || 1);
   const FL = 1.1, TOP = FL + 2.3, wall = it.wall || WALLS[(it.seed || 0) % WALLS.length], trim = C.woodGD;
   const shut = SHUT[Math.floor(r() * SHUT.length)];
@@ -213,6 +214,7 @@ function wStilt(g, f, it) {
     g.box(tx, TOP - 0.05, D / 2 + 0.9, 0.02, 0.3, 0.02, C.ink);
   } else { // a lantern by the door
     g.box(doorX + 0.75, TOP - 0.3, D / 2 + 0.3, 0.2, 0.28, 0.2, C.mustard);
+    glowAt(g, ctx, doorX + 0.75, TOP - 0.3, D / 2 + 0.3); // (lit after dark)
     g.box(doorX + 0.75, TOP - 0.13, D / 2 + 0.3, 0.24, 0.05, 0.24, C.iron);
   }
   // under the floor: jars, firewood, a boat or a hammock
@@ -279,6 +281,7 @@ function wGodown(g, f, it, ctx) {
   // a lamp bracket by the door
   g.box(1.75, 0.5 + 2.7, D / 2 + 0.2, 0.06, 0.06, 0.4, C.iron);
   g.box(1.75, 0.5 + 2.55, D / 2 + 0.38, 0.2, 0.26, 0.2, C.mustard);
+  glowAt(g, ctx, 1.75, 0.5 + 2.55, D / 2 + 0.38); // (lit after dark: the bracket's lamp)
   if (it.label) ctx.signs.push({ x: 0, y: 0.5 + H - 0.62, z: D / 2 + 0.08, w: 2.6, h: 0.56, lines: [{ text: it.label.my, size: 46 }, { text: it.label.en, ...SIGN_EN }], bg: '#F6F0E2', width: 560, height: 120 });
   void r;
 }
@@ -330,6 +333,7 @@ function wShop(g, f, it, ctx) {
   const awn = it.awning || [C.teal, C.indigo, C.rust, C.ochreD][(it.seed || 0) % 4];
   for (let i = 0; i < n; i++) g.boxR(-W / 2 + (W * (i + 0.5)) / n, H1 + 0.02, D / 2 + 0.45, W / n + 0.005, 0.06, 1.3, i % 2 ? C.cream : awn, 0.32, 0, 0);
   for (let i = 0; i < n; i++) g.box(-W / 2 + (W * (i + 0.5)) / n, H1 - 0.34, D / 2 + 1.08, W / n - 0.05, 0.14, 0.04, i % 2 ? C.cream : awn);
+  bulb(g, ctx, W / 2 - 1.0, 2.05, D / 2 + 0.85, 2.76, { cap: C.iron, shade: true }); // a working lamp under the awning's front
   // upper balcony and windows
   g.box(0, H1 + 0.25, D / 2 + 0.12, W - 0.5, 0.08, 0.7, C.woodG);
   for (let x = -W / 2 + 0.3; x <= W / 2 - 0.25; x += 0.33) g.box(x, H1 + 0.55, D / 2 + 0.44, 0.05, 0.5, 0.05, C.woodD);
@@ -404,16 +408,18 @@ function weighHouse(g, f, it, ctx) {
   // a hand bell and a chalk slate by the door, a lamp bracket
   g.box(-DW / 2 - 0.25, 0.24 + 2.2, D / 2 + 0.25, 0.06, 0.06, 0.3, C.iron);
   g.box(-DW / 2 - 0.25, 0.24 + 2.05, D / 2 + 0.36, 0.18, 0.2, 0.18, C.goldD);
+  glowAt(g, ctx, -DW / 2 - 0.25, 0.24 + 2.05, D / 2 + 0.36);
   g.box(DW / 2 + 0.4, 0.24 + 1.4, D / 2 + 0.22, 0.6, 0.8, 0.04, C.woodD);
   g.box(DW / 2 + 0.4, 0.24 + 1.4, D / 2 + 0.25, 0.5, 0.68, 0.02, '#3E4A3F');
   for (let k = 0; k < 4; k++) g.box(DW / 2 + 0.32, 0.24 + 1.62 - k * 0.14, D / 2 + 0.27, 0.3 - (k % 2) * 0.08, 0.025, 0.01, C.white);
   g.box(DW / 2 + 0.3, 0.24 + 2.7, D / 2 + 0.35, 0.06, 0.06, 0.4, C.iron);
   g.box(DW / 2 + 0.3, 0.24 + 2.55, D / 2 + 0.5, 0.22, 0.28, 0.22, C.mustard);
+  glowAt(g, ctx, DW / 2 + 0.3, 0.24 + 2.55, D / 2 + 0.5);
 }
 
 /** Daw Sanda's stilt house (room `sandahouse`): high on posts at the quay's edge above Little Jetty, its
  * plank door at the top of five steps facing the jetty (+Z), patches of cloth drying under the eaves. */
-function sandaHouse(g, f, it) {
+function sandaHouse(g, f, it, ctx) {
   const W = it.w, D = it.d, FL = 1.5, TOP = FL + 2.2;
   const wall = '#B9A486';
   f.flat(-W / 2 - 0.3, -D / 2 - 0.3, W / 2 + 0.5, D / 2 + 1.0, 0.004, C.shadow);
@@ -435,6 +441,7 @@ function sandaHouse(g, f, it) {
   for (let k = 0; k < 4; k++) g.box(dx - 0.3 + k * 0.2, FL + 0.93, D / 2 + 0.06, 0.18, 1.72, 0.06, jitter(C.woodG, 0.08, k + 3));
   g.box(dx, FL + 1.4, D / 2 + 0.1, 0.7, 0.07, 0.04, C.woodD); g.box(dx, FL + 0.5, D / 2 + 0.1, 0.7, 0.07, 0.04, C.woodD);
   g.box(dx + 0.3, FL + 0.95, D / 2 + 0.11, 0.06, 0.06, 0.04, C.iron);
+  wallLantern(g, ctx, dx + 0.82, FL + 1.6, D / 2 + 0.3, 0.3, { col: C.iron }); // by the door, for whoever climbs the steps
   win(g, W / 2 - 1.1, FL + 1.25, D / 2 + 0.02, 0.85, 0.7, C.teal, true);
   // five steps down to the jetty (toward +Z), a hand rope
   for (let k = 0; k < 5; k++) g.box(dx, FL - 0.15 - k * 0.3, D / 2 + 1.12 + k * 0.3, 0.92, 0.07, 0.3, k % 2 ? C.woodL : C.wood);
@@ -532,6 +539,7 @@ function teaHut(g, f, it, ctx) {
   for (let k = 0; k < 3; k++) { g.box(-1.6 + k * 0.32, 1.12, -D / 2 + 0.75, 0.24, 0.3, 0.24, C.glass); g.box(-1.6 + k * 0.32, 1.06, -D / 2 + 0.75, 0.2, 0.16, 0.2, [C.ochre, C.red, C.leafL][k]); }
   g.box(-0.9, 1.75, -D / 2 + 0.12, 0.4, 0.5, 0.02, C.white); g.box(-0.9, 1.92, -D / 2 + 0.13, 0.4, 0.14, 0.02, C.red);
   g.box(0.2, 2.15, 0, 0.2, 0.26, 0.2, C.mustard);
+  glowAt(g, ctx, 0.2, 2.15, 0); // (the hanging lamp, lit after dark)
   // low tables and tiny stools out front
   for (const [x, z] of [[-1.1, D / 2 + 0.7], [1.0, D / 2 + 1.0]]) {
     g.box(x, 0.36, z, 0.8, 0.05, 0.6, C.woodL);

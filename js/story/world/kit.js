@@ -276,6 +276,88 @@ export class Geo {
   }
 }
 
+// ---------------------------------------------------------------------------------
+// Window panes: every window helper of the towns calls pane() for its glass (or its dark opening), so the windows
+// can light up after dark (windowlights.js). build.js chunkJob points PANES.list at the item being built (null the
+// rest of the time: a helper drawing anywhere else records nothing). A module-level list, not an argument: the
+// helpers are called with only the Geo in hand, a dozen files deep.
+// ---------------------------------------------------------------------------------
+export const PANES = { list: null };
+export const PANE_STRIDE = 10;
+/**
+ * A window's glass on g's current item: centre (x, y, z) and size w x h in the item's local space, the glass d deep,
+ * facing local +Z (face = 1), -Z (-1), +X (2) or -X (-2); lit: painted lit by day already (a lamp window), so never
+ * left dark. Records world centre, size, depth, world facing (nx, nz), lit and the item's ground height.
+ */
+export function pane(g, x, y, z, w, h, d = 0, face = 1, lit = false) {
+  const L = PANES.list;
+  if (!L) return;
+  const s = Math.sign(face), nx = Math.abs(face) === 2 ? g.tc * s : g.ts * s, nz = Math.abs(face) === 2 ? -g.ts * s : g.tc * s;
+  L.push(g.tx + x * g.tc + z * g.ts, g.ty + y, g.tz - x * g.ts + z * g.tc, w, h, d, nx, nz, lit ? 1 : 0, g.ty);
+}
+
+// ---------------------------------------------------------------------------------
+// Small light fittings for stalls, carts and shop fronts (the towns' own boxes round one glowing core each: the
+// shared instanced lamp core, so its pool on the ground and the night shadows come too). All in the item's local
+// space; the core sits at (x, y, z). Each has its own little glass inside the core (seen when it is not lit: build.js
+// leaves a fitting's light out when another light is closer than 2.5 m, ctx.fits). Thin parts are drawn without
+// their ink hull (g.bare): a wire or a hook outlined at phone size is a black smear.
+// ---------------------------------------------------------------------------------
+/** A fitting's lamp core at (x, y, z) in g's item space (into ctx.fits while a chunk is built, else ctx.glows). */
+export const FIT_STRIDE = 5; // x, y, z, the core's width and height (just over the fitting's own glass)
+export function glowAt(g, ctx, x, y, z, w = 0.26, h = 0.3) {
+  const X = g.tx + x * g.tc + z * g.ts, Z = g.tz - x * g.ts + z * g.tc;
+  if (ctx.fits) ctx.fits.push(X, g.ty + y, Z, w, h); else ctx.glows.push(X, g.ty + y, Z);
+}
+/** The fitting's own boxes (drawn by fn) are not what makes its prop tall: build.js leaves them out of the height that
+ *  decides whether the cutaway may fade the prop (a bulb on its flex over a low table is not a roof). */
+function fitting(g, ctx, fn) { const v0 = g.nv; fn(); ctx.fitV?.push(v0, g.nv); }
+function thin(g, fn) { const b = g.bare; g.bare = true; try { fn(); } finally { g.bare = b; } }
+/** A bare bulb hanging on its flex from a roof or a beam at height top: a little socket cap over the core; shade:
+ *  a wide tin shade over it instead (a working lamp, the Wharf's). */
+export function bulb(g, ctx, x, y, z, top, { cap = '#3A2E25', shade = false } = {}) {
+  fitting(g, ctx, () => {
+    thin(g, () => { if (top - y > 0.25) g.box(x, (top + y + 0.2) / 2, z, 0.025, top - y - 0.2, 0.025, '#2B2420'); });
+    g.box(x, y + 0.19, z, 0.12, 0.08, 0.12, cap);
+    if (shade) g.box(x, y + 0.17, z, 0.42, 0.04, 0.42, cap);
+    g.box(x, y + 0.02, z, 0.12, 0.2, 0.12, '#EFE6CF'); // the bulb
+  });
+  glowAt(g, ctx, x, y, z, 0.16, 0.25);
+}
+/** A lantern hung from a bracket on a wall facing local +Z (the wall's face at z - out): a back plate, an arm, a hook,
+ *  a cap and a foot round the core. kind 'tin' (dark metal, the Wharf's working lamps) or 'paper' (a paper shade). */
+export function wallLantern(g, ctx, x, y, z, out, { kind = 'tin', col = '#4A3B30' } = {}) {
+  fitting(g, ctx, () => wallLanternBoxes(g, x, y, z, out, kind, col));
+  glowAt(g, ctx, x, y, z, kind === 'paper' ? 0.245 : 0.225, 0.28);
+}
+function wallLanternBoxes(g, x, y, z, out, kind, col) {
+  g.box(x, y + 0.42, z - out + 0.03, 0.12, 0.2, 0.06, col); // the plate on the wall
+  g.box(x, y + 0.42, z - out / 2 + 0.03, 0.05, 0.05, out, col); // the arm
+  thin(g, () => g.box(x, y + 0.3, z, 0.02, 0.18, 0.02, col)); // the hook
+  if (kind === 'paper') {
+    g.box(x, y + 0.19, z, 0.2, 0.06, 0.2, col);
+    g.box(x, y - 0.19, z, 0.2, 0.06, 0.2, col);
+    g.box(x, y, z, 0.22, 0.26, 0.22, '#F3E6C4'); // the paper
+    for (const dy of [-0.08, 0.08]) thin(g, () => g.box(x, y + dy, z, 0.29, 0.02, 0.29, '#C9A24A')); // ribs over the paper
+  } else {
+    g.box(x, y, z, 0.2, 0.26, 0.2, '#E8E2CC'); // the glass
+    g.box(x, y + 0.2, z, 0.32, 0.06, 0.32, col);
+    g.box(x, y + 0.26, z, 0.16, 0.06, 0.16, col);
+    g.box(x, y - 0.19, z, 0.3, 0.06, 0.3, col);
+  }
+}
+/** A hurricane lamp standing on a counter or a table whose top is at height top: foot, cap, and its wire handle. */
+export function hurricane(g, ctx, x, top, z, col = '#4A3B30') {
+  const y = top + 0.21;
+  fitting(g, ctx, () => {
+    g.box(x, top + 0.03, z, 0.24, 0.06, 0.24, col);
+    g.box(x, y + 0.19, z, 0.22, 0.07, 0.22, col);
+    g.box(x, y, z, 0.16, 0.3, 0.16, '#E8E2CC'); // the chimney glass
+    thin(g, () => { for (const sx of [-0.13, 0.13]) g.box(x + sx, y + 0.27, z, 0.02, 0.16, 0.02, col); g.box(x, y + 0.35, z, 0.28, 0.02, 0.02, col); });
+  });
+  glowAt(g, ctx, x, y, z, 0.185, 0.29);
+}
+
 /** Frees a mesh made by Geo.mesh() (and its outline); the shared materials stay. */
 export function disposeMesh(m) {
   if (!m) return;

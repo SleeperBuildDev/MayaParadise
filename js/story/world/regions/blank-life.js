@@ -33,7 +33,7 @@
 //   blPencilTown { pts, w }  pencil streets laid out on the white: two faint lines along pts, plots ticked off (flat)
 //   blPots { n }        a row of clay flower pots
 // Every Burmese string here is a draft for Maya.
-import { rng, shade } from '../kit.js';
+import { rng, shade, hurricane } from '../kit.js';
 import { jitter } from '../../../game/voxel.js';
 
 const K = {
@@ -316,6 +316,7 @@ function blCobbler(g, f, it, ctx) {
   g.box(0.42, 0.13, -0.22, 0.4, 0.22, 0.26, K.woodD); g.box(0.42, 0.25, -0.22, 0.42, 0.03, 0.28, K.wood);
   g.box(0.32, 0.29, -0.22, 0.04, 0.06, 0.18, K.iron); g.box(0.5, 0.3, -0.24, 0.12, 0.04, 0.04, K.iron); // hammer, awl
   g.box(-0.2, 0.12, -0.25, 0.08, 0.24, 0.08, K.woodD); g.box(-0.2, 0.26, -0.22, 0.12, 0.06, 0.24, K.wood); // the last
+  hurricane(g, ctx, 0.5, 0.265, -0.13); // on the tool box
   stool(g, -0.6, -0.3, K.woodL, 0.2);
   // her little sign on a stake at the mat's corner
   g.box(0.78, 0.4, 0.5, 0.05, 0.8, 0.05, K.woodD);

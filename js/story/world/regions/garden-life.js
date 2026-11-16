@@ -27,7 +27,7 @@
 // Art:
 //   gdFieldHut { seed }               a small bamboo field hut on short stilts, open front, a mat and a pot (h 2.7)
 // Every Burmese string here is a draft for Maya.
-import { rng, shade } from '../kit.js';
+import { rng, shade, hurricane } from '../kit.js';
 
 const K = {
   ink: '#2A2118', iron: '#4A3B30', wood: '#B58A5A', woodD: '#7A5434', woodL: '#CDA577', woodG: '#9E8A70',
@@ -179,6 +179,7 @@ function vegTable(g, f, it, ctx) {
   }
   // a little brass hand-scale at the end and a stool behind
   g.box(0.95, 0.76, 0.1, 0.06, 0.12, 0.06, K.iron); g.box(0.95, 0.84, 0.1, 0.3, 0.03, 0.2, K.mustard);
+  hurricane(g, ctx, 0, 0.73, -0.27);
   g.box(0, 0.16, -0.7, 0.4, 0.06, 0.34, K.teal); for (const sx of [-0.15, 0.15]) g.box(sx, 0.07, -0.7, 0.05, 0.14, 0.28, shade(K.teal, 0.8));
   // a crate of more under the table
   g.box(-0.4, 0.17, 0, 0.6, 0.34, 0.5, K.woodG); g.box(-0.4, 0.36, 0, 0.5, 0.05, 0.4, K.leafD);

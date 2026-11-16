@@ -28,7 +28,7 @@
 //   gfFolk { pose, seed, kid? }      a townsperson at work, still (RETIRED 2026-11-15: region.js STILL_FOLK drops it at merge):
 //        'sweep' (broom), 'carry' (a yoke of two buckets), 'head' (a basket on the head), 'squat' (weeding),
 //        'sit' (on a low stool), 'stand', 'play' (a child with a cane ball)
-import { rng, shade } from '../kit.js';
+import { rng, shade, pane, hurricane, bulb } from '../kit.js';
 import { folkArms, broom } from '../folk-arms.js';
 
 const K = {
@@ -70,6 +70,7 @@ function hip(g, W, D, y0, col) {
 function win(g, f, x, y, z, w, h, shut) {
   g.box(x, y, z, w + 0.12, h + 0.12, 0.05, K.white);
   f.box(x, y, z + 0.035, w, h, 0.02, K.glass);
+  pane(g, x, y, z + 0.035, w, h, 0.02);
   if (shut) f.box(x - w / 2 - 0.16, y, z + 0.04, 0.24, h, 0.02, shut), f.box(x + w / 2 + 0.16, y, z + 0.04, 0.24, h, 0.02, shut);
 }
 
@@ -171,12 +172,13 @@ function home(g, f, it, ctx) {
 // ---------------------------------------------------------------------------------
 // ART: gfWorkshop (an open tin lean-to)
 // ---------------------------------------------------------------------------------
-function workshop(g, f, it) {
+function workshop(g, f, it, ctx) {
   const r = rng(it.seed || 5), W = 3.4, D = 2.4, trade = it.trade || 'carpenter';
   f.flat(-W / 2 - 0.3, -D / 2 - 0.3, W / 2 + 0.3, D / 2 + 0.6, 0.004, trade === 'carpenter' ? '#E3CFA8' : SH);
   for (const sx of [-1, 1]) { g.box(sx * W / 2, 1.25, D / 2, 0.12, 2.5, 0.12, K.woodD); g.box(sx * W / 2, 1.0, -D / 2, 0.12, 2.0, 0.12, K.woodD); }
   g.boxR(0, 2.3, 0, W + 0.5, 0.07, D + 0.6, pick(ROOFS, r), -0.2, 0, 0);
   g.box(0, 0.95, -D / 2 + 0.05, W, 1.9, 0.06, K.bambooL); // the back wall
+  bulb(g, ctx, 0.2, 1.75, 0.9, 2.45); // under the roof's front, over the work
   if (trade === 'carpenter') {
     g.box(0, 0.75, -0.3, 2.2, 0.1, 0.7, K.woodL); for (const sx of [-0.95, 0.95]) g.box(sx, 0.36, -0.3, 0.1, 0.72, 0.6, K.woodD);
     g.boxR(0.9, 0.45, 0.85, 0.9, 0.08, 0.4, K.woodD, 0, 0.3, 0); g.boxR(0.5, 0.52, 0.75, 1.6, 0.06, 0.22, K.woodL, 0, 0.3, 0.1); // a sawhorse, a plank
@@ -196,7 +198,7 @@ function workshop(g, f, it) {
 // ---------------------------------------------------------------------------------
 // props
 // ---------------------------------------------------------------------------------
-function teaStall(g, f, it) {
+function teaStall(g, f, it, ctx) {
   const r = rng(it.seed || 3), aw = pick(CLOTH, r);
   f.flat(-1.6, -1.0, 1.6, 1.2, 0.004, SH);
   for (const sx of [-1.35, 1.35]) g.box(sx, 1.05, -0.8, 0.08, 2.1, 0.08, K.bambooD);
@@ -204,6 +206,7 @@ function teaStall(g, f, it) {
   g.box(0, 0.42, 0.2, 1.4, 0.06, 0.7, K.woodL); f.box(-0.6, 0.2, 0.2, 0.06, 0.4, 0.6, K.woodD); f.box(0.6, 0.2, 0.2, 0.06, 0.4, 0.6, K.woodD);
   for (const [x, z] of [[-0.95, 0.2], [0.95, 0.2], [-0.3, 0.85], [0.35, 0.85]]) g.box(x, 0.13, z, 0.3, 0.26, 0.3, pick([K.red, K.blue, K.teal, K.mustard], r));
   for (const x of [-0.3, 0.1, 0.4]) f.box(x, 0.49, 0.2, 0.1, 0.08, 0.1, K.white); // cups
+  hurricane(g, ctx, -0.55, 0.45, 0.35);
   g.box(-1.0, 0.25, -0.65, 0.5, 0.5, 0.5, K.clayD); g.box(-1.0, 0.6, -0.65, 0.3, 0.22, 0.3, K.iron); // the brazier and kettle
   g.box(0.9, 0.35, -0.65, 0.7, 0.7, 0.45, K.woodD); f.box(0.9, 0.72, -0.65, 0.5, 0.04, 0.3, K.glass); // the cupboard of tea leaves and condensed milk
 }

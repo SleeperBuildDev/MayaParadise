@@ -63,6 +63,7 @@
   "js/story/world/map.js",
   "js/story/props.js",
   "js/story/world/stream.js",
+  "js/story/world/windowlights.js",
   "js/story/world/cutaway.js",
   "js/story/world/walker.js",
   "js/story/world/desks.js",

@@ -1,6 +1,6 @@
 // District 1 · the Exercise-Book Quarter (ruled paper; opens Day 2). School, potter's yard, snack shop,
 // playground and a little stage on four east-west streets. Region file format: see regions/index.js.
-import { rng } from '../kit.js';
+import { rng, bulb, hurricane } from '../kit.js';
 import { detail as quarterDetail } from './quarter-detail.js';
 
 export const REGION = { id: 'exercise', name: { my: 'ဗလာစာအုပ်ရပ်', en: 'Exercise-Book Quarter' }, rect: [-71, 40, 79, 160], paper: 'ruled', label: [-36, 50] };
@@ -498,7 +498,7 @@ function washTub(g, f) {
   g.box(-0.8, 0.28, -0.1, 0.4, 0.06, 0.3, '#FFFDF8');
   f.flatR(0.1, 0.3, 2.2, 1.4, 0.0055, '#D6CFC0'); // wet earth
 }
-function bikeShop(g, f) {
+function bikeShop(g, f, it, ctx) {
   f.flatR(0, 0, 3.6, 2.2, 0.0055, '#DCCFB1');
   // a bicycle upside down on its seat and bars, wheels in the air
   const wheel = (x) => { for (const [w, h] of [[0.62, 0.06], [0.06, 0.62]]) g.box(x, 0.66, -0.1, w, h, 0.04, W.ink); g.box(x, 0.66, -0.1, 0.44, 0.44, 0.02, '#8E8173'); };
@@ -512,12 +512,13 @@ function bikeShop(g, f) {
   for (const [x, y, w, h] of [[1.45, 1.52, 0.5, 0.07], [1.45, 1.08, 0.5, 0.07], [1.22, 1.3, 0.07, 0.5], [1.68, 1.3, 0.07, 0.5]]) g.box(x, y, -0.44, w, h, 0.07, W.ink);
   g.box(0.75, 0.12, 0.55, 0.5, 0.24, 0.28, W.red);
   g.box(0.75, 0.26, 0.55, 0.16, 0.04, 0.06, W.ink);
+  hurricane(g, ctx, 0.62, 0.24, 0.55); // on the toolbox: a puncture mended after dark
   for (const [x, c] of [[0.6, '#B9B6B0'], [0.86, W.mustard]]) f.box(x, 0.02, 0.15, 0.2, 0.03, 0.05, c); // spanners
   g.box(1.15, 0.2, 0.25, 0.08, 0.4, 0.08, '#2F6B4F'); // the foot pump
   g.box(1.15, 0.42, 0.25, 0.22, 0.04, 0.04, W.ink);
 }
 /** Ko Zaw's tea stall: a counter under a striped awning, a kettle on a charcoal stove, low tables and stools. */
-function teaStall(g, f) {
+function teaStall(g, f, it, ctx) {
   f.flatR(0, 0.4, 4.6, 4.2, 0.0055, '#DCCFB1');
   // the counter (Ko Zaw stands behind it, facing the stools)
   g.box(0, 0.45, -0.6, 2.2, 0.9, 0.6, W.wood);
@@ -534,6 +535,7 @@ function teaStall(g, f) {
   g.boxR(0, 2.42, -0.35, 2.9, 0.06, 3.0, W.red, 0.1, 0, 0);
   for (const x of [-0.95, 0, 0.95]) g.boxR(x, 2.45, -0.35, 0.36, 0.02, 3.0, W.white, 0.1, 0, 0);
   g.box(0, 2.2, 1.18, 2.9, 0.2, 0.04, W.red);
+  bulb(g, ctx, 0.3, 1.55, 0.75, 2.31); // under the awning's front, between the counter and the tables
   // two low tables with tiny stools
   for (const [tx, tz] of [[-0.85, 1.55], [0.95, 1.7]]) {
     g.box(tx, 0.32, tz, 0.7, 0.05, 0.5, W.woodL);

@@ -5,7 +5,7 @@
 // Wharf colours: weathered silver plank, tar, teal, rust zinc, jute; ledger cream ruled blue and red.
 // Nothing here marks where to go: a street-name board names the street it stands in, nothing more.
 // Every Burmese string is a draft for Maya. Original art only.
-import { shade, rng } from '../kit.js';
+import { shade, rng, bulb } from '../kit.js';
 
 const C = {
   wood: '#B98A5A', woodD: '#7E5A38', woodL: '#CDA577', woodG: '#A89A86', woodGD: '#8C7E6A', woodGL: '#C4B9A6',
@@ -35,7 +35,7 @@ function wStreetSign(g, f, it, ctx) {
 
 /** A hawker under a big striped umbrella: a low table of snacks in tins, a stool, a basket. (Tall: north
  * kerbs only.) it.seed picks the umbrella's colours. */
-function wUmbrella(g, f, it) {
+function wUmbrella(g, f, it, ctx) {
   const r = rng(it.seed || 3);
   const cols = [[C.red, C.cream], [C.teal, C.cream], [C.blue, C.mustard], [C.rust, C.ochre]][Math.floor(r() * 4)];
   f.flat(-1.2, -1.0, 1.3, 1.1, 0.005, C.shadow);
@@ -44,6 +44,7 @@ function wUmbrella(g, f, it) {
   // tipped up into a bowl, fought for the same pixels and flickered in stripes)
   g.parasol(0, 2.4, 0, 1.12, 0.3, cols);
   g.box(0, 2.42, 0, 0.12, 0.12, 0.12, cols[0]);
+  bulb(g, ctx, 0.3, 1.75, 0.55, 2.22, { cap: C.iron, shade: true }); // over the table, under the umbrella's front
   // the table and its tins and jars
   g.box(0, 0.5, 0.35, 1.1, 0.06, 0.62, C.woodL);
   for (const sx of [-0.48, 0.48]) for (const sz of [0.1, 0.6]) g.box(sx, 0.24, sz, 0.05, 0.48, 0.05, C.woodD);

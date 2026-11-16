@@ -24,7 +24,7 @@
 //   drain { len }             a kerbside drain cover strip (decal)
 import { PALETTE } from '../../../game/toon.js';
 import { jitter } from '../../../game/voxel.js';
-import { shade, rng } from '../kit.js';
+import { shade, rng, pane, bulb } from '../kit.js';
 import { folkArms, broom } from '../folk-arms.js';
 
 const K = {
@@ -138,6 +138,7 @@ function stampHall(g, f, it, ctx) {
   g.box(0, H + 0.12, D / 2 + 0.08, W + 0.2, 0.24, 0.3, K.brickD);
   // the gallery: a narrow balcony with lines of stamp sheets drying on it
   g.box(0, H - 1.55, D / 2 + 0.45, W - 0.8, 0.1, 0.8, K.woodL);
+  bulb(g, ctx, -W / 2 + W / bays * 0.5 + 0.7, 2.35, D / 2 + 0.5, H - 1.6); // under the gallery, over the loading bay
   for (let x = -W / 2 + 0.6; x <= W / 2 - 0.6; x += 0.4) g.box(x, H - 1.25, D / 2 + 0.82, 0.05, 0.52, 0.05, K.woodD);
   g.box(0, H - 0.98, D / 2 + 0.82, W - 0.9, 0.06, 0.07, K.goldD);
   g.box(0, H - 0.2, D / 2 + 0.55, W - 1.0, 0.02, 0.02, K.ink);
@@ -147,7 +148,7 @@ function stampHall(g, f, it, ctx) {
     for (let k = 0; k < 4; k++) f.box(x - 0.1 + (k % 2) * 0.2, H - 0.38 - (k >> 1) * 0.22, D / 2 + 0.575, 0.15, 0.17, 0.01, sc[(i + k) % sc.length]);
   }
   // upper windows behind the gallery
-  for (let i = 0; i < bays; i++) { const x = -W / 2 + (W * (i + 0.5)) / bays; g.box(x, H - 0.75, D / 2 + 0.03, 1.4, 0.8, 0.06, K.glass); g.box(x, H - 0.75, D / 2 + 0.06, 0.05, 0.8, 0.03, K.white); }
+  for (let i = 0; i < bays; i++) { const x = -W / 2 + (W * (i + 0.5)) / bays; g.box(x, H - 0.75, D / 2 + 0.03, 1.4, 0.8, 0.06, K.glass); pane(g, x, H - 0.75, D / 2 + 0.03, 1.4, 0.8, 0.06); g.box(x, H - 0.75, D / 2 + 0.06, 0.05, 0.8, 0.03, K.white); }
   // ground floor: the loading bay (shutter half down: you see the press's feet and paper stacks), windows
   const lx = -W / 2 + W / bays * 0.5 + 0.1;
   g.box(lx, 1.2, D / 2 + 0.02, 2.2, 2.0, 0.05, K.dark);
@@ -156,7 +157,7 @@ function stampHall(g, f, it, ctx) {
   g.box(lx - 0.5, 0.55, D / 2 - 0.2, 0.7, 0.6, 0.5, K.iron); // the press's base
   for (let k = 0; k < 3; k++) g.box(lx + 0.5, 0.35 + k * 0.12, D / 2 - 0.15, 0.6, 0.1, 0.45, k % 2 ? K.white : K.envL); // paper stacks
   g.box(lx, 0.06, D / 2 + 0.45, 2.6, 0.12, 0.8, K.stoneD); // the loading step
-  for (let i = 1; i < bays; i++) { const x = -W / 2 + (W * (i + 0.5)) / bays; g.box(x, 1.55, D / 2 + 0.03, 1.3, 1.2, 0.06, K.glass); g.box(x, 1.55, D / 2 + 0.07, 1.3, 0.05, 0.02, K.white); g.box(x, 0.88, D / 2 + 0.12, 1.5, 0.06, 0.2, K.goldD); }
+  for (let i = 1; i < bays; i++) { const x = -W / 2 + (W * (i + 0.5)) / bays; g.box(x, 1.55, D / 2 + 0.03, 1.3, 1.2, 0.06, K.glass); pane(g, x, 1.55, D / 2 + 0.03, 1.3, 1.2, 0.06); g.box(x, 1.55, D / 2 + 0.07, 1.3, 0.05, 0.02, K.white); g.box(x, 0.88, D / 2 + 0.12, 1.5, 0.06, 0.2, K.goldD); }
   // the sawtooth roof: north-light teeth along x
   const teeth = Math.max(2, Math.round(D / 2.6)), td = D / teeth;
   for (let i = 0; i < teeth; i++) {
@@ -211,7 +212,7 @@ function bambooFence(g, f, it) {
   } else seg(-L / 2, L / 2);
   for (let x = -L / 2; x <= L / 2 + 0.01; x += Math.max(1.2, L / Math.ceil(L / 1.6))) g.box(x, 0.5, 0, 0.09, 1.0, 0.09, K.woodD);
 }
-function foodCart(g, f, it) {
+function foodCart(g, f, it, ctx) {
   const r = rng(it.seed || 3), kind = it.kind || 'mohinga';
   const body = [K.teal, K.maroon, K.blue][Math.floor(r() * 3)];
   f.flat(-1.0, -0.6, 1.1, 0.75, 0.004, K.shadow);
@@ -226,6 +227,7 @@ function foodCart(g, f, it) {
   const pc = [K.red, K.cream];
   g.parasol(0.5, 2.21, -0.25, 0.8, 0.2, pc);
   g.box(0.5, 2.24, -0.25, 0.12, 0.08, 0.12, K.red);
+  bulb(g, ctx, 0.5, 1.6, 0.3, 2.06); // a bulb hung under the parasol's front, off the cart's battery
   if (kind === 'mohinga') {
     g.box(-0.3, 1.2, 0, 0.5, 0.32, 0.5, K.tinD); g.box(-0.3, 1.38, 0, 0.54, 0.04, 0.54, K.tin); // the big soup pot
     for (let k = 0; k < 4; k++) f.box(0.25 + (k % 2) * 0.2, 1.08, -0.15 + (k >> 1) * 0.25, 0.16, 0.06, 0.16, K.white); // bowls

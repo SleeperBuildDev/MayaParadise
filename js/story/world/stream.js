@@ -1,6 +1,6 @@
 // Streams the open world in chunks around a focus point (Maya or the car): builds the chunks ahead of
 // time in small slices (a few milliseconds a frame, so nothing hitches), disposes the far ones, and
-// draws every loaded chunk's trees and lamp cores with shared instanced meshes.
+// draws every loaded chunk's trees, lamp cores and lit windows with shared instanced meshes.
 //
 //   const st = createStreamer({ scene, net, edges, shadows, onReady(chunk), onGone(chunk) })
 //   st.update(dt, t, x, z, camera)  every world frame (focus: where the player is; the camera, for culling)
@@ -8,6 +8,7 @@
 //   await st.ensureAsync(x, z) builds every chunk round a point, a slice per frame (behind a page-turn)
 //   st.chunks                  Map 'i,j' -> chunk { i, j, x0, z0, x1, z1, items, state, group }
 //   st.refresh(x0, z0, x1, z1) rebuilds the built chunks over a box at once (a gate opened or closed)
+//   st.windows                 the lit windows (windowlights.js; null with an older daytime.js)
 //   st.stats()                 { loaded, queued, tris }
 //   st.dispose()
 import * as THREE from '../../game/three.js';
@@ -20,13 +21,14 @@ import { disposeMesh } from './kit.js';
 import { createStoryGround } from './ground.js';
 import { fastRaycast, prepareRaycast } from './rayindex.js';
 import { stackFlatsJob, bookNear, BOOK_RECT } from './ground-layers.js';
+import { createWindowLights } from './windowlights.js';
 
 const LOAD_R = 50; // metres from the focus to a chunk's edge: build it
 const DROP_R = 78; // farther than this: dispose it
 const AHEAD = 20; // the camera looks north: the focus sits this far north of the player
 const BUDGET = 3.5; // ms of building per frame while moving
 const TREE_CAP = 600;
-const GLOW_CAP = 200;
+const GLOW_CAP = 400; // (the street lamps, and since 2026-11-16 a bulb or lantern on every stall, cart and shop front)
 // Phone budget (renderer.info per frame, shadow pass included): the camera sees a narrow wedge, so
 // what it cannot see costs nothing, and what is far costs less:
 const OUTLINE_R = 46; // a cell farther than this from the camera drops its outline (it is deep in the haze)
@@ -83,6 +85,7 @@ export function createStreamer({ scene, net, edges, shadows = false, low = false
   }
   const glows = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), basic('#FFE3A0'), GLOW_CAP);
   glows.name = 'ow-glows';
+  const glowSize = glows.userData.size = new Float32Array(GLOW_CAP * 2); // each core's width and height (index.js puts a hidden one back at its own size)
   glows.count = 0;
   root.add(glows);
   // the pool of warm light on the ground under every lamp, lantern and bulb (one draw call; the Home Book's lamps have
@@ -101,6 +104,9 @@ export function createStreamer({ scene, net, edges, shadows = false, low = false
     lampPools.visible = false;
     root.add(lampPools);
   }
+  // the lit windows of every loaded chunk (three draw calls after dark, none by day)
+  const windows = createWindowLights(root, { low });
+  let capWarned = false;
   /** One pool under the glow at (x, y, z): a street lamp's is 4.2 m wide (as the Home Book's), a low bulb's smaller. */
   const POOL_Y = 0.176; // just over the road's top (0.14 + its dashes): a pool is never cut off by the tarmac
   function putPool(i, x, y, z) {
@@ -119,17 +125,23 @@ export function createStreamer({ scene, net, edges, shadows = false, low = false
         if (P.all.length < TREE_CAP) P.all.push(it);
       }
       const G = ch.out.glows;
+      const F0 = ch.out.fitFrom ?? G.length, FS = ch.out.fitSizes;
+      if (ng + G.length / 3 > GLOW_CAP && !capWarned) { capWarned = true; console.warn('[stream] more lamp cores than GLOW_CAP: some lamps are not drawn'); }
       for (let k = 0; k < G.length && ng < GLOW_CAP; k += 3) {
         if (lampPools) putPool(ng, G[k], G[k + 1], G[k + 2]);
-        glows.setMatrixAt(ng++, m4.compose(p.set(G[k], G[k + 1], G[k + 2]), q.identity(), sc.set(0.26, 0.3, 0.26)));
+        // (a street lamp's head, or a fitting's own small core: build.js fitSizes)
+        const f = k >= F0 ? (k - F0) / 3 * 2 : -1, cw = f >= 0 ? FS[f] : 0.26, chh = f >= 0 ? FS[f + 1] : 0.3;
+        glowSize[ng * 2] = cw; glowSize[ng * 2 + 1] = chh;
+        glows.setMatrixAt(ng++, m4.compose(p.set(G[k], G[k + 1], G[k + 2]), q.identity(), sc.set(cw, chh, cw)));
       }
     }
     const X = extraGlows ? extraGlows() : null; // lit Bookmark Desk lamps
-    if (X) for (let k = 0; k < X.length && ng < GLOW_CAP; k += 3) { if (lampPools) putPool(ng, X[k], X[k + 1], X[k + 2]); glows.setMatrixAt(ng++, m4.compose(p.set(X[k], X[k + 1], X[k + 2]), q.identity(), sc.set(0.26, 0.3, 0.26))); }
+    if (X) for (let k = 0; k < X.length && ng < GLOW_CAP; k += 3) { if (lampPools) putPool(ng, X[k], X[k + 1], X[k + 2]); glowSize[ng * 2] = 0.26; glowSize[ng * 2 + 1] = 0.3; glows.setMatrixAt(ng++, m4.compose(p.set(X[k], X[k + 1], X[k + 2]), q.identity(), sc.set(0.26, 0.3, 0.26))); }
     glows.count = ng;
     glows.instanceMatrix.needsUpdate = true;
     if (lampPools) { lampPools.count = ng; lampPools.instanceMatrix.needsUpdate = true; }
     glows.computeBoundingSphere();
+    windows?.rebuild(chunks);
     for (const kind in pools) for (const it of pools[kind].all) {
       it._ry ??= ((it.x * 12.9898 + it.z * 78.233) % 6.283);
       it._ph ??= (it.x * 0.37 + it.z * 0.21) % 6.283;
@@ -467,6 +479,7 @@ export function createStreamer({ scene, net, edges, shadows = false, low = false
     root,
     chunks,
     pools,
+    windows,
     viewCull: true, // (false: blocks off screen are drawn again; for a same-frame comparison)
     /** Builds every chunk near (x, z) right now (used behind a page-turn, e.g. a desk teleport). */
     ensure(x, z) {
@@ -532,6 +545,7 @@ export function createStreamer({ scene, net, edges, shadows = false, low = false
     update(dt, t, x, z, camera = null, fogFar = 1e9) {
       painted?.update();
       if (lampPools) lampPools.visible = poolMat.opacity > 0.015 && lampPools.count > 0; // (by day: not drawn at all)
+      windows?.update();
       scanT -= dt;
       const fx = x, fz = z - AHEAD;
       if (scanT <= 0) {
@@ -581,7 +595,7 @@ export function createStreamer({ scene, net, edges, shadows = false, low = false
         loaded++;
         ch.group.traverse((o) => { if (o.geometry?.index) tris += o.geometry.index.count / 3; });
       }
-      return { loaded, queued: queue.length + (current ? 1 : 0), tris: Math.round(tris), trees: pools.padauk.list.length + pools.rain.list.length, glows: glows.count, ground: painted ? painted.info().mode : 'off' };
+      return { loaded, queued: queue.length + (current ? 1 : 0), tris: Math.round(tris), trees: pools.padauk.list.length + pools.rain.list.length, glows: glows.count, windows: windows?.count ?? 0, ground: painted ? painted.info().mode : 'off' };
     },
     smokePoints() {
       const out = smokeBuf;
@@ -595,6 +609,7 @@ export function createStreamer({ scene, net, edges, shadows = false, low = false
       for (const kind in pools) { pools[kind].mesh.geometry.dispose(); pools[kind].mesh.dispose(); pools[kind].outline.dispose(); }
       glows.geometry.dispose(); glows.dispose();
       if (lampPools) { lampPools.geometry.dispose(); lampPools.dispose(); } // (the material is the Home Book's: kept)
+      windows?.dispose();
       if (treeMats) { treeMats.mat.dispose(); treeMats.depth.dispose(); }
       painted?.dispose();
       scene.remove(root);

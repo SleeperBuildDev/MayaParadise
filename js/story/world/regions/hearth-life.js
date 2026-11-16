@@ -24,7 +24,7 @@
 //   kiteLine { len }    kites hung to dry on a line between two posts (kite workshop yard)
 // Every Burmese string in the district is a draft for Maya (there is none in this file: no text signs, so no
 // extra draw calls).
-import { rng } from '../kit.js';
+import { rng, hurricane } from '../kit.js';
 import { C } from '../art/hearth.js';
 
 const K = {
@@ -155,7 +155,7 @@ function baskets(g, f, it) {
   g.boxR(0.0, 0.42, -0.3, 1.0, 0.84, 0.04, C.bamboo, 0.3, 0, 0); // the winnowing tray leaning behind
 }
 
-function teaCorner(g, f) {
+function teaCorner(g, f, it, ctx) {
   f.flat(-1.0, -0.8, 1.0, 0.8, 0.005, C.shadow);
   g.box(0, 0.4, 0, 0.9, 0.05, 0.6, C.woodL);
   for (const sx of [-0.38, 0.38]) for (const sz of [-0.24, 0.24]) g.box(sx, 0.2, sz, 0.05, 0.4, 0.05, C.woodD);
@@ -164,6 +164,7 @@ function teaCorner(g, f) {
   g.box(-0.08, 0.54, 0, 0.1, 0.03, 0.03, C.tinD);
   for (const [x, z] of [[0.12, -0.12], [0.26, 0.1], [0.05, 0.16]]) g.box(x, 0.47, z, 0.08, 0.09, 0.08, C.white);
   g.box(0.3, 0.44, -0.16, 0.18, 0.04, 0.14, C.crustL); // a plate of fried snacks
+  hurricane(g, ctx, -0.3, 0.425, -0.19, C.tinD);
 }
 
 function gutter(g, f, it) {

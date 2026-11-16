@@ -10,7 +10,7 @@
 // while LIVE has that name the static one is not drawn (its keep-out stays), so the live prop can stand
 // in its place without two copies overlapping. regions/junction.js `useLive(ow, names, on)` sets LIVE and
 // rebuilds the Junction's chunks. Nothing here ever marks where to go.
-import { shade, rng } from '../kit.js';
+import { shade, rng, pane, bulb, hurricane, wallLantern } from '../kit.js';
 import { PALETTE } from '../../../game/toon.js';
 import { jitter } from '../../../game/voxel.js';
 
@@ -90,6 +90,7 @@ function win(g, f, x, y, z, w, h, o = {}) {
   const fr = o.frame || J.ink;
   g.box(x, y, z, w + 0.14, h + 0.14, 0.08, fr);
   g.box(x, y, z + 0.025, w, h, 0.06, o.dark ? J.inside : J.glass);
+  pane(g, x, y, z + 0.025, w, h, 0.06);
   if (!o.dark) g.box(x - w * 0.22, y + h * 0.18, z + 0.058, w * 0.28, h * 0.4, 0.004, J.glassD); // a reflection
   face(f, x, y, z + 0.07, 0.04, h, fr);
   face(f, x, y + h * 0.12, z + 0.07, w, 0.04, fr);
@@ -359,6 +360,7 @@ function jLetter(g, f, it, ctx) {
   for (const sx of [-1, 1]) g.box(sx * W / 2, H2 / 2 + 0.1, fz, 0.2, H2 - 0.2, 0.2, J.blueD);
   // the narrow blue door, open inward: dark doorway, the leaf swung back, a glimpse of the table and jars
   g.box(DX, 2.22, fz + 0.02, 1.16, 0.12, 0.12, J.blueD); // the door frame
+  wallLantern(g, ctx, DX - 0.92, 1.9, fz + 0.32, 0.32, { kind: 'paper', col: J.blueD });
   for (const sx of [-1, 1]) g.box(DX + sx * 0.53, 1.2, fz + 0.02, 0.1, 2.04, 0.12, J.blueD);
   g.box(DX - 0.44, 1.2, fz - 0.46, 0.06, 1.96, 0.8, J.blue); // the leaf, swung in against the wall
   g.box(DX - 0.4, 1.2, fz - 0.8, 0.04, 0.05, 0.05, J.brass);
@@ -421,6 +423,7 @@ function jCorner(g, f, it, ctx) {
   g.boxR(-0.1, 0.72, fz + 0.38, 0.03, 0.42, 0.03, J.woodL, 0.3, 0, 0.4); // a brush in a tin
   // a little door at the west end
   door(g, f, -2.15, 0.2, fz - 0.07, 0.85, 2.1, J.red);
+  bulb(g, ctx, 0.4, 2.15, fz - 0.4, H1 - 0.05); // a bulb in the shop's opening: he paints late
   // the shop sign he is repainting: half fresh, half still faded; a drip below it
   g.box(0.4, 2.62, fz + 0.06, 3.5, 0.62, 0.08, J.ink);
   ctx.signs.push({ x: 0.4, y: 2.62, z: fz + 0.11, w: 3.3, h: 0.5, lines: [{ text: 'လက်ရေး ဆိုင်းဘုတ်', size: 52, color: '#B8323A' }], bg: '#F6F0E2', border: null, width: 512, height: 80 });
@@ -516,6 +519,7 @@ function jSchool(g, f, it, ctx) {
   // the hand bell in a little frame over the door, its rope looped on a hook
   g.box(0, 2.62, fz + 0.18, 0.7, 0.07, 0.07, J.woodD);
   for (const sx of [-0.32, 0.32]) g.box(sx, 2.78, fz + 0.18, 0.06, 0.38, 0.06, J.woodD);
+  wallLantern(g, ctx, 1.25, 2.0, fz + 0.32, 0.32, { col: J.ink }); // for the evening lessons
   g.box(0, 2.95, fz + 0.18, 0.76, 0.07, 0.07, J.woodD);
   oct(g, 0, 2.76, fz + 0.18, 0.24, 0.24, J.brass);
   g.box(0, 2.6, fz + 0.18, 0.08, 0.06, 0.08, J.goldD);
@@ -572,6 +576,7 @@ function jPress(g, f, it, ctx) {
   g.box(0, OH / 2 + 0.22, fz + 0.06, OW + 0.36, 0.2, 0.2, J.ink);
   g.box(0, OH + 0.32, fz + 0.06, OW + 0.5, 0.22, 0.24, J.ink);
   for (const sx of [-1, 1]) g.box(sx * (OW / 2 + 0.09), OH / 2 + 0.22, fz + 0.06, 0.18, OH, 0.24, J.ink);
+  wallLantern(g, ctx, OW / 2 + 0.6, 2.3, fz + 0.43, 0.33, { col: J.ink }); // the press works into the night
   for (const sx of [-1, 1]) {
     const hx = sx * (OW / 2 + 0.05);
     g.boxR(hx + sx * 0.12, OH / 2 + 0.24, fz + 0.62, 0.08, OH - 0.08, 1.25, J.woodG, 0, sx * 0.15, 0);
@@ -592,6 +597,7 @@ function jPress(g, f, it, ctx) {
     const x = sx * (W / 2 - 1.15);
     g.box(x, 1.75, fz + 0.06, 1.2, 1.25, 0.08, J.ink);
     g.box(x, 1.75, fz + 0.08, 1.04, 1.1, 0.06, J.glass);
+    pane(g, x, 1.75, fz + 0.08, 1.04, 1.1, 0.06);
     for (const ox of [-0.26, 0.26]) face(f, x + ox, 1.75, fz + 0.12, 0.03, 1.1, J.ink);
     for (const oy of [-0.27, 0.0, 0.27]) face(f, x, 1.75 + oy, fz + 0.12, 1.04, 0.03, J.ink);
     g.box(x, 1.12, fz + 0.15, 1.36, 0.08, 0.22, J.stone);
@@ -773,6 +779,7 @@ function jCart(g, f, it, ctx) {
   oct(g, 0.35, Y + 0.42, 0, 0.26, 0.24, J.tinL);
   g.box(0.5, Y + 0.48, 0, 0.18, 0.04, 0.04, J.tinL);
   smoke(g, ctx, 0.35, Y + 0.65, 0);
+  hurricane(g, ctx, -0.1, Y + 0.04, 0.22); // on the tray's corner
   g.box(-0.25, Y + 0.06, 0, 0.5, 0.04, 0.4, J.tinD);
   for (let k = 0; k < 6; k++) g.box(-0.42 + (k % 3) * 0.17, Y + 0.14, -0.1 + Math.floor(k / 3) * 0.2, 0.08, 0.12, 0.08, J.glass);
   // the rail along the front, four heavy ink jars hung on it

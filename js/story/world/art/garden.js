@@ -8,7 +8,7 @@
 //
 // Each draw(g, f, it, ctx): g = outlined solids (item-local), f = flat ground decals, ctx.glows / signs / smoke.
 // Exports: GARDEN_ART (buildings: h, map, obstacles) and GARDEN_PROP (props) for regions/garden.js to merge.
-import { shade, rng } from '../kit.js';
+import { shade, rng, pane, hurricane } from '../kit.js';
 import { jitter } from '../../../game/voxel.js';
 
 export const K = {
@@ -80,6 +80,7 @@ function leanRoof(g, W, D, y0, y1, col, { over = 0.35, ribs = true } = {}) {
 function win(g, x, y, z, w, h, shut, { shutters = true, lit = false, curtain = null, box = null } = {}) {
   g.box(x, y, z, w + 0.14, h + 0.14, 0.08, K.white);
   g.box(x, y, z + 0.02, w, h, 0.06, lit ? '#F6D58E' : K.glass);
+  pane(g, x, y, z + 0.02, w, h, 0.06, 1, lit);
   if (curtain) g.box(x - w * 0.22, y + 0.02, z + 0.055, w * 0.42, h * 0.92, 0.02, curtain);
   g.box(x, y, z + 0.06, 0.04, h, 0.03, K.white);
   g.box(x, y + 0.03, z + 0.06, w, 0.04, 0.03, K.white);
@@ -628,6 +629,7 @@ function stall(g, f, it, ctx) {
   g.box(-W / 4, 0.72, 0.0, 0.7, 0.14, 0.14, K.strawD);
   g.box(W / 4, 0.7, -0.05, 0.5, 0.1, 0.5, K.bamboo); g.box(W / 4, 0.8, -0.05, 0.44, 0.1, 0.44, K.bambooL);
   g.box(0, 0.66, 0.36, W - 0.2, 0.03, 0.12, shade(col, 0.9));
+  hurricane(g, ctx, 0, 0.65, -0.15); // left on low for the night (the Garden keeps early hours: a small light)
   if (it.slate) {
     g.box(W / 2 - 0.45, 0.95, 0.47, 0.62, 0.48, 0.05, K.woodD);
     ctx.signs.push({ x: W / 2 - 0.45, y: 0.95, z: 0.51, w: 0.56, h: 0.42, lines: it.slate, bg: '#3E4A3F', border: null, width: 256, height: 192 });

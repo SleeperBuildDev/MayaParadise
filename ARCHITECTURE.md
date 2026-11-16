@@ -173,7 +173,10 @@ The full content (prices, packages, links) lives in `index.html`; the original c
   things drawn with a depth material patched by `nightWarp()` (the story chunks, instanced and batched casters, the
   Home Book) do the same per vertex from a small texture of the lights. A shadow depends only on where its own caster
   stands: nothing else moves when the player walks. Far from every light it is the moon's. Lights are read from the
-  `glows` / `ow-glows` instanced meshes (`glowSource`) and `day.windowSource`; add others with `ns.addSource(fn)`.
+  `glows` / `ow-glows` instanced meshes (`glowSource`) and `day.windowSource`; add others with `ns.addSource(fn)` (the
+  story towns' lit windows do: `js/story/world/windowlights.js`, three instanced quads for the whole open world, the
+  windows recorded at chunk build time by every window helper through `kit.js pane()`; the stalls', carts' and shop
+  fronts' bulbs and lanterns are `kit.js bulb / hurricane / wallLantern`, one shared lamp core each).
   Never turn the shadow light itself toward a lamp (tried on 2026-11-16: every shadow on screen swung).
 - **World:** the car is road-locked (`world.drive`); taps/dock buttons use the autopilot. Arriving
   shows the place card; the autopilot auto-enters. `atPad` is ignored while the autopilot drives.

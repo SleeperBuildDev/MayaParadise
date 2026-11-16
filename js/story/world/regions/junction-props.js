@@ -4,7 +4,7 @@
 // (PROP; format at the top of regions/index.js). Item-local: origin = the item's (x, z), front = +Z, metres.
 // Original blocky art in the Junction's newsprint greys and ink. Nothing here marks where to go.
 // Every Burmese string is a draft for Maya.
-import { rng } from '../kit.js';
+import { rng, bulb } from '../kit.js';
 import { J, rotBox, face } from '../art/junction.js';
 
 const TAU = Math.PI * 2;
@@ -35,6 +35,7 @@ function jStall(g, f, it, ctx) {
   // the awning: tin, ink edge, a fringe of red
   g.boxR(0, 2.55, 0.15, 2.8, 0.06, 1.5, J.tin, 0.18, 0, 0);
   g.box(0, 2.42, 0.9, 2.8, 0.08, 0.05, J.red);
+  bulb(g, ctx, 0.6, 1.95, 0.6, 2.44); // over the counter: the evening edition
   // stacks of papers on the counter (newsprint, a red mast-head on top), and the pegged line behind
   for (let k = 0; k < 5; k++) {
     const x = -1.0 + k * 0.5, h = 0.08 + r() * 0.12;

@@ -25,7 +25,7 @@
 //   flatStone
 import { PALETTE } from '../../../game/toon.js';
 import { jitter } from '../../../game/voxel.js';
-import { shade, rng } from '../kit.js';
+import { shade, rng, pane, bulb, hurricane, wallLantern } from '../kit.js';
 
 export const K = {
   kraft: '#D6B486', kraftD: '#B8935F', kraftL: '#E7CFA4', env: '#EBDCBF', envL: '#F5EBD6', cream: '#F6EEDB', paper: '#FBF6EA',
@@ -60,6 +60,7 @@ function win(g, x, y, z, w, h, shut, curtain = K.white) {
   const f = FLAT_G || g;
   g.box(x, y, z, w + 0.14, h + 0.14, 0.08, K.white);
   f.box(x, y, z + 0.045, w, h, 0.02, K.glass); // (pane, curtain and mullion unoutlined: the phone budget)
+  pane(g, x, y, z + 0.045, w, h, 0.02);
   f.box(x, y + h * 0.18, z + 0.06, w * 0.92, h * 0.5, 0.01, curtain);
   f.box(x, y, z + 0.068, 0.05, h, 0.01, K.white);
   g.box(x, y - h / 2 - 0.09, z + 0.08, w + 0.26, 0.06, 0.18, K.goldD);
@@ -161,7 +162,7 @@ function stampRoof(g, cx, zb, yb, zf, yf, w, col, motif = 0, striped = false) {
 }
 
 /** One storey's worth of shop front: a half-rolled shutter and shelves of goods (W wide, front z). */
-function shopFront(g, f, W, z, seed, H = 2.6) {
+function shopFront(g, f, ctx, W, z, seed, H = 2.6) {
   const r = rng(seed);
   g.box(0, H / 2 + 0.1, z - 0.1, W - 0.5, H - 0.1, 0.06, '#3A2E25');
   const goods = ['#E2B33C', '#C8323C', '#2F5DB3', '#FFFDF8', '#4E8C86', '#F3B27A', '#D6B486', '#E8A0A8'];
@@ -170,6 +171,7 @@ function shopFront(g, f, W, z, seed, H = 2.6) {
     for (let x = -W / 2 + 0.6; x < W / 2 - 0.5; x += 0.5) f.box(x, 0.72 + k * 0.6, z, 0.36, 0.28 + (r() < 0.3 ? 0.1 : 0), 0.22, goods[Math.floor(r() * goods.length)]);
   }
   g.box(0, H - 0.05, z + 0.02, W - 0.4, 0.42, 0.16, '#B9B0A2'); // the rolled shutter
+  bulb(g, ctx, 0, H - 0.8, z + 0.3, H - 0.26); // the shop's bulb, hung from the shutter box over the goods
   for (let k = 0; k < 3; k++) f.box(0, H - 0.2 + k * 0.11, z + 0.11, W - 0.4, 0.03, 0.02, '#8E8173');
   for (const sx of [-1, 1]) g.box(sx * (W / 2 - 0.12), H / 2 + 0.1, z, 0.24, H, 0.24, K.envL);
   // goods spilling out front: baskets, a sack, a stool for the keeper
@@ -229,7 +231,7 @@ function mkHouse(g, f, it, ctx) {
   g.box(0, 0.32, D / 2 - 0.45, W, 0.3, 0.1, shade(wall, 0.85));
   // ground floor: a shop front (goods, shutter) or a home (door, windows, a bench)
   const shop = it.shop ?? r() < 0.6;
-  if (shop) shopFront(g, f, W, D / 2 - 0.5, seed, H1);
+  if (shop) shopFront(g, f, ctx, W, D / 2 - 0.5, seed, H1);
   else {
     const dx = (r() - 0.5) * (W - 2.6);
     doorway(g, dx, D / 2 - 0.5, 1.0, 2.1, shut);
@@ -313,6 +315,7 @@ function postOffice(g, f, it, ctx) {
   const dx = poDoorX(W);
   doorway(g, dx, D / 2 + 0.02, 1.6, 2.4, K.greenD, K.woodD);
   g.box(dx, 2.86, D / 2 + 0.06, 1.7, 0.36, 0.05, K.glass);
+  pane(g, dx, 2.86, D / 2 + 0.06, 1.7, 0.36, 0.05); // (the fanlight)
   for (const k of [-0.5, 0, 0.5]) g.box(dx + k, 2.86, D / 2 + 0.09, 0.04, 0.36, 0.02, K.white);
   g.box(dx, 0.2, D / 2 + 0.6, 2.4, 0.08, 0.4, K.stoneD);
   // windows with green shutters either side; the waiting bench under the west one (outside)
@@ -406,6 +409,7 @@ function riceShop(g, f, it, ctx) {
   g.box(0, 0.38, D / 2 + 0.03, W, 0.3, 0.1, K.terraD);
   doorway(g, 0, D / 2 + 0.02, 1.4, 2.2, K.woodL);
   for (const sx of [-1, 1]) win(g, sx * 2.4, 1.6, D / 2 + 0.03, 1.3, 0.95, K.terra, K.cream);
+  wallLantern(g, ctx, 1.25, 1.75, D / 2 + 0.32, 0.32, { kind: 'paper', col: K.terraD }); // by the door: whoever comes late still finds it
   // a long bench either side of the door for whoever is waiting, and the water jar with a cup
   for (const sx of [-1, 1]) { g.box(sx * 2.4, 0.42, D / 2 + 0.45, 1.6, 0.07, 0.38, K.woodL); for (const k of [-0.65, 0.65]) g.box(sx * 2.4 + k, 0.2, D / 2 + 0.45, 0.07, 0.4, 0.3, K.woodD); }
   g.box(W / 2 - 0.45, 0.35, D / 2 + 0.55, 0.5, 0.7, 0.5, K.terra);
@@ -445,6 +449,7 @@ function sundries(g, f, it, ctx) {
   g.box(1.9, 0.26, D / 2 + 0.55, 0.34, 0.05, 0.34, K.red); g.box(1.9, 0.12, D / 2 + 0.55, 0.26, 0.24, 0.26, K.redD);
   // a tin awning and a flat roof with a hand-painted board «ကုန်စုံ»
   g.boxR(0, 2.62, D / 2 + 0.55, W + 0.2, 0.06, 1.2, K.teal, 0.25, 0, 0);
+  bulb(g, ctx, -1.1, 2.0, D / 2 + 0.95, 2.49); // a bulb under the awning's front edge (seen from the street), over the window
   for (let k = 0; k < 7; k++) g.boxR(-W / 2 + 0.3 + k * ((W - 0.6) / 6), 2.66, D / 2 + 0.55, 0.05, 0.03, 1.2, shade(K.teal, 0.8), 0.25, 0, 0);
   g.box(0, H + 0.3, 0, W + 0.2, 0.2, D + 0.2, K.goldD);
   g.box(0, H + 0.62, D / 2 - 0.05, W - 0.4, 0.5, 0.12, wall);
@@ -526,6 +531,7 @@ function stampStall(g, f, it, ctx) {
   }
   g.box(0, 1.7, -D / 2 + 0.1, W - 0.16, 0.05, 0.05, K.woodD);
   stampRoof(g, 0, -D / 2 - 0.05, 2.25, D / 2 + 0.3, 1.95, W + 0.35, col, it.motif ?? 1 + Math.floor(r() * 5));
+  bulb(g, ctx, 0, 1.62, D / 2 + 0.0, 1.97); // one bare bulb under the stamp's front edge (seen from the street), over the counter
   // the counter: a plank table with a cloth front, goods on it
   const cz = D / 2 - 0.35;
   g.box(0, 0.74, cz, W - 0.3, 0.07, 0.6, K.woodL);
@@ -637,7 +643,7 @@ function pageCrease(g, f, it) {
   }
   f.flat(-gap / 2, -0.06, gap / 2, 0.06, 0.16, '#D8CCB2');
 }
-function thanaka(g, f) {
+function thanaka(g, f, it, ctx) {
   // Grandmother Pwa Pwa's: a round stone slab on a low stand, thanaka logs, a cup of water, a low stool, a mirror
   f.flat(-0.9, -0.6, 1.0, 0.7, 0.004, K.shadow);
   g.box(0, 0.2, 0, 0.7, 0.4, 0.5, K.woodD);
@@ -647,8 +653,9 @@ function thanaka(g, f) {
   g.box(-0.5, 0.48, 0.05, 0.12, 0.12, 0.12, K.white);
   g.box(-0.6, 0.2, -0.4, 0.34, 0.05, 0.34, K.blue); g.box(-0.6, 0.09, -0.4, 0.26, 0.18, 0.26, K.blueD);
   g.box(0.3, 0.75, -0.24, 0.3, 0.38, 0.04, K.goldD); f.box(0.3, 0.75, -0.21, 0.22, 0.28, 0.01, K.glass);
+  hurricane(g, ctx, -0.22, 0.49, -0.14); // for the evening grinders
 }
-function planeTable(g, f) {
+function planeTable(g, f, it, ctx) {
   // Ma Thiri's: a low table of neatly folded paper planes, rows of them
   f.flat(-0.8, -0.5, 0.9, 0.6, 0.004, K.shadow);
   g.box(0, 0.6, 0, 1.3, 0.06, 0.65, K.woodL);
@@ -660,6 +667,7 @@ function planeTable(g, f) {
     f.boxR(x - 0.03, 0.69, z, 0.12, 0.04, 0.02, K.white, 0, 0, 0);
   }
   g.box(-0.85, 0.22, -0.1, 0.32, 0.05, 0.32, K.mustard); g.box(-0.85, 0.1, -0.1, 0.24, 0.2, 0.24, shade(K.mustard, 0.8));
+  hurricane(g, ctx, 0.52, 0.63, 0.24);
 }
 function bambooPost(g, f) {
   // Ma Thiri's own post (Day 4): bamboo, three node rings, old pale string marks near the top
@@ -698,7 +706,7 @@ function envCrates(g, f, it) {
     f.boxR(x + 0.06, y + 0.06, 0.33, 0.24, 0.02, 0.01, K.red, 0, 0, 0.5);
   }
 }
-function riceCart(g, f) {
+function riceCart(g, f, it, ctx) {
   // Daw Kyar's hand cart with one rice sack, shafts down
   f.flat(-1.1, -0.6, 1.2, 0.7, 0.004, K.shadow);
   g.box(0, 0.62, 0, 1.4, 0.08, 0.9, K.wood);
@@ -708,6 +716,7 @@ function riceCart(g, f) {
   g.box(0.15, 0.95, 0, 0.75, 0.55, 0.6, K.rice); g.box(0.15, 1.25, 0, 0.45, 0.1, 0.4, '#E8E0CC');
   g.box(0.15, 0.95, 0.31, 0.3, 0.2, 0.01, K.green); // a printed sack mark
   g.box(-0.4, 0.75, 0.0, 0.2, 0.14, 0.3, K.tin); // a scoop
+  hurricane(g, ctx, 0.6, 0.66, 0.26); // tied at the cart's corner
 }
 function flatStone(g, f) {
   // the dogs' corner's flat stone (the bowls go on it) and the sacking they sleep on
@@ -798,7 +807,7 @@ function postBox(g, f) {
   g.box(0, 0.85, 0.25, 0.3, 0.06, 0.02, K.ink); g.box(0, 0.6, 0.25, 0.24, 0.16, 0.02, K.white);
   f.flat(-0.4, -0.35, 0.5, 0.45, 0.004, K.shadow);
 }
-function lowTea(g, f, it) {
+function lowTea(g, f, it, ctx) {
   // a street tea table: low table, four tiny stools, glasses and a pot
   const r = rng(it.seed || 2), cs = [K.red, K.blue, K.green, K.mustard];
   f.flat(-0.9, -0.7, 1.0, 0.8, 0.004, K.shadow);
@@ -806,6 +815,7 @@ function lowTea(g, f, it) {
   for (const sx of [-0.38, 0.38]) for (const sz of [-0.24, 0.24]) g.box(sx, 0.2, sz, 0.05, 0.4, 0.05, K.woodD);
   f.box(-0.15, 0.52, 0, 0.16, 0.16, 0.16, K.white); f.box(-0.15, 0.62, 0, 0.08, 0.04, 0.08, K.gold);
   for (const [x, z] of [[0.12, 0.12], [0.26, -0.08]]) f.box(x, 0.49, z, 0.07, 0.1, 0.07, '#E9C79A');
+  hurricane(g, ctx, 0.3, 0.445, 0.19);
   for (const [x, z, k] of [[-0.75, 0, 0], [0.75, 0, 1], [0, 0.55, 2], [0, -0.55, 3]]) { const c = cs[(k + Math.floor(r() * 4)) % 4]; g.box(x, 0.26, z, 0.3, 0.05, 0.3, c); g.box(x, 0.12, z, 0.22, 0.24, 0.22, shade(c, 0.8)); }
 }
 function hawkerMat(g, f, it) {
@@ -843,7 +853,7 @@ function planters(g, f, it) {
     f.box(x, h + 0.32, 0, 0.14, 0.12, 0.14, cols[Math.floor(r() * cols.length)]);
   }
 }
-function scribe(g, f) {
+function scribe(g, f, it, ctx) {
   // the public letter-writer's table: a typewriter, a stack of envelopes, an ink pot, two stools, a parasol
   f.flat(-1.0, -0.7, 1.1, 0.8, 0.004, K.shadow);
   g.box(0, 0.72, 0, 1.1, 0.06, 0.6, K.woodL);
@@ -857,6 +867,7 @@ function scribe(g, f) {
   // stripes and holes on phones while the camera moved), a cap on top
   g.parasol(0.75, 2.02, 0, 0.86, 0.2, [K.red, K.cream]);
   g.box(0.75, 2.04, 0.0, 0.12, 0.08, 0.12, K.red);
+  bulb(g, ctx, 0.6, 1.45, 0.45, 1.9); // hung under the parasol's front: the letters are written after dark too
 }
 function handcart(g, f, it) {
   // a two-wheeled handcart of parcels and a basket of stamps' wrapping paper

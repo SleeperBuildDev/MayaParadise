@@ -198,15 +198,33 @@ function buildLampPools(glows) {
  * Returns { panes, halos, spills, groups, count } (opacity driven by state.windows) or null.
  */
 const GLASS = new THREE.Color('#BFD9EC'); // PALETTE.skyTop: the window-glass colour in landmarks.js
-function buildWindowLights(root) {
+/** The three materials of a set of window lights: the lit pane (vertex colours: each window's warmth), the halo and
+ *  the ground spill. Their opacity is the hour's (setWindowLight). */
+let haloTex = null;
+function windowMaterials() {
   const paneMat = new THREE.MeshBasicMaterial({ color: '#FFC46E', transparent: true, opacity: 0, depthWrite: false, toneMapped: false, fog: true, vertexColors: true });
-  const haloTex = discTexture('rgba(255,200,120,0.9)', 'rgba(255,170,90,0.3)', 0.38);
+  haloTex ||= discTexture('rgba(255,200,120,0.9)', 'rgba(255,170,90,0.3)', 0.38);
   const haloMat = new THREE.MeshBasicMaterial({ map: haloTex, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false, fog: true, side: THREE.DoubleSide });
   // (one pass, not three's two for a see-through double-sided material: each halo is a flat quad, drawn once either
   // way, and added light does not care about order. The two passes flagged the material for a new program twice
   // per mesh per frame, garbage that ended in GC pauses; perf pass 2, 2026-11-15)
   haloMat.forceSinglePass = true;
   const spillMat = new THREE.MeshBasicMaterial({ map: haloTex, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false, fog: true });
+  return { panes: paneMat, halos: haloMat, spills: spillMat };
+}
+function setWindowLight(m, w) {
+  m.panes.opacity = Math.min(1, w * 0.95);
+  m.halos.opacity = w * 0.85;
+  m.spills.opacity = w * 0.75;
+}
+/** The story towns' window lights (js/story/world/windowlights.js): their own set of the same three materials (drawn
+ *  instanced there; one material drawn both instanced and not costs three.js a program-key rework at each switch),
+ *  made on the first applyWorld so their opacity is always the hour's. */
+let townWin = null;
+let winNow = 0; // (the hour's window light as last applied: a set made later starts from it, not dark)
+export function townWindowMaterials() { if (!townWin) { townWin = windowMaterials(); setWindowLight(townWin, winNow); } return townWin; }
+function buildWindowLights(root) {
+  const { panes: paneMat, halos: haloMat, spills: spillMat } = windowMaterials();
   const isActor = (o) => { for (let q = o; q; q = q.parent) if (/car|maya/i.test(q.name || '')) return true; return false; };
   const meshes = [];
   root.traverse((o) => { if (o.isMesh && !o.userData.isOutline && o.geometry?.attributes?.color && o.geometry?.attributes?.normal && !isActor(o)) meshes.push(o); });
@@ -624,12 +642,11 @@ export function createDaytime({ renderer, tier = 'mid', params = null, baseExpos
       // warm light from the house windows after dark
       if (windowLights === undefined) windowLights = buildWindowLights(world.root || scene);
       if (windowLights) {
-        const w = s.windows;
-        windowLights.panes.opacity = Math.min(1, w * 0.95);
-        windowLights.halos.opacity = w * 0.85;
-        windowLights.spills.opacity = w * 0.75;
-        for (const g of windowLights.groups) g.visible = w > 0.02;
+        setWindowLight(windowLights, s.windows);
+        for (const g of windowLights.groups) g.visible = s.windows > 0.02;
       }
+      winNow = s.windows;
+      setWindowLight(townWindowMaterials(), s.windows); // (the story towns' windows: they come on with the Home Book's)
       if (renderer) renderer.toneMappingExposure = baseExposure * s.exposure;
       return s;
     },

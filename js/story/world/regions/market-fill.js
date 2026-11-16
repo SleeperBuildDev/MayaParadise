@@ -17,7 +17,7 @@
 //   loom                a back-strap weaver's frame under a little lean-to (Ink Lane's weaver)
 import { PALETTE } from '../../../game/toon.js';
 import { jitter } from '../../../game/voxel.js';
-import { shade, rng } from '../kit.js';
+import { shade, rng, pane } from '../kit.js';
 
 const PI = Math.PI;
 const K = {
@@ -59,6 +59,7 @@ function hipRoof(g, W, D, y0, color) {
 function window_(g, f, x, y, z, w, h, shut) {
   g.box(x, y, z, w + 0.12, h + 0.12, 0.07, K.white);
   f.box(x, y, z + 0.04, w, h, 0.02, K.glass);
+  pane(g, x, y, z + 0.04, w, h, 0.02);
   f.box(x, y + h * 0.15, z + 0.06, w * 0.9, h * 0.45, 0.01, K.cream);
   if (shut) for (const sx of [-1, 1]) g.box(x + sx * (w / 2 + 0.17), y, z + 0.04, 0.26, h, 0.05, shut);
 }

@@ -20,7 +20,7 @@
 //   wPlankWalk { len }             a raised plank walk across a muddy yard (low; walkable over)
 //   wPuddle { w, d }               a pale wet patch (decal)
 //   wDeckLitter { w, d, kind, seed } straw, rice spill, fish scales, a wet trail, chalk tally, rope end (decal)
-import { shade, rng } from '../kit.js';
+import { shade, rng, hurricane } from '../kit.js';
 import { folkArms, broom, stick } from '../folk-arms.js';
 
 const C = {
@@ -164,7 +164,7 @@ function wShrub(g, f, it) {
 }
 
 /** A low tea corner under the eaves: a low table, tiny stools, a kettle and glasses. */
-function wTeaCorner(g, f, it) {
+function wTeaCorner(g, f, it, ctx) {
   const r = rng(it.seed || 7);
   f.flatR(0, 0, 2.0, 1.6, 0.004, C.shadow, 0);
   g.box(0, 0.32, 0, 0.9, 0.05, 0.6, C.woodL);
@@ -172,6 +172,7 @@ function wTeaCorner(g, f, it) {
   g.box(-0.15, 0.42, 0, 0.18, 0.16, 0.16, C.white); // the kettle
   g.box(-0.02, 0.45, 0, 0.1, 0.04, 0.04, C.white);
   for (let k = 0; k < 3; k++) g.box(0.12 + k * 0.1, 0.39, (k % 2 ? 0.1 : -0.12), 0.06, 0.09, 0.06, '#E9C9A0');
+  hurricane(g, ctx, -0.3, 0.345, -0.18);
   for (const [x, z] of [[-0.75, 0.1], [0.75, -0.05], [0.1, 0.62]]) { const c = pick(r, [C.red, C.blue, C.leaf]); g.box(x, 0.2, z, 0.3, 0.04, 0.3, c); g.box(x, 0.09, z, 0.22, 0.18, 0.22, shade(c, 0.8)); }
 }
 

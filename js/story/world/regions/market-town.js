@@ -28,7 +28,7 @@
 // are moved a step aside, not lost, where there is room.
 import { PALETTE } from '../../../game/toon.js';
 import { jitter } from '../../../game/voxel.js';
-import { shade, rng } from '../kit.js';
+import { shade, rng, pane, bulb, hurricane } from '../kit.js';
 import { TOWN_HELLO } from './market-townfolk.js';
 
 const PI = Math.PI;
@@ -70,6 +70,7 @@ function gableTri(G, axis, at, half, y0, rise, color, n) {
 /** a window: a dark pane, a sill, and its two shutters folded open (all flat panels) */
 function win(f, x, y, z, w, h, shut, n = 1) {
   pz(f, x, y, z, w, h, K.glass, n);
+  pane(f, x, y, z, w, h, 0, n);
   pz(f, x, y + h * 0.18, z + 0.005 * n, w * 0.86, h * 0.36, K.cream, n);
   pz(f, x, y - h / 2 - 0.05, z + 0.006 * n, w + 0.16, 0.08, K.white, n);
   if (shut) for (const sx of [-1, 1]) pz(f, x + sx * (w / 2 + 0.17), y, z, 0.3, h, shut, n);
@@ -177,6 +178,7 @@ function simpleHome(g, f, it, W, D, seed, st) {
   pz(f, dx + (dx > 0 ? -1.3 : 1.3), base + 1.3, fz, 0.7, 0.7, K.glass);
   pz(f, dx + (dx > 0 ? -1.3 : 1.3), base + 1.3, fz + 0.004, 1.3, 0.72, SHUT[seed % SHUT.length]);
   pz(f, dx + (dx > 0 ? -1.3 : 1.3), base + 1.3, fz + 0.008, 0.66, 0.66, K.glass);
+  pane(f, dx + (dx > 0 ? -1.3 : 1.3), base + 1.3, fz + 0.008, 0.66, 0.66);
   const gc = st === 'brick' ? K.cream : shade(wall, 0.92);
   if (ridge === 'x') for (const sx of [-1, 1]) gableTri(f, 'x', sx * (W / 2 + 0.01), D / 2, y0, rise, gc, sx);
   else for (const sz of [-1, 1]) gableTri(f, 'z', sz * (D / 2 + 0.01), W / 2, y0, rise, gc, sz);
@@ -203,6 +205,7 @@ function mkRow(g, f, it, ctx) {
     const goods = ['#E2B33C', '#C8323C', '#2F5DB3', '#FFFDF8', '#4E8C86', '#F3B27A', '#D6B486', '#E8A0A8'];
     for (let k = 0; k < 2; k++) for (let x = -W / 2 + 0.7; x < W / 2 - 0.6; x += 0.55) pz(f, x, 0.9 + k * 0.6, fz + 0.004, 0.4, 0.3, goods[Math.floor(r() * goods.length)]);
     g.box(0, 0.45, D / 2 + 0.35, W - 1.0, 0.7, 0.6, K.woodL); // the counter on the footpath
+    bulb(g, ctx, 0, 2.3, D / 2 + 0.35, 3.14); // hung from the balcony over the counter
   } else {
     for (let k = 0; k < 4; k++) pz(f, -W / 2 + 0.5 + ((W - 1) * (k + 0.5)) / 4, 1.3, fz, (W - 1) / 4 - 0.06, 2.2, k % 2 ? shut : shade(shut, 0.85));
   }
@@ -330,7 +333,7 @@ function tMat(g, f, it) {
 }
 /** a roadside stall: a low table under a cloth awning on two poles, two stools, the day's goods (tea, fritters,
  *  betel, fruit, shoe repair...). Low (2.1 m): it stays in the foreground */
-function tStall(g, f, it) {
+function tStall(g, f, it, ctx) {
   const r = rng(it.seed || 3), c = CLOTH[(it.seed || 0) % CLOTH.length];
   f.flat(-1.1, -0.8, 1.1, 0.9, 0.005, K.earthD);
   g.box(0, 0.62, -0.1, 1.5, 0.08, 0.7, K.woodL);
@@ -338,6 +341,7 @@ function tStall(g, f, it) {
   for (const sx of [-0.9, 0.9]) f.box(sx, 1.05, -0.5, 0.06, 2.1, 0.06, K.bambooD);
   g.boxR(0, 2.05, -0.05, 2.1, 0.05, 1.3, c, 0.22, 0, 0);
   pz(f, 0, 1.86, 0.62, 2.1, 0.2, shade(c, 0.85));
+  bulb(g, ctx, 0, 1.3, 0.4, 1.92); // under the canopy's front, low enough to be seen from the street
   const goods = ['#E2B33C', '#C8323C', '#FFFDF8', '#4E8C86', '#F3B27A', '#D6B486', '#7FAE66'];
   for (let k = 0; k < 4; k++) f.box(-0.55 + k * 0.37, 0.74, -0.15 + (k % 2) * 0.12, 0.26, 0.16, 0.24, goods[Math.floor(r() * goods.length)]);
   if (r() < 0.5) { f.box(0.45, 0.82, -0.25, 0.22, 0.3, 0.22, '#5E5850'); f.box(0.45, 1.0, -0.25, 0.1, 0.06, 0.1, K.dark); } // a kettle on a charcoal stove
@@ -350,12 +354,13 @@ function tGround(g, f, it) {
   f.flat(-W / 2, -D / 2, W / 2, D / 2, 0.003, cs[0]);
   for (let k = 0; k < 5; k++) { const w = W * (0.2 + r() * 0.25), d = D * (0.2 + r() * 0.25); f.flatR((r() - 0.5) * (W - w), (r() - 0.5) * (D - d), w, d, 0.004, cs[1 + (k % 2)], (r() - 0.5) * 0.6); }
 }
-function tCart(g, f, it) {
+function tCart(g, f, it, ctx) {
   const c = SHUT[(it.seed || 2) % SHUT.length];
   g.box(0, 0.72, 0, 1.5, 0.14, 0.9, K.wood);
   for (const n of [1, -1]) pz(f, -0.2, 0.42, 0.47 * n, 0.66, 0.66, '#2A2420', n);
   f.box(0.95, 0.66, 0, 0.6, 0.05, 0.05, K.woodD);
   f.box(-0.2, 0.92, 0, 1.2, 0.26, 0.7, c === K.woodD ? K.kraft : '#E8D9A8');
+  hurricane(g, ctx, 0.55, 0.79, 0.2);
 }
 
 // keep-out helper (world space, from the item's turn)

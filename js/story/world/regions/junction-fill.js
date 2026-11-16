@@ -25,7 +25,7 @@
 //   jPots { n, seed }   clay pots of herbs and flowers in a row
 //   jStallLow { seed, goods }   a roadside table under a sun umbrella with a stool (knee-to-head height)
 //   jSignPost { name: { my, en }, color }   a shop's name board on two posts (a trade name, never a way)
-import { rng, shade } from '../kit.js';
+import { rng, shade, pane, bulb } from '../kit.js';
 import { J, rotBox } from '../art/junction.js';
 import { jitter } from '../../../game/voxel.js';
 
@@ -73,6 +73,7 @@ function faceZ(g, x, y, z, w, h, col, sz = 1) {
 function win(g, f, x, y, z, w, h, shut, sz = 1) {
   g.box(x, y, z, w + 0.12, h + 0.12, 0.06, J.white);
   faceZ(g, x, y, z + sz * 0.035, w, h, J.inside, sz);
+  pane(g, x, y, z + sz * 0.035, w, h, 0, sz);
   faceZ(g, x, y + h * 0.18, z + sz * 0.04, w * 0.86, h * 0.36, J.cream, sz); // a curtain
   if (shut) for (const sx of [-1, 1]) faceZ(g, x + sx * (w / 2 + 0.2), y, z + sz * 0.02, 0.3, h, shut, sz);
 }
@@ -120,8 +121,10 @@ function jHome(g, f, it, ctx) {
     g.box(dx, Hs + 0.1 + 0.92, wz + 0.03, 0.85, 1.84, 0.05, J.inside);
     const wx = dx > 0 ? -W * 0.24 : W * 0.24;
     g.box(wx, Hs + 1.4, wz + 0.03, 0.85, 0.65, 0.05, J.inside);
+    pane(g, wx, Hs + 1.4, wz + 0.03, 0.85, 0.65, 0.05);
     g.boxR(wx, Hs + 1.8, wz + 0.25, 0.92, 0.05, 0.5, J.woodG, -0.7, 0, 0); // the shutter propped open
     g.box(0, Hs + 1.4, -D / 2 - 0.02, 0.8, 0.6, 0.05, J.inside); // a back window
+    pane(g, 0, Hs + 1.4, -D / 2 - 0.02, 0.8, 0.6, 0.05, -1);
     for (const sx of [-1, 1]) g.box(sx * (W / 2 - 0.12), Hs + 0.1 + H / 2, fz - 0.12, 0.12, H, 0.12, J.woodD); // veranda posts
     g.box(0, Hs + 0.6, fz - 0.08, W - 0.3, 0.07, 0.07, J.woodL); // the rail
     for (let k = 0; k < 3; k++) g.box(dx, Hs - 0.2 - k * 0.3, fz + 0.22 + k * 0.3, 0.95, 0.07, 0.3, J.woodL); // steps
@@ -265,7 +268,7 @@ function jPots(g, f, it) {
     if (r() < 0.65) f.box(x + 0.04, h + 0.28, 0.04, 0.13, 0.08, 0.13, pick(flw, r));
   }
 }
-function jStallLow(g, f, it) {
+function jStallLow(g, f, it, ctx) {
   const r = rng(it.seed || 5), canopy = pick([J.red, J.teal, J.blue, J.mustard, J.green], r);
   f.flat(-0.9, -0.6, 0.9, 0.7, 0.004, J.shadow);
   g.box(0, 0.72, 0, 1.3, 0.06, 0.7, J.woodL); // the table
@@ -274,6 +277,7 @@ function jStallLow(g, f, it) {
   g.box(0.75, 1.1, -0.3, 0.05, 2.2, 0.05, J.ink); // the umbrella's pole
   g.box(0.3, 2.15, -0.05, 2.0, 0.1, 1.7, canopy);
   g.box(0.3, 2.24, -0.05, 1.2, 0.08, 1.0, J.white);
+  bulb(g, ctx, 0.05, 1.6, 0.55, 2.1); // hung under the canopy's front
   g.box(0.2, 0.22, 0.65, 0.34, 0.44, 0.34, pick([J.red, J.blue, J.teal], r)); // the stool
 }
 function jSignPost(g, f, it, ctx) {

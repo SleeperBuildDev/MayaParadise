@@ -15,7 +15,7 @@
 //   wear { w, d, seed }          scuffed earth, a few fallen leaves (flat; no keep-out)
 //   kerbBoard { my, en }         a small A-frame board with a hand-painted line (one canvas sign = one draw call:
 //                                only a few in the whole district)
-import { rng } from '../kit.js';
+import { rng, bulb } from '../kit.js';
 import { C } from '../art/hearth.js';
 
 const box = (w, d) => (it) => {
@@ -72,7 +72,7 @@ function canopy(g, y, cols, ox = 0, oz = 0) {
   for (const [x, z] of [[-1.0, -1.0], [1.0, -1.0], [-1.0, 1.0], [1.0, 1.0]]) g.box(ox + x, y - 0.25, oz + z, 0.05, 0.08, 0.05, cols[0]); // rib tips
 }
 
-function umbrellaStall(g, f, it) {
+function umbrellaStall(g, f, it, ctx) {
   const r = rng(seedOf(it));
   const goods = it.goods || 'fritters';
   const pairs = { fritters: [C.red, C.cream], flowers: [C.green, C.cream], betel: [C.blue, C.cream], fruit: [C.mustard, C.redD] };
@@ -82,6 +82,7 @@ function umbrellaStall(g, f, it) {
   g.box(-0.7, 0.14, -0.45, 0.3, 0.28, 0.3, C.tinD);
   g.box(-0.45, 2.16, -0.28, 0.5, 0.04, 0.04, C.woodD); // the arm from the pole to the canopy's middle
   canopy(g, 2.2, pairs[goods] || pairs.fritters, -0.2, -0.1);
+  bulb(g, ctx, 0.2, 1.45, 0.45, 2.05, { cap: C.tinD, shade: true }); // a mended tin lamp, hung under the umbrella's front
   // the table
   g.box(0, 0.72, 0, 1.3, 0.06, 0.72, C.woodL);
   for (const sx of [-0.58, 0.58]) for (const sz of [-0.3, 0.3]) g.box(sx, 0.35, sz, 0.06, 0.7, 0.06, C.woodD);

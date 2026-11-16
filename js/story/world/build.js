@@ -12,7 +12,7 @@ import { mergeGeometries } from '../../game/three.js';
 import { PALETTE } from '../../game/toon.js';
 import { jitter } from '../../game/voxel.js';
 import { ROAD } from '../../game/world/roads.js';
-import { Geo, shade, rng, rgb } from './kit.js';
+import { Geo, shade, rng, rgb, PANES, PANE_STRIDE, pane, bulb, hurricane, wallLantern, glowAt, FIT_STRIDE } from './kit.js';
 import { CHUNK, GRID, REGIONS, BRIDGE, ART as REG_ART, PROP as REG_PROP, regionAt, bookDist } from './region.js';
 
 const C = {
@@ -297,13 +297,14 @@ function tufts(g, f, it) {
     if (k % 3 === 0) f.box(x, h + 0.05, z, 0.09, 0.09, 0.09, [C.rose, C.white, C.mustard][Math.floor(r() * 3)]);
   }
 }
-function stall(g, f) {
+function stall(g, f, ctx) {
   // tea corner: a low table and tiny stools (a Yangon tea-shop street corner)
   g.box(0, 0.42, 0, 1.2, 0.06, 0.7, C.woodL);
   for (const sx of [-0.52, 0.52]) for (const sz of [-0.28, 0.28]) g.box(sx, 0.2, sz, 0.06, 0.4, 0.06, C.woodD);
   for (const [x, z] of [[-0.95, 0.1], [0.95, 0.1], [0, 0.75], [-0.4, -0.7]]) { g.box(x, 0.2, z, 0.3, 0.06, 0.3, ['#2F5DB3', '#C8323C', '#E2B33C', '#4E8C86'][Math.abs(Math.round(x * 10 + z * 3)) % 4]); g.box(x, 0.09, z, 0.22, 0.18, 0.22, shade('#C8323C', 0.8)); }
   g.box(-0.25, 0.5, 0.05, 0.14, 0.1, 0.14, C.white); g.box(0.2, 0.5, -0.1, 0.14, 0.1, 0.14, C.white);
   g.box(0.3, 0.55, 0.15, 0.22, 0.2, 0.18, C.goldD); // kettle
+  hurricane(g, ctx, -0.36, 0.45, -0.18);
   f.flat(-1.2, -1.0, 1.2, 1.1, 0.005, C.shadow);
 }
 function noticeBoard(g, ctx) {
@@ -362,6 +363,7 @@ function pots(g, f, it) {
 function windowBox(g, x, y, z, w, h, shut, open = true) {
   g.box(x, y, z, w + 0.12, h + 0.12, 0.08, C.white);
   g.box(x, y, z + 0.02, w, h, 0.06, C.glass);
+  pane(g, x, y, z + 0.02, w, h, 0.06);
   g.box(x, y, z + 0.05, 0.05, h, 0.03, C.white);
   g.box(x, y - h / 2 - 0.08, z + 0.08, w + 0.24, 0.06, 0.16, C.goldD);
   if (open) for (const sx of [-1, 1]) {
@@ -405,7 +407,7 @@ function gableEnds(g, W, D, y0, rise, color) {
   }
 }
 
-function house(g, f, it) {
+function house(g, f, it, ctx) {
   const W = it.w, D = it.d, r = rng(it.seed);
   const wall = it.wall, roof = it.roof, trim = r() < 0.5 ? C.goldD : C.woodD;
   const shut = [C.maroon, '#4E8C86', '#2F5DB3', C.woodD][Math.floor(r() * 4)];
@@ -444,6 +446,7 @@ function house(g, f, it) {
     g.box(-W / 2 + 0.35, FL + 0.25, D / 2 + 0.75, 0.26, 0.26, 0.26, C.terra);
     g.box(-W / 2 + 0.35, FL + 0.45, D / 2 + 0.75, 0.24, 0.16, 0.24, C.rose);
     g.box(doorX + 0.75, top - 0.35, D / 2 + 0.5, 0.18, 0.26, 0.18, C.mustard);
+  glowAt(g, ctx, doorX + 0.75, top - 0.35, D / 2 + 0.5); // (lit after dark)
   } else if (it.style === 'shop') {
     const H1 = 3.0, H2 = 5.6;
     g.box(0, 0.08, 0, W + 0.2, 0.16, D + 0.2, C.parch);
@@ -462,6 +465,7 @@ function house(g, f, it) {
     const stripes = Math.max(4, Math.round(W / 0.5));
     for (let i = 0; i < stripes; i++) g.boxR(-W / 2 + (W * (i + 0.5)) / stripes, H1 + 0.0, D / 2 - 0.15, W / stripes + 0.005, 0.06, 1.3, i % 2 ? C.white : roof, 0.32, 0, 0);
     g.box(0, H1 - 0.2, D / 2 + 0.45, W + 0.02, 0.16, 0.04, C.goldD);
+    bulb(g, ctx, 0, 2.2, D / 2 + 0.2, 2.8); // the shop's bulb under the awning (far enough out to be seen from the street)
     // balcony, upper windows
     g.box(0, H1 + 0.32, D / 2 + 0.1, W - 0.4, 0.1, 0.8, C.cream);
     for (let x = -W / 2 + 0.3; x <= W / 2 - 0.25; x += 0.35) g.box(x, H1 + 0.62, D / 2 + 0.45, 0.05, 0.5, 0.05, C.goldD);
@@ -544,6 +548,7 @@ function school(g, f, it, ctx) {
   for (const sx of [-1.9, -1.2, 1.2, 1.9]) g.box(sx, 1.6, D / 2 + 1.4, 0.26, 3.2, 0.26, C.white);
   for (let k = 0; k < 3; k++) g.box(0, 0.1 + k * 0.1, D / 2 + 1.75 + (2 - k) * 0.25, 4.6 - k * 0.3, 0.1, 0.5 + k * 0.25, C.parch);
   windowBox(g, 0, 4.4, D / 2 + 1.23, 1.4, 1.1, green, false);
+  wallLantern(g, ctx, 0, 2.95, D / 2 + 1.52, 0.32, { col: C.iron }); // over the door: the evening class finds its way in
   for (let k = 0; k < 4; k++) g.box(0, H2 + 0.6 + k * 0.32, D / 2 + 0.6, 4.6 - k * 1.1, 0.32, 1.3, k === 0 ? C.goldD : wall);
   // roof: two broad stepped slabs, maroon, gold eaves
   tileRoof(g, W, D, H2, C.maroon, 6, 0.28);
@@ -605,6 +610,7 @@ function snack(g, f, it, ctx) {
   // snacks hanging on a string under the awning
   g.box(0, 2.62, D / 2 - 0.15, W - 0.8, 0.03, 0.03, C.ink);
   for (let x = -W / 2 + 0.7; x < W / 2 - 0.5; x += 0.32) g.box(x, 2.42, D / 2 - 0.15, 0.2, 0.34, 0.04, fills[Math.abs(Math.round(x * 3)) % 6]);
+  for (const sx of [-1, 1]) bulb(g, ctx, sx * Math.min(1.6, W / 4), 2.05, D / 2 + 0.55, 2.84); // bulbs under the awning, over the counter
   // striped awning
   const n = Math.round(W / 0.5);
   for (let i = 0; i < n; i++) g.boxR(-W / 2 + (W * (i + 0.5)) / n, 2.95, D / 2 + 0.35, W / n + 0.005, 0.06, 1.3, i % 2 ? C.white : C.maroon, 0.35, 0, 0);
@@ -1399,7 +1405,7 @@ const PROP = {
   lamp: (g, f, it, ctx) => lamp(g, ctx),
   bench: (g, f) => { bench(g); f.flat(-0.9, -0.4, 1.0, 0.5, 0.005, C.shadow); },
   fence, hedge, garden, laundry: (g, f, it) => laundry(g, it), jars: (g, f) => jars(g, f), bikes: (g) => bikes(g),
-  woodpile: (g, f) => woodpile(g, f), flowers: (g, f, it) => flowers(g, it), stall: (g, f) => stall(g, f),
+  woodpile: (g, f) => woodpile(g, f), flowers: (g, f, it) => flowers(g, it), stall: (g, f, it, ctx) => stall(g, f, ctx),
   noticeBoard: (g, f, it, ctx) => noticeBoard(g, ctx),
   stamp, seal: (g, f) => seal(g, f), parcel,
   pencil, eraser: (g, f) => eraser(g, f), clip: (g, f) => paperClip(g, f), hens, tufts, well: (g, f) => well(g, f), teaSet: (g, f) => teaSet(g, f), swing: (g, f) => swing(g, f), seesaw: (g) => seesaw(g), slide: (g) => slide(g), pots,
@@ -1464,7 +1470,15 @@ function clipY(src, n, dst, y, above) {
   return m;
 }
 export const SIGHT_AUTO_H = 1.6; // metres: a prop this tall can hide her (her ~1.3 m), so it gets SIGHT too (auto)
-function topOf(P, v0, v1) { let y = -Infinity; for (let v = v0; v < v1; v++) if (P[v * 3 + 1] > y) y = P[v * 3 + 1]; return y; }
+/** The highest vertex of v0..v1, the light fittings' own vertex ranges (skip: [from, to, ...], kit.js fitting) left out. */
+function topOf(P, v0, v1, skip) {
+  let y = -Infinity;
+  for (let v = v0; v < v1; v++) {
+    if (skip) { let s = false; for (let k = 0; k < skip.length; k += 2) if (v >= skip[k] && v < skip[k + 1]) { v = skip[k + 1] - 1; s = true; break; } if (s) continue; }
+    if (P[v * 3 + 1] > y) y = P[v * 3 + 1];
+  }
+  return y;
+}
 function sightBands(P, v0, v1) {
   const box = [Infinity, -Infinity, Infinity, -Infinity, Infinity, -Infinity];
   let bands = [];
@@ -1504,7 +1518,7 @@ export function* chunkJob(chunk, ctx) {
     const k = (x - x0 >= CELL ? 1 : 0) + (z - z0 >= CELL ? 2 : 0);
     return solids[k] || (solids[k] = new Geo({ outline: true, cap: 4000, anchors: true }));
   };
-  const out = { trees: [], glows: [], signs: [], smoke: [] };
+  const out = { trees: [], glows: [], signs: [], smoke: [], windows: [], fitFrom: 0, fitSizes: [] };
   chunk.ground = ground; chunk.solids = solids; chunk.out = out;
   // closed tears cut a hole in the paper
   // (lazy towns: ctx.regionOk / ctx.edgeOk leave out the land and roads of a town not here yet; the chunk is rebuilt when it comes)
@@ -1521,7 +1535,8 @@ export function* chunkJob(chunk, ctx) {
     if (e.gate && e.look !== 'hidden' && e.look !== 'none') gateDressing(solidFor, ground, e, !isClosed(ctx, e), x0, z0, x1, z1, ctx);
   }
   yield;
-  const local = { glows: [], signs: [], smoke: [] };
+  const local = { glows: [], signs: [], smoke: [], panes: [], fits: [], fitV: [] };
+  const fits = []; // the light fittings' cores (kit.js glowAt): kept below only where no other light is near
   for (const it of chunk.items) {
     if (it.k === 'padauk' || it.k === 'rain') {
       out.trees.push(it);
@@ -1538,15 +1553,17 @@ export function* chunkJob(chunk, ctx) {
     solid.at(it.x, it.z, it.ry || 0).item(it.x, it.z, tall ? 1 : 0);
     ground.at(it.x, it.z, it.ry || 0);
     gk(ground, GK.item);
-    local.glows.length = 0; local.signs.length = 0; local.smoke.length = 0;
+    local.glows.length = 0; local.signs.length = 0; local.smoke.length = 0; local.panes.length = 0; local.fits.length = 0; local.fitV.length = 0;
     const v0 = solid.nv, o0 = solid.onv;
     const tIt = performance.now();
-    fn(solid, tall ? standUp(solid, ground) : ground, it, local);
+    PANES.list = local.panes; // (the window helpers record their glass here: kit.js pane)
+    try { fn(solid, tall ? standUp(solid, ground) : ground, it, local); } finally { PANES.list = null; }
+    if (local.panes.length) litWindows(it, local.panes, out.windows);
     // (a big item's build and its sight bands in separate slices: together they were one 25-60 ms step at 4x CPU
     // throttle, e.g. a market house; perf verify pass, 2026-11-15)
     if (performance.now() - tIt > 1 && (tall || solid.nv > v0)) yield;
     if (tall) SIGHT.set(it, sightBands(solid.p, v0, solid.nv));
-    else if (solid.nv > v0 && topOf(solid.p, v0, solid.nv) >= SIGHT_AUTO_H) {
+    else if (solid.nv > v0 && topOf(solid.p, v0, solid.nv, local.fitV.length ? local.fitV : null) >= SIGHT_AUTO_H) {
       // a prop that stands as tall as she does (a stall's roof on its posts, an awning, a cart's canopy, a lamp): it
       // fades too, but only when it covers her (index.js); its anchors are marked tall for the cutaway shader
       const sg = sightBands(solid.p, v0, solid.nv);
@@ -1556,6 +1573,7 @@ export function* chunkJob(chunk, ctx) {
       if (solid.oa) for (let v = o0; v < solid.onv; v++) solid.oa[v * 3 + 2] = 1;
     }
     for (let k = 0; k < local.glows.length; k += 3) out.glows.push(local.glows[k], local.glows[k + 1], local.glows[k + 2]); // (world space)
+    for (const v of local.fits) fits.push(v);
     for (const s of local.signs) {
       // sign positions are in the item's local space: turn them into world space
       const c = Math.cos(it.ry || 0), sn = Math.sin(it.ry || 0);
@@ -1564,9 +1582,46 @@ export function* chunkJob(chunk, ctx) {
     for (let k = 0; k < local.smoke.length; k += 3) out.smoke.push(local.smoke[k], local.smoke[k + 1], local.smoke[k + 2]);
     if (it.k !== 'fence' && it.k !== 'lamp' && it.k !== 'flowers') yield;
   }
+  // a fitting's light only where no lamp, lantern or other fitting of the chunk is within FIT_GAP (two pools on top of
+  // each other read as one blot, and the shadows between them turn back and forth); its glass stays, unlit
+  // (out.glows from out.fitFrom on are fittings: out.fitSizes holds each one's core width and height, the streamer
+  // draws it just over the fitting's own glass, not as a street lamp's big head)
+  out.fitFrom = out.glows.length;
+  for (let k = 0; k < fits.length; k += FIT_STRIDE) {
+    let near = false;
+    for (let j = 0; j < out.glows.length && !near; j += 3) near = Math.hypot(out.glows[j] - fits[k], out.glows[j + 2] - fits[k + 2]) < FIT_GAP;
+    if (!near) { out.glows.push(fits[k], fits[k + 1], fits[k + 2]); out.fitSizes.push(fits[k + 3], fits[k + 4]); }
+  }
   ground.at(0, 0, 0);
   for (const g of solids) g?.at(0, 0, 0);
   chunk.gKind = gKinds(ground);
+}
+
+// ---------------------------------------------------------------------------------
+// Lit windows (windowlights.js draws them after dark). Which windows are lit is decided here, once, from a hash of
+// where each one is (never random per load): about two in three, each a slightly different warmth, and now and then
+// a whole house dark (out, or asleep), so a street reads as real homes. Each town keeps its own late hours.
+// ---------------------------------------------------------------------------------
+const FIT_GAP = 2.5; // metres
+export const WIN_STRIDE = 11; // x, y, z (the pane, just off the glass), w, h, nx, nz (facing out), ax, az (its item), warmth, ground y
+const WIN_LIT = { hearth: 0.86, garden: 0.6, wharf: 0.74 }; // share of a lit house's windows that are lit (else WIN_LIT_DEF)
+const WIN_LIT_DEF = 0.78, WIN_DARK_HOUSE = 0.14;
+const hash01 = (a, b, c) => { const v = Math.sin(Math.round(a * 100) * 12.9898 + Math.round(b * 100) * 78.233 + Math.round(c * 100) * 37.719) * 43758.5453; return v - Math.floor(v); };
+function litWindows(it, P, out) {
+  const dark = hash01(it.x, 7.3, it.z) < WIN_DARK_HOUSE;
+  const share = WIN_LIT[regionAt(it.x, it.z)?.id] ?? WIN_LIT_DEF;
+  for (let k = 0; k < P.length; k += PANE_STRIDE) {
+    const x = P[k], y = P[k + 1], z = P[k + 2], w = P[k + 3], h = P[k + 4], d = P[k + 5], lit = P[k + 8];
+    let nx = P[k + 6], nz = P[k + 7];
+    if (w < 0.2 || h < 0.2) continue; // (a jar or a glass on a counter is no window)
+    const roll = hash01(x, y, z);
+    if (!lit && (dark || roll > share)) continue;
+    // the side away from the building is the outside: a helper drawing on a back wall faces in (its glass box shows
+    // on both sides; its lit pane goes on the outer one)
+    if ((x - it.x) * nx + (z - it.z) * nz < -0.3) { nx = -nx; nz = -nz; }
+    const o = d / 2 + 0.012;
+    out.push(x + nx * o, y, z + nz * o, w, h, nx, nz, it.x, it.z, 0.78 + hash01(z, x, y) * 0.22, P[k + 9]);
+  }
 }
 
 // ---------------------------------------------------------------------------------

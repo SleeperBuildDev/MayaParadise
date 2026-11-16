@@ -25,7 +25,7 @@
 //   lowWall { len, ry }  breadRack  flourSacks { n }  sackSeat  crates { n, seed }  clayStove { smoke }
 //   noodleRack { len }  bananas  plantPots { n }  charcoal  trayStack  dyeVats  kerbPot  lampBench
 //   kiteBench  cat { ry }  dog  goat { ry }  hearthSign  laneSign  lookout
-import { shade, rng } from '../kit.js';
+import { shade, rng, pane, wallLantern } from '../kit.js';
 import { PALETTE } from '../../../game/toon.js';
 import { jitter } from '../../../game/voxel.js';
 
@@ -123,6 +123,7 @@ function win(g, x, y, z, w, h, o = {}) {
   const frame = o.frame || C.woodD;
   g.box(x, y, z, w + 0.14, h + 0.14, 0.08, frame);
   g.box(x, y, z + 0.02, w, h, 0.06, o.lit ? C.lit : o.pane || C.dark2);
+  pane(g, x, y, z + 0.02, w, h, 0.06, 1, o.lit);
   if (o.lit) g.box(x, y - h * 0.18, z + 0.04, w * 0.9, h * 0.3, 0.04, C.litD);
   if (o.bars) for (let k = 1; k < 4; k++) g.box(x - w / 2 + (w * k) / 4, y, z + 0.06, 0.035, h, 0.035, C.iron);
   else g.box(x, y, z + 0.05, 0.05, h, 0.03, frame);
@@ -262,7 +263,7 @@ function bakery(g, f, it, ctx) {
     g.boxMin(lx0, 0, lz0, lx1, 3.0, -D / 2, C.brickD);
     g.boxMin(lx0 - 0.2, 3.0, lz0 - 0.1, lx1 + 0.1, 3.12, -D / 2 + 0.1, C.tinD);
     for (let z = lz0 + 0.3; z < -D / 2; z += 0.5) g.box((lx0 + lx1) / 2, 3.17, z, lx1 - lx0 + 0.25, 0.05, 0.06, C.tin);
-    for (let z = lz0 + 0.8; z < -D / 2 - 0.5; z += 2.4) g.box(lx0 - 0.03, 1.7, z, 0.06, 0.7, 0.8, C.dark2); // little side windows on the yard
+    for (let z = lz0 + 0.8; z < -D / 2 - 0.5; z += 2.4) { g.box(lx0 - 0.03, 1.7, z, 0.06, 0.7, 0.8, C.dark2); pane(g, lx0 - 0.03, 1.7, z, 0.8, 0.7, 0.06, -2); } // little side windows on the yard
   }
 }
 function bakeryBack(g, f, it, ctx) {
@@ -369,6 +370,7 @@ function eveningClass(g, f, it, ctx) {
   for (const sx of [-1, 1]) g.boxMin(sx < 0 ? -W / 2 : W / 2 - 0.25, P, FZ - AL, sx < 0 ? -W / 2 + 0.25 : W / 2, H, FZ - SK, C.lime);
   g.boxMin(-W / 2, H - 0.25, FZ - AL, W / 2, H, FZ - SK, C.lime);
   const holes = [[dx - DW / 2, P, dx + DW / 2, P + DH], [-2.6, 1.35, -1.3, 2.45]];
+  wallLantern(g, ctx, dx + DW / 2 + 0.45, P + 1.85, FZ + 0.32, 0.32, { col: C.tinD }); // the class comes in after dark
   slab(g, -W / 2, W / 2, P, H, FZ - SK, FZ, C.lime, holes);
   // lime wash worn at the foot, a green dado band, corner posts
   g.boxMin(-W / 2 - 0.01, P, FZ - 0.01, W / 2 + 0.01, P + 0.5, FZ + 0.012, C.limeD);
@@ -417,6 +419,7 @@ function noodleHouse(g, f, it, ctx) {
   for (const sx of [-1, 1]) g.boxMin(sx < 0 ? -W / 2 : W / 2 - 0.22, 0.22, FZ - AL, sx < 0 ? -W / 2 + 0.22 : W / 2, H, FZ - SK, C.woodG);
   g.boxMin(-W / 2, H - 0.22, FZ - AL, W / 2, H, FZ - SK, C.woodG);
   const holes = [[dx - DW / 2, 0.22, dx + DW / 2, 0.22 + DH], [-3.9, 1.1, -2.1, 2.1]];
+  wallLantern(g, ctx, dx + DW / 2 + 0.45, 2.2, FZ + 0.32, 0.32, { col: C.tinD });
   // the front: vertical planks round the holes
   slab(g, -W / 2, W / 2, 0.22, H, FZ - SK, FZ - 0.06, C.wood, holes);
   for (let x = -W / 2 + 0.15, k = 0; x < W / 2; x += 0.32, k++) {
@@ -465,6 +468,7 @@ function loomShed(g, f, it, ctx) {
   f.flat(-W / 2 - 0.3, -D / 2 - 0.3, W / 2 + 0.3, FZ + 0.9, 0.004, C.shadow);
   g.boxMin(-W / 2 - 0.1, 0, -D / 2 - 0.05, W / 2 + 0.1, 0.25, FZ + 0.1, C.stone);
   const wins = [-5.2, -2.6, 0.0];
+  wallLantern(g, ctx, dx - 1.25, 2.1, FZ + 0.32, 0.32, { col: C.tinD });
   const holes = wins.map((x) => [x - 0.85, 1.1, x + 0.85, 2.2]);
   g.boxMin(-W / 2, 0.25, -D / 2, W / 2, H, FZ - 1.2, C.woodG);
   for (const sx of [-1, 1]) g.boxMin(sx < 0 ? -W / 2 : W / 2 - 0.2, 0.25, FZ - 1.2, sx < 0 ? -W / 2 + 0.2 : W / 2, H, FZ - 0.2, C.woodG);
@@ -560,7 +564,7 @@ function teaHouse(g, f, it, ctx) {
   for (let i = 0; i < n; i++) g.box(-W / 2 + (W * (i + 0.5)) / n, H - 0.48, FZ + 1.28, W / n - 0.05, 0.14, 0.04, i % 2 ? C.cream : C.green);
   for (const tx of [-3.3, 3.3]) { lowTable(g, dx + tx, FZ + 0.9, C.woodL, 0.4); stool(g, dx + tx - 0.55, FZ + 0.95, C.red, 0.28); stool(g, dx + tx + 0.55, FZ + 0.85, C.blue, 0.28); g.box(dx + tx, 0.48, FZ + 0.9, 0.12, 0.1, 0.12, C.white); }
   // the side window looking east (at the kite), a tin roof with a pipe
-  for (const sx of [1]) { g.box(sx * W / 2 + 0.02, 1.8, 0.4, 0.06, 1.0, 1.2, C.greenD); g.box(sx * W / 2 + 0.05, 1.8, 0.4, 0.04, 0.84, 1.04, C.dark2); g.box(sx * W / 2 + 0.07, 1.8, 0.4, 0.02, 0.84, 0.05, C.greenD); }
+  for (const sx of [1]) { g.box(sx * W / 2 + 0.02, 1.8, 0.4, 0.06, 1.0, 1.2, C.greenD); g.box(sx * W / 2 + 0.05, 1.8, 0.4, 0.04, 0.84, 1.04, C.dark2); pane(g, sx * W / 2 + 0.05, 1.8, 0.4, 1.04, 0.84, 0.04, 2 * sx); g.box(sx * W / 2 + 0.07, 1.8, 0.4, 0.02, 0.84, 0.05, C.greenD); }
   gableEnds(g, W, D, H, 1.3, C.ochreD);
   tinRoof(g, W, D, H, 1.3, C.tin, 931);
   g.box(2.6, H + 1.6, -1.6, 0.22, 1.6, 0.22, C.tinD);
@@ -617,6 +621,7 @@ function boxShop(g, f, it, ctx) {
   f.flat(-W / 2 - 0.3, -D / 2 - 0.3, W / 2 + 0.3, FZ + 0.9, 0.004, C.shadow);
   g.boxMin(-W / 2 - 0.1, 0, -D / 2 - 0.05, W / 2 + 0.1, 0.2, FZ + 0.1, C.stone);
   const holes = [[dx - 0.5, 0.2, dx + 0.5, 1.95], [wx - 0.85, 0.85, wx + 0.85, 2.05]];
+  wallLantern(g, ctx, dx - 0.95, 2.1, FZ + 0.32, 0.32, { col: C.tinD });
   g.boxMin(-W / 2, 0.2, -D / 2, W / 2, H, FZ - 1.3, '#9A7552');
   for (const sx of [-1, 1]) g.boxMin(sx < 0 ? -W / 2 : W / 2 - 0.2, 0.2, FZ - 1.3, sx < 0 ? -W / 2 + 0.2 : W / 2, H, FZ - 0.2, '#9A7552');
   g.boxMin(-W / 2, H - 0.2, FZ - 1.3, W / 2, H, FZ - 0.2, '#9A7552');
