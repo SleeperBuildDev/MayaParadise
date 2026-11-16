@@ -568,7 +568,9 @@ const FRAG_COLOR = /* glsl */ `
   gDX = dFdx(vGW.xz); gDY = dFdy(vGW.xz);
   vec3 gVc = vColor.rgb;
   vec3 gOut = gVc;
-  if (vGUp > 0.5 && vGW.y > -0.02 && vGW.y < 0.03 && vGK < 1.5) {
+  // (0.06: ground-layers.js stacks the paper's markings up to ~4 cm on the busiest corners; nothing of kind 0/1 lies at
+  // 0.03-0.06 otherwise)
+  if (vGUp > 0.5 && vGW.y > -0.02 && vGW.y < 0.06 && vGK < 1.5) {
     vec2 xz = vGW.xz;
     int ri = -1;
     for (int k = 0; k < G_MAXR; k++) {

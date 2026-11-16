@@ -161,6 +161,7 @@ export class Geo {
   #emit(color, bottom) {
     const [r, g, b] = rgb(color);
     const nf = bottom ? 6 : 5;
+    const v0 = this.nv, o0 = this.outline && !this.bare ? this.onv : -1;
     this.#grow(nf * 4, nf * 6);
     const P = this.p, N = this.n, C = this.c, I = this.i;
     for (let f = 0; f < 6; f++) {
@@ -201,6 +202,8 @@ export class Geo {
       }
       for (let k = 0; k < 36; k++) this.oi[this.oni++] = base + HULL[k];
     }
+    // (its vertices and ink hull: ground-layers.js may lift a low box's level top clear of what it overlaps)
+    (this.boxes || (this.boxes = [])).push(v0, this.nv, o0);
     return this;
   }
 
@@ -223,6 +226,8 @@ export class Geo {
     const I = this.i;
     if (flip) { I[this.ni++] = base; I[this.ni++] = base + 2; I[this.ni++] = base + 1; I[this.ni++] = base; I[this.ni++] = base + 3; I[this.ni++] = base + 2; }
     else { I[this.ni++] = base; I[this.ni++] = base + 1; I[this.ni++] = base + 2; I[this.ni++] = base; I[this.ni++] = base + 2; I[this.ni++] = base + 3; }
+    // a level, up-facing quad (a ground decal): ground-layers.js may lift it clear of what it overlaps
+    if (ny === 1 && a[1] === b[1] && a[1] === c[1] && a[1] === d[1]) (this.flats || (this.flats = [])).push(base);
     return this;
   }
   /** Flat axis-aligned quad in local space (turned with the item), facing up. */

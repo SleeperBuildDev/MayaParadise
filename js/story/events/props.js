@@ -25,6 +25,7 @@ import * as THREE from '../../game/three.js';
 import { toon, basic, outlineGeometry } from '../../game/toon.js';
 import { instancedOutlineMaterial, trackOutlineResolution } from '../../game/fx.js';
 import { jitter } from '../../game/voxel.js';
+import { LAYER } from '../world/ground-layers.js';
 
 const CAP = 200; // boxes (instances) at most at once
 const C = {
@@ -292,7 +293,7 @@ export function createPropRig(scene, { low = false } = {}) {
       if (colorDirty && mesh.instanceColor) { mesh.instanceColor.needsUpdate = true; colorDirty = false; }
       // the extras that follow parts
       if (rig.screenOn && rig.screenPart) placeScreen();
-      if (rig.glowOn && rig.glowPart) { const gp = rig.glowPart, p = gp.pos; glow.position.set(p.x, 0.012, p.z); glow.visible = gp.vis && gp.s > 0.3; }
+      if (rig.glowOn && rig.glowPart) { const gp = rig.glowPart, p = gp.pos; glow.position.set(p.x, LAYER.over + 0.002, p.z); glow.visible = gp.vis && gp.s > 0.3; }
     },
     clear() {
       for (const pt of parts) { pt.vis = false; write(pt); pt.held = null; pt.drive = null; }
@@ -372,7 +373,8 @@ export function createPropRig(scene, { low = false } = {}) {
     return glow;
   };
 
-  // ---- chalk lines for the race: two flat strips (one instanced quad), at y 0.01 with polygonOffset
+  // ---- chalk lines for the race: two flat strips (one instanced quad), at y LAYER.over (over the stacked ground
+  // paint, ground-layers.js) with polygonOffset
   let chalk = null;
   rig.chalkShow = (on, a = null, b = null, h = 0, w = 2.6) => {
     if (!on) { if (chalk?.parent) chalk.removeFromParent(); return null; }
@@ -383,7 +385,7 @@ export function createPropRig(scene, { low = false } = {}) {
       chalk = new THREE.InstancedMesh(g, m, 2); chalk.frustumCulled = false; chalk.renderOrder = 1; chalk.name = 'event-chalk';
     }
     if (a && b) {
-      for (const [i, p] of [[0, a], [1, b]]) { E.set(0, h, 0); Q.setFromEuler(E); M.compose(V.set(p.x, 0.01, p.z), Q, S.set(w, 1, 1)); chalk.setMatrixAt(i, M); }
+      for (const [i, p] of [[0, a], [1, b]]) { E.set(0, h, 0); Q.setFromEuler(E); M.compose(V.set(p.x, LAYER.over, p.z), Q, S.set(w, 1, 1)); chalk.setMatrixAt(i, M); }
       chalk.instanceMatrix.needsUpdate = true;
     }
     if (!chalk.parent) scene.add(chalk);
@@ -392,7 +394,7 @@ export function createPropRig(scene, { low = false } = {}) {
   /** draw-in: 0..1 of each line's length shown */
   rig.chalkGrow = (u, a, b, h, w = 2.6) => {
     if (!chalk) return;
-    for (const [i, p] of [[0, a], [1, b]]) { E.set(0, h, 0); Q.setFromEuler(E); M.compose(V.set(p.x, 0.01, p.z), Q, S.set(Math.max(0.001, w * u), 1, 1)); chalk.setMatrixAt(i, M); }
+    for (const [i, p] of [[0, a], [1, b]]) { E.set(0, h, 0); Q.setFromEuler(E); M.compose(V.set(p.x, LAYER.over, p.z), Q, S.set(Math.max(0.001, w * u), 1, 1)); chalk.setMatrixAt(i, M); }
     chalk.instanceMatrix.needsUpdate = true;
   };
 

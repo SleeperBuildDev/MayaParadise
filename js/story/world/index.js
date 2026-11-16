@@ -24,12 +24,14 @@ import { createDesks } from './desks.js';
 import { createFeet } from './feet.js';
 import { createSeen, openMap, pageTurn } from './map.js';
 import { itemObstacles, chunkOf, tearRect, homeBookBudget, SIGHT, SIGHT_BAND } from './build.js';
+import { stackBook } from './ground-layers.js';
 import { ITEMS, REGIONS, ROAD_EDGES, PEOPLE, BRIDGE, EXTENT, GATES, OBSTACLES, ART as REG_ART, PROP as REG_PROP, bookDist } from './region.js';
 
 const call = (o, fn, ...a) => (o && typeof o[fn] === 'function' ? o[fn](...a) : undefined);
 
 export async function createOpenWorld(game, story) {
   const world = game.world;
+  stackBook(world); // (ground-layers.js: the book's ink kept a depth step clear of what it overlaps; before the batch copies it)
   const homeBudget = homeBookBudget(world); // (build.js: the book's landmarks merged, far bits hidden, small casters quiet)
   const net = world.net;
   const ownIds = new Set(ROAD_EDGES.map((e) => e.id));

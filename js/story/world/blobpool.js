@@ -11,6 +11,7 @@
 // drawn on its own is noticed by its material's onBeforeRender and taken over from the next frame.
 import * as THREE from '../../game/three.js';
 import { blobShadow } from '../../game/toon.js';
+import { LAYER, LAYERS_ON } from './ground-layers.js';
 
 const OURS = 1 << 28; // layer mask of an original while its copy draws it
 const CAP = 512;
@@ -21,6 +22,9 @@ export function installBlobPool(game) {
   const probe = blobShadow();
   const mat = probe.material; // (the shared blob material)
   probe.geometry.dispose();
+  // over the stacked ground paint (ground-layers.js LAYER.over): a blob lies 1 cm over her feet, and the paint round
+  // them may stand a little higher; a depth bias keeps the soft shadow on top of it, never flickering against it
+  if (LAYERS_ON) { mat.polygonOffset = true; mat.polygonOffsetFactor = LAYER.overFactor; mat.polygonOffsetUnits = LAYER.overUnits; }
   const plane = new THREE.PlaneGeometry(1, 1);
   const pools = new Map(); // scene -> { mesh, list: Set }
   const fr = new THREE.Frustum(), pm = new THREE.Matrix4(), sph = new THREE.Sphere(), sc = new THREE.Vector3();

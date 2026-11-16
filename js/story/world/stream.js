@@ -18,6 +18,7 @@ import { CHUNK, GRID, ITEMS, REGIONS, LAZY, LOADED, regionReady } from './region
 import { disposeMesh } from './kit.js';
 import { createStoryGround } from './ground.js';
 import { fastRaycast, prepareRaycast } from './rayindex.js';
+import { stackFlatsJob, bookNear, BOOK_RECT } from './ground-layers.js';
 
 const LOAD_R = 50; // metres from the focus to a chunk's edge: build it
 const DROP_R = 78; // farther than this: dispose it
@@ -314,6 +315,16 @@ export function createStreamer({ scene, net, edges, shadows = false, low = false
   function* finish(ch) {
     const group = ch.part = new THREE.Group();
     group.name = `chunk ${ch.key}`;
+    // no two overlapping flats closer than ground-layers.js STEP in height (they flickered against each other)
+    const near = [];
+    for (let di = -1; di <= 1; di++) for (let dj = -1; dj <= 1; dj++) { const nb = (di || dj) && chunks.get(`${ch.i + di},${ch.j + dj}`); if (nb?.stackKeep) near.push(nb.stackKeep); }
+    if (bookNear && ch.x0 < BOOK_RECT[2] && ch.x1 > BOOK_RECT[0] && ch.z0 < BOOK_RECT[3] && ch.z1 > BOOK_RECT[1]) near.push(bookNear); // (the home book's ink)
+    const job = stackFlatsJob([ch.ground, ...ch.solids], ch.gKind, [ch.x0, ch.z0, ch.x1, ch.z1], near);
+    let st, slice = 0;
+    for (;;) { const t = performance.now(); st = job.next(); slice = Math.max(slice, performance.now() - t); if (st.done) break; yield; }
+    ch.stack = st.value; ch.stack.slice = slice; // (the longest slice, ms: the streamer's budget is a few ms a frame)
+    ch.stackKeep = ch.stack.keep; ch.stack.keep = null; // (for the neighbours built after it)
+    yield;
     if (!ch.ground.empty) {
       const g = ch.ground.mesh(painted ? { material: painted.material(toon('#ffffff', { vertexColors: true })) } : undefined);
       if (painted) painted.tag(g.geometry, ch.gKind);
@@ -395,7 +406,7 @@ export function createStreamer({ scene, net, edges, shadows = false, low = false
       root.remove(ch.group);
     }
     const was = ch.state === 'ready';
-    ch.group = null; ch.job = null; ch.ground = ch.solids = null; ch.out = null; ch.signMeshes = null; ch.cells = null;
+    ch.group = null; ch.job = null; ch.ground = ch.solids = null; ch.out = null; ch.signMeshes = null; ch.cells = null; ch.stackKeep = null;
     ch.state = 'empty';
     if (was) { rebuildPools(); onGone?.(ch); }
   }
