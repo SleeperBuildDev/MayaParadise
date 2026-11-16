@@ -364,7 +364,7 @@ export function installRoam(game, story, ow) {
   // ---- what next
   function freeToMeet(o, e) {
     const r = o.rm;
-    return o !== e && r && r.kind !== 'idle' && !r.partner && r.state !== 'work' && !o.paused && o !== story.talkWith && !o.ctl && !o.walking && !(r.meetCd > performance.now()) && r.lastMet !== e;
+    return o !== e && r && r.kind !== 'idle' && !r.partner && r.state !== 'work' && !o.evt && !o.paused && o !== story.talkWith && !o.ctl && !o.walking && !(r.meetCd > performance.now()) && r.lastMet !== e;
   }
   function choose(e) {
     const rm = e.rm, pos = e.p.root.position;
@@ -446,6 +446,14 @@ export function installRoam(game, story, ow) {
   function arrive(e) {
     const rm = e.rm;
     if (rm.kind === 'idle') return idleArrive(e);
+    if (rm.kindT === 'evt') { rm.state = 'event'; rm.last = -3; return; } // (a town gathering: extras-events.js)
+    if (rm.kindT === 'evret') { // (back from a gathering where they were lent: on with what they were doing)
+      const r = rm.evRet; rm.evRet = null;
+      if (r?.tgt) { rm.next = r.next; rm.last = r.last; go(e, r.tgt.x, r.tgt.z, r.tgt.k); return; }
+      rm.last = r ? r.last : -3;
+      if (r?.state === 'work' && e.job) { work(e); return; }
+      rm.state = 'idle'; rm.t = rand(0.6, 1.5); return;
+    }
     if (rm.kindT === 'back') { rm.last = rm.from?.last ?? -3; rm.state = 'idle'; rm.t = rand(0.6, 1.5); return; }
     if (rm.kindT === 'job') return work(e);
     if (rm.kindT === 'anchor') { rm.last = -1; rm.state = 'idle'; rm.t = rand(0.6, 2); return; }
@@ -525,7 +533,7 @@ export function installRoam(game, story, ow) {
     else {
       rm.blockedT += dt; rm.stuckT = (rm.stuckT || 0) + dt;
       // (wedged for good, walk after walk: back on the hub, but only out of sight, never a pop in view)
-      if (rm.stuckT > 15 && rm.kind !== 'idle' && rm.hx != null && game.camera) {
+      if (rm.stuckT > 15 && rm.kind !== 'idle' && !rm.ev && rm.hx != null && game.camera) {
         const v = e.rmV || (e.rmV = pos.clone());
         v.set(pos.x, 1, pos.z).project(game.camera);
         if (v.z > 1 || Math.abs(v.x) > 1.2 || Math.abs(v.y) > 1.2) {
@@ -539,6 +547,7 @@ export function installRoam(game, story, ow) {
     e.p.update(dt, { speed: moved ? sp : 0 });
     // stuck (someone stands in the way for good, or a sidestep ran into a corner): somewhere else instead
     if (rm.blockedT > 2.5 || rm.t <= 0) {
+      if (rm.ev) { rm.blockedT = 0; rm.state = 'event'; rm.ev.stuck = (rm.ev.stuck || 0) + 1; return; } // (a gathering's walk: stand where it got to)
       if (rm.kindT === 'meet') endChat(e);
       rm.blockedT = 0;
       if (rm.kind === 'idle') { rm.state = 'look'; rm.t = rand(1, 2.5); if (rm.kindT !== 'ihome') rm.goHome = true; return; } // (idleStep tries the way home again)
@@ -688,6 +697,7 @@ export function installRoam(game, story, ow) {
     const root = e.p.root, pos = root.position;
     // (far from Maya, off every screen: a step every 4th frame, with the frames' time, keeps the CPU down)
     if (Math.abs(M.x - pos.x) + Math.abs(M.z - pos.z) > 60) { rm.dtAcc = (rm.dtAcc || 0) + dt; rm.fk = (rm.fk || 0) + 1; if (rm.fk % 4) return true; dt = Math.min(0.12, rm.dtAcc); rm.dtAcc = 0; }
+    if (rm.ev) return evStep(e, dt, Math.hypot(M.x - pos.x, M.z - pos.z)); // (lent to a town gathering)
     if (rm.kind === 'idle') return idleStep(e, dt, near, Math.hypot(M.x - pos.x, M.z - pos.z));
     if (!rm.built) build(e);
     rm.t -= dt;
@@ -767,6 +777,7 @@ export function installRoam(game, story, ow) {
     for (const e of people.values()) {
       if (e.walking || (e.ctl && !e.walkIn)) { if (e.roam) detach(e); if (!e.folk) e.scriptedOnce = true; e.rmCool = performance.now() + 8000; continue; } // (a day moves them now: theirs from here on)
       if (e.walkIn || e.ctl) continue;
+      if (e.evt && e.rm?.ev) continue; // (in a town gathering: extras-events.js gives them back)
       const kind = freeKind(e);
       if (kind && !e.roam) attach(e, kind);
       else if (!kind && e.roam) detach(e);
@@ -776,8 +787,111 @@ export function installRoam(game, story, ow) {
   const approach0 = story.approach;
   if (typeof approach0 === 'function') story.approach = function (e) { if (e) e.roamHold = performance.now() + 12000; return approach0.call(this, e); };
 
+  // ---- lent to a town gathering (extras-events.js): borrow(e, { x, z, h, mood, inPlace }) walks them there with
+  // roam's own walk (one collision test a step, round Maya, the car and the others) and stands them facing h; evGo
+  // moves them on (each leg a checked straight line, kept as a trail); release(e) walks them back by that trail to
+  // their hub and back to their own day. Refused unless the lines there and back to the hub are clear. Never e.ctl
+  // (the scan would make a region person scripted for good).
+  /** the corners on the way from where they stand to (x, z): [] straight there, null no known way. Standing on one of
+   *  their own patch points or their job spot, the way they know back to the hub, then straight on from it. */
+  function wayTo(e, x, z) {
+    const rm = e.rm, pos = e.p.root.position;
+    if (lineOk(pos.x, pos.z, x, z)) return [];
+    // (walking a straight leg: on to its end first, if it is in sight of the spot)
+    if (rm.state === 'walk') return !rm.route?.length && lineOk(rm.tx, rm.tz, x, z) ? [{ x: rm.tx, z: rm.tz }] : null;
+    if (!lineOk(rm.hx, rm.hz, x, z)) return null;
+    const at = (px, pz) => Math.hypot(pos.x - px, pos.z - pz) < 0.4;
+    const H = { x: rm.hx, z: rm.hz };
+    if (at(rm.hx, rm.hz)) return [];
+    const q = rm.last >= 0 ? rm.pts[rm.last] : null;
+    if (q && at(q.x, q.z)) return q.via ? [...q.via.slice().reverse(), H] : [H];
+    if (at(rm.ax, rm.az)) return rm.hubOff && rm.exit?.length ? rm.exit.slice() : [H];
+    return null;
+  }
+  /** can they come to (x, z)? the way there ([] = straight) or null. They go back the same way afterwards (every leg
+   *  of it checked), to where they were, and carry on with their day from there. */
+  function canBorrow(e, x, z, o = {}) {
+    const rm = e?.rm;
+    if (!e?.roam || !rm || rm.kind === 'idle' || rm.ev || e.evt || rm.partner || e.paused || e === story.talkWith || e.ctl || e.walking || rm.hx == null) return null;
+    if (rm.state === 'walk' && (rm.route?.length || rm.kindT === 'meet' || rm.kindT === 'evret')) return null; // (on a corner way: not from the middle of it)
+    if (o.inPlace) return [];
+    return wayTo(e, x, z);
+  }
+  function borrow(e, o) {
+    const way = canBorrow(e, o.x, o.z, o);
+    if (!way) return null;
+    const rm = e.rm, pos = e.p.root.position;
+    if (rm.state === 'chat' || rm.state === 'wait') endChat(e);
+    setMood(e, null);
+    // (what they were doing: picked up again when they are back)
+    const walking = rm.state === 'walk' && (rm.kindT === 'wp' || rm.kindT === 'job' || rm.kindT === 'anchor');
+    const ret = walking ? { tgt: { x: rm.tx, z: rm.tz, k: rm.kindT }, next: rm.next, last: rm.from?.last ?? -3 } : { tgt: null, last: rm.state === 'walk' ? -3 : rm.last, state: rm.state === 'work' ? 'work' : 'idle' };
+    rm.ev = { x: o.x, z: o.z, h: o.h ?? e.p.root.rotation.y, mood: o.mood ?? null, moodOn: undefined, look: null, sp: 0, sp0: rm.speed, inPlace: !!o.inPlace, trail: [{ x: pos.x, z: pos.z }, ...way.map((q) => ({ x: q.x, z: q.z })), { x: o.x, z: o.z }], stuck: 0, ret };
+    e.evt = o.evt || { id: 'event' };
+    rm.route = null;
+    if (o.inPlace) { rm.state = 'event'; rm.ev.x = pos.x; rm.ev.z = pos.z; rm.ev.trail.length = 1; } else go(e, o.x, o.z, 'evt', way.length ? way : null);
+    stats.lent = (stats.lent || 0) + 1;
+    return rm.ev;
+  }
+  function evGo(e, x, z, sp = 0) {
+    const rm = e?.rm, ev = rm?.ev;
+    if (!ev || ev.inPlace) return false;
+    const pos = e.p.root.position;
+    if (Math.hypot(x - pos.x, z - pos.z) < 0.05) { rm.state = 'event'; return true; }
+    if (!lineOk(pos.x, pos.z, x, z)) return false;
+    const last = ev.trail[ev.trail.length - 1];
+    if (!last || Math.hypot(last.x - pos.x, last.z - pos.z) > 0.3) ev.trail.push({ x: pos.x, z: pos.z });
+    ev.trail.push({ x, z });
+    if (ev.trail.length > 28) ev.trail.splice(1, 2);
+    ev.x = x; ev.z = z; ev.sp = sp || 0;
+    go(e, x, z, 'evt');
+    return true;
+  }
+  function release(e) {
+    const rm = e?.rm, ev = rm?.ev;
+    if (e) e.evt = null;
+    if (!ev) return;
+    rm.ev = null; rm.speed = ev.sp0; rm.mood = null;
+    e.p.setMood?.(e.baseMood ?? null);
+    e.p.lookAt(null);
+    rm.last = -3; rm.blockedT = 0;
+    if (ev.inPlace) { rm.state = 'idle'; rm.t = rand(0.5, 1.5); return; }
+    // back along the gathering's own legs (every one of them checked) to where they were, then on with their day
+    const pos = e.p.root.position, t0 = ev.trail[0];
+    const way = [];
+    for (let i = ev.trail.length - 2; i >= 1; i--) { const q = ev.trail[i]; if (Math.hypot(q.x - pos.x, q.z - pos.z) > 0.2) way.push(q); }
+    rm.evRet = ev.ret;
+    go(e, t0.x, t0.z, 'evret', way.length ? way : null);
+  }
+  function evStep(e, dt, mdist) {
+    const rm = e.rm, ev = rm.ev, root = e.p.root;
+    // (lent to a gathering that is no longer on, or to another one than the one running: never kept for good, they
+    // go back to their day after a moment)
+    const on = story.npcEvent;
+    if (on && (!on.active || (e.evt?.id && on.id && e.evt.id !== on.id && e.evt.id !== 'event'))) {
+      if ((ev.orphanT = (ev.orphanT || 0) + dt) > 3) { release(e); stats.orphans = (stats.orphans || 0) + 1; stand(e, dt); return true; }
+    } else ev.orphanT = 0;
+    if (rm.state === 'walk') {
+      if (ev.moodOn !== null) { e.p.setMood(e.baseMood ?? null); ev.moodOn = null; }
+      const sp0 = rm.speed;
+      if (ev.sp) rm.speed = ev.sp;
+      walkStep(e, dt);
+      rm.speed = sp0;
+      if (ev.look) headAt(e, ev.look.x, ev.look.z); else e.p.lookAt(null);
+      return true;
+    }
+    rm.state = 'event';
+    turnToward(root, ev.h, dt, 5);
+    if (ev.moodOn !== ev.mood) { e.p.setMood(ev.mood || (e.baseMood ?? null)); ev.moodOn = ev.mood; }
+    if (e.roamHold > performance.now() && M.on && mdist < 4) headAt(e, M.x, M.z);
+    else if (ev.look) headAt(e, ev.look.x, ev.look.z); else e.p.lookAt(null);
+    stand(e, dt);
+    return true;
+  }
+
   story.roam = {
     stats,
+    canBorrow, borrow, evGo, release,
     debug: {
       list: () => [...people.values()].filter((e) => e.roam).map((e) => ({ id: e.id, st: e.rm.state, k: e.rm.kindT, pts: e.rm.pts.length, walked: +e.rm.walked.toFixed(1) })),
       /** why a walker's patch came out small: rejection counts over n candidates round its anchor */

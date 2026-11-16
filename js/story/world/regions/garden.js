@@ -40,6 +40,7 @@ import { FOLK_PEOPLE } from './garden-folk.js';
 import { LIFE_ART, LIFE_PROP, MORE_COTTAGES, fillLife } from './garden-life.js';
 import { TOWN_ART, TOWN_PROP, fillTown } from './garden-town.js';
 import { TOWN_PEOPLE } from './garden-town-folk.js';
+import { DETAIL_PROP, fillDetail } from './garden-detail.js';
 
 export const REGION = { id: 'garden', name: { my: 'နေ့စဉ်မှတ်တမ်းဥယျာဉ်', en: 'Diary Garden' }, rect: [119, 18, 269, 138], paper: 'diary', label: [222, 28] };
 
@@ -61,7 +62,7 @@ export const ROAD_EDGES = [
 ];
 
 export const ART = { ...GARDEN_ART, ...GARDEN_FIT_ART, ...LIFE_ART, ...TOWN_ART };
-export const PROP = { ...GARDEN_PROP, ...GARDEN_FIT_PROP, ...LIFE_PROP, ...TOWN_PROP };
+export const PROP = { ...GARDEN_PROP, ...GARDEN_FIT_PROP, ...LIFE_PROP, ...TOWN_PROP, ...DETAIL_PROP };
 
 export const ITEMS = [];
 const add = (o) => (ITEMS.push(o), o);
@@ -339,6 +340,9 @@ export const TOWN = fillTown({ ITEMS, add, defs: { ...ART, ...PROP }, doors: DOO
     add({ k: 'tufts', x, z, seed: 300 + n }); n++;
   }
 }
+
+// the detail pass (garden-detail.js), last: poles, varied flower rows, bees, tags, puddles, animals, lanterns...
+export const DETAIL = fillDetail({ ITEMS, add, town: TOWN, gates: GATES });
 
 // ---------------------------------------------------------------------------------
 // The diary's edge: the Garden lies inside a clasped diary, so along its south side (the seam with Hearth

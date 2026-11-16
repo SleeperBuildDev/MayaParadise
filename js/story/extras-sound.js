@@ -26,18 +26,37 @@
 //   story.sound.state()          what is heard now: { music, layers, mode, cue, district, zone, room, ... }
 //   story.sound.log              state changes [{ t, music, amb, mode, cue, district, zone, room }] (tests)
 //   story.sound.cpu()            { updateMs (avg main-thread ms per update), notesPerSec, eventsPerSec, beds, layers }
+//
+// For whoever builds the NPC gatherings / events (Nov 2026):
+//   story.sound.gather(id, { kind, x, z, r })  a gathering at (x, z), radius r (m). While Maya stands inside r (on
+//        foot, outdoors) its song plays ('event:<kind>' in songs-more.js) with its ambience ('ev:<kind>' in
+//        places.js: claps, the ball, cups...; louder near the centre); she leaves it at r * 1.4. kinds with a song:
+//        festival lanterns chinlone kidsplay countten rainwait teachat haggle kiteday party storytime.
+//   story.sound.ungather(id)                   the gathering is over (the place's own music returns)
+//   story.sound.cue('event:chinlone')          or name the gathering song directly as a cue (null: back)
+//   story.sound.cue('reflect' | 'sorry' | 'wonder' | 'together' | 'triumph')  the new story cues
+//   story.sound.emit(name, { x, z, v })        one positional one-shot at a world point (sound/fx.js FX names:
+//        ballKick, clapBurst, giggle, yay, coinTink, cupSaucer, hen, cat ...): panned and muffled by distance,
+//        silent past 22 m, refused when the events budget is full (never more than 5 sounding, 18 a minute).
+//   story.sound.doorSound(roomId, entering)    the door sound for a room ('shopBell' | 'doorOpen' | 'doorClose' | 'screenDoor')
+// Footsteps follow the ground: game.stepSound ('stepStone', 'stepWood', 'stepWet' in the rain...) is set here and
+// main.js plays it for each of Maya's steps. While she drives (moving) the music turns to a 'drive:*' song.
 import { createSoundscape } from './soundscape.js';
-import { ROOM_TYPE, AMBIENCE, districtAt, zoneAt } from './sound/places.js';
-import { getBank, INSTRUMENTS, LOOP_NAMES, baseOf } from './sound/bank.js';
+import { ROOM_TYPE, AMBIENCE, SURFACE_OF, ZONE_SURFACE, ROOM_FLOOR, districtAt, zoneAt } from './sound/places.js';
+import { getBank, INSTRUMENTS, LOOP_NAMES, UNUSED_LOOPS, baseOf } from './sound/bank.js';
 
 const STEP = 0.1; // seconds between soundscape updates (it schedules 0.4 s ahead)
 const POLL = 0.2; // seconds between DOM checks (stings, steam)
 /** Everyday houses (rooms/generic.js kinds) -> room type. */
-const GENERIC_KIND = { home: 'home', shop: 'post', workshop: 'workshop', tea: 'teashop', baker: 'bakery', fisher: 'lodge', gardener: 'workshop', student: 'library', elder: 'home', blank: 'library' };
+const GENERIC_KIND = { home: 'home', shop: 'post', workshop: 'workshop', tea: 'teashop', baker: 'bakery', fisher: 'fisherhut', gardener: 'greenhouse', student: 'study', elder: 'elderhome', blank: 'library' };
+/** Room types whose door has a shop bell; houses with a bamboo screen door. */
+const SHOP_DOOR = ['teashop', 'bakery', 'post', 'noodle'], SCREEN_DOOR = ['fisherhut', 'elderhome'];
 const GENERIC_TRADE = { weaver: 'loom' };
 /** The site's own rooms (js/game/interiors) when a story scene walks into one. */
 const SITE_ROOMS = { scripts: 'home', contact: 'post' };
 const DISTRICT_DWELL = 2.5; // s in a new district before the fallback arrival sting
+const EMIT_R = 22; // m: story.sound.emit is silent beyond this
+const STEP_NAME = { Stone: 'stepStone', Dirt: 'stepDirt', Grass: 'stepGrass', Wood: 'stepWood', Tile: 'stepTile', Paper: 'stepPaper', Rug: 'stepRug' };
 
 export function installSound(game, story, ow) {
   if (story.sound) return story.sound;
@@ -147,11 +166,38 @@ export function installSound(game, story, ow) {
       const dx = r.position.x - mp.x, dz = r.position.z - mp.z;
       if (dx * dx + dz * dz < CROWD_R * CROWD_R) n++;
     }
+    if (story.npcEvent?.active && story.npcEvent.quiet) n = 0; // (a quiet town gathering: a kitten, a baby, a story: no crowd song)
     crowdN = n;
     const want = crowdOn ? n > CROWD_OFF : n >= CROWD_ON;
     if (want === crowdOn) { crowdT = 0; return; }
     crowdT += 0.5;
     if (crowdT >= (crowdOn ? 6 : 3)) { crowdOn = want; crowdT = 0; }
+  }
+
+  // ---- driving: the car moving (> 2 m/s held 2 s) turns the music to a drive song; stopped 4 s: back
+  let driving = false, driveT = 0, wasRain = !!save.weather;
+  function driveStep(dt, inCar) {
+    const v = inCar ? Math.abs(game.world?.drive?.state?.speed || 0) : 0;
+    const want = driving ? v > 0.5 : v > 2;
+    if (want === driving) { driveT = 0; return; }
+    driveT += dt;
+    if (!inCar || driveT >= (driving ? 4 : 2)) { driving = want; driveT = 0; }
+  }
+  // ---- gatherings (story.sound.gather): the one Maya stands in, with hysteresis (in at r, out at r * 1.4)
+  const gathers = new Map(), gatherOut = { kind: '', level: 1 };
+  let inGather = null;
+  function gatherStep(onFoot) {
+    if (!onFoot || !gathers.size) { inGather = null; return null; }
+    const mp = game.maya.root.position;
+    let best = null, bd = 1e9;
+    for (const [id, G] of gathers) {
+      const d = Math.hypot(G.x - mp.x, G.z - mp.z);
+      if (d < (id === inGather ? G.r * 1.4 : G.r) && d / G.r < bd) { best = id; bd = d / G.r; }
+    }
+    inGather = best;
+    if (best == null) return null;
+    gatherOut.kind = gathers.get(best).kind; gatherOut.level = Math.max(0.4, 1 - 0.45 * bd);
+    return gatherOut;
   }
 
   function tick(dt) {
@@ -162,7 +208,7 @@ export function installSound(game, story, ow) {
     if (acc < STEP) return;
     // (the first seconds: silent until the warm-up worker has rendered the bank, so nothing is synthesized on this
     // thread mid-game; WARM_MAX caps the wait, after which a missing piece is rendered on the spot as before)
-    if (held.length && game.audio?.context) putPiece(null);
+    if ((held.length || (worker && !warmFlag)) && game.audio?.context) { putPiece(null); warmFlag = !!worker; }
     if (!bankReady) { if (clock < WARM_MAX) { acc = 0; return; } bankReady = true; }
     const t0 = performance.now();
     const room = roomOf();
@@ -177,10 +223,19 @@ export function installSound(game, story, ow) {
     const rain = !!save.weather;
     let c = cue;
     if (!c && save.day === 12 && rain && !room && (mode === null || mode === 'scene')) c = 'd12rain';
-    crowdStep(clock, !room && game.mode === 'world' && !!(story.foot?.active || game.worldWalk));
+    const onFoot = !!(story.foot?.active || game.worldWalk);
+    crowdStep(clock, !room && game.mode === 'world' && onFoot);
+    driveStep(acc, !room && game.mode === 'world' && !onFoot && mode !== 'scene');
+    const g = gatherStep(!room && game.mode === 'world' && onFoot);
+    // footsteps follow the ground (main.js plays game.stepSound for each step); wet outdoors in the rain
+    const surf = room ? ROOM_FLOOR[ROOM_TYPE[room]] || 'Rug' : (zone && ZONE_SURFACE[zone]) || SURFACE_OF[district] || 'Stone';
+    game.stepSound = !room && rain && surf !== 'Paper' ? 'stepWet' : STEP_NAME[surf] || 'step';
+    if (rain && !wasRain) sting('rain');
+    wasRain = rain;
     const s = {
       district, zone, room, mode, cue: c, tension: mode === 'talk' ? tension : 0,
       speaking: !!game.ui?.dialogOpen, period: game.day?.period, hour: game.day?.hour, rain, crowd: crowdOn,
+      driving, gather: g, day: save.day | 0,
     };
     arrival(clock, !room && game.mode === 'world', district);
     scape.update(acc, s);
@@ -189,10 +244,10 @@ export function installSound(game, story, ow) {
     upMs += took; upN++; if (took > upMax) upMax = took;
     const R = scape.state;
     if (R) {
-      const key = [R.music, Object.keys(R.amb).sort().join('+'), mode, R.cue, s.speaking ? 'duck' : ''].join('|');
+      const key = [R.song, Object.keys(R.amb).sort().join('+'), mode, R.cue, s.speaking ? 'duck' : ''].join('|');
       if (key !== lastKey) {
         lastKey = key;
-        log.push({ t: +clock.toFixed(1), music: R.music, amb: Object.keys(R.amb), mode, cue: R.cue, district: R.district, zone: R.zone, room: R.room, period: R.period, speaking: s.speaking, rain });
+        log.push({ t: +clock.toFixed(1), music: R.music, song: R.song, amb: Object.keys(R.amb), mode, cue: R.cue, district: R.district, zone: R.zone, room: R.room, period: R.period, speaking: s.speaking, rain });
         if (log.length > 400) log.splice(0, 100);
       }
     }
@@ -210,7 +265,7 @@ export function installSound(game, story, ow) {
   const HEAVY_LOOPS = ['fire', 'trickle', 'cicada', 'crickets', 'loom', 'brown', 'pink'];
   // then every instrument over its whole range (one instrument per slot; the pad, ~95 ms, in two halves)
   const NOTE_ITEMS = [['pad', 30, 64], ['pad', 66, 100], ...INSTRUMENTS.filter((i) => i !== 'pad').map((i) => [i, 30, 100])];
-  let warmQ = null, warmed = 0, worker = null, workerGot = 0;
+  let warmQ = null, warmed = 0, worker = null, workerGot = 0, warmFlag = false;
   const idle = (fn, ms) => (document.body.classList.contains('playing') && typeof requestIdleCallback === 'function'
     ? setTimeout(() => requestIdleCallback(fn, { timeout: 1500 }), ms) : setTimeout(fn, ms));
   function warmOrder() {
@@ -238,7 +293,7 @@ export function installSound(game, story, ow) {
     const ctx = game.audio?.context;
     if (!ctx) { held.push(m); return; }
     const t0 = performance.now();
-    try { const bank = getBank(ctx); while (held.length) { const h = held.shift(); bank.put(h.kind, h.a, h.b, h.d); } if (m) bank.put(m.kind, m.a, m.b, m.d); workerGot++; } catch { /* context changed */ }
+    try { const bank = getBank(ctx); bank.warming = !!worker; while (held.length) { const h = held.shift(); bank.put(h.kind, h.a, h.b, h.d); } if (m) bank.put(m.kind, m.a, m.b, m.d); workerGot++; } catch { /* context changed */ }
     warmed += performance.now() - t0;
   }
   function warmWorker() {
@@ -249,19 +304,20 @@ export function installSound(game, story, ow) {
       const seen = new Set();
       for (let m = it[2]; m <= it[3]; m++) { const b = baseOf(it[1], m); if (b != null && !seen.has(b)) { seen.add(b); pieces.push(['note', it[1], b]); } }
     }
-    for (const l of LOOP_NAMES) if (!pieces.some((p) => p[0] === 'loop' && p[1] === l)) pieces.push(['loop', l]);
+    for (const l of LOOP_NAMES) if (!UNUSED_LOOPS.includes(l) && !pieces.some((p) => p[0] === 'loop' && p[1] === l)) pieces.push(['loop', l]);
     try {
       worker = new Worker(new URL('./sound/bank-worker.js', import.meta.url), { type: 'module' });
     } catch { worker = null; bankReady = true; return idle(warmStep, 600); }
+    pieces.sort((a, b) => (b[1] === 'white') - (a[1] === 'white')); // the one-shots' noise first (tiny)
     warmQ = pieces;
     worker.onmessage = (ev) => {
       const m = ev.data || {};
-      if (m.done) { worker.terminate(); worker = null; warmQ = []; bankReady = true; return; }
+      if (m.done) { worker.terminate(); worker = null; warmQ = []; bankReady = true; const c = game.audio?.context; if (c) getBank(c).warming = false; return; }
       if (warmQ?.length) warmQ.shift();
       if (!m.d || (story.sound && story.sound.scape !== scape)) return;
       putPiece(m);
     };
-    worker.onerror = () => { try { worker?.terminate(); } catch { /* gone */ } worker = null; warmQ = null; bankReady = true; idle(warmStep, 600); };
+    worker.onerror = () => { try { worker?.terminate(); } catch { /* gone */ } worker = null; warmQ = null; bankReady = true; const c = game.audio?.context; if (c) getBank(c).warming = false; idle(warmStep, 600); };
     worker.postMessage({ pieces });
   }
   if (typeof Worker === 'function') setTimeout(warmWorker, 0); else { bankReady = true; idle(warmStep, 600); }
@@ -292,7 +348,25 @@ export function installSound(game, story, ow) {
     cue(name = null) { cue = name || null; log.push({ t: +clock.toFixed(1), cueSet: cue }); },
     get cueName() { return cue; },
     sting,
-    state() { const R = scape.state; return R ? { crowd: crowdOn, crowdN, music: R.music, layers: scape.stats()?.layers, amb: R.amb, mode: modeOf(), cue: R.cue, district: R.district, zone: R.zone, room: R.room, period: R.period } : null; },
+    gather(id, o = {}) { if (id != null && o.kind) gathers.set(id, { kind: o.kind, x: +o.x || 0, z: +o.z || 0, r: Math.max(2, +o.r || 10) }); },
+    ungather(id) { gathers.delete(id); if (inGather === id) inGather = null; },
+    get gathers() { return [...gathers.keys()]; },
+    emit(name, { x = 0, z = 0, v = 1 } = {}) {
+      const cam = game.camera, mp = game.maya?.root?.position;
+      if (!cam || !mp) return 0;
+      const dx = x - mp.x, dz = z - mp.z, d = Math.sqrt(dx * dx + dz * dz);
+      if (d > EMIT_R) return 0;
+      const e = cam.matrixWorld.elements; // the camera's right axis (x, z)
+      const rl = Math.hypot(e[0], e[2]) || 1;
+      return scape.emit(name, { pan: ((dx * e[0] + dz * e[2]) / rl) / 10, far: d / EMIT_R, v: v * (1 - 0.6 * d / EMIT_R) });
+    },
+    doorSound(id, entering = true) {
+      const type = ROOM_TYPE[id] || (String(id || '').startsWith('g:') ? null : 'home');
+      if (type && SHOP_DOOR.includes(type)) return 'shopBell';
+      if (type && SCREEN_DOOR.includes(type)) return 'screenDoor';
+      return entering ? 'doorOpen' : 'doorClose';
+    },
+    state() { const R = scape.state; return R ? { crowd: crowdOn, crowdN, driving, gather: inGather, song: R.song, music: R.music, layers: scape.stats()?.layers, amb: R.amb, mode: modeOf(), cue: R.cue, district: R.district, zone: R.zone, room: R.room, period: R.period } : null; },
     /** Main-thread cost and the audio work rate since the last call. */
     cpu() {
       const st = scape.stats();

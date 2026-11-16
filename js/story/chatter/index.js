@@ -338,7 +338,7 @@ export function createChatter(game, story) {
     const mp = mayaPos(), mx = mp.x, mz = mp.z;
     const out = [];
     for (const e of story.people.values()) {
-      if (!e?.p?.root || e === story.talkWith || e.ctl || e.walking || e.paused || e.hidden) continue;
+      if (!e?.p?.root || e === story.talkWith || e.ctl || e.walking || e.paused || e.hidden || e.evt) continue; // (e.evt: in a town gathering, which says its own lines)
       if (e.p.root.visible === false) continue;
       const pp = e.p.root.getWorldPosition(v);
       const d = Math.hypot(pp.x - mx, pp.z - mz);
@@ -375,7 +375,7 @@ export function createChatter(game, story) {
     for (const b of pool) ro.observe(b.el);
   } catch { /* no ResizeObserver: the size from show() stands */ }
   let now = 0;
-  function show(sp, line, ms, cls = '') {
+  function show(sp, line, ms, cls = '', partner = null) {
     const b = pool.find((x) => !x.on && !x.fade) || pool.find((x) => !x.on) || pool[0];
     b.on = true; b.fade = 0; b.line = line; b.p = sp.p; b.until = now + ms / 1000;
     b.el.className = 'rc-chat' + (cls ? ' ' + cls : '');
@@ -384,6 +384,7 @@ export function createChatter(game, story) {
     b.el.classList.add('show');
     b.w = b.el.offsetWidth; b.h = b.el.offsetHeight; b.x = b.y = b.tx = -1;
     call(sp.p, 'talk', Math.min(4, ms / 1000 * 0.6));
+    if (sp.p !== game.maya) story.anim?.gesture(sp.p, line, { dur: ms / 1000, quiet: true, listener: partner?.p }); // (js/story/anim)
     place(b);
     return b;
   }
@@ -615,7 +616,7 @@ export function createChatter(game, story) {
     const st = seq.steps[seq.i];
     const ms = msFor(st.line);
     if (st.who === 'maya') { sayMaya(st.line); seq.b = null; }
-    else { seq.b = show(seq.sp[st.who], st.line, ms, st.who ? 'pb' : 'pa'); if (seq.i) log('pair', seq.sp[st.who].id, st.line); }
+    else { seq.b = show(seq.sp[st.who], st.line, ms, st.who ? 'pb' : 'pa', seq.sp[st.who ? 0 : 1]); if (seq.i) log('pair', seq.sp[st.who].id, st.line); }
     seq.t = ms / 1000 + T.pairStep;
   }
 

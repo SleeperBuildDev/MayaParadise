@@ -127,6 +127,7 @@ export async function createStory(game) {
     persist() { persist(save); },
 
     update(dt, t) {
+      story.anim?.frame(game.camera); // (js/story/anim: the camera for its near / far choice)
       for (const e of people.values()) {
         if (e.ctl) { e.ctl(dt); continue; } // driven by a script (api.js carry partner)
         // walking somewhere (scripted)
@@ -524,6 +525,7 @@ export async function createStory(game) {
   // pins: story mode never points the way, so they go (like main.js's pad rings)
   game.world?.scene?.getObjectByName('sparkles')?.removeFromParent();
   installApi(story, game, { groundAt, bagBtn });
+  import('./anim/index.js').then(({ install }) => install(game, story)).catch((e) => console.error('anim', e)); // NPC animation: talk gestures, job loops, reactions
   import('./extras-sound.js').then(({ installSound }) => installSound(game, story, openWorld)).catch((e) => console.error('extras sound', e)); // town sound + songs (replaces the site's music)
   document.addEventListener('mw:lang', setModeIcon);
   // keyboard: F switches, E / Enter talks to whoever is close
@@ -578,6 +580,7 @@ export async function createStory(game) {
   whole().then(() => import('./extras-houses.js')).then(({ installHouses }) => installHouses(game, story)).catch((e) => console.error('extras houses', e)); // everyday houses to walk into
   whole().then(() => import('./extras-chatter.js')).then(({ installChatter }) => installChatter(game, story, openWorld)).catch((e) => console.error('extras chatter', e)); // town chatter, small talk, ambient folk
   whole().then(() => import('./extras-heinhtet.js')).then(({ installHeinHtet }) => installHeinHtet(game, story, openWorld)).catch((e) => console.error('extras heinhtet', e)); // Ko Hein Htet, the man in the red suit who is always running
+  whole().then(() => import('./extras-events.js')).then(({ installEvents }) => installEvents(game, story, openWorld)).catch((e) => console.error('extras events', e)); // random town gatherings (a chinlone circle, a kite contest, a puppet show...)
   // the day's opening runs on its own (it waits for the player's taps); the very first time on this device, Maya's
   // intro to the book plays first (intro.js: a fresh Day 1 only, once; ?intro=1 plays it again)
   const firstIntro = () => import('./intro.js').then((m) => (m.introWanted(save, params) ? m.playIntro(game, story, { force: params.get('intro') === '1' }) : null))

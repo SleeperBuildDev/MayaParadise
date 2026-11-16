@@ -28,6 +28,7 @@ import { WHARF_ART, WHARF_PROP } from '../art/wharf.js';
 import { WHARF_EXTRA_PROP } from './wharf-props.js';
 import { FOLK_PEOPLE } from './wharf-folk.js';
 import { WHARF_YARD_PROP, fillBand, spaceOf } from './wharf-yards.js';
+import { detail as wharfDetail } from './wharf-detail.js';
 
 const PI = Math.PI;
 
@@ -521,4 +522,8 @@ export const SPOTS = {
 };
 
 export const PEOPLE = FOLK_PEOPLE;
+// the detail pass, last: street details merged into the chunk meshes, 2 m clear of the doors, desks, spots and the
+// townsfolk's places (wharf-detail.js)
+export const DETAIL = wharfDetail({ ITEMS, add, PROP, keep: [...DOORS, ...DESKS, ...FOLK_PEOPLE,
+  ...Object.values(SPOTS).flatMap((v) => (Array.isArray(v) ? v.map((j) => j.head || j) : [v])).filter((p) => p && Number.isFinite(p.x))] });
 export const SIGNS = [];

@@ -588,7 +588,7 @@ export async function createDoors(game, story) {
     }
     let R = null;
     const roomP = loadRoom(id, o).catch((err) => { console.error('room', id, err); return null; });
-    call(game.audio, 'play', 'door');
+    call(game.audio, 'play', story.sound?.doorSound?.(id, true) || 'door'); // (shop bell / house door: extras-sound.js)
     await game.ui.irisClose();
     // (a slow connection: the room's file is still on its way: a page turns over the dark and flutters until
     // it is here, then turns away; never a still screen)
@@ -692,7 +692,7 @@ export async function createDoors(game, story) {
     if (!o.instant && Math.hypot(game.walker.pos.x - R.door.x, game.walker.pos.y - R.door.z) > R.door.r) {
       await new Promise((res) => { let done = false; const fin = () => { if (!done) { done = true; res(); } }; game.walker.goTo(R.door.x, R.door.z, fin); setTimeout(fin, 6000); });
     }
-    call(game.audio, 'play', 'door');
+    call(game.audio, 'play', story.sound?.doorSound?.(c.id, false) || 'door');
     await game.ui.irisClose();
     try { await call(dayFor(c.id), 'leaveRoom', c.id, c.built || R); } catch (e) { console.error('day.leaveRoom', e); }
     // the room's people go, the street's come back

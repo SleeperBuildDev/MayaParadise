@@ -37,6 +37,8 @@ import { ART as LIFE_ART, PROP as LIFE_PROP } from './market-life.js';
 import { FOLK_PEOPLE } from './market-folk.js';
 import { ART as FILL_ART, PROP as FILL_PROP, fill } from './market-fill.js';
 import { ART as TOWN_ART, PROP as TOWN_PROP, town } from './market-town.js';
+import { detail as marketDetail } from './market-detail.js';
+import { detail as envelopeDetail } from './envelope-detail.js';
 
 export const ART = { ...MK_ART, ...LIFE_ART, ...FILL_ART, ...TOWN_ART };
 export const PROP = { ...MK_PROP, ...LIFE_PROP, ...FILL_PROP, ...TOWN_PROP };
@@ -541,6 +543,8 @@ export const SPOTS = {
 const KEEP = [...DOORS, ...DESKS, ...FOLK_PEOPLE]; // (and where the townsfolk with hellos stand)
 for (const v of Object.values(SPOTS)) for (const p of Array.isArray(v) ? v : [v]) if (p && typeof p === 'object' && Number.isFinite(p.x)) KEEP.push(p);
 export const TOWN = town({ ITEMS, add, folk, defs: { ...ART, ...PROP }, keep: KEEP });
+// the Market's detail pass, last on the letter, through the same clear-check: street details merged into the chunk meshes (market-detail.js)
+export const DETAIL = marketDetail({ ITEMS, add, town: TOWN, PROP, keep: KEEP });
 
 /** day4-market.js's MK, same shape, same names: Day 4 can import this instead of its own copy. */
 export const MK = {
@@ -586,3 +590,6 @@ export const PEOPLE = [
   ...TOWN.TOWN_PEOPLE, // and the town pass's (market-townfolk.js; the same: once cast.js lists them)
 ];
 export const SIGNS = [];
+
+// the envelope road's detail pass (envelope-detail.js, art plan 2026-11-16), laid last: clear of everything above
+envelopeDetail({ ITEMS, add, defs: { ...ART, ...PROP }, keep: [...KEEP, ...PEOPLE.flatMap((p) => [p, p.job?.spot].filter(Boolean))], PROP, ART, ROAD_EDGES });

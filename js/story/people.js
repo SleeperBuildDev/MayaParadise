@@ -16,6 +16,7 @@
 //   p.headTop(target) -> Vector3       world point just above the head (bubbles, labels)
 //   p.portrait(face) -> canvas         128 px head-and-shoulders picture for the talk screen
 //   p.dispose()
+//   p.P / p.rig                        the pose record and body measures js/story/anim reads (PEOPLE_ANIM below)
 import * as THREE from '../game/three.js';
 import { mergeGeometries, mergeVertices } from '../game/three.js';
 import { PALETTE, toon, blobShadow } from '../game/toon.js';
@@ -748,6 +749,10 @@ const _q = new THREE.Quaternion();
 /** Every live person: root -> { hips bone, its rest height, the body mesh }. world/feet.js stands them on the surface drawn
  * under them (a road is 0.14 m above the paper) and tells a seated pose (hips lowered) from a standing one. */
 export const LIVE_PEOPLE = new Map();
+/** The animation layer (js/story/anim/index.js sets `layer`): called once per person per update with the pose so far
+ * (walk, moods, emotes), before lookAt and the bone writes. While it owns moods / talk (P.ownMood, P.ownTalk) people.js
+ * leaves those to it, so a mood or a gesture fades in and out instead of snapping. Unset: people.js as before. */
+export const PEOPLE_ANIM = { layer: null };
 
 export function createPerson(spec = {}) {
   const it = createPersonSteps(spec);
@@ -852,6 +857,9 @@ export function* createPersonSteps(spec = {}) {
   let shownFace = '';
   function showFace(name) { if (name !== shownFace) { shownFace = name; setFaceUV(faceGeo, name); } }
 
+  // the pose record the anim layer reads and writes (one per person, made here: nothing is allocated per frame)
+  const P = { hipsY: 0, torsoX: 0, torsoY: 0, torsoZ: 0, headX: 0, headY: 0, headZ: 0, aLx: 0, aLy: 0, aLz: 0, aRx: 0, aRy: 0, aRz: 0, lLx: 0, lRx: 0,
+    walk: 0, speed: 0, t: 0, talk: 0, mood: null, emote: 0, face: 'smile', ownMood: 0, ownTalk: 0 };
   const EMOTE_DUR = { wave: 1.6, nod: 0.9, bow: 1.4, cheer: 1.3, shrug: 1.1, think: 2.0, slump: 1.6, fists: 1.0, point: 1.4 };
 
   function update(dt, opts = {}) {
@@ -868,18 +876,21 @@ export function* createPersonSteps(spec = {}) {
     let headX = -st.stoop * 0.6 + Math.sin(st.t * 0.9) * 0.02, headY = 0, headZ = 0;
     let aLx = -s * 0.7 * walk, aRx = s * 0.7 * walk, aLz = 0.06, aRz = -0.06;
     let lLx = s * 0.75 * walk, lRx = -s * 0.75 * walk;
-    // held moods
-    if (st.mood === 'hot') { aLz = 0.22; aRz = -0.22; aLx = -0.15; aRx = -0.15; torsoX += 0.05; headX += 0.08 + Math.sin(st.t * 24) * 0.012; }
-    if (st.mood === 'down') { torsoX += 0.16; headX += 0.28; aLz = 0.02; aRz = -0.02; hipsY -= 0.01; }
+    let torsoY = 0, aLy = 0, aRy = 0;
+    const layer = PEOPLE_ANIM.layer;
+    // held moods (the anim layer plays them itself while it owns them; the chinlone kick stays here: its ball bone)
+    const mood = layer && P.ownMood && st.mood !== 'kick' ? null : st.mood;
+    if (mood === 'hot') { aLz = 0.22; aRz = -0.22; aLx = -0.15; aRx = -0.15; torsoX += 0.05; headX += 0.08 + Math.sin(st.t * 24) * 0.012; }
+    if (mood === 'down') { torsoX += 0.16; headX += 0.28; aLz = 0.02; aRz = -0.02; hipsY -= 0.01; }
     // jobs (held while working): hands busy in front, sweeping, reading a letter, playing with a windmill
-    if (st.mood === 'work') { const w = Math.sin(st.t * 6.5); aLx = -1.0 + w * 0.18; aRx = -1.0 - w * 0.18; aLz = -0.15; aRz = 0.15; torsoX += 0.12; headX += 0.22; }
-    if (st.mood === 'sweep') { const w = Math.sin(st.t * 3.2); aLx = -0.7; aRx = -0.9; aLz = -0.35 + w * 0.35; aRz = 0.05 + w * 0.35; torsoX += 0.15; torsoZ += w * 0.06; headX += 0.15; }
-    if (st.mood === 'read') { aLx = -1.25; aRx = -1.25; aLz = -0.32; aRz = 0.32; headX += 0.3 + Math.sin(st.t * 0.7) * 0.04; }
-    if (st.mood === 'play') { aRx = -2.4 + Math.sin(st.t * 2) * 0.15; aRz = -0.1; headX -= 0.12; headZ += Math.sin(st.t * 1.3) * 0.08; hipsY += Math.abs(Math.sin(st.t * 3)) * 0.012; }
-    if (st.mood === 'shy') { headX += 0.12; aLx = -0.35; aRx = -0.35; aLz = -0.25; aRz = 0.25; }
+    if (mood === 'work') { const w = Math.sin(st.t * 6.5); aLx = -1.0 + w * 0.18; aRx = -1.0 - w * 0.18; aLz = -0.15; aRz = 0.15; torsoX += 0.12; headX += 0.22; }
+    if (mood === 'sweep') { const w = Math.sin(st.t * 3.2); aLx = -0.7; aRx = -0.9; aLz = -0.35 + w * 0.35; aRz = 0.05 + w * 0.35; torsoX += 0.15; torsoZ += w * 0.06; headX += 0.15; }
+    if (mood === 'read') { aLx = -1.25; aRx = -1.25; aLz = -0.32; aRz = 0.32; headX += 0.3 + Math.sin(st.t * 0.7) * 0.04; }
+    if (mood === 'play') { aRx = -2.4 + Math.sin(st.t * 2) * 0.15; aRz = -0.1; headX -= 0.12; headZ += Math.sin(st.t * 1.3) * 0.08; hipsY += Math.abs(Math.sin(st.t * 3)) * 0.012; }
+    if (mood === 'shy') { headX += 0.12; aLx = -0.35; aRx = -0.35; aLz = -0.25; aRz = 0.25; }
     // chinlone: keep the rattan ball up with the inside of the foot, arms out for balance, eyes on the ball
     let ballUp = -1;
-    if (st.mood === 'kick') {
+    if (mood === 'kick') {
       const u = (st.t / 0.95) % 1, kickFoot = Math.floor(st.t / 0.95) % 3 === 2 ? 1 : -1; // mostly the right foot
       const k = u < 0.12 ? Math.sin((u / 0.12) * Math.PI) : 0;
       if (kickFoot < 0) { lRx = -0.95 * k; } else { lLx = -0.95 * k; }
@@ -890,8 +901,8 @@ export function* createPersonSteps(spec = {}) {
       st.kickFoot = kickFoot;
     }
     // talking gestures
-    if (st.talkT > 0) {
-      st.talkT -= dt;
+    if (st.talkT > 0) st.talkT -= dt;
+    if (st.talkT > 0 && !(layer && P.ownTalk)) {
       aRx += -0.35 - Math.sin(st.t * 5.3) * 0.25;
       aRz += -0.1;
       headZ += Math.sin(st.t * 3.1) * 0.05;
@@ -915,6 +926,14 @@ export function* createPersonSteps(spec = {}) {
       }
       if (st.emoteT >= st.emoteDur) { const done = st.emoteDone; st.emote = null; st.emoteDone = null; done?.(); }
     }
+    if (layer) {
+      P.hipsY = hipsY; P.torsoX = torsoX; P.torsoY = torsoY; P.torsoZ = torsoZ; P.headX = headX; P.headY = headY; P.headZ = headZ;
+      P.aLx = aLx; P.aLy = aLy; P.aLz = aLz; P.aRx = aRx; P.aRy = aRy; P.aRz = aRz; P.lLx = lLx; P.lRx = lRx;
+      P.walk = walk; P.speed = st.speed; P.t = st.t; P.talk = st.talkT; P.mood = st.mood; P.emote = st.emote ? 1 : 0; P.face = st.face;
+      layer(api, P, dt);
+      hipsY = P.hipsY; torsoX = P.torsoX; torsoY = P.torsoY; torsoZ = P.torsoZ; headX = P.headX; headY = P.headY; headZ = P.headZ;
+      aLx = P.aLx; aLy = P.aLy; aLz = P.aLz; aRx = P.aRx; aRy = P.aRy; aRz = P.aRz; lLx = P.lLx; lRx = P.lRx;
+    } else P.ownMood = P.ownTalk = 0;
     // look at a world point (head yaw/pitch, clamped)
     let ly = 0, lp = 0;
     if (st.look) {
@@ -929,10 +948,10 @@ export function* createPersonSteps(spec = {}) {
     st.headPitch = damp(st.headPitch, lp, 6, dt);
 
     bones.hips.position.y = hipsY;
-    bones.torso.rotation.set(torsoX, 0, torsoZ);
+    bones.torso.rotation.set(torsoX, torsoY, torsoZ);
     bones.head.rotation.set(headX + st.headPitch, headY + st.headYaw, headZ);
-    bones.armL.rotation.set(aLx, 0, aLz);
-    bones.armR.rotation.set(aRx, 0, aRz);
+    bones.armL.rotation.set(aLx, aLy, aLz);
+    bones.armR.rotation.set(aRx, aRy, aRz);
     bones.legL.rotation.set(lLx, 0, 0);
     bones.legR.rotation.set(lRx, 0, 0);
     if (B.chinlone) {
@@ -978,6 +997,10 @@ export function* createPersonSteps(spec = {}) {
     /** The person's own meshes, read-only, for a crowd that draws many people as one mesh (day15-launch.js
      *  crowdBatch): it takes them off the camera's layer and skins a merged copy with the same bones. */
     parts: { mesh, outline, face, shadow, skeleton },
+    P,
+    /** Body measures for js/story/anim (props in the hand, clip mirroring). Bone space: the hand is at (0, -(arm + 0.02), 0) of its arm bone. */
+    rig: { hipY: B.hipY, shoulderY: B.shoulderY, arm: B.A, sw: B.SW, armW: B.armW, headTop: B.hc + B.HH / 2 - (B.shoulderY + 0.03),
+      stick: (spec.extras || []).includes('cane'), chinlone: B.chinlone, age: spec.age || 'adult' },
     dispose() {
       LIVE_PEOPLE.delete(root);
       bodyGeo.dispose(); outGeo.dispose(); faceGeo.dispose(); skeleton.dispose();

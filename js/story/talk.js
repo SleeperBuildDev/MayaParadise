@@ -721,6 +721,7 @@ export function createTalk(game, story, opts = {}) {
       if (line.mood !== undefined) call(v.p, 'setMood', line.mood);
       if (line.emote) call(v.p, 'emote', line.emote);
       call(v.p, 'talk', Math.min(6, 0.8 + tr(line).length * 0.05));
+      story?.anim?.gesture(v.p, line, { listener: helperP || game?.maya }); // (js/story/anim: the line's own gesture)
       ui.themName = v.name;
       ui.$('.tk-who.them .tk-name').textContent = tr(v.name);
       ui.setThemFace(f === 'talk' ? 'smile' : f, v.who);
@@ -732,6 +733,7 @@ export function createTalk(game, story, opts = {}) {
       const a = helperP || game?.maya;
       call(a, 'setFace', helperP ? (face === 'surprised' ? 'surprised' : face === 'think' ? 'think' : 'smile') : face, 6);
       call(a, 'talk', Math.min(5, 0.8 + tr(line).length * 0.05));
+      story?.anim?.gesture(a, line, { listener: p });
       ui.setMayaFace(face);
       await ui.say(mayaVoice, line, { maya: true, ...o });
       call(a, 'talk', 0);

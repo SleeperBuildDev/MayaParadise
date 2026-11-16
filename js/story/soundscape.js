@@ -16,8 +16,20 @@
 //   sound.sting('lesson' | 'stamp' | 'page' | 'arrive', districtForArrive);
 //   sound.volume = 0.5;  sound.stats();  sound.dispose();
 //
-// Priorities: mission cue > room > area > town. Music: one song at a time, 2.5 s cross-fades; a change of
-// time of day re-plays the same song in its new colour. Ambience: town bed (day/night) + area bed on top;
+//   more state (Nov 2026): driving: true (she drives; music turns to a 'drive:*' song), gather: { kind, level }
+//   (a gathering she stands in: 'event:<kind>' song + 'ev:<kind>' ambience at level 0..1), day (save day: varies
+//   which song of a place plays first). sound.emit(name, { pan, far, v }): one positional one-shot (budgeted).
+//
+// Priorities: mission cue > room > gathering > driving > rain (outdoors) > crowd > area > town.
+// Songs of a place: a place key ('town:market') has variants ('town:market#2'...): PLAYLIST (songs-more.js) or the
+// default recipe picks one by time of day and visit (a new visit hears a different one; the same song never plays
+// again within three picks; back from a talk or a room within 90 s: the same song as before), and after 150 s in
+// one place it rotates to the next, only at the end of a form, with a 4 s cross-fade. Rooms pick theirs by a hash
+// of the room id (each house keeps its own tune). R.music = the place key, R.song = the variant playing.
+// Events budget (every ambience layer and emit together): at most 5 one-shots sounding, 18 a minute (tiny ones
+// like drips and the clock are free), a cooldown per name (animals 6-20 s, a child's voice 25 s), and while a line
+// is on screen only 40% of them play. Birds: a 'birds:<period>' layer outdoors (places.js DISTRICT_BIRDS).
+// Music: one song at a time, 2.5 s cross-fades; a change of time of day re-plays the same song in its new colour. Ambience: town bed (day/night) + area bed on top;
 // indoors the town is heard through the walls (low-passed, 30%). Rain adds a bed outside or on the roof.
 // It plays into audio.output, so the game's sound button mutes it. While muted / suspended nothing runs.
 // CPU: ~2-5 short notes a second per song (each 1 buffer source + 1 gain), 2-6 looping beds (3-5 nodes each),
@@ -25,13 +37,24 @@
 import { getBank } from './sound/bank.js';
 import { FX } from './sound/fx.js';
 import { SONGS, startSong, playSting } from './sound/songs.js';
-import { AMBIENCE, ZONES, ROOM_TYPE, ROOM_AMB, ROOM_SONG, MODE_CUE, DISTRICT_ALIAS, zoneAt, districtAt } from './sound/places.js';
+import { PLAYLIST } from './sound/songs-more.js';
+import { AMBIENCE, ZONES, ROOM_TYPE, ROOM_AMB, ROOM_SONG, MODE_CUE, DISTRICT_ALIAS, DISTRICT_BIRDS, TIN_ROOF, zoneAt, districtAt } from './sound/places.js';
 
 export { SONGS, AMBIENCE, ZONES, ROOM_TYPE };
 
 const AHEAD = 0.4; // seconds scheduled ahead
 const FADE = 2.5; // cross-fade (s)
 const TONE = { morning: 7000, noon: 10000, evening: 5200, night: 3400 }; // music brightness by time of day
+const ROTATE = 150; // s in one place before its next song (at a form end)
+const EV_PER_MIN = 18, EV_ALIVE = 5; // the events budget
+/** Tiny one-shots outside the per-minute budget (they still keep their cooldown). */
+const FREE = new Set(['drip', 'clockTick', 'splash', 'rainWindow', 'gutterDrip', 'creak']);
+/** Seconds between two of the same one-shot (default 3; 'every' bed events such as the clock set their own: 0). */
+const COOLDOWN = {
+  clockTick: 0, drip: 0.3, splash: 0.6, rainWindow: 0.5, creak: 1.5,
+  giggle: 25, yay: 25, dog: 6, dogFar: 10, rooster: 20, hen: 6, duck: 6, cat: 12, gecko: 6, crowFar: 10, koel: 8, dove: 6,
+  owlet: 6, frog: 4, horn: 20, schoolBell: 20, kettle: 8, teaPour: 6, cartBell: 15, trishawPass: 12, wellBucket: 15,
+};
 
 export function periodOf(hour = 12) {
   const h = ((hour % 24) + 24) % 24;
@@ -49,23 +72,33 @@ export function resolve(s = {}) {
   const room = s.room || null, rtype = room ? ROOM_TYPE[room] || 'home' : null;
   const period = s.period || periodOf(s.hour ?? 12), night = period === 'night';
   const cue = s.cue || MODE_CUE[s.mode] || null;
+  const evCue = cue && cue.startsWith('event:'); // a gathering song named as a cue (an events script)
+  const gather = !rtype && s.gather ? s.gather : null;
+  const eve = period === 'evening';
   // s.crowd: many townsfolk around Maya outdoors -> the livelier street song (owner: music, not crowd noise)
-  const music = cue ? 'cue:' + cue : rtype ? ROOM_SONG[rtype] || 'room:' + rtype : s.crowd ? 'area:crowd' : Z ? 'area:' + Z : district ? 'town:' + district : null;
+  const music = cue ? (cue.includes(':') ? cue : 'cue:' + cue) : rtype ? ROOM_SONG[rtype] || 'room:' + rtype
+    : gather && SONGS['event:' + gather.kind] ? 'event:' + gather.kind
+      : s.driving ? 'drive:' + (s.rain ? 'rain' : night ? 'night' : eve ? 'eve' : district === 'envelope' ? 'road' : 'town')
+        : s.rain ? 'rain:' + (night ? 'night' : eve ? 'eve' : 'day')
+          : s.crowd ? 'area:crowd' : Z ? 'area:' + Z : district ? 'town:' + district : null;
   const amb = {};
   const town = district ? `${district}:${night ? 'night' : 'day'}` : null;
   if (rtype) {
     amb[ROOM_AMB[room] || ROOM_AMB[rtype] || 'room:' + rtype] = { level: 1 };
     if (town) amb[town] = { level: 0.3, muffle: true };
-    if (s.rain) amb['rain:in'] = { level: 1 };
+    if (s.rain) amb[TIN_ROOF.includes(rtype) ? 'rain:tin' : 'rain:in'] = { level: 1 };
   } else {
     if (town) amb[town] = { level: (Z ? 0.6 : 1) * (s.rain ? 0.45 : 1) }; // rain: birds and crowds go quiet
     if (Z) amb['area:' + Z] = { level: night && !['jetties', 'bridge', 'lodgeporch'].includes(Z) ? 0.4 : 1 };
     if (s.rain) amb['rain:out'] = { level: 1 };
+    else if (district && DISTRICT_BIRDS[district]) amb['birds:' + period] = { level: DISTRICT_BIRDS[district] * (Z ? 0.7 : 1) * (s.driving ? 0.5 : 1) };
+    const ev = gather ? 'ev:' + gather.kind : evCue ? 'ev:' + cue.slice(6) : null;
+    if (ev && AMBIENCE[ev]) amb[ev] = { level: Math.max(0.05, Math.min(1, gather ? gather.level ?? 1 : 1)) };
   }
   if (cue === 'finale') for (const k in amb) amb[k].level *= 0.5;
-  else if (cue) for (const k in amb) amb[k].level *= cue === 'talk' ? 0.3 : cue === 'focus' ? 0.5 : 0.7; // the place steps back while she talks / works
+  else if (cue && !evCue) for (const k in amb) amb[k].level *= cue === 'talk' ? 0.3 : cue === 'focus' ? 0.5 : 0.7; // the place steps back while she talks / works
   const tension = cue === 'talk' ? Math.max(0, Math.min(1, s.tension ?? (s.calm ? 0 : 0.6))) : 0;
-  return { music: SONGS[music] ? music : null, period, amb, tension, cue, district, zone: Z, room };
+  return { music: SONGS[music] ? music : null, song: null, period, amb, tension, cue, district, zone: Z, room, gather: gather ? gather.kind : null };
 }
 
 const irCache = new WeakMap();
@@ -84,7 +117,7 @@ function reverbIR(ctx) {
 }
 
 /** The engine on any AudioContext (live or Offline). dest: the node it plays into. */
-export function createScape(ctx, dest, { volume = 0.38, solo = null } = {}) {
+export function createScape(ctx, dest, { volume = 0.38, solo = null, fallback = false } = {}) {
   const bank = getBank(ctx);
   const master = ctx.createGain(); master.gain.value = volume; master.connect(dest);
   const musicBus = ctx.createGain(), tone = ctx.createBiquadFilter(), musicDuck = ctx.createGain();
@@ -95,7 +128,7 @@ export function createScape(ctx, dest, { volume = 0.38, solo = null } = {}) {
   const stingBus = ctx.createGain(); stingBus.gain.value = 0.6; stingBus.connect(master); // ~6 dB over the music, not 10
   const verbIn = ctx.createGain(), conv = ctx.createConvolver();
   conv.buffer = reverbIR(ctx); verbIn.gain.value = 0.9; verbIn.connect(conv); conv.connect(master);
-  const E = { ctx, bank, verb: verbIn, dest: ambBus };
+  const E = { ctx, bank, verb: verbIn, dest: ambBus, fallback }; // fallback: live game (a song plays a part's `alt` until its instrument is warmed)
   if (solo) { // previews only: hear one bus (its reverb included) to measure the balance
     const keep = { music: musicDuck, amb: ambDuck, sting: stingBus }[solo];
     for (const b of [musicDuck, ambDuck, stingBus]) if (b !== keep) { b.disconnect(); b.connect(ctx.createGain()); }
@@ -157,18 +190,78 @@ export function createScape(ctx, dest, { volume = 0.38, solo = null } = {}) {
     for (const n of L.nodes) try { n.disconnect(); } catch { /* ignore */ }
     layers.delete(L.key);
   }
+  // ---- the events budget (all layers and emit() share it; no allocation) ----
+  const evTimes = new Float64Array(EV_PER_MIN), alive = new Float64Array(EV_ALIVE), lastAt = Object.create(null);
+  let evI = 0, speaking = false;
+  evTimes.fill(-1e9);
+  /** May a one-shot `name` start at t? (books it if so; `dur` is filled in by fire()) */
+  function allow(name, t) {
+    const cd = COOLDOWN[name] ?? 3;
+    if (t - (lastAt[name] ?? -1e9) < cd) return -1;
+    if (FREE.has(name)) { lastAt[name] = t; return EV_ALIVE; }
+    if (speaking && Math.random() < 0.6) return -1;
+    if (t - evTimes[evI] < 60) return -1; // the oldest of the last EV_PER_MIN is under a minute old
+    let slot = -1;
+    for (let i = 0; i < EV_ALIVE; i++) if (alive[i] <= t) { slot = i; break; }
+    if (slot < 0) return -1;
+    lastAt[name] = t;
+    evTimes[evI] = t; evI = (evI + 1) % EV_PER_MIN;
+    return slot;
+  }
+  function fire(name, t, v, opts, dest) {
+    const slot = allow(name, t);
+    if (slot < 0) return 0;
+    E.dest = dest;
+    const d = FX[name](E, t, v, opts) || 1;
+    if (slot < EV_ALIVE) alive[slot] = t + d;
+    counts.events++;
+    return d;
+  }
   function pumpLayer(L, now, until) {
     for (const e of L.ev) {
       if (e.next < now - 1) e.next = now + (e.period || L.gap(e.rate)) * Math.random(); // after a long pause: no burst
       while (e.next < until) {
-        if (L.target > 0.02 && FX[e.name]) {
-          E.dest = L.input;
-          FX[e.name](E, e.next, e.v, e.opts);
-          counts.events++;
-        }
+        if (L.target > 0.02 && FX[e.name]) fire(e.name, e.next, e.v, e.opts, L.input);
         e.next += e.period || L.gap(e.rate);
       }
     }
+  }
+
+  // ---- which song of a place plays (see the top of the file) ----
+  const recent = ['', '']; // the last two songs started
+  const visits = Object.create(null), memo = Object.create(null); // per place: visits; { song, t } last heard
+  let placeKey = null, place = null, list = null, idx = 0, placeT0 = 0, rotateFade = 0;
+  function variantsOf(key, period) {
+    const P = PLAYLIST[key];
+    if (P) return (P[period] || P.noon).filter((k) => SONGS[k]);
+    const B = key + '#2', C3 = key + '#3';
+    if (!SONGS[B]) return [key];
+    if (!SONGS[C3]) return [key, B];
+    return period === 'morning' ? [key, B] : period === 'noon' ? [B, key] : period === 'evening' ? [B, C3] : [C3, key];
+  }
+  function fresh(L, i) { for (let k = 0; k < L.length; k++) { const j = (i + k) % L.length; if (L[j] !== recent[0] && L[j] !== recent[1]) return j; } return i; }
+  function hashStr(str) { let h = 7; for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) | 0; return h < 0 ? -h : h; }
+  function chooseSong(R, s, now) {
+    rotateFade = 0;
+    if (s.song && SONGS[s.song]) return s.song; // (previews / tests: one exact song)
+    if (!R.music) { placeKey = place = null; return null; }
+    const key = R.music + '@' + R.period;
+    if (key !== placeKey) {
+      const was = place, cur = list ? list[idx] : null;
+      placeKey = key; place = R.music; list = variantsOf(place, R.period); placeT0 = now;
+      const m = memo[place];
+      if (R.room && place.startsWith('room:')) idx = hashStr(String(R.room)) % list.length; // each house keeps its tune
+      else if (was === place && list.includes(cur)) idx = list.indexOf(cur); // only the time of day changed
+      else if (m && now - m.t < 90 && list.includes(m.song)) idx = list.indexOf(m.song); // back from a talk / a room
+      else { visits[place] = (visits[place] || 0) + 1; idx = fresh(list, ((s.day | 0) * 7 + visits[place]) % list.length); }
+    } else if (song && list.length > 1 && !place.startsWith('room:') && song.loops > (song.seen || 0)) {
+      song.seen = song.loops; // a form just ended
+      if (now - placeT0 >= ROTATE) { idx = fresh(list, (idx + 1) % list.length); placeT0 = now; rotateFade = 4; }
+    }
+    const v = list[idx];
+    const m = memo[place];
+    if (m) { m.song = v; m.t = now; } else memo[place] = { song: v, t: now };
+    return v;
   }
 
   const scape = {
@@ -180,12 +273,16 @@ export function createScape(ctx, dest, { volume = 0.38, solo = null } = {}) {
       if (disposed) return;
       const now = ctx.currentTime, R = resolve(s);
       last = R;
+      speaking = !!s.speaking;
       // music
-      const id = R.music ? R.music + '@' + R.period : null;
+      const v = chooseSong(R, s, now);
+      R.song = v;
+      const id = v ? v + '@' + R.period : null;
       if ((song?.id || null) !== id) {
-        if (song) { song.stop(fade); fading.push(song); }
-        song = id ? startSong(E, R.music, musicBus, { period: R.period, fade }) : null;
-        if (song) song.id = id;
+        const f = rotateFade || fade;
+        if (song) { song.stop(f); fading.push(song); }
+        song = id ? startSong(E, v, musicBus, { period: R.period, fade: f }) : null;
+        if (song) { song.id = id; if (v !== recent[0]) { recent[1] = recent[0]; recent[0] = v; } }
         curTense = -1; // the new song starts calm: set its tension below
       }
       if (song) {
@@ -233,10 +330,21 @@ export function createScape(ctx, dest, { volume = 0.38, solo = null } = {}) {
       }
       return d;
     },
+    /** One positional one-shot (FX name) now: pan -1..1, far 0..1 (low-passed, more reverb), v volume. Budgeted:
+     *  returns 0 when refused (cooldown, too many sounding, over the per-minute budget). */
+    emit(name, { pan = 0, far = 0, v = 1 } = {}) {
+      if (disposed || !FX[name]) return 0;
+      const t = ctx.currentTime + 0.05;
+      if (t - (lastAt[name] ?? -1e9) < (COOLDOWN[name] ?? 3)) return 0;
+      const p = ctx.createStereoPanner ? ctx.createStereoPanner() : null, lp = ctx.createBiquadFilter();
+      lp.type = 'lowpass'; lp.frequency.value = 16000 - Math.max(0, Math.min(1, far)) * 12500;
+      if (p) { p.pan.value = Math.max(-1, Math.min(1, pan)); lp.connect(p); p.connect(ambDuck); } else lp.connect(ambDuck);
+      return fire(name, t, v, undefined, lp);
+    },
     stats() {
       let beds = 0;
       for (const L of layers.values()) beds += (L.def.beds || []).length;
-      return { music: song?.key || null, fading: fading.length, layers: [...layers.keys()], beds, notes: counts.notes, events: counts.events, bankKB: Math.round(bank.bytes() / 1024) };
+      return { music: song?.key || null, place, fading: fading.length, layers: [...layers.keys()], beds, notes: counts.notes, events: counts.events, bankKB: Math.round(bank.bytes() / 1024) };
     },
     dispose(fadeOut = 0.4) {
       if (disposed) return;
@@ -270,13 +378,14 @@ export function createSoundscape(audio, opts = {}) {
       if (!core) {
         const ctx = audio.context, out = audio.output;
         if (!ctx || !out) return;
-        core = createScape(ctx, out, { volume: vol });
+        core = createScape(ctx, out, { volume: vol, fallback: true });
         core.update(dt, s, { fade: 1.5 });
         return;
       }
       core.update(dt, s);
     },
     sting(name, arg) { return core ? core.sting(name, arg) : 0; },
+    emit(name, o) { return core ? core.emit(name, o) : 0; },
     get volume() { return vol; },
     set volume(v) { vol = v; if (core) core.volume = v; },
     get state() { return core?.state || null; },

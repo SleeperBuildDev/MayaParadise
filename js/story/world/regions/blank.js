@@ -30,6 +30,7 @@
 // drawn outdoors, its page-turn spot is on the step in front of the door.
 import { LIFE_PROP } from './blank-life.js';
 import { FOLK_PEOPLE } from './blank-folk.js';
+import { DETAIL_PROP, DETAIL_ITEMS } from './blank-detail.js';
 import { lodge, lodgeYard, lastHedge, backBoard, backBoardObstacles, blankSign, pencilStub, sketch, prints, restBench, LODGE as LG, BACK_DOOR } from '../art/blank.js';
 
 export const REGION = { id: 'blank', name: { my: 'စာမျက်နှာလွတ်', en: 'The Blank Page' }, rect: [46, -62, 146, 18], paper: 'blank', label: [88, -46] };
@@ -171,6 +172,8 @@ for (const [x0, x1, n] of [[119.6, 138.8, 3], [141.2, 145.8, 1]]) {
   const w = (x1 - x0) / n;
   for (let i = 0; i < n; i++) ITEMS.push({ k: 'lastHedge', x: x0 + w * (i + 0.5), z: HEDGE_Z, len: w, capE: x1 === 138.8 && i === n - 1, capW: x0 === 141.2 && i === 0 });
 }
+// the small things (blank-detail.js): pencil plans, sandals, basil on the rails, a notebook on the bench...
+ITEMS.push(...DETAIL_ITEMS);
 // (the low sunset itself is the day's scripted look: day13.js holds the hour at 18 while Maya is on this leaf)
 
 export const DESKS = [
@@ -229,4 +232,5 @@ export const PROP = {
   sketch: { draw: sketch, obstacles: () => [] },
   prints: { draw: prints, obstacles: () => [] },
   ...LIFE_PROP, // the lived-in things (blank-life.js)
+  ...DETAIL_PROP, // the small things (blank-detail.js)
 };

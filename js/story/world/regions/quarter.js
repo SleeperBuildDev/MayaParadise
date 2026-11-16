@@ -1,6 +1,7 @@
 // District 1 · the Exercise-Book Quarter (ruled paper; opens Day 2). School, potter's yard, snack shop,
 // playground and a little stage on four east-west streets. Region file format: see regions/index.js.
 import { rng } from '../kit.js';
+import { detail as quarterDetail } from './quarter-detail.js';
 
 export const REGION = { id: 'exercise', name: { my: 'ဗလာစာအုပ်ရပ်', en: 'Exercise-Book Quarter' }, rect: [-71, 40, 79, 160], paper: 'ruled', label: [-36, 50] };
 
@@ -604,3 +605,6 @@ export const PEOPLE = [
     return { id, x, z, heading: h, hello, job: { area: { x, z, r: 0.9 }, spot: { x, z, h }, mood: 'kick', workChance: 0.92, workFor: [20, 40], speed: 0.8 } };
   }),
 ];
+
+// the detail pass (quarter-detail.js, art plan 2026-11-16), laid last through the Quarter's own clear-check
+quarterDetail({ ITEMS, add, place, FP, PROP, STORY_CLEAR, STREETS_Z, STREETS_X, AVE_X, ROAD_HALF, PEOPLE, DESKS });

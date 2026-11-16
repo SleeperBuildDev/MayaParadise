@@ -777,5 +777,6 @@ export function town({ ITEMS, add, folk, defs = {}, keep = [] }) {
   tryAt('mlaylay', 'work', mine.filter((it) => (it.k === 'mkHut' || it.k === 'mkLow') && it.z > 302 && it.z < 330 && it.x > -28 && it.x < 6), 1.8, 1.0);
   tryAt('uaungba', 'work', mine.filter((it) => it.k === 'mkHut' && it.x < -60), 1.4);
 
-  return { added: ITEMS.length - base, houses, people, relocated, dropped, skipped, TOWN_PEOPLE };
+  // (put and defs: the detail pass, market-detail.js, lays its things through the same clear-check, last)
+  return { added: ITEMS.length - base, houses, people, relocated, dropped, skipped, TOWN_PEOPLE, put, defs, why: () => why };
 }

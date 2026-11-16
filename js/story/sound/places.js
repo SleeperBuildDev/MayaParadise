@@ -17,19 +17,19 @@ export const AMBIENCE = {
   'home:day': { level: 2.9, vibe: 'gentle page rustle, a quiet house, birds outside', beds: [roomTone(0.012), air(0.016, 900)],
     events: [['page', 4, 1.3], ['warble', 1.5, 0.6], ['sparrow', 1, 0.5], ['leaves', 0.6, 0.7]] },
   'exercise:day': { level: 1.27, vibe: 'school bell far off, children, sparrows, bicycle bells', beds: [air(0.01)],
-    events: [['schoolBell', 0.4, 0.9], ['sparrow', 5, 0.8], ['bikeBell', 1.6, 0.8], ['steps', 1, 0.7], ['warble', 1, 0.6], ['dog', 0.3, 0.6]] },
+    events: [['schoolBell', 0.4, 0.9], ['sparrow', 5, 0.8], ['bikeBell', 1.6, 0.8], ['steps', 1, 0.7], ['warble', 1, 0.6], ['dog', 0.3, 0.6], ['bikeWhirr', 0.6, 0.8], ['sweep', 0.3, 0.7]] },
   'envelope:day': { level: 2.85, vibe: 'wind over open paper, a cart far off, flapping flaps', beds: [wind(0.06), air(0.01, 1400)],
-    events: [['gust', 2, 1], ['cart', 0.6, 0.9], ['rustle', 1.5, 0.7], ['flap', 1, 0.8], ['sparrow', 1, 0.5], ['warble', 0.6, 0.5]] },
+    events: [['gust', 2, 1], ['cart', 0.6, 0.9], ['rustle', 1.5, 0.7], ['flap', 1, 0.8], ['sparrow', 1, 0.5], ['warble', 0.6, 0.5], ['cartBell', 0.4, 0.9], ['trishawPass', 0.3, 0.8]] },
   'market:day': { level: 1.27, vibe: 'crowd murmur, sellers calling, scale clinks, dogs', beds: [air(0.012, 1000)],
-    events: [['clink', 5, 1], ['dog', 0.5, 0.8], ['bikeBell', 1, 0.7], ['steps', 1, 0.6], ['sparrow', 1, 0.5], ['cart', 0.5, 0.8]] },
+    events: [['clink', 5, 1], ['dog', 0.5, 0.8], ['bikeBell', 1, 0.7], ['steps', 1, 0.6], ['sparrow', 1, 0.5], ['cart', 0.5, 0.8], ['coinTink', 3, 1], ['trishawBulb', 0.5, 0.8], ['scaleBalance', 0.8, 0.9], ['bikeWhirr', 0.4, 0.7]] },
   'wharf:day': { level: 1.43, vibe: 'water lapping, rope creak, gulls, a boat horn far away', beds: [water(0.1), foam(0.006)],
-    events: [['splash', 8, 1], ['creak', 5, 0.9], ['gull', 3, 1], ['horn', 0.5, 1], ['steps', 0.6, 0.7, { surface: 'wood' }]] },
+    events: [['splash', 8, 1], ['creak', 5, 0.9], ['gull', 3, 1], ['horn', 0.5, 1], ['steps', 0.6, 0.7, { surface: 'wood' }], ['duck', 0.5, 0.8], ['laundrySlap', 1, 0.8]] },
   'junction:day': { level: 2.07, vibe: 'printing press clack, newspapers, footsteps on stone', beds: [air(0.012)],
-    events: [['press', 0.9, 1], ['rustle', 3, 0.9], ['steps', 2.5, 0.9], ['bikeBell', 0.6, 0.6], ['sparrow', 1, 0.5]] },
+    events: [['press', 0.9, 1], ['rustle', 3, 0.9], ['steps', 2.5, 0.9], ['bikeBell', 0.6, 0.6], ['sparrow', 1, 0.5], ['bikeWhirr', 0.6, 0.8]] },
   'hearth:day': { level: 1.84, vibe: 'oven crackle, a kettle, cozy murmur', beds: [{ loop: 'fire', v: 0.035, f: ['lowpass', 2200, 0.6] }],
-    events: [['kettle', 0.5, 1], ['tray', 1.5, 0.9], ['clink', 2, 0.8], ['sparrow', 1.5, 0.6], ['warble', 0.6, 0.5], ['dog', 0.3, 0.5], ['steps', 1, 0.6]] },
+    events: [['kettle', 0.5, 1], ['tray', 1.5, 0.9], ['clink', 2, 0.8], ['sparrow', 1.5, 0.6], ['warble', 0.6, 0.5], ['dog', 0.3, 0.5], ['steps', 1, 0.6], ['mortar', 0.5, 0.8], ['chop', 1, 0.8], ['hen', 0.5, 0.8]] },
   'garden:day': { level: 2.04, vibe: 'birdsong, insects, a trickle of water, leaves', beds: [{ loop: 'trickle', v: 0.045, f: ['highpass', 300, 0.7] }, { loop: 'cicada', v: 0.012, f: ['lowpass', 8000, 0.7], lfo: [0.05, 0.7] }, { loop: 'pink', v: 0.01, f: ['highpass', 2500, 0.6], lfo: [0.09, 0.7] }],
-    events: [['warble', 5, 1], ['sparrow', 3, 0.8], ['leaves', 1.5, 1], ['frog', 0.3, 0.6]] },
+    events: [['warble', 5, 1], ['sparrow', 3, 0.8], ['leaves', 1.5, 1], ['frog', 0.3, 0.6], ['hen', 0.3, 0.7], ['wellBucket', 0.3, 0.8]] },
   'blank:day': { level: 2.1, vibe: 'near silence, soft wind, pencil scratches', beds: [wind(0.04, 350)],
     events: [['pencil', 1.2, 0.9], ['gust', 0.6, 0.6], ['page', 0.2, 0.5]] },
   // ---------------- towns: night ----------------
@@ -38,7 +38,7 @@ export const AMBIENCE = {
   'exercise:night': { level: 1.3, vibe: 'crickets, a far dog, a frog, one late bicycle', beds: [crickets(0.045)], events: [['dog', 0.6, 0.6], ['owlet', 0.4, 0.7], ['frog', 0.8, 0.7], ['bikeBell', 0.3, 0.5]] },
   'envelope:night': { level: 2.0, vibe: 'low wind, crickets', beds: [wind(0.035), crickets(0.035)], events: [['gust', 1, 0.7], ['owlet', 0.5, 0.7]] },
   'market:night': { level: 1.58, vibe: 'a few night stalls, frying, low talk, crickets', beds: [crickets(0.03)],
-    events: [['sizzle', 1.2, 0.8], ['clink', 2, 0.7], ['dog', 0.8, 0.7]] },
+    events: [['sizzle', 1.2, 0.8], ['clink', 2, 0.7], ['dog', 0.8, 0.7], ['wokClang', 1.2, 0.8], ['bowlDown', 1, 0.8]] },
   'wharf:night': { level: 1.66, vibe: 'dark water, frogs, creaking moorings', beds: [water(0.085, 450), crickets(0.03)],
     events: [['frog', 2, 0.9], ['creak', 2.5, 0.9], ['splash', 3, 0.8], ['horn', 0.2, 0.8]] },
   'junction:night': { level: 1.8, vibe: 'quiet stone, a late press, crickets', beds: [crickets(0.03)], events: [['steps', 1, 0.6], ['rustle', 0.6, 0.6], ['press', 0.2, 0.7], ['owlet', 0.3, 0.6]] },
@@ -48,29 +48,66 @@ export const AMBIENCE = {
     events: [['frog', 3, 1], ['owlet', 0.6, 0.8], ['leaves', 0.6, 0.6]] },
   'blank:night': { level: 1.8, vibe: 'almost nothing: wind, one cricket, a pencil', beds: [wind(0.02, 300), crickets(0.015)], events: [['pencil', 0.6, 0.7], ['owlet', 0.2, 0.6]] },
   // ---------------- areas (on top of the town, which drops to 60%) ----------------
-  'area:teasquare': { level: 1.5, vibe: 'cups and saucers, tea-shop chatter', beds: [], events: [['clink', 6, 1], ['kettle', 0.4, 0.8]] },
+  'area:teasquare': { level: 1.5, vibe: 'cups and saucers, tea-shop chatter', beds: [], events: [['clink', 3, 1], ['kettle', 0.4, 0.8], ['cupSaucer', 4, 1], ['spoonStir', 1.5, 1], ['teaPour', 1, 1]] },
   'area:jetties': { level: 1.8, vibe: 'water right under the boards, ropes, gulls', beds: [water(0.12, 650)], events: [['splash', 6, 1], ['creak', 4, 1], ['steps', 1.5, 0.9, { surface: 'wood' }], ['gull', 1.5, 1]] },
-  'area:schoolyard': { level: 0.8, vibe: 'children close by at play, the bell', beds: [], events: [['schoolBell', 0.5, 1], ['sparrow', 2, 0.7], ['bikeBell', 0.6, 0.6]] },
-  'area:bakeryrow': { level: 3.2, vibe: 'ovens, trays, sugar in the air', beds: [{ loop: 'fire', v: 0.045, f: ['lowpass', 2000, 0.6] }], events: [['tray', 3, 1], ['kettle', 0.3, 0.8], ['clink', 1, 0.7]] },
+  'area:schoolyard': { level: 0.8, vibe: 'children close by at play, the bell', beds: [], events: [['schoolBell', 0.5, 1], ['sparrow', 2, 0.7], ['bikeBell', 0.6, 0.6], ['ropeSkip', 0.8, 0.8], ['clapGame', 0.8, 0.8], ['ballKick', 0.6, 0.8]] },
+  'area:bakeryrow': { level: 3.2, vibe: 'ovens, trays, sugar in the air', beds: [{ loop: 'fire', v: 0.045, f: ['lowpass', 2000, 0.6] }], events: [['tray', 3, 1], ['kettle', 0.3, 0.8], ['clink', 1, 0.7], ['chop', 1, 0.8]] },
   'area:kitefield': { level: 2.1, vibe: 'open wind, kite tails snapping', beds: [wind(0.065, 600)], events: [['flap', 5, 1], ['gust', 2.5, 1], ['sparrow', 1, 0.6]] },
   'area:bridge': { level: 2.0, vibe: 'deep water far below, rope creak, wind', beds: [water(0.06, 380), wind(0.04, 500)], events: [['creak', 5, 1], ['gust', 1.5, 0.8], ['steps', 1, 0.8, { surface: 'wood' }]] },
   'area:lodgeporch': { level: 2.2, vibe: 'a wind chime, a rocking chair, low fire inside', beds: [{ loop: 'fire', v: 0.015, f: ['lowpass', 1200, 0.6] }], events: [['chimes', 2, 1], ['creak', 1.5, 0.7]] },
   // ---------------- rooms (the town outside is heard through the walls: low and muffled) ----------------
-  'room:teashop': { level: 1.15, vibe: 'close chatter, cups, the kettle', beds: [], events: [['clink', 6, 1], ['kettle', 0.6, 0.8]] },
-  'room:bakery': { level: 2.85, vibe: 'the oven roaring low, trays, warm', beds: [{ loop: 'fire', v: 0.045, f: ['lowpass', 1600, 0.6] }], events: [['tray', 2.5, 1], ['clink', 1, 0.7], ['kettle', 0.2, 0.7]] },
+  'room:teashop': { level: 1.15, vibe: 'close chatter, cups, the kettle', beds: [], events: [['clink', 3, 1], ['kettle', 0.6, 0.8], ['cupSaucer', 4, 1], ['spoonStir', 1.5, 1], ['teaPour', 1, 1]] },
+  'room:bakery': { level: 2.85, vibe: 'the oven roaring low, trays, warm', beds: [{ loop: 'fire', v: 0.045, f: ['lowpass', 1600, 0.6] }], events: [['tray', 2.5, 1], ['clink', 1, 0.7], ['kettle', 0.2, 0.7], ['chop', 0.8, 0.8]] },
   'room:classroom': { level: 2.95, vibe: 'whispers, chalk, a clock, pages', beds: [], events: [['chalk', 2, 1], ['page', 2, 0.9]], every: [['clockTick', 1, 1]] },
-  'room:workshop': { level: 5.6, vibe: 'tools, paper, a mallet now and then', beds: [roomTone(0.008)], events: [['stamp', 1.5, 0.8], ['rustle', 1.5, 0.8], ['creak', 0.8, 0.6]] },
+  'room:workshop': { level: 5.6, vibe: 'tools, paper, a mallet now and then', beds: [roomTone(0.008)], events: [['stamp', 1.5, 0.8], ['rustle', 1.5, 0.8], ['creak', 0.8, 0.6], ['hammerTap', 2, 1], ['sawRasp', 0.6, 0.9]] },
   'room:press': { level: 2.5, vibe: 'the press inside: rollers and clacks, paper', beds: [roomTone(0.012)], events: [['press', 3, 1.1], ['rustle', 3, 1]] },
   'room:post': { level: 3.1, vibe: 'stamps, sorting, a clock', beds: [roomTone(0.009)], events: [['stamp', 3, 1], ['rustle', 3, 1], ['page', 1.5, 0.8]], every: [['clockTick', 1, 0.9]] },
   'room:home': { level: 4.6, vibe: 'a quiet room, pen and pages, a clock', beds: [roomTone(0.01)], events: [['page', 1.2, 0.9], ['pencil', 1.5, 0.9]], every: [['clockTick', 1, 0.7]] },
   'room:lodge': { level: 3.5, vibe: 'fire, an old floor, travellers murmuring', beds: [{ loop: 'fire', v: 0.05, f: ['lowpass', 1800, 0.6] }], events: [['creak', 1, 0.8], ['clink', 1, 0.7]] },
-  'room:noodle': { level: 1.15, vibe: 'steam, sizzling, bowls and voices', beds: [], events: [['sizzle', 2.5, 1], ['clink', 5, 1], ['kettle', 0.3, 0.6]] },
+  'room:noodle': { level: 1.15, vibe: 'steam, sizzling, bowls and voices', beds: [], events: [['sizzle', 2.5, 1], ['clink', 2, 1], ['kettle', 0.3, 0.6], ['wokClang', 2, 1], ['chop', 1.5, 1], ['bowlDown', 2, 1], ['steamLid', 0.6, 1]] },
   'room:loom': { level: 1.17, vibe: 'the loom: swish, knock, swish, knock', beds: [{ loop: 'loom', v: 0.12, f: ['lowpass', 5000, 0.6] }], events: [['clink', 0.3, 0.6]] },
   'room:library': { level: 3.5, vibe: 'hush, pages, a slow clock', beds: [roomTone(0.012)], events: [['page', 2.5, 1], ['pencil', 0.3, 0.6]], every: [['clockTick', 2, 0.8]] },
   // ---------------- weather ----------------
-  'rain:out': { level: 1.6, vibe: 'steady rain, drips', beds: [{ loop: 'pink', v: 0.07, f: ['highpass', 900, 0.6], lfo: [0.07, 0.25] }, { loop: 'brown', v: 0.03, f: ['lowpass', 300, 0.7] }], events: [['drip', 14, 1]] },
-  'rain:in': { level: 1.5, vibe: 'rain on the roof', beds: [{ loop: 'pink', v: 0.05, f: ['lowpass', 1800, 0.6], lfo: [0.07, 0.25] }], events: [['drip', 6, 0.8]] },
+  'rain:out': { level: 1.6, vibe: 'steady rain, drips', beds: [{ loop: 'pink', v: 0.07, f: ['highpass', 900, 0.6], lfo: [0.07, 0.25] }, { loop: 'brown', v: 0.03, f: ['lowpass', 300, 0.7] }, { loop: 'rainTin', v: 0.012, f: ['highpass', 4000, 0.7] }], events: [['drip', 14, 1], ['gutterDrip', 3, 1], ['puddleSplash', 2, 1]] },
+  'rain:in': { level: 1.5, vibe: 'rain on the roof', beds: [{ loop: 'pink', v: 0.05, f: ['lowpass', 1800, 0.6], lfo: [0.07, 0.25] }], events: [['drip', 6, 0.8], ['rainWindow', 8, 1]] },
+  // ---------------- new room types (everyday houses by trade: fisher, elder, student, gardener) ----------------
+  'room:fisherhut': { level: 3.5, vibe: 'water lapping under the floor, rope, a creak', beds: [water(0.05, 500)], events: [['creak', 1.5, 0.8], ['splash', 2, 0.6], ['duck', 0.3, 0.5]] },
+  'room:elderhome': { level: 4.6, vibe: 'an old house: a slow clock, a creak, a cup', beds: [roomTone(0.01)], events: [['creak', 0.6, 0.6], ['cupSaucer', 0.8, 0.8], ['page', 0.6, 0.7]], every: [['clockTick', 2, 0.8]] },
+  'room:study': { level: 4.6, vibe: 'a desk at night: pencil, pages, a clock', beds: [roomTone(0.01)], events: [['pencil', 2, 0.9], ['page', 1.2, 0.9], ['gecko', 0.3, 0.5]], every: [['clockTick', 1, 0.6]] },
+  'room:greenhouse': { level: 2.6, vibe: 'water trickling, drips, leaves', beds: [{ loop: 'trickle', v: 0.03, f: ['highpass', 300, 0.7] }], events: [['drip', 6, 0.8], ['leaves', 0.8, 0.6], ['rustle', 0.6, 0.5]] },
+  // ---------------- birds and animals by time of day (outdoors, scaled per district: DISTRICT_BIRDS) ----------------
+  'birds:morning': { level: 1.6, vibe: 'dawn chorus: bulbul, koel far off, doves, a rooster, hens', beds: [],
+    events: [['bulbul', 2.5, 1], ['koel', 0.6, 1], ['dove', 1, 1], ['rooster', 0.35, 1], ['hen', 0.5, 0.9]] },
+  'birds:noon': { level: 1.6, vibe: 'midday: doves, parakeets passing, a far crow, hens', beds: [],
+    events: [['bulbul', 0.8, 0.8], ['dove', 1, 0.9], ['parakeet', 0.5, 1], ['crowFar', 0.25, 0.9], ['hen', 0.5, 0.8]] },
+  'birds:evening': { level: 1.6, vibe: 'dusk: swifts high up, a last dove, a cat', beds: [],
+    events: [['swift', 1.4, 1], ['dove', 0.5, 0.8], ['koel', 0.3, 0.8], ['cat', 0.3, 0.8]] },
+  'birds:night': { level: 1.6, vibe: 'night: a gecko, a far dog answered, a cat', beds: [],
+    events: [['gecko', 1, 1], ['dogFar', 0.4, 0.8], ['cat', 0.2, 0.7]] },
+  // ---------------- gatherings (story.sound.gather): no voice beds, ever; claps, never cheering crowds ----------------
+  'ev:festival': { level: 1.5, vibe: 'claps, coins at the stalls, chimes', beds: [], events: [['clapBurst', 2, 1], ['coinTink', 3, 1], ['bikeBell', 1, 0.7], ['chimes', 2, 0.9]] },
+  'ev:lanterns': { level: 1.5, vibe: 'a hush, paper, a few claps', beds: [], events: [['rustle', 2, 0.7], ['clapBurst', 0.6, 0.8], ['chimes', 1.5, 0.8]] },
+  'ev:chinlone': { level: 1.5, vibe: 'the rattan ball in a rally, claps, a happy shout', beds: [], events: [['ballKick', 3, 1], ['clapBurst', 1, 0.9], ['yay', 0.5, 0.8], ['steps', 1.5, 0.7]] },
+  'ev:kidsplay': { level: 1.5, vibe: 'skipping rope, clapping games, marbles, a giggle', beds: [], events: [['giggle', 1.5, 0.8], ['ropeSkip', 1.5, 1], ['clapGame', 2, 1], ['marbles', 0.5, 1], ['whistleCall', 0.4, 0.8]] },
+  'ev:countten': { level: 1.5, vibe: 'tiptoes and a giggle', beds: [], events: [['steps', 1.5, 0.6], ['giggle', 0.8, 0.7], ['rustle', 1, 0.6]] },
+  'ev:rainwait': { level: 1.4, vibe: 'rain on a tin awning, a gutter, cups', beds: [{ loop: 'rainTin', v: 0.05, f: ['lowpass', 5000, 0.6], lfo: [0.07, 0.3] }], events: [['gutterDrip', 4, 1], ['cupSaucer', 2, 0.9], ['sparrow', 0.4, 0.5]] },
+  'ev:teachat': { level: 1.5, vibe: 'cups, spoons, tea poured', beds: [], events: [['cupSaucer', 5, 1], ['spoonStir', 2, 1], ['teaPour', 1, 1]] },
+  'ev:haggle': { level: 1.5, vibe: 'coins, a hand scale, a bicycle bell', beds: [], events: [['coinTink', 4, 1], ['scaleBalance', 1, 1], ['bikeBell', 0.6, 0.7]] },
+  'ev:kiteday': { level: 1.5, vibe: 'wind, kite tails snapping', beds: [wind(0.04, 600)], events: [['flap', 4, 1], ['gust', 1.5, 0.8], ['clapBurst', 0.4, 0.7]] },
+  'ev:party': { level: 1.5, vibe: 'claps, cups, a bell', beds: [], events: [['clapBurst', 1.5, 1], ['cupSaucer', 2, 0.9], ['marbles', 0.4, 0.8]] },
+  'ev:storytime': { level: 1.5, vibe: 'a hush: a page, a creak', beds: [], events: [['page', 1, 0.8], ['creak', 0.4, 0.6]] },
+  // ---------------- rain on a tin roof (rooms with tin roofs: TIN_ROOF) ----------------
+  'rain:tin': { level: 1.5, vibe: 'rain drumming on a tin roof, drops on the window', beds: [{ loop: 'rainTin', v: 0.05, f: ['lowpass', 5000, 0.6], lfo: [0.07, 0.3] }, { loop: 'pink', v: 0.02, f: ['lowpass', 1500, 0.6] }], events: [['rainWindow', 8, 1], ['drip', 3, 0.7]] },
 };
+
+/** Birds and animals by time of day ('birds:<period>' layers, outdoors): how much of each district hears them. */
+export const DISTRICT_BIRDS = { garden: 1, home: 0.8, envelope: 0.8, exercise: 0.6, wharf: 0.5, market: 0.35, hearth: 0.4, junction: 0.25, blank: 0.3 };
+/** Room types with a tin roof: rain drums on it ('rain:tin' instead of 'rain:in'). */
+export const TIN_ROOF = ['workshop', 'bakery', 'noodle', 'teashop', 'fisherhut'];
+/** Footstep surfaces (js/game/audio.js 'step<Surface>'): by district, by zone (outdoors) and by room type (indoors). */
+export const SURFACE_OF = { home: 'Paper', blank: 'Paper', envelope: 'Dirt', exercise: 'Dirt', market: 'Stone', junction: 'Stone', hearth: 'Stone', garden: 'Grass', wharf: 'Wood' };
+export const ZONE_SURFACE = { jetties: 'Wood', bridge: 'Wood', lodgeporch: 'Wood', kitefield: 'Grass', teasquare: 'Stone', bakeryrow: 'Stone', schoolyard: 'Dirt' };
+export const ROOM_FLOOR = { teashop: 'Tile', bakery: 'Tile', classroom: 'Wood', workshop: 'Dirt', post: 'Tile', home: 'Rug', lodge: 'Wood', noodle: 'Tile', loom: 'Wood', library: 'Wood', fisherhut: 'Wood', elderhome: 'Rug', study: 'Rug', greenhouse: 'Stone', backcover: 'Paper' };
 
 /** Listening zones: walk in, the area song and ambience fade in. Circle (x, z, r) or rect [x0, z0, x1, z1]. */
 export const ZONES = {
@@ -111,7 +148,7 @@ export const ROOM_AMB = { press: 'room:press', backcover: 'room:library' };
 export const ROOM_SONG = { backcover: 'cue:d14back' };
 
 /** Mission cues the game can name in update({ cue }); modes map to a cue unless one is named. */
-export const CUES = ['talk', 'focus', 'nightpage', 'finale', 'd12rain', 'd14back', 'd15letter'];
+export const CUES = ['talk', 'focus', 'nightpage', 'finale', 'd12rain', 'd14back', 'd15letter', 'reflect', 'sorry', 'wonder', 'together', 'triumph']; // (or any 'event:<kind>' song)
 export const MODE_CUE = { talk: 'talk', act: 'focus' }; // 'scene' keeps the place's music (cutscenes)
 
 export const DISTRICTS = ['home', 'exercise', 'envelope', 'market', 'wharf', 'junction', 'hearth', 'garden', 'blank'];

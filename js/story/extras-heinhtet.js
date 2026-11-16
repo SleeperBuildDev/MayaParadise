@@ -515,6 +515,7 @@ export function installHeinHtet(game, story, ow) {
     if (save.cargo) return 'cargo';
     if (ow?.overviewOn) return 'overview';
     if (dayOwns('heinhtet')) return 'day';
+    { const ne = story.npcEvent; if (ne?.active && Math.hypot(ne.x - game.maya.root.position.x, ne.z - game.maya.root.position.z) < 30) return 'event'; } // (a town gathering near her: extras-events.js)
     return '';
   }
   const hardStop = () => !game.maya?.root || game.mode !== 'world' || !!story.inRoom || !!ow?.overviewOn;
@@ -982,7 +983,8 @@ export function installHeinHtet(game, story, ow) {
         const ms = msFor(l);
         bubble(sp, l, ms, l.who === 'folk' ? 'pb' : 'hh');
         if (l.who !== 'folk' && l.anim && !(first && l.anim === m.hhAnim)) hh.play(l.anim);
-        if (l.who === 'folk') call(e.p, 'emote', pick(['nod', 'think', 'point', 'wave']));
+        if (l.who === 'folk') { if (story.anim) story.anim.gesture(e.p, l, { dur: ms / 1000, listener: hh }); else call(e.p, 'emote', pick(['nod', 'think', 'point', 'wave'])); }
+        else story.anim?.listen(e.p, hh, ms / 1000); // (js/story/anim: the townsperson hears him out)
         first = false;
         await sleep(ms / 1000 + 0.3);
       }

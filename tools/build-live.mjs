@@ -47,7 +47,7 @@ if (OUT === ROOT || ROOT.startsWith(OUT + sep) || !OUT.startsWith(ROOT + sep)) {
 // ---------------------------------------------------------------------------------------------
 // What goes live
 // ---------------------------------------------------------------------------------------------
-const SKIP_TOP_DIRS = new Set(['dev', 'tools', 'dist', '.git', 'node_modules', '.claude']);
+const SKIP_TOP_DIRS = new Set(['dev', 'tools', 'dist', '.git', '.github', 'node_modules', '.claude']);
 const OUT_TOP = relative(ROOT, OUT).split(sep)[0];
 SKIP_TOP_DIRS.add(OUT_TOP);
 const SKIP_FILE = [/^out-.*\.txt$/i, /\.md$/i, /^\.gitignore$/, /\.log$/i, /^\.DS_Store$/, /^Thumbs\.db$/i, /\.(py|sh|mjs)$/i];
@@ -558,7 +558,7 @@ for (const f of files) {
 // build version: hash of everything that goes live
 const h = createHash('sha256');
 for (const f of [...outputs.keys()].sort()) { h.update(f); h.update('\0'); h.update(outputs.get(f)); }
-const version = h.digest('hex').slice(0, 10);
+let version = h.digest('hex').slice(0, 10); // (the first-load/start lists are folded in below, once they are known)
 
 // the lazy towns' outlines (regions/outlines.js) must match the towns' own files
 if (existsSync(join(ROOT, 'tools', 'town-outlines.mjs'))) {
@@ -705,6 +705,11 @@ try {
   const boot = reach(core.filter((f) => f.startsWith('js/story/') && f.endsWith('.js') && exists(f)), (f, isDyn) => !isDyn || !LAZY.test(f));
   game = { home, towns, dayTowns: DAY_IMPORTS, days, boot };
 } catch (e) { log('game start lists not written (the warm-up then follows "rest" only):', e.message); }
+
+// the version also covers what is not in any one file: the first-load list, the story-mode preload list and the
+// service worker's start lists (live-core.json or the game lists changing alone must still make a new version,
+// else a returning visitor keeps the old index.html / precache lists)
+version = createHash('sha256').update(version).update(JSON.stringify([core, flags['no-preload'] ? [] : preloadUrls, game])).digest('hex').slice(0, 10);
 
 // inject the live marker, version, service-worker registration and (story mode only) modulepreload
 {

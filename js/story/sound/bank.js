@@ -10,9 +10,11 @@
 // Instruments: harp (saung-like plucked harp, Karplus-Strong), pat (tuned drum, pat-waing-like),
 // pattala (bamboo xylophone), wood (bamboo clapper), si (small hand cymbals, open), siShort (damped),
 // tick, kick, shaker, bell, ep (soft electric piano), flute (breathy, palwe-like), pad (warm loop),
-// bass, musicbox, guitar (bright pluck), marimba.
+// bass, musicbox, guitar (bright pluck), marimba; added Nov 2026: hne (reed pipe), piano, strings (loop), pizz,
+// kalimba, gong (small circle gongs), clap, tom, whistle (built last in the warm-up; songs name a fallback).
 // Loops: white, pink, brown (noise), babble (distant crowd), kids (distant children), murmur (a few
-// low voices in a room), crickets, cicada, fire (crackle + roar), trickle (small water), loom.
+// low voices in a room), crickets, cicada, fire (crackle + roar), trickle (small water), loom, rainTin.
+// (babble / kids / murmur are no longer used by any place: UNUSED_LOOPS, the warm-up skips them.)
 
 const NOTE_SR = 32000; // instrument notes at 32 kHz (playback resamples): ~27% less memory than 44.1k
 const LOOP_SR = 22050; // ambience loops are dark (low-passed beds): 22 kHz is plenty
@@ -168,6 +170,72 @@ const INST = {
       const ph0 = (k * 1.7 + det * 3) % TAU;
       for (let i = 0; i < n; i++) d[i] += a * Math.sin(ph0 + (TAU * ff * i) / SR);
     }
+  } },  // ---- added for the second set of songs (audio plan, Nov 2026). Last in the warm-up queue; until one is in the
+  // bank a song plays its part on the fallback named in the part (`alt`), so nothing is built on the main thread.
+  hne: { sec: 2.2, bases: [60, 72], fill(d, n, f, r) { // a reed pipe, nasal and singing (hne-like): saw partials through two vowel bands
+    const b1 = biquad().set('bp', 800, 5), b2 = biquad().set('bp', 1900, 5), br = biquad().set('bp', 3000, 1);
+    const K = Math.min(14, Math.floor((SR * 0.45) / f));
+    let ph = 0;
+    for (let i = 0; i < n; i++) {
+      const t = i / SR, vib = 1 + 0.008 * Math.sin(TAU * 5.2 * t) * Math.min(1, Math.max(0, (t - 0.3) / 0.3));
+      ph += (TAU * f * vib * (1 - 0.04 * Math.exp(-t / 0.05))) / SR; // a little scoop up into the note
+      let s = 0;
+      for (let k = 1; k <= K; k++) s += Math.sin(k * ph) / Math.pow(k, 0.8);
+      d[i] = Math.min(1, t / 0.06) * Math.exp(-t / 6) * (s * 0.2 + b1.run(s) * 0.9 + b2.run(s) * 0.6 + br.run(r() * 2 - 1) * 0.06);
+    }
+  } },
+  piano: { sec: 2.2, bases: [48, 60, 72], fill(d, n, f, r) { // a soft felt piano
+    const A = [1, 0.45, 0.25, 0.12, 0.06, 0.03], D = [1.6, 0.9, 0.5, 0.3, 0.2, 0.12], s = f > 400 ? 0.7 : 1;
+    for (let k = 1; k <= 6; k++) addSine(d, n, f * k * (1 + 0.0004 * k * k), A[k - 1], D[k - 1] * s);
+    const lp = biquad().set('lp', 1200, 0.7), H = Math.floor(0.012 * SR);
+    for (let i = 0; i < H; i++) d[i] += lp.run(r() * 2 - 1) * 0.3 * (1 - i / H);
+    for (let i = 0; i < n; i++) d[i] = Math.tanh(d[i] * 1.2);
+  } },
+  // a slow, warm string section that loops seamlessly (partials on the 0.25 Hz grid, like the pad)
+  strings: { sec: 4, bases: [55], loop: true, fill(d, n, f) {
+    const f0 = Math.round(f * 4) / 4;
+    for (const det of [-0.75, 0, 0.75]) for (let k = 1; k <= 12; k++) {
+      const ff = k * f0 + det * k, a = (1 / k / 3) * (ff < 2500 ? 1 : Math.exp(-(ff - 2500) / 800)), ph0 = (k * 2.3 + det * 5) % TAU;
+      for (let i = 0; i < n; i++) d[i] += a * Math.sin(ph0 + (TAU * ff * i) / SR);
+    }
+  } },
+  pizz: { sec: 0.7, bases: [48, 60], fill(d, n, f) { // plucked strings
+    ks(d, n, f, { damp: 0.985, bright: 0.6, pick: 0.2, seed: 11 + Math.round(f) });
+    for (let i = 0; i < n; i++) d[i] *= Math.exp(-i / SR / 0.25);
+  } },
+  kalimba: { sec: 1.4, bases: [64, 79], fill(d, n, f, r) { // thumb-piano tines
+    addSine(d, n, f, 1, 1.2); addSine(d, n, f * 5.4, 0.25, 0.15); addSine(d, n, f * 12.8, 0.08, 0.04);
+    for (let i = 0; i < 40; i++) d[i] += (r() * 2 - 1) * 0.15 * (1 - i / 40);
+  } },
+  gong: { sec: 3, bases: [60], fill(d, n, f, r) { // small circle gongs (kyi-waing-like): inharmonic, beating pairs
+    for (const [m, a, dec] of [[1, 1, 2.5], [1.006, 0.5, 2.2], [1.52, 0.45, 1.6], [2.14, 0.3, 1.1], [2.89, 0.18, 0.7], [3.7, 0.1, 0.4]]) {
+      let ph = 0;
+      for (let i = 0; i < n; i++) { const t = i / SR; ph += (TAU * f * m * (1 + 0.03 * Math.exp(-t / 0.04))) / SR; d[i] += a * Math.sin(ph) * Math.exp(-t / dec); }
+    }
+    for (let i = 0; i < 0.01 * SR; i++) d[i] += (r() * 2 - 1) * 0.2 * (1 - i / (0.01 * SR));
+  } },
+  clap: { sec: 0.15, bases: [84], fill(d, n, f, r) { // a hand clap: three quick bursts
+    const bp = biquad().set('bp', 1400, 1.5);
+    for (let i = 0; i < n; i++) {
+      const t = i / SR, b = t < 0.021 ? Math.exp(-(t % 0.007) / 0.002) : Math.exp(-(t - 0.014) / 0.04);
+      d[i] = bp.run(r() * 2 - 1) * b;
+    }
+  } },
+  tom: { sec: 0.5, bases: [48], fill(d, n, f, r) { // a low circle drum
+    let ph = 0;
+    for (let i = 0; i < n; i++) {
+      const t = i / SR; ph += (TAU * f * (1 + 0.45 * Math.exp(-t / 0.03))) / SR;
+      d[i] = Math.sin(ph) * Math.exp(-t / 0.3) + (r() * 2 - 1) * 0.15 * Math.exp(-t / 0.01);
+    }
+  } },
+  whistle: { sec: 1.5, bases: [84], fill(d, n, f, r) { // a friendly human whistle
+    const bp = biquad().set('bp', f, 4);
+    let ph = 0;
+    for (let i = 0; i < n; i++) {
+      const t = i / SR, vib = 1 + 0.01 * Math.sin(TAU * 5.5 * t) * Math.min(1, Math.max(0, (t - 0.3) / 0.3));
+      ph += (TAU * f * vib) / SR;
+      d[i] = Math.min(1, t / 0.04) * Math.exp(-t / 4) * (Math.sin(ph) + 0.08 * Math.sin(2 * ph) + bp.run(r() * 2 - 1) * 0.12);
+    }
   } },
 };
 
@@ -266,6 +334,15 @@ const LOOPS = {
       const t1 = t0 + Math.floor(0.62 * SR);
       for (let k = 0; k < SR * 0.12; k++) { const t = k / SR; d[t1 + k] += Math.sin(TAU * 180 * t) * Math.exp(-t / 0.03) + Math.sin(TAU * 620 * t) * 0.4 * Math.exp(-t / 0.015); }
     }
+  } },  // rain on a tin roof: many small impacts, each ringing the sheet a little (added Nov 2026)
+  rainTin: { sec: 3, fill(d, n, r) {
+    const ring = biquad().set('bp', 1800, 10), hp = biquad().set('hp', 2400, 0.7), B = Math.floor(0.003 * SR);
+    let left = 0, a = 0;
+    for (let i = 0; i < n; i++) {
+      if (left <= 0 && r() < 600 / SR) { left = B; a = 0.2 + r() * 0.8; }
+      const x = left > 0 ? (r() * 2 - 1) * a * (left-- / B) : 0;
+      d[i] = hp.run(x) * 0.7 + ring.run(x) * 1.5;
+    }
   } },
 };
 
@@ -359,3 +436,5 @@ export function getBank(ctx) {
 
 export const INSTRUMENTS = Object.keys(INST);
 export const LOOP_NAMES = Object.keys(LOOPS);
+/** Loops no place uses any more (the owner removed the crowd-voice beds): never warmed, built only if asked for. */
+export const UNUSED_LOOPS = ['babble', 'kids', 'murmur'];

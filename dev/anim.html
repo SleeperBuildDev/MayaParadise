@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="my">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>anim</title>
+<link rel="stylesheet" href="dev.css">
+<style>
+  #labels { position: fixed; inset: 0; pointer-events: none; }
+  #labels span { position: absolute; transform: translate(-50%, 0); font: 600 11px/1.2 system-ui, sans-serif; color: #2A2118;
+    background: rgba(255, 253, 248, 0.85); border-radius: 4px; padding: 1px 4px; white-space: nowrap; pointer-events: auto; cursor: pointer; }
+  #info { position: fixed; left: 6px; top: 6px; font: 12px/1.4 monospace; color: #2A2118; background: rgba(255,253,248,.85); padding: 3px 6px; border-radius: 6px; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="labels"></div>
+<div id="info"></div>
+<script type="module">
+// Dev page for js/story/anim: every clip on its own townsperson, looping (one-shots replay), the name under each.
+// ?only=a,b,c   just those clips   ?cols=11   ?walk=1 (everyone walks on the spot: walkable clips keep going)
+// ?off=1 anim off (plain people.js)   ?mood=work (people.js setMood on everyone: anim's job loop by mood)
+// Tap a name to replay that clip. window.__animDev = { anim, people, replay(name) }
+window.addEventListener('error', (e) => { document.title = `ERR ${e.message} @${e.lineno}`; });
+window.addEventListener('unhandledrejection', (e) => { document.title = `ERR ${e.reason?.message || e.reason}`; });
+import * as THREE from '../js/game/three.js';
+import { PALETTE, addStandardLights, fontsReady } from '../js/game/toon.js';
+import { VoxelBuilder } from '../js/game/voxel.js';
+import { createPerson } from '../js/story/people.js';
+import { CAST } from '../js/story/cast.js';
+import { install, CLIPS } from '../js/story/anim/index.js';
+import { startDevView } from './devview.js';
+
+const params = new URLSearchParams(location.search);
+await fontsReady();
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#F2E6CC');
+addStandardLights(scene);
+const solo = params.get('solo');
+const names = solo ? [solo] : params.get('only') ? params.get('only').split(',') : CLIPS.slice();
+const cols = +(params.get('cols') || Math.ceil(Math.sqrt(names.length * 1.6)));
+const rows = Math.ceil(names.length / cols);
+const gx = +(params.get('gx') || 1.45), gz = +(params.get('gz') || 1.9);
+const W = cols * gx, D = rows * gz;
+const ground = new VoxelBuilder();
+ground.boxMin(-W / 2 - 1, -0.1, -D / 2 - 1, W / 2 + 1, 0, D / 2 + 1, PALETTE.paper);
+scene.add(ground.mesh({ outline: false }));
+const game = { world: { scene }, maya: null };
+const anim = install(game, null, { maxHolders: 96 });
+if (params.get('off') === '1') anim.enabled = false;
+const looks = CAST.filter((c) => c.look && !c.offstage);
+const people = [];
+const SEAT = 0.3;
+const ball = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.1), new THREE.MeshBasicMaterial({ color: '#D9A93B' }));
+names.forEach((name, i) => {
+  const c = solo ? (looks.find((x) => x.id === (params.get('who') || '')) || looks[3]) : looks[(i * 7) % looks.length];
+  const p = createPerson(c.look);
+  const r = Math.floor(i / cols), k = i % cols;
+  const x = (k - (cols - 1) / 2) * gx, z = (r - (rows - 1) / 2) * gz;
+  p.root.position.set(x, 0, z);
+  scene.add(p.root);
+  const clip = name;
+  const o = { clip, p, x, z, seat: /^(sit|pedal)$/.test(name) ? SEAT : 0 };
+  if (o.seat) { const st = new VoxelBuilder(); st.boxMin(x - 0.18, 0, z - 0.2, x + 0.18, SEAT - 0.02, z + 0.12, '#8C6A48'); scene.add(st.mesh()); }
+  if (/point|handOver|gather/.test(name)) { const b = ball.clone(); b.position.set(x + 0.5, 1.0, z + 0.6); scene.add(b); o.target = b.position; }
+  if (params.get('mood')) p.setMood(params.get('mood'));
+  people.push(o);
+});
+const labels = document.getElementById('labels');
+for (const o of people) {
+  const s = document.createElement('span');
+  s.textContent = o.clip;
+  s.onclick = () => replay(o);
+  labels.appendChild(s);
+  o.el = s;
+}
+function replay(o) {
+  const loop = !!(o.p && (/^(sweep|stirPot|fanGrill|sellHand|callOut|pourTea|sipTea|readPaper|hammer|carry|pushCart|fishRod|mendNet|knead|weave|washScrub|hangLaundry|waterPlants|scatterFeed|flyKite|holdUmbrella|playKids|skipRope|idleShift|sit|pedal|chinlone)/.test(o.clip)));
+  o.loop = loop;
+  return anim.play(o.p, o.clip, { loop, seat: o.seat || undefined, target: o.target, n: o.clip === 'count' ? 3 : 0 });
+}
+let started = false;
+const v = new THREE.Vector3();
+const walk = params.get('walk') === '1';
+let camRef = null;
+const view = startDevView({
+  scene, target: new THREE.Vector3(solo ? -0.25 : 0, solo ? 0.72 : 0.3, solo ? 0 : 0.2), distance: solo ? 3.3 : Math.max(6, Math.max(W, D * 1.6) * 1.05), tilt: solo ? 14 : 38, fov: 32, yaw: solo ? 35 : 0,
+  update(dt) {
+    if (!started) {
+      started = true;
+      if (!solo) for (const o of people) {
+        const go = () => replay(o).then(() => { if (!o.loop) setTimeout(go, 500); });
+        setTimeout(go, 200 + Math.random() * 600);
+      }
+    }
+    for (const o of people) o.p.update(dt, { speed: walk ? 1.2 : 0 });
+  },
+});
+// the camera the dev view made (for LOD and label placement)
+scene.traverse(() => {});
+const cam = view?.camera || null;
+function placeLabels() {
+  const camera = cam || window.__devCamera;
+  if (camera) {
+    anim.frame(camera);
+    for (const o of people) {
+      v.set(o.x, 0, o.z + 0.45).project(camera);
+      o.el.style.left = ((v.x + 1) / 2) * innerWidth + 'px';
+      o.el.style.top = ((1 - v.y) / 2) * innerHeight + 'px';
+    }
+  }
+  const s = anim.stats();
+  document.getElementById('info').textContent = `${names.length} clips · props ${s.props} · ${anim.enabled ? 'anim on' : 'anim OFF'}`;
+  requestAnimationFrame(placeLabels);
+}
+requestAnimationFrame(placeLabels);
+// solo: one person, show(name) switches the clip (for a sheet of stills: the steps wait into each clip and shoot)
+function show(name) {
+  const o = people[0];
+  o.clip = name; o.el.textContent = name;
+  o.seat = /^(sit|pedal)$/.test(name) ? SEAT : 0;
+  if (o.stool) o.stool.visible = !!o.seat;
+  anim.stop(o.p, { fade: 0.05 });
+  replay(o);
+  return 1;
+}
+if (solo) {
+  document.getElementById('info').style.display = 'none';
+  const o = people[0];
+  const st = new VoxelBuilder(); st.boxMin(o.x - 0.18, 0, o.z - 0.2, o.x + 0.18, SEAT - 0.02, o.z + 0.12, '#8C6A48');
+  o.stool = st.mesh(); o.stool.visible = false; scene.add(o.stool);
+  const b = ball.clone(); b.position.set(o.x + 0.6, 1.0, o.z + 0.5); scene.add(b); o.target = b.position;
+}
+window.__animDev = { anim, people, show, replay: (n) => { const o = people.find((x) => x.clip === n); return o && replay(o); }, ready: true };
+</script>
+</body>
+</html>

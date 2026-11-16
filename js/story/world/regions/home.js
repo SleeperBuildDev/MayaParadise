@@ -1,6 +1,7 @@
 // District 0 · the Home Book (world.js draws the book itself; this file only says where it lies, the
 // ribbon road from the plaza down over its tail edge, the bridge onto the land, and the home desk).
 // Region file format: see regions/index.js.
+import { detail as homeDetail } from './home-detail.js';
 
 export const REGION = { id: 'home', book: true, name: { my: 'အိမ်စာအုပ်', en: 'Home Book' }, rect: [-26, -18, 26, 18], label: [0, -13] };
 
@@ -52,3 +53,6 @@ function sortDoor(g) {
   g.box(0, 0.06, 0.32, 1.0, 0.12, 0.42, '#B98E5C'); // the step down to the street
 }
 export const PROP = { sortDoor: { draw: sortDoor, obstacles: () => [] } };
+
+// the detail pass (home-detail.js, art plan 2026-11-16): small lived-in things on the plaza and the pages
+homeDetail({ ITEMS, PROP });

@@ -435,7 +435,7 @@ class Game {
   /** Maya's animation cues -> small effects and sounds, so every emote feels alive. */
   onMayaEvent(type, data) {
     if (type === 'step') {
-      if (this.mode === 'room' || this.worldWalk) call(this.audio, 'play', 'step');
+      if (this.mode === 'room' || this.worldWalk) call(this.audio, 'play', this.stepSound || 'step'); // (story mode: the ground's step, extras-sound.js)
       return;
     }
     if (type !== 'cue' || !this.fx) return;

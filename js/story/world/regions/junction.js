@@ -44,6 +44,7 @@ import { PROP as J_FOLK } from './junction-folk.js';
 import { PROP as J_VERGE } from './junction-verge.js';
 import { ART as FILL_ART, PROP as FILL_PROP, fill } from './junction-fill.js';
 import { FOLK_PEOPLE } from './junction-people.js';
+import { detail as jDetail } from './junction-detail.js';
 
 export const ART = { ...J_ART, ...FILL_ART };
 // the rope footbridge, the middle pier and the press's door easel have live twins too (props4): hide them as well
@@ -575,3 +576,7 @@ export const PEOPLE = [
 export const SIGNS = [];
 /** what the fill pass laid, lifted and left out (tests) */
 export const FILLED = export_fill.result;
+
+// ---- the detail pass (junction-detail.js, art-plan 2026-11-16): small street details laid last, through the same
+// clear-check as every pass above (roads, paths, doors, desks, KEEP, the townsfolk's spots); merged, no new draw call
+export const DETAIL = jDetail({ ITEMS, add, PROP, ART, DOORS, DESKS, PEOPLE, KEEP, ROAD_NODES, ROAD_EDGES });

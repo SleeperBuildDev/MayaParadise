@@ -459,10 +459,10 @@ export function fillTown({ ITEMS, add, defs, doors, people = [] }) {
   const keepPts = [...KEEP, ...doors.map((d) => [d.x, d.z])];
   const fp = (o) => rectOf(o, defs[o.k]) || [o.x - 0.3, o.z - 0.3, o.x + 0.3, o.z + 0.3];
   /** clear? (wayGap: from road kerbs and lane edges; gap: from other things). Trees in the way of a house move out. */
-  function clear(o, { way = 1.6, gap = 0.3, displace = false } = {}) {
+  function clear(o, { way = 1.6, gap = 0.3, displace = false, core = true } = {}) {
     const me = fp(o);
     if (!inLand(me)) return 'edge';
-    for (const c of CORE) if (rectGap(me, c) < 0.4) return 'core';
+    if (core) for (const c of CORE) if (rectGap(me, c) < 0.4) return 'core'; // (core: false: a detail inside the square or the plots, placed by hand: garden-detail.js)
     for (const [x, z] of keepPts) if (ptGap(x, z, me) < 2.0) return 'spot';
     for (const p of people) if (ptGap(p.x, p.z, me) < 0.75) return 'person';
     if (wayGap(me) < way) return 'way';
@@ -675,5 +675,6 @@ export function fillTown({ ITEMS, add, defs, doors, people = [] }) {
     }
   }
 
-  return { added: ITEMS.length - base, skipped, moved };
+  // (put / putNear / clear: the same checks for the detail pass, garden-detail.js, laid after the town)
+  return { added: ITEMS.length - base, skipped, moved, put, putNear, clear };
 }

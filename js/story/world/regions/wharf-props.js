@@ -89,7 +89,7 @@ function wTinPlants(g, f, it) {
   for (let k = 0; k < n; k++) {
     const x = -((n - 1) * 0.24) + k * 0.48, tall = r() < 0.3;
     g.box(x, 0.2, 0, 0.34, 0.4, 0.34, k % 3 === 2 ? C.terra : r() < 0.5 ? C.zinc : C.teal);
-    g.box(x, 0.42, 0, 0.36, 0.04, 0.36, C.zincD);
+    f.box(x, 0.42, 0, 0.36, 0.04, 0.36, C.zincD); // (the tin's rolled rim: unoutlined, a lip too thin for an ink hull)
     g.box(x, tall ? 0.75 : 0.56, 0, tall ? 0.2 : 0.36, tall ? 0.7 : 0.26, tall ? 0.2 : 0.36, C.leaf);
     if (tall) g.box(x, 1.12, 0, 0.5, 0.36, 0.5, C.leafL);
     if (r() < 0.5) g.box(x + 0.08, tall ? 1.0 : 0.72, 0.12, 0.08, 0.1, 0.08, r() < 0.5 ? C.red : C.mustard);
@@ -122,8 +122,9 @@ function wTally(g, f, it) {
     const n = 2 + Math.floor(r() * 4);
     for (let k = 0; k < n; k++) {
       const x = -0.35 + k * 0.17, y = 1.05 - row * 0.2;
-      for (let m = 0; m < 4; m++) g.boxR(x + m * 0.03, y, 0.085 - (y - 0.85) * 0.12, 0.012, 0.11, 0.01, C.white, -0.12, 0, 0);
-      g.boxR(x + 0.045, y, 0.087 - (y - 0.85) * 0.12, 0.14, 0.012, 0.01, C.white, -0.12, 0, -0.5);
+      // (chalk strokes: unoutlined, they were ~50 inked boxes a board and cast shadows)
+      for (let m = 0; m < 4; m++) f.boxR(x + m * 0.03, y, 0.085 - (y - 0.85) * 0.12, 0.012, 0.11, 0.01, C.white, -0.12, 0, 0);
+      f.boxR(x + 0.045, y, 0.087 - (y - 0.85) * 0.12, 0.14, 0.012, 0.01, C.white, -0.12, 0, -0.5);
     }
   }
 }
@@ -135,8 +136,9 @@ function wPaperWall(g, f, it) {
   f.flat(-L / 2 - 0.1, -0.25, L / 2 + 0.1, 0.35, 0.005, C.shadow);
   g.box(0, 0.42, 0, L, 0.84, 0.16, C.ledger);
   g.box(0, 0.86, 0, L + 0.04, 0.05, 0.2, shade(C.ledger, 0.88));
-  for (const y of [0.25, 0.45, 0.65]) g.box(0, y, 0.085, L - 0.06, 0.018, 0.01, C.bRule);
-  g.box(-L / 2 + 0.5, 0.42, 0.085, 0.02, 0.8, 0.01, C.rRule);
+  // (the ruled lines: unoutlined, an ink hull round a 2 cm line was a black smudge)
+  for (const y of [0.25, 0.45, 0.65]) f.box(0, y, 0.085, L - 0.06, 0.018, 0.01, C.bRule);
+  f.box(-L / 2 + 0.5, 0.42, 0.085, 0.02, 0.8, 0.01, C.rRule);
 }
 
 const box = (w, d, ox = 0, oz = 0) => (it) => {

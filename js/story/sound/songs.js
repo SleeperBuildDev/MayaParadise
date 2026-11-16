@@ -9,12 +9,19 @@
 //           night?: { lead } }
 // A part: { t: 'lead'|'counter'|'pad'|'drone'|'arp'|'bass'|'chord'|'drum'|'hit', i: instrument, v: level,
 //           w: reverb send, g: 'tense'|'calm' (talk cue only), ...per-type fields (see playStep) }
-import { rng, mtof } from './bank.js';
+// More songs (time-of-day variants 'town:market#2', events, rain, driving, rooms, cues) are in songs-more.js;
+// optional song fields: chordsB (bridge chords: cycle 2, bars 8-15, with a third tune), intro (bars before the
+// tune enters on a fresh start), bars32 (rooms / events: a 32-bar form); part fields: alt (fallback instrument
+// while the warm-up has not built this one yet), every (hit: one bar in n); part types roll / strum / clap / sway.
+// st.loops counts finished forms (soundscape.js rotates a place's songs only there).
+import { rng, mtof, baseOf } from './bank.js';
 import { sample } from './fx.js';
+import { moreSongs } from './songs-more.js';
 
 const MODES = {
   majp: [0, 2, 4, 7, 9], minp: [0, 3, 5, 7, 10], dor: [0, 2, 3, 5, 7, 9, 10], lyd: [0, 2, 4, 6, 7, 9, 11],
   maj: [0, 2, 4, 5, 7, 9, 11], mix: [0, 2, 4, 5, 7, 9, 10], aeo: [0, 2, 3, 5, 7, 8, 10], whole: [0, 2, 4, 6, 8, 10],
+  sus: [0, 2, 5, 7, 10], kumoi: [0, 2, 3, 7, 9], hex: [0, 2, 4, 5, 7, 9],
 };
 /** Scale notes from `root` over `oct` octaves (plus the top root). */
 const S = (root, mode, oct = 2) => {
@@ -321,13 +328,14 @@ export const SONGS = {
       { t: 'pad', i: 'pad', v: 0.03, w: 0.4 },
     ] },
 };
+Object.assign(SONGS, moreSongs({ S, C, RH }));
 
 /** 16 bars of melody for one part: an 8-bar tune, then its first half and a varied second half. */
-function melody(S, P, seed) {
+function melody(S, P, seed, chords = S.chords) {
   const r = rng(seed), bars = [], sc = S.scale, rh = P.rh;
   let idx = Math.floor(sc.length / 3);
   for (let b = 0; b < 8; b++) {
-    const pat = rh[Math.floor(r() * rh.length)], ch = S.chords[b % S.chords.length], notes = [];
+    const pat = rh[Math.floor(r() * rh.length)], ch = chords[b % chords.length], notes = [];
     for (let k = 0; k < pat.length; k++) {
       idx = Math.max(0, Math.min(sc.length - 1, idx + Math.round((r() - 0.5) * 3.4)));
       let n = sc[idx];
@@ -347,7 +355,13 @@ function melody(S, P, seed) {
   return [...bars, ...bars.slice(0, 4), ...bars.slice(4).map((ns) => ns.map(([p, x, l]) => [p, r2() < 0.35 ? up(x) : x, l]))];
 }
 
-const HIT_M = { wood: 72, tick: 84, shaker: 84, si: 96, siShort: 96, kick: 36 };
+const HIT_M = { wood: 72, tick: 84, shaker: 84, si: 96, siShort: 96, kick: 36, clap: 84, tom: 48, gong: 60 };
+/** Held instruments: a lead / counter on them always plays legato (a held reed note must not ring over the next). */
+const HELD = new Set(['flute', 'hne', 'whistle']);
+/** Parts that may be skipped when too many notes are still sounding (the tune and the bed never are). */
+const THIN = new Set(['hit', 'counter', 'arp', 'clap', 'roll', 'drum']);
+const MAX_LIVE = 16; // notes sounding at once (one song)
+const LIVE_FOR = { pad: 3, strings: 3, gong: 2.5, bell: 2, harp: 2, guitar: 2, ep: 2, piano: 2, hne: 1.5, flute: 1.5 }; // s a note counts as live
 
 /** Time-of-day colour: period 'morning'|'noon'|'evening'|'night'. */
 const PERIOD = {
@@ -384,15 +398,19 @@ export function startSong(E, key, out, { period = 'noon', fade = 2.5, at = null 
       const s = ctx.createGain(); s.gain.value = Math.min(1, (P.w || 0) + V.wet); pg.connect(s); s.connect(E.verb);
     }
     const inst = P.t === 'lead' && night.lead ? night.lead : P.i;
-    return { P, pg, inst, i, alt: null, mel: P.t === 'lead' || P.t === 'counter' ? melody(S, P, S.seed + i * 99) : null, r: rng(S.seed + i * 13) };
+    return { P, pg, inst, i, alt: null, br: null, fb: E.fallback && P.alt && inst === P.i ? P.alt : null, mel: P.t === 'lead' || P.t === 'counter' ? melody(S, P, S.seed + i * 99) : null, r: rng(S.seed + i * 13) };
   });
   const spb = S.spb || 4;
+  const live = new Float64Array(MAX_LIVE + 8); // end times of the notes still sounding (a ring)
+  let liveI = 0;
+  const intro = S.intro || 0, formBars = S.bars32 ? 32 : 64;
   const st = {
-    key, S, gain, groups, notes: 0, step: 0,
+    key, S, gain, groups, notes: 0, step: 0, loops: 0, formBars,
     six: 60 / (S.bpm * V.tempo) / spb, next: t0 + 0.08, stopAt: Infinity,
     schedule(until) {
       while (st.next < until && st.next < st.stopAt) {
         const bar = Math.floor(st.step / S.steps), s = st.step % S.steps;
+        if (s === 0 && bar > 0 && bar % formBars === 0) st.loops++; // a form ended: the place may rotate its song here
         const t = st.next + (s % 2 && spb === 4 ? (S.swing || 0) * st.six : 0);
         for (const p of parts) playStep(p, bar, s, t);
         st.step++;
@@ -412,19 +430,55 @@ export function startSong(E, key, out, { period = 'noon', fade = 2.5, at = null 
     dispose() { try { gain.disconnect(); } catch { /* ignore */ } },
   };
   function note(p, midi, t, vel = 1, dur = 0) {
-    sample(E, p.pg, p.inst, midi, t, vel, dur ? { dur, rel: 0.3 } : {});
+    let inst = p.inst;
+    // (a new instrument the warm-up has not built yet: its fallback, never a synthesis on this thread)
+    if (E.fallback && !E.bank.has('note', inst, baseOf(inst, midi))) {
+      if (p.fb) inst = p.fb;
+      // (the warm-up worker is still busy: skip a note it has not delivered rather than build it on this thread)
+      if (E.bank.warming && !E.bank.has('note', inst, baseOf(inst, midi))) return;
+    }
+    const end = t + (dur || LIVE_FOR[inst] || 0.8);
+    let n = 0, slot = -1;
+    for (let k = 0; k < live.length; k++) { if (live[k] > t) n++; else if (slot < 0) slot = k; }
+    if (n >= MAX_LIVE && THIN.has(p.P.t)) return; // too many notes still ringing: drop an ornament, never the tune
+    live[slot >= 0 ? slot : liveI++ % live.length] = end;
+    sample(E, p.pg, inst, midi, t, vel, dur ? { dur, rel: 0.3 } : {});
     st.notes++;
   }
   function playStep(p, bar, s, t) {
-    const { P } = p, ch = S.chords[bar % S.chords.length], barLen = S.steps * st.six;
+    const { P } = p, barLen = S.steps * st.six;
+    const bridge = S.chordsB && bar % 64 >= 40 && bar % 64 < 48; // cycle 2, bars 8-15: the bridge chords
+    const ch = bridge ? S.chordsB[bar % S.chordsB.length] : S.chords[bar % S.chords.length];
+    if (bar < intro && P.t !== 'pad' && P.t !== 'drone' && P.t !== 'bass') return; // a fresh song breathes in
     switch (P.t) {
       case 'lead': case 'counter': {
         // a long stay should not hear one 16-bar loop: cycle 1 plays a second tune on the same chords,
         // cycle 3 lets the lead rest for 8 bars (the bed carries on), then the tune comes home
-        const cyc = Math.floor(bar / 16) % 4;
-        if (cyc === 3 && bar % 16 < 8 && P.t === 'lead') break;
-        const mel = cyc === 1 ? (p.alt ||= melody(S, P, S.seed + p.i * 99 + 5003)) : p.mel;
-        for (const [ps, n, len] of mel[bar % 16]) if (ps === s) note(p, n + (P.oct || 0), t, 1, P.legato ? len * st.six * 0.95 : 0);
+        // (bars32: two cycles, the lead rests the last 4 bars)
+        const cyc = S.bars32 ? Math.floor(bar / 16) % 2 : Math.floor(bar / 16) % 4;
+        if (P.t === 'lead' && (S.bars32 ? cyc === 1 && bar % 16 >= 12 : cyc === 3 && bar % 16 < 8)) break;
+        const mel = bridge ? (p.br ||= melody(S, P, S.seed + p.i * 99 + 7001, S.chordsB)) : cyc === 1 ? (p.alt ||= melody(S, P, S.seed + p.i * 99 + 5003)) : p.mel;
+        const held = P.legato || HELD.has(p.inst);
+        for (const [ps, n, len] of mel[bar % 16]) if (ps === s) note(p, n + (P.oct || 0), t, 1, held ? len * st.six * 0.95 : 0);
+        break;
+      }
+      case 'roll': { // a drum-circle roll (pat-waing-like): accents on the grid, light notes between
+        if (s % (P.every || 2)) break;
+        const acc = P.acc.includes(s);
+        if (!acc && p.r() > (P.prob ?? 0.5) * 0.6) break;
+        const motif = Math.floor(bar / 2) % 4, rr = rng(S.seed * 5 + motif * 17 + s);
+        note(p, P.pitches[Math.floor(rr() * P.pitches.length)], t, acc ? 1 : 0.45 + p.r() * 0.2);
+        break;
+      }
+      case 'strum': // the chord strummed low to high
+        if (P.steps.includes(s)) ch.forEach((n, k) => note(p, n + (P.oct || 0), t + k * 0.03, (1 / ch.length) * 1.5 * (k ? 0.85 : 1)));
+        break;
+      case 'clap':
+        if (P.steps.includes(s) && (!P.prob || p.r() < P.prob)) note(p, HIT_M.clap, t + p.r() * 0.012, 0.6 + p.r() * 0.4);
+        break;
+      case 'sway': { // a rocking bass: root, fifth, root, fifth
+        const k = P.steps.indexOf(s);
+        if (k >= 0) { let n = ch[0] + (k % 2 ? 7 : 0); while (n >= 52) n -= 12; while (n < 38) n += 12; note(p, n, t, k ? 0.75 : 1); }
         break;
       }
       case 'pad':
@@ -458,6 +512,7 @@ export function startSong(E, key, out, { period = 'noon', fade = 2.5, at = null 
         break;
       }
       case 'hit':
+        if (P.every && bar % P.every) break;
         if (P.steps.includes(s) && (!P.prob || p.r() < P.prob)) note(p, P.m || HIT_M[P.i] || 72, t, s === 0 ? 1 : 0.8);
         break;
       default:
@@ -471,6 +526,7 @@ export const STINGS = {
   lesson: { name: 'Lesson lands', vibe: 'warm click of understanding' },
   stamp: { name: 'Stamp', vibe: 'small, proud, done' },
   page: { name: 'Page turns', vibe: 'a new day' },
+  rain: { name: 'Rain begins', vibe: 'six small drops, rising (not sad)' },
   arrive: { name: 'Arrival', vibe: 'the town opens its doors (uses the town song\'s instrument and scale)' },
 };
 export function playSting(E, out, name, t, arg) {
@@ -502,6 +558,10 @@ export function playSting(E, out, name, t, arg) {
     for (const m of S.chords[0]) n('pad', m, 0.3, 0.035, 2.4);
     n('si', 96, 0.7, 0.03);
     return 3.5;
+  }
+  if (name === 'rain') {
+    [79, 81, 84, 86, 88, 91].forEach((m, k) => n('musicbox', m, k * 0.21 + (k % 2) * 0.05, 0.045));
+    return 1.6;
   }
   return 0;
 }

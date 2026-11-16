@@ -42,6 +42,7 @@ import { ART as H_ART, PROP as H_PROP } from '../art/hearth.js';
 import { LIFE_PROP } from './hearth-life.js';
 import { FOLK_PEOPLE } from './hearth-folk.js';
 import { KERB_PROP } from './hearth-kerb.js';
+import { detail as hDetail } from './hearth-detail.js';
 
 export const REGION = { id: 'hearth', name: { my: 'မီးဖိုတန်း', en: 'Hearth Row' }, rect: [119, 138, 269, 258], paper: 'parchment', label: [222, 248] };
 
@@ -483,3 +484,7 @@ export const PEOPLE = [
     job(161.4, 198.4, 0, 'read', 1.0)),
 ];
 export const SIGNS = [];
+
+// ---- the detail pass (hearth-detail.js, art-plan 2026-11-16): small street details laid last, through the same
+// clear-check (roads, doors and their paths, desks, SPOTS, the townsfolk's spots); merged, one new kerb board
+export const DETAIL = hDetail({ ITEMS, add, PROP, ART, DOORS, DESKS, PEOPLE, SPOTS, ROAD_NODES, ROAD_EDGES });

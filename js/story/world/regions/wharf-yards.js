@@ -68,7 +68,10 @@ function wYard(g, f, it) {
     const side = k % 4, t = r() - 0.5;
     const x = side < 2 ? t * W : (side === 2 ? -1 : 1) * W / 2 * (0.85 + r() * 0.2);
     const z = side < 2 ? (side === 0 ? -1 : 1) * D / 2 * (0.85 + r() * 0.2) : t * D;
-    if (r() < 0.65) { const h = 0.12 + r() * 0.16; g.box(x, h / 2, z, 0.16 + r() * 0.12, h, 0.14 + r() * 0.1, r() < 0.5 ? C.leaf : C.leafL); }
+    // (a tuft lies flat on the earth: two crossed blades of green, 4 triangles. Raised boxes here read as loose
+    // green cubes floating over the bare yards from the walking camera, glitch G8, and cost ~24 triangles each
+    // plus their shadow; detail pass 2026-11-16)
+    if (r() < 0.65) { const h = 0.12 + r() * 0.16, w = 0.2 + r() * 0.14 + h * 0.5, d = 0.12 + r() * 0.08, c = r() < 0.5 ? C.leaf : C.leafL; f.flatR(x, z, w, d, 0.009, c, h * 9); f.flatR(x + 0.03, z - 0.02, w * 0.7, d * 0.8, 0.0095, c === C.leaf ? C.leafL : C.leafD, h * 9 + 1.1); }
     else f.flatR(x, z, 0.1, 0.08, 0.045, C.zincL, 0); // a pebble (a flat chip: 2 triangles, not a 10-triangle box)
   }
 }
@@ -131,7 +134,7 @@ function wCrabPots(g, f, it) {
     const x = -0.55 + (k % 3) * 0.55, y = k < 3 ? 0.17 : 0.5, z = (k % 2) * 0.08;
     g.box(x, y, z, 0.48, 0.32, 0.6, k % 2 ? C.bamboo : C.bambooD);
     for (const sx of [-0.16, 0, 0.16]) front(f, x + sx, y, z + 0.306, 0.02, 0.3, C.bambooD); // the cage bars (flat, facing the street)
-    g.box(x, y + 0.17, z, 0.52, 0.03, 0.64, C.tar);
+    f.flatR(x, z, 0.52, 0.64, y + 0.175, C.tar, 0); // the lid (flat: from the walking camera it is only its top; no ink hull, no shadow pass)
   }
   if (r() < 0.6) g.box(0.95, 0.18, 0.1, 0.12, 0.36, 0.12, C.terra); // a float
 }

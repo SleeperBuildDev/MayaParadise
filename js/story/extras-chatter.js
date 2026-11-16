@@ -212,7 +212,7 @@ export function installChatter(game, story, ow) {
   }
   /** someone who may make small talk: the district's own folk, never a day's story cast */
   function chatty(e) {
-    if (!e?.p?.root || e === story.talkWith || e.ctl || e.walking || e.hidden || e.indoor) return false;
+    if (!e?.p?.root || e === story.talkWith || e.ctl || e.walking || e.hidden || e.indoor || e.evt) return false; // (e.evt: in a town gathering)
     if (e.p.root.visible === false || !e.p.root.parent) return false;
     return !!e.folk || AMBIENT_IDS.has(e.id) || !!e.cast?.ambient || !castById(e.id);
   }
@@ -355,6 +355,7 @@ export function installChatter(game, story, ow) {
     const no = (k) => { if (why) why[k] = (why[k] || 0) + 1; return false; };
     const mp = mayaXZ();
     if (Math.hypot(x - mp.x, z - mp.z) < KEEP.maya) return no('maya');
+    const ne = story.npcEvent; if (ne?.active && Math.hypot(x - ne.x, z - ne.z) < 12) return no('event'); // (a town gathering there: extras-events.js)
     if (ow?.space && ow.space.collides(x, z, 0.5)) return no('solid');
     const rd = ow?.net?.nearest?.(x, z);
     if (rd && rd.dist < KEEP.road) return no('road');
@@ -608,12 +609,13 @@ export function installChatter(game, story, ow) {
     const calls = callsNow();
     overT = calls > CALL_DROP ? overT + 0.5 : 0;
     for (const [id, e] of folk) {
+      if (e.evt) continue; // (in a town gathering: it gives them back first)
       const p = e.p.root.position;
       const d = Math.hypot(p.x - mp.x, p.z - mp.z);
       if (d > DROP_ALWAYS || (d > DROP_FAR && !onScreen(e.p, -60)) || dayOwns(id) || dayOwns('folk:' + e.folk)) { dropFolk(id); stats.dropped++; }
     }
     if (overT > 2 && folk.size) {
-      const far = [...folk.values()].filter((e) => !onScreen(e.p, -60)).sort((a, b) => b.p.root.position.distanceTo(mp) - a.p.root.position.distanceTo(mp))[0];
+      const far = [...folk.values()].filter((e) => !e.evt && !onScreen(e.p, -60)).sort((a, b) => b.p.root.position.distanceTo(mp) - a.p.root.position.distanceTo(mp))[0];
       if (far) { dropFolk(far.id); stats.dropped++; overT = 0; }
     }
     stillT = lastMp0 && Math.hypot(mp.x - lastMp0.x, mp.z - lastMp0.z) < 0.3 ? stillT + 0.5 : 0;
@@ -733,7 +735,7 @@ export function installChatter(game, story, ow) {
     let need = PER_AREA - seen.length;
     // room: the cap stays; one out of sight for VIEW.offFor s goes (farthest first) so one in sight can come
     while (folk.size + need > cap() && stillT >= 2) { // (only while she stands: no coming and going as she walks)
-      const out = [...folk.values()].filter((e) => !seen.includes(e) && (e.offT || 0) >= VIEW.offFor && story.talkWith !== e)
+      const out = [...folk.values()].filter((e) => !seen.includes(e) && !e.evt && (e.offT || 0) >= VIEW.offFor && story.talkWith !== e)
         .sort((p, q) => q.p.root.position.distanceTo(mp) - p.p.root.position.distanceTo(mp))[0];
       if (!out) break;
       dropFolk(out.id); stats.dropped++; stats.recycled = (stats.recycled || 0) + 1;
@@ -805,6 +807,7 @@ export function installChatter(game, story, ow) {
 
   story.chatterExtras = {
     folk,
+    keepSpots, // (read only: extras-events.js keeps its gatherings off them too)
     get areas() { return areas; },
     stats,
     debug: {

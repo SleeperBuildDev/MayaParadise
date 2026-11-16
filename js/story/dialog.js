@@ -49,9 +49,13 @@ export function createDialog(game, story) {
       if (opts.mood !== undefined) call(s.actor, 'setMood', opts.mood);
       const total = lines.reduce((n, l) => n + tr(l).length, 0);
       call(s.actor, 'talk', Math.min(8, 1 + total * 0.05));
+      // each line's own gesture while it types (js/story/anim), the one hearing it listens
+      const listener = s.actor === game.maya ? story.talkWith?.p || null : game.maya;
+      let li = 0;
       await ui.say(lines, {
         face: s.face(opts.face === 'talk' ? 'smile' : opts.face || 'smile'),
         auto: opts.auto ?? false,
+        onLine: () => { const l = lines[li++]; if (story.anim && l && typeof l === 'object') story.anim.gesture(s.actor, li === 1 && (opts.emote || opts.face) ? { ...l, emote: l.emote || opts.emote, face: l.face || opts.face } : l, { listener }); },
         onTick: () => call(game.audio, 'play', 'type'),
       });
       call(s.actor, 'talk', 0);
