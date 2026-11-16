@@ -65,7 +65,7 @@ export function installRoam(game, story, ow) {
   // ---- where nobody loiters: doors and everyone's own spots (a person's own job spot is fine for them)
   // (the doors' list kept for half a second: the scan below drops it; DOORS grows as the houses near her go live)
   let doors = null;
-  const doorList = () => doors || (doors = Object.values(DOORS));
+  const doorList = () => doors || (doors = Object.values(DOORS).flatMap((d) => (d?.enter ? [d, d.enter] : [d]))); // (a raised house: its steps' foot too)
   function keepOut(x, z, self) {
     for (const d of doorList()) if (d && Math.hypot(x - d.x, z - d.z) < 2.2) return true;
     for (const pl of game.world?.places || []) if (pl.door && Math.hypot(x - pl.door.x, z - pl.door.z) < 2.2) return true;

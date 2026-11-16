@@ -261,7 +261,7 @@ export function installEvents(game, story, ow) {
   function readKeep() {
     const mp = mayaPos(), mx = mp.x, mz = mp.z, R = SITE.far + 12;
     const near = (o) => o && Number.isFinite(o.x) && Math.abs(o.x - mx) < R && Math.abs(o.z - mz) < R;
-    const doors = Object.values(DOORS).filter(near).map((d) => ({ x: d.x, z: d.z, f: d.facing || 0 }));
+    const doors = Object.values(DOORS).flatMap((d) => (d?.enter ? [d, d.enter] : [d])).filter(near).map((d) => ({ x: d.x, z: d.z, f: d.facing || 0 })); // (a raised house: its steps' foot too)
     for (const pl of game.world?.places || []) if (pl.door && near(pl.door)) doors.push({ x: pl.door.x, z: pl.door.z, f: 0 });
     let spots = story.chatterExtras?.keepSpots;
     if (!spots) {

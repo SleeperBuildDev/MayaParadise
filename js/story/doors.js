@@ -12,6 +12,9 @@
 //       building's face; facing = the way the door looks out (radians, Math.atan2(dx, dz): 0 = +Z, the
 //       street south of a north-side house); r = how close Maya must come (default 0.75); site = a
 //       Home Book room built by js/game/interiors/<id>.js.
+//       enter = { x, z, r?, facing? } (optional): a raised house's steps' foot, on the ground. When set, walking in,
+//       tapping (the door or the steps) and coming out all happen THERE, not at the porch door (r and facing default
+//       to the door's). doorSpot(d) -> the spot that counts ({ x, z, r, facing }: enter, else the door itself).
 //
 //   story.enter(id, opts) -> Promise<bool>   scripts: straight into a room (iris). opts:
 //       { at: spotName | { x, z, h }   start there instead of the doorway,
@@ -158,10 +161,14 @@ export function registerDoors(list) {
   for (const d of arr) {
     const id = d.room || d.id;
     if (!id || !Number.isFinite(d.x) || !Number.isFinite(d.z)) continue;
-    DOORS[id] = { room: id, x: d.x, z: d.z, facing: d.facing ?? 0, region: d.region || null, r: d.r ?? 0.75, site: !!d.site, name: d.name || null, off: !!d.off };
+    const e = d.enter && Number.isFinite(d.enter.x) && Number.isFinite(d.enter.z) ? d.enter : null;
+    DOORS[id] = { room: id, x: d.x, z: d.z, facing: d.facing ?? 0, region: d.region || null, r: d.r ?? 0.75, site: !!d.site, name: d.name || null, off: !!d.off,
+      enter: e ? { x: e.x, z: e.z, r: e.r ?? d.r ?? 0.75, facing: e.facing ?? d.facing ?? 0 } : null };
   }
   return DOORS;
 }
+/** Where a door is walked into, tapped to and come out of: a raised house's steps' foot (d.enter), else the door. */
+export const doorSpot = (d) => d.enter || d;
 
 /** Take doors away again: ids, or door objects { room, x, z } (an object only removes the door if it is still that one). */
 export function unregisterDoors(list) {
@@ -454,6 +461,11 @@ export async function createDoors(game, story) {
         const q = px(d.x, h, d.z);
         if (q) { const dd = Math.hypot(q.x - x, q.y - y); if (dd < bd) { bd = dd; best = d; } }
       }
+      // (a raised house: its steps answer a tap too)
+      if (d.enter) for (const h of [0.2, 0.8]) {
+        const q = px(d.enter.x, h, d.enter.z);
+        if (q) { const dd = Math.hypot(q.x - x, q.y - y); if (dd < bd) { bd = dd; best = d; } }
+      }
     }
     return best;
   }
@@ -508,8 +520,9 @@ export async function createDoors(game, story) {
       const bq = d && B?.root?.visible && B.target && Math.hypot(B.x - foot.pos.x, B.z - foot.pos.y) < 26 ? px(B.target.x, 1.15, B.target.z) : null;
       const onBoard = bq && Math.hypot(bq.x - x, bq.y - y) < 64;
       if (d && !onBoard) {
-        const f = front(d, 0.55);
-        foot.walkTo(f.x, f.z, (ok) => { if (ok !== false && Math.hypot(foot.pos.x - d.x, foot.pos.y - d.z) < d.r + 0.9) enter(d.room, { via: d }); });
+        // (a raised house: up to the steps' foot, never the porch door above it)
+        const e = doorSpot(d), f = d.enter ? e : front(d, 0.55);
+        foot.walkTo(f.x, f.z, (ok) => { if (ok !== false && Math.hypot(foot.pos.x - e.x, foot.pos.y - e.z) < e.r + 0.9) enter(d.room, { via: d }); });
         return true;
       }
     }
@@ -582,8 +595,8 @@ export async function createDoors(game, story) {
     game.input.reset?.();
     if (wasFoot) foot.walker.stop();
     else { game.world.drive.stop(); game.world.setRoute?.(null); game.autoEnter = null; call(game.audio, 'engine', 0); }
-    if (wasFoot && door) { // turn to the door
-      foot.walker.heading = door.facing + Math.PI;
+    if (wasFoot && door) { // turn to the door (a raised house: up its steps)
+      foot.walker.heading = doorSpot(door).facing + Math.PI;
       game.maya.root.rotation.set(0, foot.walker.heading, 0);
     }
     let R = null;
@@ -607,7 +620,7 @@ export async function createDoors(game, story) {
     // the street's people wait outside, untouched
     const stash = new Map(people);
     people.clear();
-    const exitTo = door ? front(door, 0.9) : { x: startPos.x, z: startPos.z, heading: game.mayaHeading() };
+    const exitTo = door ? front(doorSpot(door), 0.9) : { x: startPos.x, z: startPos.z, heading: game.mayaHeading() }; // (a raised house: at its steps' foot)
     cur = { id, R, built: R.story || null, exitTo, doorId: door?.room || null, stash, wasFoot, pushed: false, extras: [] };
     if (!wasFoot) game.maya.root.removeFromParent();
     game.enterRoomScene(R); // walker, the close room camera (roomCam), room UI, the hour's light (+ lightRoom)
@@ -706,7 +719,7 @@ export async function createDoors(game, story) {
     document.getElementById('game').classList.remove('story-room');
     cur = null;
     // outside the same door, facing the street
-    const tgt = typeof o.to === 'string' ? (DOORS[o.to] ? front(DOORS[o.to], 0.9) : null) : o.to ? { heading: 0, ...o.to } : null;
+    const tgt = typeof o.to === 'string' ? (DOORS[o.to] ? front(doorSpot(DOORS[o.to]), 0.9) : null) : o.to ? { heading: 0, ...o.to } : null;
     const to = { ...(tgt || c.exitTo) };
     const onFoot = o.onFoot !== false;
     // the car parked across the doorway: she steps out beside it, not into it
@@ -821,13 +834,14 @@ export async function createDoors(game, story) {
     const pushing = stick.lengthSq() > 0.04 || foot.walker.moving;
     for (const d of Object.values(DOORS)) {
       if (d.off) continue;
-      const dx = p.x - d.x, dz = p.y - d.z;
+      const e = doorSpot(d); // (a raised house: its steps' foot; a day that shuts a door with r = 0 shuts its steps too)
+      const dx = p.x - e.x, dz = p.y - e.z, r = d.r > 0 ? e.r : 0;
       if (dx * dx + dz * dz > 9) continue;
       const dist = Math.hypot(dx, dz);
-      if (d.room === coolId) { if (dist > d.r + 1.0) coolId = null; continue; }
-      if (dist > d.r) continue;
+      if (d.room === coolId) { if (dist > r + 1.0) coolId = null; continue; }
+      if (dist > r) continue;
       // heading in through the door (against its facing), and actually walking
-      const inward = -(hx * Math.sin(d.facing) + hz * Math.cos(d.facing));
+      const inward = -(hx * Math.sin(e.facing) + hz * Math.cos(e.facing));
       if (inward > 0.6 && pushing && (moved > 1e-4 || stick.lengthSq() > 0.04)) { enter(d.room, { via: d }); return; }
     }
   }

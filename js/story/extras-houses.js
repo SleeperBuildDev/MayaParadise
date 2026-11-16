@@ -109,7 +109,7 @@ export function installHouses(game, story) {
     }
     for (const [id, d] of want) {
       if (!live.has(id) || !DOORS[id]) {
-        registerDoors([{ room: id, x: d.x, z: d.z, facing: d.facing, region: d.region, r: d.r }]);
+        registerDoors([{ room: id, x: d.x, z: d.z, facing: d.facing, region: d.region, r: d.r, enter: d.enter }]); // (enter: a raised house's steps' foot)
         live.add(id);
       }
       let off = blocked;

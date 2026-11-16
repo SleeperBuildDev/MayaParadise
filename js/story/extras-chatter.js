@@ -359,7 +359,7 @@ export function installChatter(game, story, ow) {
     if (ow?.space && ow.space.collides(x, z, 0.5)) return no('solid');
     const rd = ow?.net?.nearest?.(x, z);
     if (rd && rd.dist < KEEP.road) return no('road');
-    for (const d of near ? near.doors : Object.values(DOORS)) if (d && Math.hypot(x - d.x, z - d.z) < KEEP.door) return no('door');
+    for (const d of near ? near.doors : Object.values(DOORS).flatMap((d) => (d?.enter ? [d, d.enter] : [d]))) if (d && Math.hypot(x - d.x, z - d.z) < KEEP.door) return no('door');
     for (const s of near ? near.spots : keepSpots) if (Math.hypot(x - s.x, z - s.z) < KEEP.spot) return no('spot');
     for (const e of story.people.values()) {
       const p = e.p?.root?.position;
@@ -491,7 +491,7 @@ export function installChatter(game, story, ow) {
     // distance cannot be too near any of them, so freeAt looks only at the rest: the same answers, a fraction of
     // the work; perf pass 2)
     const near = {
-      doors: Object.values(DOORS).filter((d) => d && Math.hypot(d.x - mp.x, d.z - mp.z) <= VIEW.far + KEEP.door + 0.01),
+      doors: Object.values(DOORS).flatMap((d) => (d?.enter ? [d, d.enter] : [d])).filter((d) => d && Math.hypot(d.x - mp.x, d.z - mp.z) <= VIEW.far + KEEP.door + 0.01), // (a raised house: its steps' foot too)
       spots: keepSpots.filter((p) => Math.hypot(p.x - mp.x, p.z - mp.z) <= VIEW.far + KEEP.spot + 0.01),
     };
     for (const c of cands) {

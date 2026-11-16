@@ -17,7 +17,7 @@
 //       | { x, z, y?, kind? } | an Object3D / { root } | (s) => any of these (or null).
 // Kinds: 'person', 'door', 'thing' (something to tap: the tap pointer shows once it is on screen), 'area' (a town or a
 // stretch of ground: the map pin only).
-import { DOORS } from './doors.js';
+import { DOORS, doorSpot } from './doors.js';
 import { ALL_REGIONS } from './world/region.js';
 import { castById } from './cast.js';
 
@@ -84,9 +84,9 @@ export function createWhere(game, story) {
       }
     }
     if (!castRoom || !DOORS[castRoom]) return false;
-    const d = DOORS[castRoom];
+    const d = DOORS[castRoom], e = doorSpot(d); // (a raised house: its steps' foot, where she walks in)
     out.room = castRoom;
-    return setPoint(d.x, d.z, 1.1, 'door', null);
+    return setPoint(e.x, e.z, d.enter ? 0.7 : 1.1, 'door', null);
   }
 
   function spec(v, now, depth = 0) {
@@ -99,7 +99,8 @@ export function createWhere(game, story) {
         const d = DOORS[id];
         if (!d) return false;
         out.room = id;
-        return setPoint(d.x, d.z, 1.1, 'door', null);
+        const e = doorSpot(d); // (a raised house: its steps' foot)
+        return setPoint(e.x, e.z, d.enter ? 0.7 : 1.1, 'door', null);
       }
       if (k === 'desk') {
         const d = story.openWorld?.desks?.byId?.(id);

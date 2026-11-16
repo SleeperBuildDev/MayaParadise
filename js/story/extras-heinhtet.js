@@ -174,7 +174,7 @@ export function installHeinHtet(game, story, ow) {
   const local = { at: null, x: 0, z: 0, doors: [], spots: [] };
   function refreshLocal(x, z) {
     local.at = clock; local.x = x; local.z = z;
-    local.doors = Object.values(DOORS).filter((d) => d && Number.isFinite(d.x) && Math.hypot(x - d.x, z - d.z) < 75);
+    local.doors = Object.values(DOORS).flatMap((d) => (d?.enter ? [d, d.enter] : [d])).filter((d) => d && Number.isFinite(d.x) && Math.hypot(x - d.x, z - d.z) < 75); // (a raised house: its steps' foot too)
     local.spots = keepSpots.filter((d) => Math.hypot(x - d.x, z - d.z) < 75);
   }
   // nothing between the lens and him (a house roof hid him once): rays at his head, chest and shins.

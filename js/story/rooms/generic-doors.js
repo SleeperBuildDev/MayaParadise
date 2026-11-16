@@ -1,7 +1,8 @@
 // Which of the world's filler buildings get a door into a generic room (rooms/generic.js), and which kind of
 // room each one is. Pure data + maths: no three.js, no DOM (runs in node for counting).
 //
-//   doorsForItems(items, { regionAt?, skipDoors? }) -> [{ room: 'g:<district>:<itemIndex>', x, z, facing, region, r, kind, trade?, seed, art, w, d }]
+//   doorsForItems(items, { regionAt?, skipDoors? }) -> [{ room: 'g:<district>:<itemIndex>', x, z, facing, region, r, kind, trade?, seed, art, w, d, enter? }]
+//       enter      a raised house's steps' foot { x, z, r } (doors.js: walked into / tapped there, she comes out there)
 //       items      the merged ITEMS (js/story/world/region.js); itemIndex is the index in that array
 //       regionAt   (x, z) -> { id } | null  (region.js's; a built-in rect table is used without it)
 //       skipDoors  [{ x, z }] doors already in the world (story rooms): a building with one of those at its
@@ -50,6 +51,36 @@ const HOUSES = {
   sketch: { role: 'blank', only: (it) => it.kind === 'house' },
 };
 export const HOUSE_KINDS = Object.keys(HOUSES);
+
+// Raised houses (owner 2026-11-16: "the trigger area that goes into the house is at the door even though it should
+// be at the stair"): where the drawn steps come down to the ground, item-local (x along the front, z out from the
+// centre), so the walk-in spot and the tap go to the steps' foot (doors.js `enter`). Each mirrors its art's seeded
+// picks (the same rng and the same order of draws) and returns null when that house has no steps.
+function rng(seed) { // (world/kit.js's rng: kept in step with it)
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const STAIRS = {
+  // art/wharf.js wStilt: the veranda's steps at the end away from the door (lowest tread D/2 + 1.82)
+  wStilt: (it) => { const r = rng(it.seed || 1), W = it.w; const dx = it.doorX ?? Math.round((r() - 0.5) * (W - 2.8) * 4) / 4; return { x: dx < 0 ? W / 2 - 0.55 : -W / 2 + 0.55, z: it.d / 2 + 1.85 }; },
+  // art/wharf.js wGodown: two steps up to the loading platform at its east end
+  wGodown: (it) => ({ x: it.w / 2 - 0.9, z: it.d / 2 + 1.95 }),
+  // world/build.js house ('stilt'): three steps straight down from the door (trim, shutters, then the door's x)
+  house: (it) => { if (it.style !== 'stilt') return null; const r = rng(it.seed); r(); r(); return { x: (r() - 0.5) * (it.w - 2.4), z: it.d / 2 + 1.7 }; },
+  // regions/market-fill.js mkCot ('stilt'): steps down from the door, a fifth of the width off the middle
+  mkCot: (it) => { if (it.style !== 'stilt') return null; const r = rng(it.seed || 1); return { x: (r() < 0.5 ? -1 : 1) * (it.w || 5) * 0.2, z: (it.d || 5) / 2 + 0.85 }; },
+  // regions/market-town.js mkHut ('stilt', not the simple far look): the yard's colour, then the door's x
+  mkHut: (it) => { if (it.style !== 'stilt' || it.simple) return null; const r = rng(it.seed || 1); r(); return { x: (r() - 0.5) * (it.w || 4.6) * 0.36, z: (it.d || 4.2) / 2 + 0.95 }; },
+  // regions/garden-town.js gfHome ('stilt'): roof (unless given), shutters, wall, floor height, wall colour, the door's side
+  gfHome: (it) => { if (it.style !== 'stilt') return null; const r = rng(it.seed || 1); if (!it.roof) r(); r(); r(); r(); r(); return { x: (r() < 0.5 ? -1 : 1) * (it.w || 5) * 0.2, z: (it.d || 4.4) / 2 + 0.95 }; },
+  // (jHome 'stilt' needs none: its steps come straight down at it.door, where its door already stands)
+};
 
 const W8 = (list, u) => { // weighted pick: [[name, weight], ...]
   const tot = list.reduce((a, [, w]) => a + w, 0);
@@ -109,10 +140,12 @@ export function doorsForItems(items, { regionAt = null, skipDoors = [] } = {}) {
     const x = it.x + doorX * c + out0 * s, z = it.z - doorX * s + out0 * c;
     const seed = hashStr(`${district}:${Math.round(it.x * 10)}:${Math.round(it.z * 10)}`);
     const k = pickKind(it.k, district, it); // (the same position seed, and the item's own flags: a shop, a stilt house)
+    const st = sk ? null : STAIRS[it.k]?.(it); // a raised house: walk in (and tap) at its steps' foot
     out.push({
       room: `g:${district}:${index}`, x: +x.toFixed(2), z: +z.toFixed(2), facing: ry, region: district,
       r: +Math.min(H.rMax || 1.25, Math.max(0.8, w * 0.22 + (H.rMax ? 0.3 : 0))).toFixed(2), kind: k.kind, ...(k.trade ? { trade: k.trade } : {}), seed, art: it.k,
       w: +w.toFixed(2), d: +d.toFixed(2),
+      ...(st ? { enter: { x: +(it.x + st.x * c + st.z * s).toFixed(2), z: +(it.z - st.x * s + st.z * c).toFixed(2), r: 0.85 } } : {}),
     });
   });
   return out;
