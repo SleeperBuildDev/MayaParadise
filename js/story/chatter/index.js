@@ -792,7 +792,7 @@ function injectStyle() {
   .rc-chat p .nw { white-space: nowrap; }
   .rc-chat p { position: relative; margin: 0; padding: 3px 11px 4px; border-radius: 14px; background: rgba(255, 252, 244, .95); color: #2A2118;
     border: 1.5px solid rgba(164, 122, 44, .45); box-shadow: 0 3px 10px rgba(59, 42, 26, .16);
-    font: 600 13.5px/1.75 "Noto Sans Myanmar", system-ui, sans-serif; word-break: keep-all; overflow-wrap: anywhere; text-align: center; }
+    font: 600 12.5px/1.75 "Noto Sans Myanmar", system-ui, sans-serif; word-break: keep-all; overflow-wrap: anywhere; text-align: center; }
   html[data-lang="en"] .rc-chat p { line-height: 1.35; padding: 5px 11px; font-weight: 600; }
   .rc-chat p::after { content: ""; position: absolute; left: var(--tx, 50%); bottom: -6px; width: 10px; height: 10px; margin-left: -5px;
     background: rgba(255, 252, 244, .95); border-right: 1.5px solid rgba(164, 122, 44, .45); border-bottom: 1.5px solid rgba(164, 122, 44, .45);
