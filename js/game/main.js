@@ -13,7 +13,6 @@ import * as shadowKit from './shadows.js';
 const { enableShadows, setupSceneShadows } = shadowKit;
 const markShadows = shadowKit.markShadows || shadowKit.markCasters;
 import * as dayKit from './daytime.js';
-import { createLampShadow } from './lampshadow.js';
 // (namespace import: a browser still holding the previous daytime.js for a few minutes keeps working)
 const { createDaytime, buildHeadlightBeams } = dayKit;
 import { createMusic } from './music.js?v=6';
@@ -361,12 +360,6 @@ class Game {
     this.fx.update(dt);
     this.rig.update(dt);
     // world: the sun's shadow covers exactly what the camera sees (texel-snapped); rooms: fitted once
-    if (this.mode === 'world' && this.worldShadow && this.day) {
-      // night: the shadow light leans toward the nearest street lamp / lantern, so shadows swing as the player walks
-      if (!this.lampShadow) this.lampShadow = createLampShadow({ scene: this.world.scene, shadow: this.worldShadow, day: this.day, restore: () => this.applyDayLook() });
-      const lp = this.mayaOut() ? this.maya.root.getWorldPosition(this.tmp2) : this.car.root.position;
-      this.lampShadow.update(dt, t, lp.x, lp.z);
-    }
     if (this.mode === 'world') this.worldShadow?.fitCamera?.(this.camera);
     if (this.heroLight && this.mode === 'world') {
       const p = this.mayaOut() ? this.maya.root.getWorldPosition(this.tmp2) : this.car.root.position;

@@ -14,7 +14,8 @@ export function createLampShadow({ scene, shadow, day, restore }) {
   let pts = new Float32Array(0), nPts = 0, scanAt = -1e9, active = false;
   const cur = new THREE.Vector3(), tgt = new THREE.Vector3(), moon = new THREE.Vector3(), lampDir = new THREE.Vector3();
   const m4 = new THREE.Matrix4(), moonCol = new THREE.Color();
-  let inited = false;
+  let inited = false, lastI = -1, applied = null;
+  const aim = new THREE.Vector3();
 
   function scan() {
     const list = [];
@@ -36,27 +37,35 @@ export function createLampShadow({ scene, shadow, day, restore }) {
       if (!light || !shadow?.setDir) return;
       const s = day.state, k = Math.max(0, Math.min(1, (s.lamps - 0.3) / 0.7));
       if (k <= 0.001) { if (active) { active = false; inited = false; restore?.(); } return; }
-      if (t - scanAt > 1.5) { scan(); scanAt = t; }
+      if (t - scanAt > 1.5) { scan(); scanAt = t; applied = null; }
       moon.set(s.sunDir[0], s.sunDir[1], s.sunDir[2]).normalize();
-      let best = -1, bd = FAR * FAR;
+      // calm, not swimming: the player's spot is snapped to a coarse grid, the chosen lamp is kept until another is clearly
+      // nearer, and the light only turns when the new aim is a few degrees off, then eases over a couple of seconds
+      const gx = Math.round(fx / 3) * 3, gz = Math.round(fz / 3) * 3;
+      let best = -1, bd = FAR * FAR, keepD = Infinity;
       for (let i = 0; i < nPts; i++) {
-        const dx = pts[i * 3] - fx, dz = pts[i * 3 + 2] - fz, d2 = dx * dx + dz * dz;
+        const dx = pts[i * 3] - gx, dz = pts[i * 3 + 2] - gz, d2 = dx * dx + dz * dz;
+        if (i === lastI) keepD = d2;
         if (d2 < bd) { bd = d2; best = i; }
       }
+      if (lastI >= 0 && lastI < nPts && best !== lastI && keepD < FAR * FAR && keepD < bd * 1.6) { best = lastI; bd = keepD; }
+      lastI = best;
       let w = 0;
       if (best >= 0) {
         const d = Math.sqrt(bd);
         const x = Math.max(0, Math.min(1, (d - NEAR) / (FAR - NEAR)));
         w = (1 - x * x * (3 - 2 * x)) * k;
-        const dx = pts[best * 3] - fx, dz = pts[best * 3 + 2] - fz, h = Math.hypot(dx, dz) || 0.001;
-        lampDir.set(dx, Math.max(pts[best * 3 + 1], 0.45 * h, 0.8), dz).normalize(); // the lamp's side; never grazing the ground
+        const dx = pts[best * 3] - gx, dz = pts[best * 3 + 2] - gz, h = Math.hypot(dx, dz) || 0.001;
+        lampDir.set(dx, Math.max(pts[best * 3 + 1], 0.45 * h, 0.8), dz).normalize();
       }
-      tgt.copy(moon).lerp(lampDir, best >= 0 ? Math.min(0.92, w) : 0).normalize();
-      if (!inited) { cur.copy(tgt); inited = true; } else cur.lerp(tgt, 1 - Math.exp(-dt * 3.5)).normalize();
+      w = Math.round(Math.min(0.92, w) * 8) / 8; // steps of 1/8: no constant tiny changes
+      tgt.copy(moon).lerp(lampDir, best >= 0 ? w : 0).normalize();
+      if (!inited) { cur.copy(tgt); aim.copy(tgt); inited = true; }
+      else { if (aim.angleTo(tgt) > 0.1) aim.copy(tgt); cur.lerp(aim, 1 - Math.exp(-dt * 1.2)).normalize(); }
       active = true;
       moonCol.set(s.sun);
       light.color.copy(moonCol).lerp(WARM, Math.min(0.85, w) * 0.8);
-      shadow.setDir(cur);
+      if (!applied || applied.angleTo(cur) > 0.004) { shadow.setDir(cur); (applied ||= new THREE.Vector3()).copy(cur); }
     },
   };
 }
