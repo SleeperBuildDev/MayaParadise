@@ -16,6 +16,21 @@ export function createInput(canvas, joyEl) {
 
   const emit = (name, ...a) => { for (const f of handlers[name]) f(...a); };
 
+  // iPhone Safari: dragging the joystick downwards pulls the page down (rubber band / pull-to-refresh) even with
+  // touch-action: none on older iOS. While the game is on screen, stop the page from taking touch moves,
+  // except inside a real scrolling panel (sheets, the notebook, the bag).
+  const scrollable = (el) => {
+    for (; el && el !== document.body && el.nodeType === 1; el = el.parentElement) {
+      const o = getComputedStyle(el).overflowY;
+      if ((o === 'auto' || o === 'scroll') && el.scrollHeight > el.clientHeight + 1) return true;
+    }
+    return false;
+  };
+  document.addEventListener('touchmove', (e) => {
+    if (!document.body.classList.contains('playing')) return;
+    if (e.cancelable && !scrollable(e.target)) e.preventDefault();
+  }, { passive: false });
+
   canvas.addEventListener('pointerdown', (e) => {
     emit('any');
     if (pid !== null) return;

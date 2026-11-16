@@ -146,8 +146,9 @@ html[data-lang="en"] .glance h2, html[data-lang="en"] .place > h2 { font: 700 30
 
 /* ---------- game layer ---------- */
 body.playing { overflow: hidden; position: fixed; inset: 0; overscroll-behavior: none; }
+html:has(body.playing) { overflow: hidden; overscroll-behavior: none; } /* iPhone Safari: no pull-down-to-refresh / rubber band while playing */
 body.playing #cover, body.playing #classic { display: none; }
-#game { position: fixed; inset: 0; z-index: 10; overflow: hidden; background: var(--cream); user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+#game { position: fixed; inset: 0; z-index: 10; overflow: hidden; touch-action: none; background: var(--cream); user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
 #scene { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
 #game::after { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 1;
   background: radial-gradient(120% 90% at 50% 45%, transparent 60%, rgba(74, 20, 28, .16) 100%); }
