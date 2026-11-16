@@ -9,15 +9,15 @@
 export const D1_CARDS = [
   {
     id: 'once',
-    name: { my: 'နောက်တစ်ခါ', en: 'Once more' },
-    line: { my: 'မှားလည်း ရပါတယ်။ နောက်တစ်ခါ ထပ်လုပ်ကြည့်ရုံပဲနော်။', en: "Getting it wrong is fine. We just try once more." },
+    name: { my: 'နောက်တစ်ခေါက်', en: 'Once more' },
+    line: { my: 'မှားသွားလည်း ကိစ္စမရှိပါဘူး။ နောက်တစ်ခေါက် ထပ်ကြိုးစားကြည့်ရုံပေါ့။', en: "Getting it wrong is fine. We just try once more." },
     answers: ['given', 'afraid'],
-    from: { my: 'လေ့ကျင့်ရင်း ရခဲ့တာ', en: 'from the practice' },
+    from: { my: 'လေ့ကျင့်ခန်းထဲက', en: 'from the practice' },
   },
   {
     id: 'love',
-    name: { my: 'ဘာကို အချစ်ဆုံးလဲ', en: 'What do you love most?' },
-    line: { my: 'ဖိုးသား ဘာလုပ်ရတာကို အချစ်ဆုံးလဲဟင်။', en: 'Pho Thar, what do you love doing most?' },
+    name: { my: 'အကြိုက်ဆုံးက ဘာလဲ', en: 'What do you love most?' },
+    line: { my: 'ဖိုးသား၊ မင်း အလုပ်ချင်ဆုံးက ဘာလဲဟင်။', en: 'Pho Thar, what do you love doing most?' },
     answers: ['unknown'],
     from: { my: 'မာရာ့ကိုယ်ပိုင်', en: "Maya's own" },
   },
@@ -27,10 +27,10 @@ export const D1_CARDS = [
     name: { my: 'ချုပ်ရိုးပဲ ဝင်ပါ', en: 'Enter stitching' },
     line: { my: 'ချုပ်ရိုးပဲ ဝင်ပြိုင်ပါ၊ ခုနကပဲ နိုင်ခဲ့တာလေ။', en: 'Enter stitching, you just won.' },
     shows: ['unknown'], // looks like it answers "doesn't know"…
-    really: { my: 'သူ့အစား ရွေးပေးတာ', en: 'choosing for him' }, // …but it is this
+    really: { my: 'သူ့အစား ရွေးပေးနေမိတာ', en: 'choosing for him' }, // …but it is this
     backfire: {
-      they: { my: 'ဟုတ်… ဟုတ်ကဲ့…', en: 'Oh… okay…' },
-      maya: { my: '(ကျွန်မ သူ့အစား ရွေးပေးနေမိပြီ။ ဒါ သူ့လမ်းပဲဟာ။)', en: "(I'm choosing for him. It's his road.)" },
+      they: { my: 'အော်… ဟုတ်ကဲ့…', en: 'Oh… okay…' },
+      maya: { my: '(ငါ သူ့အစား ရွေးပေးနေမိပြီ။ ဒါ သူ့လမ်းပါ။)', en: "(I'm choosing for him. It's his road.)" },
     },
   },
 ];
@@ -44,26 +44,26 @@ export const TALK_D1_FAIR = {
   turns: 7,
   hand: D1_CARDS,
   tutorial: [
-    { at: 'path', my: 'ဖိုးသားက သူ့လမ်းညွှန်တိုင်ဆီ ကိုယ်တိုင် လျှောက်ရမယ်။ မာရာက ဘေးကနေ ကူပေးရုံပဲ။', en: 'Pho Thar walks to his own signpost himself. Maya only helps from beside him.' },
-    { at: 'label', my: 'ခဲတံစာက အပြင်ပန်း မြင်ရတာ။ "ကြည့်" လိုက်ရင် အမှန်ကို ရွှေမင်နဲ့ မြင်ရမယ်။ စိတ်အေး ၁ မှတ် ကုန်မယ်။', en: 'The pencil word is how it looks from outside. Look shows the truth in gold, for one calm.' },
-    { at: 'hand', my: 'လေ့ကျင့်ရင်း ရခဲ့တဲ့ စကားတွေပါ။ ကိုက်ရင် တစ်လှမ်း တိုးမယ်။ မကိုက်ရင် စိတ်အေး ၁ မှတ် လျော့မယ်။', en: 'Words you earned in the practice. One that fits moves him a step; one that does not costs a calm.' },
-    { at: 'steam', my: 'ခွက်ထဲက အငွေ့ သုံးကြောင်း တက်လာရင် ဘာပြောပြော နားမဝင်တော့ဘူး။ အရင် နားထောင်ပေးပါ။', en: 'Three wisps from his cup and words stop entering the ear. Listen first.' },
+    { at: 'path', my: 'ဖိုးသားက သူ့လမ်းညွှန်ဆိုင်းဘုတ်ဆီ သူ့ဘာသာ လျှောက်သွားတယ်။ မာရာက ဘေးကနေပဲ ကူညီပေးတာ။', en: 'Pho Thar walks to his own signpost himself. Maya only helps from beside him.' },
+    { at: 'label', my: 'ခဲတံစာလုံးက အပြင်ပန်း မြင်ရတဲ့ပုံ။ ကြည့် ကိုနှိပ်ရင် စိတ်အေး တစ်မှတ်ပေးပြီး ရွှေရောင်အမှန်တရားကို မြင်ရမယ်။', en: 'The pencil word is how it looks from outside. Look shows the truth in gold, for one calm.' },
+    { at: 'hand', my: 'လေ့ကျင့်ခန်းထဲက ရလာတဲ့ စကားလုံးတွေ။ ကွက်တိကျရင် သူ ရှေ့တစ်လှမ်းတိုးမယ်၊ မကိုက်ရင် စိတ်အေး တစ်မှတ် လျော့မယ်။', en: 'Words you earned in the practice. One that fits moves him a step; one that does not costs a calm.' },
+    { at: 'steam', my: 'သူ့ခွက်ထဲက အငွေ့သုံးမျှင် ထွက်လာရင် ဘာပြောပြော နားထဲ မဝင်တော့ဘူး။ အရင် နားထောင် ပေးလိုက်ပါ။', en: 'Three wisps from his cup and words stop entering the ear. Listen first.' },
   ],
   stones: [
     {
       lines: [
         { my: 'ချုပ်ရိုးမှာ နိုင်ခဲ့ပြီ… ဒါပေမဲ့ လေရဟတ်က… မာရာ၊ ကျွန်တော် ဘာရွေးရမလဲ။', en: 'I just won at stitching… but the windmills… Maya, which should I pick?', need: 'unknown', face: 'worried',
-          tell: { my: 'တကယ်ကို မဆုံးဖြတ်နိုင်သေးဘူး။ စားပွဲ နှစ်လုံးကို တစ်လှည့်စီ ကြည့်နေတယ်။', en: 'He truly has not decided. His eyes go from one table to the other.' } },
+          tell: { my: 'သူ တကယ် မဆုံးဖြတ်နိုင်သေးဘူး။ မျက်လုံးက ဟိုစားပွဲကြည့်လိုက်၊ ဒီစားပွဲကြည့်လိုက်နဲ့။', en: 'He truly has not decided. His eyes go from one table to the other.' } },
         { my: 'စားပွဲ နှစ်လုံး၊ တစ်ခုပဲ ရွေးရမယ်… ခေါင်းထဲမှာ လေရဟတ်လို ချာချာလည်နေတယ်။', en: "Two tables, only one entry… my head's spinning like a windmill.", need: 'unknown', face: 'think',
-          tell: { my: 'ဘယ်ဟာ ပိုချစ်လဲ ကိုယ့်ကိုယ်ကိုယ် မမေးဖူးသေးဘူး။', en: 'He has never asked himself which one he loves more.' } },
+          tell: { my: 'ဘယ်ဟာကို ပိုချစ်လဲဆိုတာ သူ့ကိုယ်သူ တစ်ခါမှ မမေးဖူးဘူး။', en: 'He has never asked himself which one he loves more.' } },
       ],
     },
     {
       lines: [
-        { my: 'ဘာရွေးရမှန်း… ကျွန်တော် မသိဘူး။', en: "I… don't know what to pick.", need: 'afraid', seems: 'unknown', face: 'worried',
-          tell: { my: 'မျက်လုံးက ဦးကျော်ညွန့်ဆီ ခဏခဏ ရောက်သွားတယ်။ မသိလို့ မဟုတ်ဘူး… ဆရာ စိတ်ပျက်မှာ ကြောက်နေတာ။', en: "His eyes keep going to U Kyaw Nyunt. It isn't that he doesn't know… he's afraid of letting his teacher down." } },
+        { my: 'ကျွန်တော်… ဘာရွေးရမှန်း မသိတော့ဘူး။', en: "I… don't know what to pick.", need: 'afraid', seems: 'unknown', face: 'worried',
+          tell: { my: 'သူ့မျက်လုံးက ဦးကျော်ညွန့်ဆီပဲ ရောက်ရောက်နေတယ်။ မသိတာ မဟုတ်ဘူး… ဆရာ့ကို စိတ်ပျက်စေမှာ ကြောက်နေတာ။', en: "His eyes keep going to U Kyaw Nyunt. It isn't that he doesn't know… he's afraid of letting his teacher down." } },
         { my: 'ဆရာက နေ့တိုင်း သင်ပေးခဲ့တာ။ ချုပ်ရိုး မဝင်ရင် ဆရာ စိတ်မကောင်း ဖြစ်မှာ။', en: "He taught me every day. If I don't enter stitching, he'll be sad.", need: 'afraid', seems: 'cling', face: 'sad',
-          tell: { my: 'ဆရာ့ကို အရမ်းခင်တွယ်နေလို့ မဟုတ်ဘူး။ ဆရာ စိတ်ပျက်မှာကို ကြောက်နေတာ။', en: "He isn't clinging to his teacher. He's afraid of disappointing him." } },
+          tell: { my: 'ဆရာ့ကို တွယ်ကပ်နေတာ မဟုတ်ဘူး။ ဆရာ စိတ်ပျက်သွားမှာကို ကြောက်နေတာ။', en: "He isn't clinging to his teacher. He's afraid of disappointing him." } },
       ],
     },
     {
@@ -77,7 +77,7 @@ export const TALK_D1_FAIR = {
   ],
   react: {
     miss: { my: '…ဟင်?', en: '…Huh?' },
-    hot: { my: '(ဖိုးသား ခေါင်းငုံ့နေတယ်။ ဘာမှ မကြားဘူး။)', en: '(Pho Thar stares at the ground. Nothing gets through.)' },
+    hot: { my: '(ဖိုးသား မြေကြီးကိုပဲ ငေးကြည့်နေတယ်။ ဘာမှ နားထဲ မဝင်တော့ဘူး။)', en: '(Pho Thar stares at the ground. Nothing gets through.)' },
   },
   // his own decision, in his own words
   decision: [
