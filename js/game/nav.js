@@ -116,6 +116,8 @@ export function createWalker(room) {
     set heading(h) { heading = h; },
     speed: 0,
     get moving() { return !!path; },
+    /** The waypoints of the current walk (Vector2 x, z; smoothed), or null (keepplace.js walks them). */
+    get path() { return path; },
     /** Walk to (x, z) along a path; onDone() fires on arrival (or immediately if unreachable). */
     goTo(x, z, onDone) {
       path = astar(pos.x, pos.y, x, z);

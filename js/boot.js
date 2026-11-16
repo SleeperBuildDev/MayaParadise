@@ -90,11 +90,14 @@ function endTurnCover() {
 
 // The mode switch (js/game/modeswitch.js) landed here, or the visitor came BACK to a page they left with it and the
 // browser loaded it afresh: start by itself (they already tapped Play once; no second cover). Read once, then cleared.
+// (s.pose: where Maya was in the other mode, js/game/keepplace.js; the game starts her there)
+let arrivePose = null;
 function switchedHere() {
   let s = null;
   try { s = JSON.parse(sessionStorage.getItem('mw-switch') || 'null'); } catch { s = null; }
   const here = location.pathname + location.search;
   if (s && s.to === here && Date.now() - s.t < 60000) {
+    arrivePose = s.pose || null;
     startTurnCover(s.msg);
     try { sessionStorage.removeItem('mw-switch'); sessionStorage.setItem('mw-switch-came', JSON.stringify({ from: s.from, to: s.to })); } catch { /* ignore */ }
     return true;
@@ -140,7 +143,7 @@ async function start({ autoplay = false, switched = false } = {}) {
     const storyEarly = story && lazy ? import('./story/story.js?v=1') : null;
     storyEarly?.catch(() => {});
     const { startGame } = await import('./game/main.js?v=6');
-    const game = await startGame({ tier: pickTier(info), onProgress: setP, audioCtx: window.__mwAudioCtx || null, startHash: story ? '' : location.hash.slice(1), autoplay, story, switched });
+    const game = await startGame({ tier: pickTier(info), onProgress: setP, audioCtx: window.__mwAudioCtx || null, startHash: story ? '' : location.hash.slice(1), autoplay, story, switched, arrive: switched ? arrivePose : null });
     if (story) {
       const { createStory } = await (storyEarly || import('./story/story.js?v=1'));
       game.story = await createStory(game);

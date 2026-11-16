@@ -80,12 +80,19 @@ const ROAD = [[5.4, 13], [5.4, 19], [5.4, 24], [4.75, 30.5], [4.05, 36], [4, 41.
 const ROAD_OFF = [9, 27, 28]; // (ends where the Quarter's orbit starts)
 const HOME_DESK = { x: -3.7, z: 11.3 }; // regions/home.js DESKS 'home' (raised and lit from the start)
 
+/** Will playIntro() really play now (wanted, and not the third start in this session)? story.js asks under the
+ * turning page of the Game | Website switch: the intro starts at the Writing Room as ever, and opts.endAt (called
+ * under the intro's last page) puts her back where the website left her (keepplace.js). */
+export function introWillPlay(save, params = new URLSearchParams(location.search), force = params.get('intro') === '1') {
+  return introWanted(save, params) && (force || (+ssGet(TRY_KEY) || 0) + 1 <= 2);
+}
+
 export async function playIntro(game, story, opts = {}) {
   const ow = story.openWorld;
   const tries = (+ssGet(TRY_KEY) || 0) + 1;
   ssSet(TRY_KEY, String(tries));
   if (!ow?.streamer || game.mode !== 'world' || (tries > 2 && !opts.force)) { lsSet(SEEN_KEY, '1'); return; }
-  const dir = createDirector(game, story, ow);
+  const dir = createDirector(game, story, ow, opts);
   try { await dir.run(); } catch (err) { console.error('intro', err); } finally {
     try { await dir.end(); } catch (err) { console.error('intro end', err); }
     lsSet(SEEN_KEY, '1');
@@ -93,7 +100,7 @@ export async function playIntro(game, story, opts = {}) {
   }
 }
 
-function createDirector(game, story, ow) {
+function createDirector(game, story, ow, opts = {}) {
   const streamer = ow.streamer;
   const cam = game.camera;
   const rig = game.rig;
@@ -648,6 +655,7 @@ function createDirector(game, story, ow) {
     ow.cutOn = cutOn0;
     pose = null;
     call(rig, 'release');
+    if (opts.endAt) { try { opts.endAt(); } catch (err) { console.error('intro endAt', err); } } // (under the page: back where she came in)
     const p = game.maya.root.getWorldPosition(new THREE.Vector3());
     if (story.foot?.active) { rig.setTarget(p); faceCamera(new THREE.Vector3(p.x, 0, p.z + 6)); } else rig.setTarget(game.car.root.position);
     call(rig, 'snap');

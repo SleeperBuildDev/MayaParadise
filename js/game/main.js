@@ -18,6 +18,7 @@ const { createDaytime, buildHeadlightBeams } = dayKit;
 import { createMusic } from './music.js?v=6';
 import { createRoadBirds } from './world/birds.js?v=5'; // ?v= forces phones to drop an old cached copy
 import { preloadArt } from './art.js';
+import { validPose, placeSite, placeCar, walkToCar } from './keepplace.js'; // Maya keeps her place across the Game | Website switch
 
 const PHOTOS = { about: 'img/maya-about.webp', library: 'img/maya-book.webp' };
 const ROOM_VIEW_W = 6.0; // metres of room visible across a portrait phone
@@ -206,7 +207,12 @@ class Game {
     const hash = (this.opts.startHash || '').replace(/^#/, '');
     const startStation = pages.stationEl(hash) ? hash : null;
     const startPlace = PLACES.some((p) => p.id === hash) ? hash : startStation ? pages.placeOfStation(startStation) : null;
-    call(this.world.drive, 'teleport', startPlace || 'about');
+    // arriving by the Game | Website switch: the car (and Maya, if she was walking) where the other mode left them
+    const arrive = !startPlace && !params.get('room') && validPose(this.opts.arrive) ? this.opts.arrive : null;
+    let arrivedOnFoot = false;
+    if (arrive) {
+      try { arrivedOnFoot = (await (this.opts.story ? placeCar(this, arrive) : placeSite(this, arrive))) === 'foot'; } catch (e) { console.warn('keep place', e); call(this.world.drive, 'teleport', 'about'); }
+    } else call(this.world.drive, 'teleport', startPlace || 'about');
     this.syncCar(0);
 
     this.ui = createUI({
@@ -230,7 +236,7 @@ class Game {
     this.resize();
 
     // compile shaders before showing anything (avoids first-frame hitches on phones)
-    this.rig.setTarget(this.car.root.position);
+    this.rig.setTarget(arrivedOnFoot ? this.maya.root.position : this.car.root.position);
     this.rig.snap();
     try { await this.renderer.compileAsync(this.world.scene, this.camera); } catch { /* optional */ }
     onProgress?.(0.92);
@@ -256,6 +262,7 @@ class Game {
       this.intro();
     }
     history.replaceState({ mw: 'root' }, '', location.pathname + location.search + (startStation ? `#${startStation}` : startPlace ? `#${startPlace}` : ''));
+    if (arrivedOnFoot) walkToCar(this); // (once the turning page has lifted: she walks to the car and hops in)
     return this;
   }
 

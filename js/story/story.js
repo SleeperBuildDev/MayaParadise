@@ -17,6 +17,7 @@ import { createTalk } from './talk.js';
 import { createOpenWorld } from './world/index.js';
 import { LAZY as LAZY_TOWNS } from './world/region.js';
 import { createDoors } from './doors.js';
+import { validPose, placeStory } from '../game/keepplace.js';
 
 const params = new URLSearchParams(location.search);
 const call = (o, fn, ...a) => (o && typeof o[fn] === 'function' ? o[fn](...a) : undefined);
@@ -566,7 +567,25 @@ export async function createStory(game) {
   if (params.get('foot') === '1') { await foot.toFoot(); setModeIcon(); }
   // a game saved out on the land resumes where she was (the book's own scenes stage themselves)
   const sp = save.place;
-  if (openWorld && sp && sp.z > 19.5 && !params.has('reset')) {
+  // arriving from the website by the Game | Website switch: in the car where the website left it (keepplace.js;
+  // main.js put the car there before the first frame), the land round it built, the save's place updated. A new
+  // day's opening still runs from wherever she is. The first-time intro plays as ever from the Writing Room (its
+  // storyboard), so the car goes back there under the turning page, and the intro's last page puts her back here
+  // (introEndAt). (intro.js is fetched now, under the turning page: it is needed at once anyway)
+  const arrive = openWorld && validPose(game.opts?.arrive) && game.mode === 'world' ? game.opts.arrive : null;
+  let introEndAt = null;
+  if (arrive) {
+    try {
+      const introHere = params.get('intro') === '1' || (save.day === 1 && !save.flags?.['d1.letter'] && !params.has('nointro') && params.get('intro') !== '0')
+        ? await import('./intro.js').then((m) => m.introWillPlay(save, params)).catch(() => false) : false;
+      if (introHere) {
+        game.world.drive.teleport('about');
+        game.syncCar(0);
+        openWorld.jump?.(game.car.root.position.x, game.car.root.position.z, game.world.drive.state.heading);
+        introEndAt = () => placeStory(game, story, arrive);
+      } else placeStory(game, story, arrive);
+    } catch (err) { console.error('keep place', err); }
+  } else if (openWorld && sp && sp.z > 19.5 && !params.has('reset')) {
     try {
       openWorld.jump(sp.x, sp.z, sp.heading || 0);
       if (sp.mode === 'foot' && !foot.active) { await foot.toFoot(); setModeIcon(); }
@@ -583,7 +602,7 @@ export async function createStory(game) {
   whole().then(() => import('./extras-events.js')).then(({ installEvents }) => installEvents(game, story, openWorld)).catch((e) => console.error('extras events', e)); // random town gatherings (a chinlone circle, a kite contest, a puppet show...)
   // the day's opening runs on its own (it waits for the player's taps); the very first time on this device, Maya's
   // intro to the book plays first (intro.js: a fresh Day 1 only, once; ?intro=1 plays it again)
-  const firstIntro = () => import('./intro.js').then((m) => (m.introWanted(save, params) ? m.playIntro(game, story, { force: params.get('intro') === '1' }) : null))
+  const firstIntro = () => import('./intro.js').then((m) => (m.introWanted(save, params) ? m.playIntro(game, story, { force: params.get('intro') === '1', endAt: introEndAt }) : null))
     .catch((e) => console.error('intro', e));
   const wantIntro = params.get('intro') === '1' || (save.day === 1 && !save.flags?.['d1.letter'] && !params.has('nointro') && params.get('intro') !== '0');
   story.starting = true; // (until the day's opening is over: the mode switch stays away meanwhile)

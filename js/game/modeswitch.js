@@ -24,11 +24,15 @@
 //   - switching back to the mode you came from goes back in history (history.back()) instead of piling up new
 //     entries, so Back always leaves the site the way you came in
 //   - test settings carry over (tier, time, period, lazy, music, sound); nothing else does
+//   - Maya keeps her place (keepplace.js): 'mw-switch'.pose holds where she (and the car, and the camera's framing)
+//     was when the page had turned; the other mode starts her there (main.js / story.js), and a page shown again from
+//     the back-forward cache is moved there under its still-turned page before it lifts
 //   - live build (js/sw-register.js): touching the Game half asks the service worker for the game's start files at
 //     once (window.__sw.warm), and while the page turns a first install still running finishes first
 //     (__sw.beforeSwitch), so game mode loads from the phone's cache; both do nothing on the dev pages
 import { tr } from './ui.js';
 import { SWITCH } from '../story/intro-lines.js';
+import { capturePose, restorePose } from './keepplace.js';
 
 const call = (o, fn, ...a) => (o && typeof o[fn] === 'function' ? o[fn](...a) : undefined);
 const HOME_RECT = [-26, -18, 26, 18]; // regions/home.js REGION.rect
@@ -178,6 +182,8 @@ export function installModeSwitch(game) {
     if (leaving || toStory === isStory) return;
     leaving = true;
     call(game.audio, 'play', 'page');
+    // (no autopilot or tap-walk carrying her on under the page: she is where the page closes over her)
+    try { if (game.world?.drive?.isAuto) { game.world.drive.stop(); game.world.setRoute?.(null); game.autoEnter = null; } story()?.foot?.walker?.stop?.(); } catch { /* fine */ }
     el.classList.add('switching');
     el.classList.toggle('is-game', toStory);
     bGame.setAttribute('aria-pressed', String(toStory));
@@ -204,30 +210,49 @@ export function installModeSwitch(game) {
       try { history.replaceState({ ...(history.state || {}), mwAuto: 1 }, ''); } catch { /* ignore */ }
       let came = null;
       try { came = JSON.parse(sessionStorage.getItem('mw-switch-came') || 'null'); } catch { came = null; }
-      // (msg: the turning page's words, which the next page keeps showing until its game draws: boot.js)
-      try { sessionStorage.setItem('mw-switch', JSON.stringify({ to: target, from: here, t: Date.now(), msg: tr(toStory ? SWITCH.toGame : SWITCH.toSite) })); } catch { /* ignore */ }
       // back to the mode we came from: one step back in history (no growing pile of entries)
       // (came.from is the other mode's page this one was reached from by the switch: the same mode as the target)
       const storyUrl = (u) => /[?&]story(=|&|$)/.test(String(u).split('#')[0]);
-      if (came && came.to === here && came.from && storyUrl(came.from) === toStory && history.length > 1) {
+      const back = !!(came && came.to === here && came.from && storyUrl(came.from) === toStory && history.length > 1);
+      // (msg: the turning page's words, which the next page keeps showing until its game draws: boot.js)
+      // (pose: where she is now, under the turned page: the other mode starts her there, keepplace.js; `to` is the
+      // page that will show: the one Back returns to may carry other words in its address, e.g. ?fbclid=)
+      const pose = capturePose(game);
+      const note = (to) => { try { sessionStorage.setItem('mw-switch', JSON.stringify({ to, from: here, t: Date.now(), msg: tr(toStory ? SWITCH.toGame : SWITCH.toSite), pose })); } catch { /* ignore */ } };
+      note(back ? came.from : target);
+      if (back) {
         history.back();
         // (nothing happened: no page to go back to after all)
-        backTimer = setTimeout(() => { if (location.pathname + location.search === here) location.assign(target); }, 1500);
+        backTimer = setTimeout(() => { if (location.pathname + location.search === here) { note(target); location.assign(target); } }, 1500);
       } else location.assign(target);
     });
   }
-  // a page kept in the back-forward cache comes back as it was left: take the turning page away
-  const onShow = (e) => {
+  // a page kept in the back-forward cache comes back as it was left: Maya is moved to where the other mode had her
+  // (keepplace.js) under the turning page, which lifts once that has been drawn
+  const onShow = async (e) => {
     if (!e.persisted) return;
     leaving = false;
-    document.querySelectorAll('.ms-cover').forEach((c) => c.remove());
     el.classList.remove('switching');
     el.classList.toggle('is-game', isStory);
     bGame.setAttribute('aria-pressed', String(isStory));
     bSite.setAttribute('aria-pressed', String(!isStory));
     placedFor = '';
     place();
+    let s = null;
+    try { s = JSON.parse(sessionStorage.getItem('mw-switch') || 'null'); } catch { s = null; }
     try { sessionStorage.removeItem('mw-switch'); } catch { /* ignore */ }
+    const covers = [...document.querySelectorAll('.ms-cover')];
+    let moved = false;
+    if (s?.pose && s.to === location.pathname + location.search && Date.now() - s.t < 60000) {
+      try { moved = await restorePose(game, s.pose); } catch (err) { console.warn('keep place', err); }
+    }
+    if (!moved) { covers.forEach((c) => c.remove()); return; }
+    // (three frames drawn at the new spot, then the page fades: no jump, no pop-in under it)
+    for (let i = 0; i < 3; i++) await new Promise((r) => requestAnimationFrame(() => r()));
+    for (const c of covers) {
+      const a = c.animate?.([{ opacity: 1 }, { opacity: 0 }], { duration: 350, easing: 'ease', fill: 'forwards' });
+      (a?.finished || Promise.resolve()).catch(() => {}).then(() => c.remove());
+    }
   };
   addEventListener('pageshow', onShow);
   for (const [b, toStory] of [[bGame, true], [bSite, false]]) {
