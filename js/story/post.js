@@ -63,7 +63,10 @@ export function showLetter(game, text, o = {}) {
     const sign = o.sign ?? (o.from ? castById(o.from)?.name : null);
     el.querySelector('small').textContent = sign ? `— ${tr(sign)}` : '— ?';
     call(game.audio, 'play', 'page');
-    el.addEventListener('click', (ev) => { ev.stopPropagation(); el.classList.add('out'); setTimeout(() => el.remove(), 220); resolve(); });
+    // (phones: the tap that opened this paper is followed by its own click, which lands on the paper that has just
+    // appeared and closed it at once, before anyone could read it. A paper cannot be closed in its first half second.)
+    const shownAt = performance.now();
+    el.addEventListener('click', (ev) => { ev.stopPropagation(); if (performance.now() - shownAt < 500) return; el.classList.add('out'); setTimeout(() => el.remove(), 220); resolve(); });
     gameEl().appendChild(el);
   });
 }
@@ -79,7 +82,10 @@ export function showSlip(game, line, o = {}) {
     el.querySelector('p').innerText = tr(line);
     el.querySelector('i').textContent = tr(T.tap);
     call(game.audio, 'play', o.kind === 'question' ? 'chalk' : 'page');
-    el.addEventListener('click', (ev) => { ev.stopPropagation(); el.classList.add('out'); setTimeout(() => el.remove(), 220); resolve(); });
+    // (phones: the tap that opened this paper is followed by its own click, which lands on the paper that has just
+    // appeared and closed it at once, before anyone could read it. A paper cannot be closed in its first half second.)
+    const shownAt = performance.now();
+    el.addEventListener('click', (ev) => { ev.stopPropagation(); if (performance.now() - shownAt < 500) return; el.classList.add('out'); setTimeout(() => el.remove(), 220); resolve(); });
     gameEl().appendChild(el);
   });
 }

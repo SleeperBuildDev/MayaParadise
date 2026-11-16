@@ -116,20 +116,29 @@ export function nightWarp(mat) {
   mat.needsUpdate = true;
   return mat;
 }
-let plainTwin = null, instTwin = null;
-/** Every still shadow caster under root whose depth material is three's own gets the patched one (the Home Book). */
+let plainTwin = null;
+/**
+ * Every still, plain shadow caster under root whose depth material is three's own gets the patched one (the Home
+ * Book's merged meshes; instanced and batched casters have theirs from shadows.js depthTwin). Not the ones three
+ * would give a depth material of their own (cut-outs, clipping, displacement), and not a tracked character's.
+ */
 export function nightWarpStatics(root) {
-  root?.traverse?.((o) => {
-    if (!o.isMesh || !o.castShadow || o.isSkinnedMesh || o.isBatchedMesh) return;
-    if (o.isInstancedMesh) {
-      if (!o.customDepthMaterial || !o.customDepthMaterial.userData.nightWarp) o.customDepthMaterial = instTwin ||= nightWarp(new THREE.MeshDepthMaterial());
-    } else if (!o.customDepthMaterial) o.customDepthMaterial = plainTwin ||= nightWarp(new THREE.MeshDepthMaterial());
-  });
+  const visit = (o) => {
+    if (CASTERS.has(o)) return;
+    if (o.isMesh && o.castShadow && !o.isSkinnedMesh && !o.isBatchedMesh && !o.isInstancedMesh && o.customDepthMaterial === undefined && !OWNER.has(o)) {
+      const mats = Array.isArray(o.material) ? o.material : [o.material];
+      const special = mats.some((m) => !m || (m.clipShadows && m.clippingPlanes?.length) || (m.displacementMap && m.displacementScale !== 0)
+        || (m.alphaMap && m.alphaTest > 0) || (m.map && m.alphaTest > 0) || m.alphaToCoverage);
+      if (!special) o.customDepthMaterial = plainTwin ||= nightWarp(new THREE.MeshDepthMaterial());
+    }
+    for (const c of o.children) visit(c);
+  };
+  if (root) visit(root);
 }
 
 /** The shadow-pass hook (this = the mesh). Shears the mesh in world space: x += ax * (y - y0), z += az * (y - y0). */
 function shearForShadow(renderer, object, camera, shadowCamera) {
-  const r = object.userData.nightShadow;
+  const r = OWNER.get(object);
   if (!r || !r.on || shadowCamera !== r.cam) return;
   const m = object.matrixWorld.elements, e = _m.elements, ax = r.ax, az = r.az;
   for (let c = 0; c < 16; c += 4) {
@@ -144,13 +153,15 @@ function shearForShadow(renderer, object, camera, shadowCamera) {
 }
 
 const CASTERS = new Map(); // root -> record (one list for the page: people.js adds the townsfolk, main.js Maya and the car)
+const OWNER = new WeakMap(); // hooked mesh -> its caster's record (not in userData: a record holds objects, a clone would choke)
+let rigidInst = null; // the plain depth material of a caster's instanced parts (the car's wheels)
 /** The townsfolk cast real shadows (false on the 'low' tier: main.js). Read by js/story/people.js when a person is made. */
 export const NPC_SHADOWS = { on: true };
 
 export function trackCaster(root, { height = 1.2, blob = null, blobLive = false } = {}) {
   if (!root) return null;
   let rec = CASTERS.get(root);
-  if (!rec) { rec = { root, height, ax: 0, az: 0, y0: 0, on: false, cam: null, hookAt: -1e9, w: 0, blob: null, blobLive: false, b0: null, long: false }; CASTERS.set(root, rec); }
+  if (!rec) { rec = { root, height, ax: 0, az: 0, y0: 0, on: false, cam: null, hookAt: -1e9, w: 0, blob: null, blobLive: false, b0: null, long: false, par: undefined, host: null, outY: NaN, liveY: 0 }; CASTERS.set(root, rec); }
   rec.height = height;
   if (blob) { rec.blob = blob; rec.blobLive = blobLive; }
   return rec;
@@ -170,14 +181,22 @@ function stretchBlob(rec, mx, mz) {
   const vx = rec.ax - mx * rec.w, vz = rec.az - mz * rec.w;
   const len = rec.on && BLOB_STRETCH.on ? Math.hypot(vx, vz) * rec.height * BLOB_STRETCH.k * rec.w : 0;
   if (len < 0.06) {
-    if (rec.long) { rec.long = false; b.position.x = b0.px; b.position.z = b0.pz; b.rotation.z = b0.rz; if (!rec.blobLive) b.scale.y = b0.sy; }
+    if (rec.long) {
+      rec.long = false; b.position.x = b0.px; b.position.z = b0.pz; b.rotation.z = b0.rz;
+      if (!rec.blobLive) b.scale.y = b0.sy; else if (b.scale.y === rec.outY) b.scale.y = rec.liveY;
+      rec.outY = NaN;
+    }
     return;
   }
   const e = rec.root.matrixWorld.elements, yaw = Math.atan2(e[8], e[10]), c = Math.cos(yaw), s = Math.sin(yaw);
   const dx = vx * c - vz * s, dz = vx * s + vz * c, n = Math.hypot(dx, dz) || 1; // the direction in the root's own frame
   rec.long = true;
   b.rotation.z = Math.atan2(-dx, -dz);
-  b.scale.y = (rec.blobLive ? b.scale.y : b0.sy) + len;
+  // (a live blob: what its owner wrote this frame is the base; if the owner did not run this frame, the value is
+  // still the one written here last frame, and the remembered base is used: the stretch never piles up)
+  let base = b0.sy;
+  if (rec.blobLive) { if (b.scale.y !== rec.outY) rec.liveY = b.scale.y; base = rec.liveY; }
+  b.scale.y = rec.outY = base + len;
   b.position.x = b0.px + (dx / n) * len * 0.5;
   b.position.z = b0.pz + (dz / n) * len * 0.5;
 }
@@ -220,18 +239,23 @@ export function createNightShadow({ day, shadow }) {
   const grid = new Map(), cellX = new Map(), cellZ = new Map();
   let stills = true; // the still things follow the rule too (off on the 'low' tier)
   let scanAt = -1e9, k = 0, lit = 0, dirty = true;
-  const key = (cx, cz) => cx * 73856093 ^ cz * 19349663;
+  const key = (cx, cz) => (cx + 2048) * 4096 + (cz + 2048); // (one number per cell, no two cells alike)
+  let sig = 0, lastSig = NaN, lastN = -1;
 
   function push(x, y, z, reach = 7, power = 1, nx = 0, nz = 0) {
     if (!(reach > 0) || !(power > 0) || !Number.isFinite(x + y + z)) return;
     if ((nL + 1) * 7 > L.length) { const n = new Float32Array(L.length * 2); n.set(L); L = n; }
     const o = nL * 7;
     L[o] = x; L[o + 1] = y; L[o + 2] = z; L[o + 3] = reach; L[o + 4] = power; L[o + 5] = nx; L[o + 6] = nz;
+    sig += x * 31.7 + z * 17.3 + y * 7.1 + reach * 3.3 + power + nx * 0.7 + nz * 0.3 + nL * 0.011;
     nL++;
   }
   function scan() {
-    nL = 0;
+    nL = 0; sig = 0;
     for (const fn of sources) { try { fn(push); } catch (e) { console.warn('[nightshadow] source failed', e); } }
+    dirty = false;
+    if (nL === lastN && sig === lastSig) return; // the same lights as last time: the grid and its texture stand
+    lastN = nL; lastSig = sig;
     grid.clear(); cellX.clear(); cellZ.clear();
     for (let i = 0; i < nL; i++) {
       const o = i * 7, r = L[o + 3];
@@ -263,13 +287,23 @@ export function createNightShadow({ day, shadow }) {
     dirty = false;
   }
 
-  function hook(rec) {
-    rec.root.traverse((o) => {
-      if (!o.isMesh || o.isBatchedMesh || !o.castShadow || o.userData.nightShadow === rec) return;
-      if (o.userData.nightShadow === false) return; // opted out
-      o.userData.nightShadow = rec;
+  /** Hooks the caster's own shadow-casting meshes (not those of another caster riding on it: Maya on the car's seat). */
+  function claim(rec, o) {
+    if (o !== rec.root && casters.has(o)) return;
+    if (o.isMesh && !o.isBatchedMesh && o.castShadow && o.userData.nightShadow !== false && OWNER.get(o) !== rec) {
+      OWNER.set(o, rec);
       o.onBeforeShadow = shearForShadow;
-    });
+      // a rigid part with a still thing's depth material (the car's instanced wheels) follows its body's rule instead
+      if (o.customDepthMaterial?.userData?.nightWarp) o.customDepthMaterial = o.isInstancedMesh ? (rigidInst ||= new THREE.MeshDepthMaterial()) : undefined;
+    }
+    const ch = o.children;
+    for (let i = 0; i < ch.length; i++) claim(rec, ch[i]);
+  }
+  function hook(rec) { claim(rec, rec.root); }
+  /** The caster this one rides on, if any (Maya in the car): it takes that one's shadow rule whole. */
+  function hostOf(root) {
+    for (let p = root.parent; p; p = p.parent) { const h = casters.get(p); if (h) return h; }
+    return null;
   }
 
   /** The shear for one caster standing at (x, y0, z): fills rec.ax / rec.az, returns the lamp share 0..1. */
@@ -337,9 +371,15 @@ export function createNightShadow({ day, shadow }) {
         rec.cam = cam;
         if (!root.parent || root.visible === false) { rec.on = false; if (rec.long) stretchBlob(rec, 0, 0); continue; }
         if (t - rec.hookAt > REHOOK) { hook(rec); rec.hookAt = t + (casters.size > 8 ? Math.random() * 0.4 : 0); }
-        const e = root.matrixWorld.elements;
-        rec.y0 = e[13];
-        rec.w = solve(rec, e[12], e[13], e[14], mx, mz);
+        if (root.parent !== rec.par) { rec.par = root.parent; rec.host = hostOf(root); }
+        const h = rec.host;
+        if (h) { // riding: one shadow rule for the two (the host's of this frame or the last, the same to the eye)
+          rec.ax = h.ax; rec.az = h.az; rec.y0 = h.y0; rec.w = h.w;
+        } else {
+          const e = root.matrixWorld.elements;
+          rec.y0 = e[13];
+          rec.w = solve(rec, e[12], e[13], e[14], mx, mz);
+        }
         rec.on = rec.w > 0.004;
         if (rec.on) lit++;
         if (rec.blob && (rec.on || rec.long)) stretchBlob(rec, mx, mz);

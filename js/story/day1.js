@@ -327,7 +327,8 @@ export async function create(story) {
       el.innerHTML = '<div class="paper"><p></p><small>— ?</small></div>';
       el.querySelector('p').innerText = text[lang];
       call(game.audio, 'play', 'page');
-      el.addEventListener('click', () => { el.remove(); resolve(); });
+      const shownAt = performance.now(); // (phones: the opening tap's own click must not close the letter at once)
+      el.addEventListener('click', () => { if (performance.now() - shownAt < 500) return; el.remove(); resolve(); });
       document.getElementById('game').appendChild(el);
     });
   }
