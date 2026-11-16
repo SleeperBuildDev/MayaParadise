@@ -6,6 +6,7 @@
 // `who` = the person the step is about (story.people id); `target` = the thing, when the step is a thing.
 // The engine outlines them only while they are on screen.
 const F = (s, k) => !!s.flag(`d3.${k}`);
+const CART = { x: -7.3, z: 88.15 }; // day3.js P.cart
 // (the kiln's mouth: day3.js P.kiln; the pots and shards to tap stand round it)
 
 export default [
@@ -16,8 +17,16 @@ export default [
   { id: 'd3.shed', who: 'dawohn', done: (s) => F(s, 'ch5Done'), my: 'ဒေါ်အုန်း ခေါ်နေတယ်၊ သွားစကားပြောပါ', en: 'Daw Ohn asked you in: talk with her' },
   // ch 9 · Su Nwe and Maung Nge
   { id: 'd3.class', who: 'hninwai', done: (s) => F(s, 'hook9'), my: 'ဒေါ်နှင်းဝေရဲ့ အတန်းကို ဝင်ကြည့်ပါ', en: "Look in on Daw Hnin Wai's class" },
-  { id: 'd3.looksIn', who: 'sunwe', done: (s) => F(s, 'looked9') || (F(s, 'look9.timetable') && F(s, 'look9.stub')), my: 'စုနွယ့်စားပွဲပေါ်က ပစ္စည်းတွေ သေချာကြည့်ပါ', en: "Look closely at what's on Su Nwe's desk" },
-  { id: 'd3.looksOut', who: 'maungnge', done: (s) => F(s, 'looked9') || (F(s, 'look9.cart') && F(s, 'look9.rope')), my: 'မောင်ငယ့်လှည်းနဲ့ လက်ကို သေချာကြည့်ပါ', en: "Look closely at Maung Nge's cart and his hands" },
+  // (the looks: Su Nwe's satchel + the tiny pencil stub are classroom stations (rooms/quarter.js, day 3); the cart and
+  // the rope on it are day3.js's outdoor taps (P.cart = (-7.3, 88.15)); "his hands" is the rope, or a word with him)
+  { id: 'd3.looksIn', who: 'sunwe', looks: [
+    { f: 'd3.look9.timetable', room: 'classroom', st: 'cl-timetable', y: 0.6, r: 0.2 },
+    { f: 'd3.look9.stub', room: 'classroom', st: 'cl-stub', y: 0.76, r: 0.05 },
+  ], done: (s) => F(s, 'looked9') || (F(s, 'look9.timetable') && F(s, 'look9.stub')), my: 'စုနွယ့်စားပွဲပေါ်က ပစ္စည်းတွေ သေချာကြည့်ပါ', en: "Look closely at what's on Su Nwe's desk" },
+  { id: 'd3.looksOut', who: 'maungnge', looks: [
+    { f: 'd3.look9.cart', at: { x: CART.x - 0.15, y: 0.75, z: CART.z }, r: 0.45 },
+    { f: 'd3.look9.rope', at: { x: CART.x + 0.55, y: 0.65, z: CART.z + 0.3 }, r: 0.15 },
+  ], done: (s) => F(s, 'looked9') || (F(s, 'look9.cart') && F(s, 'look9.rope')), my: 'မောင်ငယ့်လှည်းနဲ့ လက်ကို သေချာကြည့်ပါ', en: "Look closely at Maung Nge's cart and his hands" },
   { id: 'd3.snTalk', who: 'sunwe', done: (s) => F(s, 'snTalk'), my: 'စုနွယ်နဲ့ စကားပြောပါ', en: 'Talk with Su Nwe' },
   { id: 'd3.guide', who: 'sunwe', done: (s) => F(s, 'guided'), my: 'မောင်ငယ့်နှုန်းအတိုင်း သင်ပေးဖို့ စုနွယ့်ကို ကူပေးပါ', en: 'Help Su Nwe teach Maung Nge at his pace' },
   { id: 'd3.boat', who: 'sunwe', done: (s) => F(s, 'ch9Done'), my: 'စုနွယ်တို့နဲ့အတူ စက္ကူလှေ ခေါက်ပါ', en: 'Fold the paper boat with Su Nwe and Maung Nge' },

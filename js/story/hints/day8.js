@@ -23,12 +23,22 @@ export default [
     my: `${my} ဘာကြောင့် ယုံလဲ မေးကြည့်ပါ`, en: `Ask ${en} why ${he} believes it`,
   })),
   { id: 'd8.sort', go: 'door:junctiontea', done: (s) => f(s, 'sorted'), my: 'ဘာကြောင့် ယုံကြလဲ ထိုင်ပြီး ခွဲကြည့်ပါ', en: 'Sit down and sort why they believe it' },
-  { id: 'd8.well', go: { x: W.well.x, z: W.well.z }, done: (s) => f(s, 'wellSeen'), my: 'ရွှေမင်တွင်းကို ကိုယ့်မျက်စိနဲ့ သွားကြည့်ချေ', en: 'See the gold-ink well with your own eyes' },
+  { id: 'd8.well', go: { x: W.well.x, z: W.well.z, kind: 'area' }, looks: [
+    // (day8.js's well taps: the rings, the old mark low on the left (small), the pots, the queue's second person)
+    { f: 'd8.look.rings', at: { x: W.well.x, z: W.well.z }, y: 0.55, r: 0.45 },
+    { f: 'd8.look.oldmark', at: { x: W.well.x - 0.85, z: W.well.z + 0.2 }, y: 0.35, r: 0.12 },
+    { f: 'd8.look.pots', at: { x: W.well.x + 0.8, z: W.well.z + 0.5 }, y: 0.6, r: 0.3 },
+    { f: 'd8.look.queue', at: { x: W.queue[1][0], z: W.queue[1][1] }, y: 1.0, r: 0.3 },
+  ], done: (s) => f(s, 'wellSeen'), my: 'ရွှေမင်တွင်းကို ကိုယ့်မျက်စိနဲ့ သွားကြည့်ချေ', en: 'See the gold-ink well with your own eyes' },
   { id: 'd8.thida', who: 'thida', done: (s) => f(s, 'thidaTalk'), my: 'မသီတာနဲ့ သေချာ စကားပြောပါ', en: 'Have a real talk with Ma Thida' },
   { id: 'd8.pin', go: BOARD, done: (s) => f(s, 'pinned'), my: 'ကိုယ့်စကားကို ဘုတ်ပေါ် ကိုယ်တိုင် ကပ်ပါ', en: 'Pin your own words on the board' },
   // ch 13 · the press
   { id: 'd8.wunna', who: 'kowunna', done: (s) => f(s, 'wunnaMet'), my: 'ကိုဝဏ္ဏကို ရှာပြီး သူပြောတာ နားထောင်ပါ', en: 'Find Ko Wunna and hear him out' },
-  { id: 'd8.looks', go: 'door:press', done: (s) => f(s, 'look.cases') && f(s, 'look.labels') && f(s, 'look.title'), my: 'ပုံနှိပ်တိုက်ထဲက ပစ္စည်းတွေ သေချာကြည့်ပါ', en: 'Look closely around the press' },
+  { id: 'd8.looks', looks: [
+    { f: 'd8.look.cases', room: 'press', st: 'cases', y: 0.9, r: 0.6 },
+    { f: 'd8.look.labels', room: 'press', st: 'labels', y: 0.5, r: 0.3 },
+    { f: 'd8.look.title', room: 'press', st: 'scrapCrate', y: 0.48, r: 0.2 },
+  ], go: 'door:press', done: (s) => f(s, 'look.cases') && f(s, 'look.labels') && f(s, 'look.title'), my: 'ပုံနှိပ်တိုက်ထဲက ပစ္စည်းတွေ သေချာကြည့်ပါ', en: 'Look closely around the press' },
   { id: 'd8.turn', go: 'door:press', done: (s) => f(s, 'turned'), my: 'စာလုံးတုံးကို နှစ်ဖက်လှည့်ပြီး ကြည့်ပါ', en: 'Turn the type block and see both sides' },
   { id: 'd8.ask', who: 'kowunna', done: (s) => f(s, 'asked'), my: 'ကိုဝဏ္ဏ မေးနည်းမှန် ရှာတွေ့အောင် ကူပေးပါ', en: 'Help Ko Wunna find the right way to ask' },
   { id: 'd8.tint', who: 'utint', done: (s) => f(s, 'ch13Done'), my: 'ဦးတင့်နဲ့ စကားပြောပြီး ပြင်ဆင်ချက် ရိုက်ပေးပါ', en: 'Talk with U Tint and print the correction' },

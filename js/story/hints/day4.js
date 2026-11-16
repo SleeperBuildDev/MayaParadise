@@ -7,6 +7,8 @@ import { MK } from '../world/regions/market.js'; // (the Market's own spots: whe
 
 const f = (s, k) => !!s.flag(`d4.${k}`);
 const THIRI = { x: MK.thiri.x, z: MK.thiri.z };
+// (looks, day4.js SPOTS: string / planes / post are ground taps round their spot, so the rings sit on the ground there;
+// the cleat board is the post office's `flag` station (rooms/market.js))
 
 export default [
   { id: 'd4.morning', who: 'wintwar', done: (s) => f(s, 'morning'), my: 'မဝင့်ဝါနဲ့ အရင် စကားပြောပါ', en: 'Talk to Ma Wint War first' },
@@ -30,7 +32,12 @@ export default [
   { id: 'd4.pour', who: 'kophyo', done: (s) => f(s, 'poured') || f(s, 'ch6Done'), my: 'ပထမဆုံးခွက်ကို ငြိမ်ငြိမ်လေး ငှဲ့ပါ', en: 'Pour the first cup, nice and steady' },
   // ch 7 · Ma Thiri
   { id: 'd4.kite', at: THIRI, who: 'thiri', done: (s) => f(s, 'kite1'), my: 'မသီရိရဲ့ စွန်ကို ကူလွှတ်ပေးပါ', en: "Help Ma Thiri fly her kite" },
-  { id: 'd4.looks', go: { x: MK.post.x, z: MK.post.z, kind: 'area' }, done: (s) => f(s, 'thLooked'), my: 'စွန်ကြိုးတစ်လျှောက် ကိုယ်တိုင်ကြည့်ပါ (၄ ခု)', en: 'Look along the kite line yourself (4 things)' },
+  { id: 'd4.looks', looks: [
+    { f: 'd4.look.string', when: (s) => f(s, 'kite1'), at: { x: MK.flag14?.x ?? MK.postOffice.x - 2.8, z: MK.postOffice.z + MK.postOffice.d / 2 + 0.6 }, y: 0.1, r: 0.6 },
+    { f: 'd4.look.planes', when: (s) => f(s, 'kite1'), at: MK.table, y: 0.1, r: 0.45 },
+    { f: 'd4.look.post', when: (s) => f(s, 'kite1'), at: MK.post, y: 0.1, r: 0.35 },
+    { f: 'd4.look.flag', when: (s) => f(s, 'kite1'), room: 'marketpost', st: 'flag', y: 0.8, r: 0.45 },
+  ], go: { x: MK.post.x, z: MK.post.z, kind: 'area' }, done: (s) => f(s, 'thLooked'), my: 'စွန်ကြိုးတစ်လျှောက် ကိုယ်တိုင်ကြည့်ပါ (၄ ခု)', en: 'Look along the kite line yourself (4 things)' },
   { id: 'd4.thTalk', at: THIRI, who: 'thiri', done: (s) => f(s, 'thTalk'), my: 'စောင့်နေတဲ့ မသီရိနဲ့ စကားပြောပါ', en: 'Talk with Ma Thiri while she waits' },
   { id: 'd4.post', at: THIRI, who: 'thiri', done: (s) => f(s, 'three'), my: 'မသီရိ ကိုယ့်တိုင်ကိုယ် စိုက်တာ ကူပေးပါ', en: 'Help Ma Thiri drive in her own post' },
   { id: 'd4.kite2', at: THIRI, who: 'thiri', done: (s) => f(s, 'kite2'), my: 'သူ့တိုင်ပေါ်က စွန်ကို ငြိမ်အောင် ထိန်းပေးပါ', en: 'Hold the kite steady on her own post' },

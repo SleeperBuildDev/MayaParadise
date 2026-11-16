@@ -311,6 +311,13 @@ is (rooms, talks, acts, overlays, cut-scenes, the intro). Positions come from da
 (`hints-where.js`): the person's live spot, the room the day's `roomCast` puts them in (its door, `DOORS`), desks,
 town outlines, the Home Book's places; an entry may add `go` (where the step happens), `at` (where, when the person
 is not found) or `mark: false` (the page's surprise: the border only). Debug: `__hints.where()`, `__hints.mark`.
+**Look-closely steps** (owner 2026-11-16: "add more hints, even in small places ... some are hard to find"): an entry's
+`looks: [{ f: flag, at | room+st | who, y?, r, when? }]` puts a gold tap ring + bouncing arrow on every thing not looked at yet
+(sized to the thing, `r` metres; off the picture: a small arrow on the screen's edge) and a count before the line's words
+(digits only, ၂/၆). Outdoors from data (`at`), in a room from the room's own station (`story.room.stations`, its `look` /
+`at` point): the one mark shown inside rooms. Tables: d2.looks, d3.looksIn / looksOut, d4.looks, d5.looks / looks2,
+d8.well / looks, d9.alone, d10.square, d11.p6look, d12.looked / mlooked. DOM only; the canvas rect is read in the tick,
+never per frame. Debug: `__hints.looks()`.
 
 ## Checking your work
 - Local server: `http://127.0.0.1:8123/` serves this folder (`python -m http.server 8123`).

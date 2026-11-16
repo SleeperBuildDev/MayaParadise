@@ -22,7 +22,12 @@ export default [
   { id: 'd10.offer', who: 'kyinyein', done: (s) => f(s, 'offer'), my: 'စက္ကူကုန်သည် ဦးကြည်ငြိမ်းဆီ သွားလည်ပါ', en: 'Pay U Kyi Nyein, the paper trader, a visit' },
   { id: 'd10.kpMet', who: 'kophyo', done: (s) => f(s, 'kpMet'), my: 'ကိုဖြိုးကို ရှာပြီး စကားပြောပါ', en: 'Find Ko Phyo and talk to him' },
   { id: 'd10.dusk', who: 'kophyo', done: (s) => f(s, 'dusk'), my: 'မီးထွန်းချိန် ကိုဖြိုးလှည်းဘေး သွားထိုင်ပါ', en: "Sit by Ko Phyo's cart at lamp-light" },
-  { id: 'd10.square', go: { door: 'paperstore', kind: 'area' }, target: () => window.__day10?.set?.store, done: (s) => SQ.every((k) => f(s, `sq.${k}`)) || f(s, 'matched') || f(s, 'kpEndDone'), my: 'ဦးကြည်ငြိမ်းရဲ့ ဂိုဒေါင်ကို သေချာကြည့်ပါ', en: "Watch U Kyi Nyein's store closely" },
+  { id: 'd10.square', looks: [
+    { f: 'd10.sq.store', at: () => window.__day10?.set?.targets?.store, r: 0.6 },
+    { f: 'd10.sq.locks', at: () => window.__day10?.set?.targets?.locks, r: 0.3 },
+    { f: 'd10.sq.lamp', at: () => window.__day10?.set?.targets?.lamp, r: 0.35 },
+    { f: 'd10.sq.steps', when: (s) => f(s, 'sq.lamp'), at: () => window.__day10?.set?.targets?.lamp, r: 0.35 },
+  ], go: { door: 'paperstore', kind: 'area' }, target: () => window.__day10?.set?.store, done: (s) => SQ.every((k) => f(s, `sq.${k}`)) || f(s, 'matched') || f(s, 'kpEndDone'), my: 'ဦးကြည်ငြိမ်းရဲ့ ဂိုဒေါင်ကို သေချာကြည့်ပါ', en: "Watch U Kyi Nyein's store closely" },
   { id: 'd10.matched', who: 'kophyo', done: (s) => f(s, 'matched'), my: 'မြင်ခဲ့တာတွေကို ကိုဖြိုးနဲ့အတူ တွဲကြည့်ပါ', en: 'Match up what you saw, with Ko Phyo' },
   { id: 'd10.weighed', who: 'kophyo', done: (s) => f(s, 'weighed'), my: 'စက္ကူထုပ်ကို ခြောက်ခြောက်သွေ့သွေ့ အမှန်ချိန်ပါ', en: 'Weigh the bale dry, and true' },
   { id: 'd10.kpTalk', who: 'kophyo', done: (s) => f(s, 'kpEndDone'), my: 'ကိုဖြိုးနဲ့ စကားဆက်ပြောပါ', en: 'Keep talking with Ko Phyo' },

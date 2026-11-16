@@ -6,6 +6,8 @@
 // `who` = the person the step is about (story.people id); `target` = the thing, when the step is a thing.
 // The engine outlines them only while they are on screen.
 const F = (s, k) => !!s.flag(`d2.${k}`);
+const IN_LOOKS = ['oldShelf', 'hands', 'masterWheel'];
+const RACK = [-0.6, -0.2, 0.2].map((dx) => ({ x: 48.25 + dx, y: 1.32, z: 121.27 })); // (day2-props.js rackPots, if __day2 is not up)
 // (spots from day2.js SP: Toe Toe's stops on the walk (his own front door: the day's props); Mi Cho's clay heap is by the potter's shed)
 
 export default [
@@ -25,7 +27,15 @@ export default [
   // ch 5 · Mi Cho and Daw Ohn
   { id: 'd2.micho', at: 'door:pottershed', who: 'micho', done: (s) => F(s, 'mcMet'), my: 'မိချိုကို ရှာပြီး စကားပြောပါ', en: 'Find Mi Cho and talk to her' },
   { id: 'd2.dawohn', who: 'dawohn', done: (s) => F(s, 'ohnWatch'), my: 'ဒေါ်အုန်းနဲ့ စကားပြောပါ', en: 'Talk to Daw Ohn' },
-  { id: 'd2.looks', go: 'door:pottershed', done: (s) => F(s, 'looked'), my: 'ဒေါ်အုန်းရဲ့ အလုပ်ထဲက ခြောက်ခုကို သေချာကြည့်ပါ', en: "Look closely at six things in Daw Ohn's work" },
+  // (the six looks, day2.js LOOKS: three are stations inside the shed (rooms/quarter.js st.tap: the old shelf, Daw Ohn's
+  // wheel = her hands, the master's old wheel), three are the cracked pots on the sunny rack outside (day2-props.js
+  // rackPots, small). Once the inside three are seen, the door's mark gives way to the rack's own rings.)
+  { id: 'd2.looks', go: (s) => (IN_LOOKS.every((k) => F(s, `look.${k}`)) ? { x: 48.25, z: 121.27, kind: 'area' } : 'door:pottershed'), looks: [
+    { f: 'd2.look.oldShelf', room: 'pottershed', st: 'ps-oldshelf', y: 0.85, r: 0.45 },
+    { f: 'd2.look.hands', room: 'pottershed', st: 'ps-dawohnwheel', y: 0.7, r: 0.3 },
+    { f: 'd2.look.masterWheel', room: 'pottershed', st: 'ps-master', y: 0.55, r: 0.35 },
+    ...[['rim', 0], ['sun', 1], ['dent', 2]].map(([k, i]) => ({ f: `d2.look.${k}`, at: () => window.__day2?.P?.rackPots?.[i] || RACK[i], r: 0.12 })),
+  ], done: (s) => F(s, 'looked'), my: 'ဒေါ်အုန်းရဲ့ အလုပ်ထဲက ခြောက်ခုကို သေချာကြည့်ပါ', en: "Look closely at six things in Daw Ohn's work" },
   { id: 'd2.ohnTalk', who: 'dawohn', done: (s) => F(s, 'ohnTalk'), my: 'ဒေါ်အုန်းနဲ့ ပြန်စကားပြောပါ', en: 'Talk to Daw Ohn again' },
   { id: 'd2.load', at: 'door:pottershed', who: 'micho', done: (s) => F(s, 'load'), my: 'ဘယ်နှလုံး လုပ်မလဲ မိချို ကိုယ်တိုင် ရွေးပါစေလေ', en: 'Let Mi Cho choose how many to make' },
   { id: 'd2.shape', at: 'door:pottershed', who: 'micho', done: (s) => F(s, 'shaped'), my: 'မိချိုနဲ့အတူ အိုးလုပ်ကြည့်ပါ', en: 'Make the pots with Mi Cho' },

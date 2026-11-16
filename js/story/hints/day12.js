@@ -4,6 +4,9 @@
 // (ch 19 and ch 20 can go in any order; the engine shows the first unfinished step. The trunk, the bean bed and
 // the board are optional: the night page replants the pods itself.)
 const f = (s, k) => !!s.flag(`d12.${k}`);
+// (looks: the yard's taps are day12.js's (window.__day12.set: P and the name sticks); either sheet pile and either stick
+// counts; the diary and the seed tin are stations in Hpoh Taw's shed, the dryers' corner and shards in the drying hall
+// (rooms/garden.js); `hand` is Ko Kyi Nyein himself (a word with him outdoors), `queue` the girl in the queue (day12-set.js P.girl))
 // (d12.garden: day12.js's arrival box by the clasp, x 240..269, z 104..137; d12.gate waits for whoever comes: no mark)
 
 export default [
@@ -11,7 +14,16 @@ export default [
   { id: 'd12.garden', go: { town: 'garden', x: 256, z: 128 }, done: (s) => f(s, 'arrived') || f(s, 'htMet'), my: 'မိုးထဲမှာ ဥယျာဉ်ကို သွားကြည့်ရအောင်', en: 'Go and see the Garden in the rain' },
   // ch 19 · U Hpo Htaw
   { id: 'd12.htMet', who: 'hpohtaw', done: (s) => f(s, 'htMet'), my: 'ဦးဖိုးထော်ကို ရှာပြီး စကားပြောပါ', en: 'Find U Hpo Htaw and talk to him' },
-  { id: 'd12.looked', go: { who: 'hpohtaw', kind: 'area' }, done: (s) => f(s, 'looked') || f(s, 'sorted'), my: 'မိုးကြောင့် သူ့ခြံ ဘာဖြစ်သွားလဲ သေချာကြည့်ပါ', en: 'Look closely at what the rain did to his plot' },
+  { id: 'd12.looked', looks: [
+    { f: 'd12.look.sheets', at: () => window.__day12?.set?.P?.sheets?.[0], y: 0.1, r: 0.5 },
+    { f: 'd12.look.sheets', at: () => window.__day12?.set?.P?.sheets?.[1], y: 0.1, r: 0.5 },
+    { f: 'd12.look.gourd', at: () => window.__day12?.set?.P?.gourd, y: 0.5, r: 0.7 },
+    { f: 'd12.look.sticks', at: () => window.__day12?.set?.h?.sticks?.[0]?.root?.position, y: 0.45, r: 0.2 },
+    { f: 'd12.look.sticks', at: () => window.__day12?.set?.h?.sticks?.[1]?.root?.position, y: 0.45, r: 0.2 },
+    { f: 'd12.look.beans', at: () => window.__day12?.set?.P?.beans, y: 0.25, r: 0.5 },
+    { f: 'd12.look.diary', room: 'hpohtawshed', st: 'diary', y: 0.9, r: 0.2 },
+    { f: 'd12.look.tin', room: 'hpohtawshed', st: 'tin', y: 0.88, r: 0.08 },
+  ], go: { who: 'hpohtaw', kind: 'area' }, done: (s) => f(s, 'looked') || f(s, 'sorted'), my: 'မိုးကြောင့် သူ့ခြံ ဘာဖြစ်သွားလဲ သေချာကြည့်ပါ', en: 'Look closely at what the rain did to his plot' },
   { id: 'd12.sorted', who: 'hpohtaw', done: (s) => f(s, 'sorted'), my: '"ငါ့ဟာ" နဲ့ "သူများဟာ" ဦးဖိုးထော်နဲ့ ခွဲကြည့်ပါ', en: 'Sort "mine" from "not mine" with U Hpo Htaw' },
   { id: 'd12.htTalk', who: 'hpohtaw', done: (s) => f(s, 'htTalk'), my: 'ဦးဖိုးထော်နဲ့ စကားဆက်ပြောပါ', en: 'Keep talking with U Hpo Htaw' },
   { id: 'd12.diary', who: 'hpohtaw', done: (s) => f(s, 'diaryLine') || f(s, 'htOut'), my: 'သူ့ဒိုင်ယာရီစာကြောင်းကို သူ့စကားနဲ့သူ ရေးပါစေ', en: 'Help him write his diary line in his own words' },
@@ -20,7 +32,12 @@ export default [
   // ch 20 · Daw Ohn
   { id: 'd12.ohnMet', who: 'dawohn', done: (s) => f(s, 'ohnMet'), my: 'အိုးထိန်းဆရာမ ဒေါ်အုန်းကို ရှာပါ', en: 'Find Daw Ohn, the potter' },
   { id: 'd12.lid', who: 'dawohn', done: (s) => f(s, 'lid'), my: 'အိုးအဖုံး မခုန်အောင် ထိန်းပေးပါ', en: 'Keep the pot lid from rattling' },
-  { id: 'd12.mlooked', go: { door: 'dryinghall', kind: 'area' }, done: (s) => f(s, 'mlooked') || f(s, 'ohnTalk'), my: 'ဒေါ်အုန်း ပတ်လည်က အဖြစ်အပျက်တွေ သေချာကြည့်ပါ', en: 'Look closely at what goes on around Daw Ohn' },
+  { id: 'd12.mlooked', looks: [
+    { f: 'd12.mlook.kids', when: (s) => f(s, 'ohnMet'), room: 'dryinghall', st: 'kids', y: 0.3, r: 0.45 },
+    { f: 'd12.mlook.shards', when: (s) => f(s, 'ohnMet'), room: 'dryinghall', st: 'shards', y: 0.2, r: 0.25 },
+    { f: 'd12.mlook.queue', when: (s) => f(s, 'ohnMet'), at: () => window.__day12?.set?.P?.girl, y: 0.9, r: 0.3 },
+    { f: 'd12.mlook.hand', when: (s) => f(s, 'ohnMet'), who: 'kyinyein', y: 1.0, r: 0.25 },
+  ], go: { door: 'dryinghall', kind: 'area' }, done: (s) => f(s, 'mlooked') || f(s, 'ohnTalk'), my: 'ဒေါ်အုန်း ပတ်လည်က အဖြစ်အပျက်တွေ သေချာကြည့်ပါ', en: 'Look closely at what goes on around Daw Ohn' },
   { id: 'd12.ohnTalk', who: 'dawohn', done: (s) => f(s, 'ohnTalk'), my: 'ဒေါ်အုန်းနဲ့ စကားဆက်ပြောပါ', en: 'Keep talking with Daw Ohn' },
   { id: 'd12.lent', who: 'dawohn', done: (s) => f(s, 'lent') || f(s, 'weighed'), my: 'အမှန်ချိန်အလေးကို ဒေါ်အုန်းကို ခဏငှားပေးပါ', en: 'Lend Daw Ohn your true weight' },
   { id: 'd12.weighed', who: 'dawohn', done: (s) => f(s, 'weighed'), my: 'ဒေါ်အုန်း ကိုယ်တိုင်ချိန်တာ နောက်ကနေ ကြည့်ပါ', en: 'Stand back while Daw Ohn weighs it herself' },

@@ -18,7 +18,11 @@ export default [
   { id: 'd9.trays', go: 'door:bakery', done: (s) => f(s, 'ch14Done'), my: 'စင်ပေါ်က မုန့်ဗန်းနှစ်ဗန်းကို ယှဉ်ကြည့်ပါ', en: 'Compare the two trays on the rack' },
   // ch 15 · Ei Mon and Maung Arkar
   { id: 'd9.eimon', who: 'eimon', done: (s) => f(s, 'emMet'), my: 'အိမွန့်နဲ့ စကားပြောပါ', en: 'Talk to Ei Mon' },
-  { id: 'd9.alone', who: 'maungarkar', done: (s) => f(s, 'alone'), my: 'တစ်ယောက်တည်းဖြစ်နေတဲ့ မောင်အာကာကို အသာကြည့်ပါ', en: 'Quietly watch Maung Arkar, alone' },
+  { id: 'd9.alone', looks: [
+    { f: 'd9.look.tiffin', at: () => window.__day9?.S?.tiffin?.root?.position || { x: 135.32, z: 188.62 }, y: 0.35, r: 0.15 },
+    { f: 'd9.look.west', at: P.yardWall, y: 0.6, r: 0.45 },
+    { f: 'd9.look.hum', who: 'maungarkar', y: 1.2, r: 0.25 },
+  ], who: 'maungarkar', done: (s) => f(s, 'alone'), my: 'တစ်ယောက်တည်းဖြစ်နေတဲ့ မောင်အာကာကို အသာကြည့်ပါ', en: 'Quietly watch Maung Arkar, alone' },
   { id: 'd9.tea', who: 'eimon', done: (s) => f(s, 'teaGiven'), my: 'အိမွန့်ဆီ ပြန်သွားပြီး စကားပြောပါ', en: 'Go back and talk with Ei Mon' },
   { id: 'd9.arkarTalk', who: 'eimon', done: (s) => f(s, 'arkarTalk'), my: 'အိမွန်နောက် လိုက်ပြီး သူတို့စကား နားထောင်ပါ', en: 'Follow Ei Mon and listen while they talk' },
   { id: 'd9.friend', who: 'maungarkar', done: (s) => f(s, 'friendDone'), my: 'နှစ်ယောက်လုံးကို ဘက်မလိုက်ဘဲ ကူပေးပါ', en: 'Help them both; take no side' },

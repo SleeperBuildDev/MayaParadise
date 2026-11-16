@@ -26,7 +26,10 @@ export default [
   { id: 'd11.p5', who: 'sanshar', done: (s) => f(s, 'p5'), my: 'ဦးစံရှားနောက် လိုက်ပြီး ဘူးခေါက်ပါ', en: 'Follow U San Shar and fold a box' },
   // piece 6 · Ma Cherry
   { id: 'd11.p6met', who: 'cherry', done: (s) => f(s, 'p6.met') || f(s, 'p6'), my: 'မချယ်ရီနဲ့ စကားပြောပါ', en: 'Talk to Ma Cherry' },
-  { id: 'd11.p6look', go: 'door:hearthtea', done: (s) => (f(s, 'p6.look.sheet') && f(s, 'p6.look.book')) || f(s, 'p6'), my: 'သူ့လေ့ကျင့်စာရွက်နဲ့ သီချင်းစာအုပ်ကို ကြည့်ပါဦး', en: 'Look at her practice sheet and songbook' },
+  { id: 'd11.p6look', looks: [
+    { f: 'd11.p6.look.sheet', room: 'hearthtea', st: 'practiceSheet', y: 1.55, r: 0.35 },
+    { f: 'd11.p6.look.book', room: 'hearthtea', st: 'songbook', y: 1.45, r: 0.25 },
+  ], go: 'door:hearthtea', done: (s) => (f(s, 'p6.look.sheet') && f(s, 'p6.look.book')) || f(s, 'p6'), my: 'သူ့လေ့ကျင့်စာရွက်နဲ့ သီချင်းစာအုပ်ကို ကြည့်ပါဦး', en: 'Look at her practice sheet and songbook' },
   { id: 'd11.p6', who: 'cherry', done: (s) => f(s, 'p6'), my: 'မချယ်ရီ ကိုယ်တိုင် ဆုံးဖြတ်ပါစေလေ', en: 'Let Ma Cherry decide for herself' },
   // piece 7 · U Chit
   { id: 'd11.p7', who: 'uchit', done: (s) => f(s, 'p7'), my: 'ဦးချစ်ရဲ့ စကားတွေကို ချိန်ဆကြည့်ပါ', en: "Weigh up U Chit's sayings" },

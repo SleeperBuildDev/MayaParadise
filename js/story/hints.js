@@ -25,6 +25,7 @@
 //   target: (s) => obj     a thing instead (an Object3D, something with .root, or a {x, y, z} point);
 //                          a string is read as story.day[key]. label: { my, en } names it on the border.
 //   go / at / mark         where the step happens, for the marks (hints-where.js has the forms)
+//   looks: [{ f, ... }]    a look-closely step's things: a ring on each one not looked at yet + a count (see below)
 // The person border (owner, 2026-11-15: "at least make a hint or border around that person when that person
 // is on the screen"): while the line's entry has who / target and that one is IN VIEW (in front of the camera,
 // on screen, visible, near enough, not behind a building) a soft breathing border with the name sits round
@@ -55,8 +56,9 @@ export function installHints(game, story) {
   const el = document.createElement('div');
   el.id = 'story-hint';
   el.setAttribute('aria-live', 'polite');
-  el.innerHTML = '<span></span>';
-  const span = el.firstChild;
+  // (b.n: a look-closely step's small count, digits only, e.g. ၂/၆; i: the line's words)
+  el.innerHTML = '<span><b class="n"></b><i></i></span>';
+  const span = el.firstChild, spanN = span.firstChild, spanText = span.lastChild;
   host.appendChild(el);
 
   let table = null; // the loaded day's entries (null = none / not loaded)
@@ -138,7 +140,7 @@ export function installHints(game, story) {
       shown = h;
       shownLang = lang;
       if (h) {
-        span.textContent = tr({ my: h.my, en: h.en });
+        spanText.textContent = tr({ my: h.my, en: h.en });
         el.lang = lang === 'en' ? 'en' : 'my';
         if (changed) fresh = true;
       }
@@ -149,6 +151,7 @@ export function installHints(game, story) {
     const w = show ? where.resolve(shown) : null;
     mark.on = !!(w && w.ok);
     if (mark.on) { mark.x = w.x; mark.z = w.z; mark.kind = w.kind; }
+    lookTick(shown, show, lang);
     if (show && fresh) {
       fresh = false;
       // a gentle fade with one small pulse (restart the animation)
@@ -332,9 +335,154 @@ export function installHints(game, story) {
     return rect;
   }
 
+  // ---------------------------------------------------------------- the look-closely rings
+  // (owner 2026-11-16: "add more hints, even in small places, looking closely at six things in Daw Ohn's work, some
+  // are hard to find") An entry with `looks: [...]` (a look-closely step) gets, while the line shows and Maya is where
+  // the things are, a gold tap ring + a small bouncing arrow on every thing not looked at yet (each ring sized to its
+  // thing: a pencil stub gets a small one), and a small count before the line's words (digits only: ၂/၆). A looked
+  // thing loses its ring. These are the one mark shown inside rooms (only for a room's own looks). A look:
+  //   { f: 'd2.look.rim', at: {x, y, z} | (s) => {x, y?, z}, y?, r }   outdoors (world metres; y = the thing's middle)
+  //   { f, room: 'pottershed', st: 'ps-oldshelf', y?, r }              a room station: its `look` point (or its `at`)
+  //   { f, who: 'castId', y?, r }                                      a person (live: they walk), outdoors or in the room
+  //   + when: (s) => bool (only then); r = the thing's rough radius in metres (the ring's size on screen)
+  // Several looks may share one flag (either pile counts): the count is per flag. DOM only, pointer-events: none.
+  const LOOK_MAX = 8;
+  const MY_D = '၀၁၂၃၄၅၆၇၈၉';
+  const looks = []; // ring slots, made on first use and kept: { el, k, obj, x, y, z, r, sightAt, blocked, vis, px, py, pd }
+  let lookN = 0, lookVis = false, lookCount = '', lookList = null, lookFlags = null, lookObj = null;
+  const lookXYZ = { x: 0, y: 0, z: 0 };
+  const lookBox = { ok: false, x: 0, y: 0, w: 0, h: 0 }; // the canvas in #game pixels (lookTick)
+  function lookSlot(i) {
+    if (looks[i]) return looks[i];
+    const e = document.createElement('div');
+    e.className = 'story-hint-look';
+    e.innerHTML = '<u></u><em>' + HAND_SVG + '</em>';
+    host.appendChild(e);
+    return (looks[i] = { el: e, k: null, obj: null, x: 0, y: 0, z: 0, r: 0.2, sightAt: -1e9, blocked: false, vis: false, edge: '', px: -1e4, py: -1e4, pd: -1 });
+  }
+  /** Where look k is now (lookXYZ; a person: lookObj), or false (not here: another room, outdoors vs in). */
+  function lookAt(k) {
+    lookObj = null;
+    if (k.room) {
+      if (story.inRoom !== k.room) return false;
+      const R = story.room;
+      const list = R?.stations?.length ? R.stations : R?.storyLayer?.stations;
+      if (!list) return false;
+      for (let i = 0; i < list.length; i++) {
+        const s = list[i];
+        if (!s || s.id !== k.st) continue;
+        const a = s.at && Number.isFinite(s.at.x) ? s.at : null;
+        lookXYZ.x = a ? a.x : (s.look?.x ?? s.x);
+        lookXYZ.z = a ? a.z : (s.look?.z ?? s.z);
+        lookXYZ.y = Number.isFinite(k.y) ? k.y : a && Number.isFinite(a.y) ? a.y : 0.8;
+        return Number.isFinite(lookXYZ.x) && Number.isFinite(lookXYZ.z);
+      }
+      return false;
+    }
+    if (k.who) {
+      const e = story.people?.get(k.who);
+      const o = e?.p?.root || story.doors?.walkOn?.(k.who)?.p?.root;
+      if (!o || !shown3d(o)) return false;
+      lookObj = o;
+      return true;
+    }
+    if (story.inRoom || game.mode !== 'world') return false;
+    let p = k.at;
+    if (typeof p === 'function') { try { p = p(story); } catch { p = null; } }
+    if (!p || !Number.isFinite(p.x) || !Number.isFinite(p.z)) return false;
+    lookXYZ.x = p.x; lookXYZ.z = p.z;
+    lookXYZ.y = Number.isFinite(k.y) ? k.y : Number.isFinite(p.y) ? p.y : 0.8;
+    return true;
+  }
+  /** A few times a second (from tick): the shown entry's looks -> ring slots, and the count on the line. */
+  function lookTick(h, show, lang) {
+    const list = h && Array.isArray(h.looks) && h.looks.length ? h.looks : null;
+    if (list !== lookList) { lookList = list; lookFlags = list ? [...new Set(list.map((k) => k.f))] : null; }
+    let n = 0, txt = '';
+    if (list) {
+      let done = 0;
+      for (const f of lookFlags) if (story.flag(f)) done++;
+      txt = `${done}/${lookFlags.length}`;
+      if (lang !== 'en') txt = txt.replace(/\d/g, (d) => MY_D[d]);
+      if (show) for (const k of list) {
+        if (n >= LOOK_MAX) break;
+        if (!k || story.flag(k.f)) continue;
+        if (k.when && test(k.when, true) !== true) continue;
+        if (!lookAt(k)) continue;
+        const L = lookSlot(n++);
+        if (L.k !== k) { L.k = k; L.sightAt = -1e9; L.blocked = false; }
+        L.obj = lookObj; L.x = lookXYZ.x; L.y = lookXYZ.y; L.z = lookXYZ.z;
+        L.r = Number.isFinite(k.r) ? k.r : 0.2;
+      }
+    }
+    if (txt !== lookCount) { lookCount = txt; spanN.textContent = txt; }
+    // the picture's place in #game, read here (a few times a second), never per frame (a rect read forces a style pass)
+    if (n) {
+      const cv = game.renderer?.domElement;
+      const cr = cv ? cv.getBoundingClientRect() : null, hr = host.getBoundingClientRect();
+      lookBox.ok = !!(cr && cr.width);
+      if (lookBox.ok) { lookBox.x = cr.left - hr.left; lookBox.y = cr.top - hr.top; lookBox.w = cr.width; lookBox.h = cr.height; }
+    }
+    for (let i = n; i < lookN; i++) { const L = looks[i]; L.k = L.obj = null; if (L.vis) { L.vis = false; L.el.classList.remove('on'); } }
+    lookN = n;
+  }
+  /** Every frame: project the rings (no allocation; a style write only when a ring moves or resizes). */
+  function lookFrame(ts) {
+    lookVis = false;
+    if (!lookN) return;
+    const cam = game.camera;
+    // (the overlay query of busy() runs in tick, which empties the slots: here only the cheap flags, for a talk that starts
+    // between ticks)
+    const ui = game.ui || {};
+    const off = !cam || !lookBox.ok || !!story.talking || !!game.busy || !!ui.dialogOpen || !!game.rig?.cinematic || BUSY_CLASSES.test(host.className);
+    if (!off) vCam.setFromMatrixPosition(cam.matrixWorld);
+    const world = game.mode === 'world';
+    for (let i = 0; i < lookN; i++) {
+      const L = looks[i];
+      let on = false;
+      if (!off) {
+        if (L.obj) { vFoot.setFromMatrixPosition(L.obj.matrixWorld); vFoot.y += Number.isFinite(L.k?.y) ? L.k.y : 1.0; }
+        else vFoot.set(L.x, L.y, L.z);
+        let ok = !world || vCam.distanceTo(vFoot) <= MAX_DIST;
+        if (ok && world) {
+          if (ts - L.sightAt > SIGHT_MS) { L.sightAt = ts; try { L.blocked = behindWall(vCam.x, vCam.y, vCam.z, vFoot.x, vFoot.z, vFoot.y, vFoot.y + L.r); } catch { L.blocked = false; } }
+          ok = !L.blocked;
+        }
+        if (ok) {
+          vFoot.applyMatrix4(cam.matrixWorldInverse);
+          const vz = -vFoot.z;
+          if (vz > 0.2) {
+            const rpx = (L.r * cam.projectionMatrix.elements[5] / vz) * lookBox.h / 2;
+            vFoot.applyMatrix4(cam.projectionMatrix);
+            const x0 = lookBox.x, y0 = lookBox.y, x1 = x0 + lookBox.w, y1 = y0 + lookBox.h;
+            let x = x0 + (vFoot.x + 1) / 2 * lookBox.w;
+            let y = y0 + (1 - vFoot.y) / 2 * lookBox.h;
+            // off the picture (a room's far corner, just past the edge): a small arrow on the edge, pointing to it
+            let edge = '';
+            if (x < x0 + 4) edge = 'l'; else if (x > x1 - 4) edge = 'r'; else if (y < y0 + 24) edge = 't'; else if (y > y1 - 4) edge = 'b';
+            if (edge !== L.edge) { if (L.edge) L.el.classList.remove('edge', `e${L.edge}`); if (edge) L.el.classList.add('edge', `e${edge}`); L.edge = edge; }
+            if (!edge || (world ? vz < 40 : true)) {
+              on = true;
+              const d = edge ? 24 : Math.min(72, Math.max(22, rpx * 2 + 12));
+              if (edge) { x = Math.min(Math.max(x, x0 + 16), x1 - 16); y = Math.min(Math.max(y, y0 + 96), y1 - 120); }
+              if (Math.abs(x - L.px) > 0.4 || Math.abs(y - L.py) > 0.4 || Math.abs(d - L.pd) > 0.8) {
+                L.el.style.transform = `translate3d(${(x - d / 2).toFixed(1)}px, ${(y - d / 2).toFixed(1)}px, 0)`;
+                L.px = x; L.py = y;
+              }
+              if (Math.abs(d - L.pd) > 0.8) { L.el.style.width = L.el.style.height = `${d.toFixed(1)}px`; L.pd = d; }
+            }
+          }
+        }
+      }
+      if (on) lookVis = true;
+      if (on !== L.vis) { L.vis = on; L.el.classList.toggle('on', on); }
+    }
+  }
+
   let raf = 0;
   function frame(ts) {
     raf = requestAnimationFrame(frame);
+    lookFrame(ts);
     const h = shown;
     const want = !!(h && (h.who || h.target));
     let rect = null, t = null;
@@ -356,7 +504,8 @@ export function installHints(game, story) {
     }
     if (t && (t.obj || t.point) && !busy()) { try { rect = project(t, ts); } catch { rect = null; } }
     // the tap pointer: on the step's own person / thing / door (not a person the step is only about, when it happens elsewhere)
-    const tap = !!(rect && h && h.mark !== false && (useAlt || h.go == null));
+    // (a look-closely step's own rings on screen: the person it is about keeps the border, not a ring of their own)
+    const tap = !!(rect && h && h.mark !== false && (useAlt || h.go == null)) && !(lookVis && !useAlt);
     if (tap !== ringTap) { ringTap = tap; ring.classList.toggle('tap', tap); }
     report = { who: h?.who || (h?.target ? h.id : null), found: !!(t && (t.obj || t.point)), onScreen: !!rect, tap, alt: useAlt, rect: rect && { x: Math.round(rect.x), y: Math.round(rect.y), w: Math.round(rect.w), h: Math.round(rect.h) } };
     if (rect) {
@@ -404,7 +553,9 @@ export function installHints(game, story) {
     mapPin: () => { const o = where.resolve(shown); return o.ok ? { x: o.x, z: o.z, name: o.name, kind: o.kind } : null; },
     /** Debug: force an entry ({ id, my, en, who?, target? }) on the line; null goes back to the table. */
     pin: (entry) => { pinned = entry || null; tick(); return api.current(); },
-    dispose() { clearInterval(timer); cancelAnimationFrame(raf); document.removeEventListener('mw:lang', onLang); el.remove(); ring.remove(); story.hints = null; },
+    /** The look-closely rings (debug): { count, rings: [{ f, on, x, y, d }] } (x, y: the ring's middle in #game pixels). */
+    looks: () => ({ count: lookCount, rings: looks.slice(0, lookN).map((L) => ({ f: L.k?.f, on: L.vis, x: Math.round(L.px), y: Math.round(L.py), d: Math.round(L.pd) })) }),
+    dispose() { clearInterval(timer); cancelAnimationFrame(raf); document.removeEventListener('mw:lang', onLang); el.remove(); ring.remove(); for (const L of looks) L.el.remove(); story.hints = null; },
   };
   story.hints = api;
   window.__hints = api;
@@ -423,6 +574,10 @@ function injectStyle() {
     background: rgba(246, 240, 226, .72); border: 1px solid rgba(164, 122, 44, .28); box-shadow: 0 1px 4px rgba(42, 33, 24, .10);
     color: #6E1F2A; font: 600 11.5px/1.75 "Noto Sans Myanmar", system-ui, sans-serif; text-shadow: 0 1px 0 rgba(255, 255, 255, .8); }
   #story-hint[lang="en"] span { font-size: 12px; line-height: 1.5; font-style: italic; }
+  #story-hint span i { font-style: inherit; }
+  #story-hint span b.n { display: inline-block; margin: 0 5px 0 -4px; padding: 0 6px; border-radius: 999px; background: rgba(201, 162, 74, .32);
+    color: #6E1F2A; font-weight: 700; font-style: normal; line-height: 1.45; }
+  #story-hint span b.n:empty { display: none; }
   #story-hint.on.fresh span { animation: rchint 1s ease both; }
   @keyframes rchint { 0% { opacity: 0; transform: translateY(-3px); } 55% { opacity: 1; transform: scale(1.04); } 100% { opacity: 1; transform: none; } }
   #story-hint-who { position: absolute; left: 0; top: 0; width: 40px; height: 80px; z-index: 27 !important; pointer-events: none;
@@ -450,6 +605,21 @@ function injectStyle() {
   #story-hint-who .hand svg { display: block; animation: rchhand .9s ease-in-out infinite alternate; }
   #story-hint-who.tap .tap { display: block; animation: rchtap 1.4s ease-in-out infinite alternate; }
   #story-hint-who.tap .hand { display: block; }
+  /* (under a speech bubble: #bark is 5) */
+  .story-hint-look { position: absolute; left: 0; top: 0; width: 30px; height: 30px; z-index: 4 !important; pointer-events: none;
+    opacity: 0; visibility: hidden; transition: opacity .4s ease, visibility 0s linear .4s; will-change: transform; }
+  .story-hint-look.on { opacity: 1; visibility: visible; transition: opacity .4s ease, visibility 0s; }
+  .story-hint-look u { position: absolute; inset: 0; border-radius: 50%; border: 2px solid rgba(201, 162, 74, .95); pointer-events: none;
+    box-shadow: 0 0 0 1px rgba(110, 31, 42, .5), inset 0 0 0 1px rgba(110, 31, 42, .35); animation: rchlook 1.4s ease-in-out infinite alternate; will-change: transform, opacity; }
+  .story-hint-look em { position: absolute; left: 50%; bottom: 100%; transform: translate(-50%, 1px) scale(.8); transform-origin: 50% 100%;
+    pointer-events: none; }
+  .story-hint-look em svg { display: block; animation: rchhand .9s ease-in-out infinite alternate; will-change: transform; }
+  .story-hint-look.edge u { display: none; }
+  .story-hint-look.edge em { bottom: auto; top: 50%; transform: translate(-50%, -50%); transform-origin: 50% 50%; }
+  .story-hint-look.el em { transform: translate(-50%, -50%) rotate(90deg); }
+  .story-hint-look.er em { transform: translate(-50%, -50%) rotate(-90deg); }
+  .story-hint-look.et em { transform: translate(-50%, -50%) rotate(180deg); }
+  @keyframes rchlook { from { opacity: .95; transform: scale(.82); } to { opacity: .5; transform: scale(1.04); } }
   @keyframes rchtap { from { opacity: .95; transform: translate(-50%, -50%) scale(.78); } to { opacity: .45; transform: translate(-50%, -50%) scale(1.02); } }
   @keyframes rchhand { from { transform: translateY(-4px); } to { transform: translateY(1px); } }
   `;
