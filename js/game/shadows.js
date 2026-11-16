@@ -254,6 +254,8 @@ export function setupSceneShadows(scene, opts = {}) {
       }
       apply(0, 1);
     },
+    /** Re-aim the light along dir (unit, toward the light) without refitting sizes (night lamp shadows, every frame). */
+    setDir(dir) { sun.position.copy(sun.target.position).addScaledVector(dir, 20); sun.updateMatrixWorld(); refreshBasis(); },
     /** Call if the light was re-aimed (e.g. a different lighting preset). */
     refresh() { refreshBasis(); curW = curH = 0; },
     dispose() { sun.shadow.map?.dispose(); sun.shadow.map = null; },
