@@ -32,7 +32,7 @@ import { PEOPLE_ANIM } from '../people.js';
 import { TALK } from './clips-talk.js';
 import { WORK, MOOD_CLIPS } from './clips-work.js';
 import { REACT } from './clips-react.js';
-import { safe, smooth } from './pose.js';
+import { safe, smooth, bodyInK } from './pose.js';
 import { cue as cueOf, cueCount, listenerCue } from './cues.js';
 import { jobClip, ATTITUDES } from './jobs.js';
 import { createProps } from './props.js';
@@ -46,7 +46,7 @@ const LISTEN = {
 const LIB = Object.assign({}, TALK, WORK, REACT, LISTEN);
 export const CLIPS = Object.freeze(Object.keys(LIB));
 // clips that hold as long as the line types (the rest are one motion of their own length)
-const HOLDS = new Set(['explain', 'explainBoth', 'beat', 'thinkChin', 'sad', 'angry', 'worry', 'handsHips', 'proud', 'read', 'phone', 'write', 'showItem', 'calmDown', 'insist', 'listen', 'laugh', 'giggle']);
+const HOLDS = new Set(['explain', 'explainBoth', 'beat', 'palmUp', 'handsBehind', 'hipTalk', 'leanIn', 'thinkChin', 'sad', 'angry', 'worry', 'handsHips', 'proud', 'read', 'phone', 'write', 'showItem', 'calmDown', 'insist', 'listen', 'laugh', 'giggle']);
 const HEAD_ONLY_OK = new Set(['nod', 'shake', 'listen', 'sorryBack', 'thinkLate']);
 
 // Ko Hein Htet plays his own (elbows and knees): names mapped onto his HH_ANIMS
@@ -119,7 +119,7 @@ export function install(game, story, opts = {}) {
       cur: { base: 0, upper: 0, head: 0 },
       mood: undefined, near: false, d2: 0, baseGate: 1, emoteGate: 0, seat: false, busy: false,
       propK: 0, propKind: null, propSide: -1, propWant: null, holdProp: null, holdSide: -1, holding: false,
-      lineI: 0, mayaT: 0, lastFrame: -1,
+      lineI: 0, mayaT: 0, lastFrame: -1, inK: bodyInK(r), wMax: 0,
     };
     for (const k in S.L) for (const sl of S.L[k]) sl.k = S.k;
     p._an = S;
@@ -183,11 +183,13 @@ export function install(game, story, opts = {}) {
     S.emoteGate += (P.emote - S.emoteGate) * Math.min(1, dt * 10);
     let any = false;
     S.seat = false;
+    S.wMax = 0;
+    const r0x = P.aRx, r0z = P.aRz; // (the stick arm before anim: pose.js safe())
     any = run(S, P, S.L.base, dt, 'base') || any;
     any = run(S, P, S.L.upper, dt, 'upper') || any;
     any = run(S, P, S.L.head, dt, 'head') || any;
     S.busy = any;
-    if (any) safe(P, S.rig, S.seat, true);
+    if (any) safe(P, S.rig, S.seat, true, S.wMax, S.inK, r0x, r0z);
     // the prop in hand
     propStep(S, dt);
     if (profile) acc += performance.now() - t0;
@@ -195,7 +197,7 @@ export function install(game, story, opts = {}) {
   PEOPLE_ANIM.layer = layer;
 
   function run(S, P, pair, dt, kind) {
-    let any = false;
+    let any = false, sum = 0;
     for (let i = 0; i < 2; i++) {
       // the outgoing slot first, then the current one: TARGET mixes compose in that order
       const sl = pair[(S.cur[kind] + 1 + i) % 2];
@@ -203,10 +205,12 @@ export function install(game, story, opts = {}) {
       if (!step(S, P, sl, dt, kind)) continue;
       any = true;
       if (sl.w > 0.0005) {
+        sum += sl.w;
         sl.clip.fn(P, sl);
         if (sl.clip.seat && sl.w > 0.01) S.seat = true;
       }
     }
+    if (sum > S.wMax) S.wMax = sum > 1 ? 1 : sum; // (the two slots of a crossfade add up: the stick rule holds through it)
     return any;
   }
   // advance a slot; false when it has ended
@@ -286,6 +290,9 @@ export function install(game, story, opts = {}) {
 
   // ---------------- starting a clip on a person
   function start(S, clip, name, o = {}) {
+    // a child plays the clip's kid version (carryHead: the basket in front, their arms cannot reach the head top)
+    let kidProp;
+    if (clip.kid && S.rig.age === 'child' && LIB[clip.kid]) { kidProp = clip.kidProp; clip = LIB[clip.kid]; }
     const kind = o.layer || clip.layer || 'upper';
     const pair = S.L[kind] || S.L.upper;
     const k = kind in S.L ? kind : 'upper';
@@ -307,7 +314,7 @@ export function install(game, story, opts = {}) {
     sl.n = o.n || 0;
     sl.seat = o.seat || 0;
     sl.auto = 0;
-    sl.prop = o.prop === undefined ? clip.prop || null : o.prop;
+    sl.prop = o.prop === undefined ? kidProp || clip.prop || null : o.prop;
     aim(S, sl, clip, o);
     // the face: the clip's own, only when the line has none (o.face === false leaves it alone)
     sl.faceSet = null;

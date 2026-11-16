@@ -42,6 +42,93 @@ export const TALK = {
       P.headX += 0.025 * b * w;
     },
   },
+  palmUp: { // "you see": one open hand held out to the side-front, slow, the head tilting toward it
+    layer: 'upper', dur: 2.6, walkable: false, face: 'talk', side: 'one',
+    fn(P, c) {
+      const { w, t, a, s, k } = c;
+      arm(P, s, -0.95 + 0.06 * a * sin(t * 1.8 + k * 4), 0.34 + 0.06 * a * sin(t * 2.3 + k * 3), w);
+      armAdd(P, -s, -0.08, 0.02, w);
+      P.torsoY += 0.05 * s * w;
+      P.headZ += 0.06 * s * w;
+      P.headX += 0.04 * pulse(t + k, 1.7) * w;
+    },
+  },
+  // ---- talking stances (a plain line between the explaining moves)
+  handsBehind: { // hands clasped behind the back, chest a little out, small nods with the words
+    layer: 'upper', dur: 2.8, walkable: false, face: 'talk',
+    fn(P, c) {
+      const { w, t, k } = c;
+      arms(P, 0.38, -0.04, w);
+      P.torsoX -= 0.04 * w;
+      P.torsoZ += 0.02 * sin(t * 0.8 + k * 5) * w;
+      P.headX += 0.04 * sin(t * 2.4 + k * 3) * w;
+      P.headZ += 0.05 * sin(t * 1.1) * w;
+    },
+  },
+  hipTalk: { // one hand on the hip, the other talking
+    layer: 'upper', dur: 2.4, walkable: false, face: 'talk', side: 'one',
+    fn(P, c) {
+      const { w, t, a, s, k } = c, b = sin(t * 3.4 + k * 5);
+      arm(P, -s, 0.12, 0.4, w); // (no elbows: out a little and back reads as a hand on the hip)
+      arm(P, s, -0.8 - 0.14 * a * b, 0.16 + 0.08 * a * sin(t * 1.9), w);
+      P.torsoZ += 0.025 * s * w;
+      P.headZ -= 0.05 * s * w;
+      P.headX += 0.025 * b * w;
+    },
+  },
+  leanIn: { // "you know": a small lean toward the listener, hands loose together low in front, a slow nod
+    layer: 'upper', dur: 2.4, walkable: false, face: 'smile',
+    fn(P, c) {
+      const { w, t, k } = c;
+      arm(P, 1, -0.55, -0.12, w); arm(P, -1, -0.6, -0.12, w);
+      P.torsoX += 0.1 * w;
+      P.headX += (0.05 + 0.05 * pulse(t + k, 2.1)) * w;
+      P.headZ += 0.07 * (k > 0.5 ? 1 : -1) * w;
+    },
+  },
+  openArms: { // "everyone", "so much": both arms sweep open wide, held, back
+    layer: 'upper', dur: 1.7, walkable: true, face: 'smile',
+    fn(P, c) {
+      const { u, a } = c, o = win(u, 0.04, 0.9, 0.28), w = c.w;
+      arms(P, -0.7 + 0.15 * o, 0.12 + 0.8 * a * o, w);
+      P.torsoX -= 0.05 * o * w;
+      P.headX -= 0.06 * o * w;
+    },
+  },
+  waveOff: { // "nothing", "nobody", "never mind": a flat hand sweeps out low and across, the head shakes a little
+    layer: 'upper', dur: 1.4, walkable: true, face: 'talk', side: 'one',
+    fn(P, c) {
+      const { u, s } = c, e = win(u, 0, 1, 0.22), sw = 0.5 + 0.5 * sin(u * TAU * 1.5 - Math.PI / 2);
+      arm(P, s, -0.9, -0.1 + 0.65 * sw, c.w * e);
+      P.headY += 0.1 * sin(u * TAU * 2) * e * c.w;
+    },
+  },
+  holdOn: { // "wait", "not yet": one hand up and out, palm to the listener, a small push
+    layer: 'upper', dur: 1.5, walkable: true, face: 'talk', side: 'one',
+    fn(P, c) {
+      const { u, s } = c, e = win(u, 0, 1, 0.2), push = win(u, 0.12, 0.42, 0.12);
+      arm(P, s, -1.35 - 0.08 * push, 0.12, c.w * e);
+      P.headZ += 0.06 * s * c.w * e;
+      P.torsoX -= 0.03 * push * c.w;
+    },
+  },
+  offer: { // "here you go", "try it": one hand forward low, palm up, held out, a small lean
+    layer: 'upper', dur: 1.8, walkable: true, face: 'smile', side: 'one',
+    fn(P, c) {
+      const k = win(c.u, 0.05, 0.9, 0.25) * c.w;
+      arm(P, c.s, -1.15, 0.14, k);
+      P.torsoX += 0.06 * k;
+      P.headX += 0.07 * k;
+    },
+  },
+  reassure: { // "don't worry", "slowly": one hand pats the air down twice, a smile
+    layer: 'upper', dur: 1.6, walkable: true, face: 'smile', side: 'one',
+    fn(P, c) {
+      const { u, s } = c, e = win(u, 0, 1, 0.2), pat = sin(u * TAU * 2) * 0.1;
+      arm(P, s, -0.95 + pat, 0.1, c.w * e);
+      P.headX += (0.05 + 0.4 * pat) * c.w * e;
+    },
+  },
   point: { // at a GIVEN thing (yaw/pitch); without one, a short point ahead at what they are talking about
     layer: 'upper', dur: 1.6, walkable: true, face: 'smile', side: 'one',
     fn(P, c) {

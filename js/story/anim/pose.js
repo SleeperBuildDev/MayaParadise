@@ -37,12 +37,24 @@ export function arms(P, x, out, w) {
 /** Twist of one arm about its own length (the hand turns palm up / down; no visual change on a box arm but used by props). */
 export function armTwist(P, side, y, w) { if (side > 0) P.aLy += (y - P.aLy) * w; else P.aRy += (y - P.aRy) * w; }
 
+// shoulder half-width of a mid build per age (people.js measures()): a wider body is deeper too, with a belly
+const SW_MID = { child: 0.125, teen: 0.145, adult: 0.16, elder: 0.155 };
+/** How much of the crossing-arm allowance this body gets: 1 for mid and slim builds, less the wider the body
+ *  (wide 1.2x: 0.65), so a wide person's arms stop at their own chest and belly instead of 4-7 cm inside them. */
+export function bodyInK(rig) {
+  const k = (rig?.sw || 0) / (SW_MID[rig?.age] || SW_MID.adult);
+  return k > 1.02 ? clamp(1 - 1.75 * (k - 1), 0.5, 1) : 1;
+}
+
 /**
  * The glitch rules, applied after every anim layer and before people.js's lookAt and bone writes.
  *   seat: true while a caller-confirmed seat clip runs (sit / pedal); otherwise hips stay within 0.06 m of rest
  *   busy: anim is driving this person (the elder's stick rule only bends anim poses, never people.js's own emotes)
+ *   w:    the strongest anim layer's weight now; r0x / r0z: the stick arm as people.js left it, before anim (the
+ *         stick rule fades from that pose to its own with w, so nothing snaps and a fading clip never swings it out)
+ *   inK:  bodyInK(rig), worked out once per person
  */
-export function safe(P, rig, seat, busy) {
+export function safe(P, rig, seat, busy, w = 1, inK = 1, r0x = P.aRx, r0z = P.aRz) {
   // hips: never low enough for feet.js to take them for seated (it uses hipY - 0.08), and never hop high
   if (!seat) P.hipsY = clamp(P.hipsY, rig.hipY - 0.06, rig.hipY + 0.07);
   P.torsoX = clamp(P.torsoX, -0.3, 0.9);
@@ -52,12 +64,17 @@ export function safe(P, rig, seat, busy) {
   P.headY = clamp(P.headY, -0.35, 0.35); // (lookAt adds its own yaw on top; this is only the clip's share)
   P.headZ = clamp(P.headZ, -0.3, 0.3);
   // arms never pass through the body: a hanging arm may tuck in only a little; forward arms may cross more
-  P.aLz = Math.max(P.aLz, -inward(P.aLx));
-  P.aRz = Math.min(P.aRz, inward(P.aRx));
+  P.aLz = Math.max(P.aLz, -inward(P.aLx) * inK);
+  P.aRz = Math.min(P.aRz, inward(P.aRx) * inK);
   if (busy && rig.stick) {
-    // the walking stick is on the right arm: keep it low and close to the side
-    P.aRx = clamp(P.aRx, -0.5, 0.35);
-    P.aRz = clamp(P.aRz, -0.35, 0.08);
+    // the walking stick is on the right arm and turns with it and the torso: the arm undoes the torso's bend and
+    // lean so the stick stands near upright on the ground whatever the clip does (a stooped elder's stick no
+    // longer swings out 20-45 degrees when a two-arm gesture or a bend plays)
+    // (never inward past the body rule: a stick a little off upright beats an arm through the torso)
+    const x = clamp(P.aRx, -P.torsoX - 0.08, -P.torsoX + 0.05);
+    const z = Math.min(Math.max(P.aRz, -P.torsoZ - 0.1), -P.torsoZ + 0.02, inward(x) * inK);
+    P.aRx = r0x + (x - r0x) * w;
+    P.aRz = r0z + (z - r0z) * w;
   }
 }
 /** How far an arm may swing across the body at this forward angle (x). */

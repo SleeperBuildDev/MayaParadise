@@ -3,7 +3,8 @@
 //
 // EVENT = {
 //   id, towns: [district ids], periods: ['morning'|'noon'|'evening'|'night'], fromDay, weight, quiet (no crowd music),
-//   dry (not in rain), min (people at least),
+//   dry (not in rain), min (people at least), calls / tris (its prop rig's draw calls (default 2: the instanced boxes
+//   and their outline, +1 each for strings, a TV picture, a glow, chalk) / triangles: extras-events.js's budget),
 //   slots: [{ id, tag, age: [..], woman?, need?, guest: 'must'|'ok'|'no', side? (walks in toward the stage), wide?
 //            (carries something wide), late? (called in by the script), inPlace? (stays where they stand) }],
 //   layout(k, cx, cz, s) -> { spots: { slotId: { x, z, h, o? } }, prop?: { x, z, r }, pts?: { name: { x, z, r?, road? } },
@@ -359,7 +360,7 @@ export const EVENTS = [
   // ---------------------------------------------------------------------------------------------------------------
   // E4 kite contest (dry weather only)
   {
-    id: 'kite', towns: ['hearth', 'envelope', 'garden', 'wharf'], periods: ['noon', 'evening'], fromDay: 5, weight: 1, dry: true, min: 3,
+    id: 'kite', towns: ['hearth', 'envelope', 'garden', 'wharf'], periods: ['noon', 'evening'], fromDay: 5, weight: 1, dry: true, min: 3, calls: 3,
     slots: [
       { id: 'f1', tag: 'flyer', age: ['child', 'teen'], need: true, guest: 'ok' },
       { id: 'f2', tag: 'flyer', age: ['child', 'teen'], need: true, guest: 'ok' },
@@ -452,7 +453,7 @@ export const EVENTS = [
   // ---------------------------------------------------------------------------------------------------------------
   // E5 football on the tea shop's TV (a trolley wheeled out)
   {
-    id: 'football', towns: ['exercise', 'hearth', 'market', 'junction', 'wharf'], periods: ['evening', 'night'], fromDay: 6, weight: 1, min: 3,
+    id: 'football', towns: ['exercise', 'hearth', 'market', 'junction', 'wharf'], periods: ['evening', 'night'], fromDay: 6, weight: 1, min: 3, calls: 3,
     slots: [
       { id: 'keeper', tag: 'keeper', age: ['adult', 'elder'], need: true, guest: 'must', side: 1, wide: true },
       { id: 'f1', tag: 'fan', age: ['teen', 'adult', 'elder'], need: true, guest: 'ok' },
@@ -827,7 +828,7 @@ export const EVENTS = [
   // ---------------------------------------------------------------------------------------------------------------
   // E9 the lantern story circle (night only, quiet)
   {
-    id: 'lantern', towns: ['exercise', 'hearth', 'garden', 'wharf', 'blank'], periods: ['night'], fromDay: 2, weight: 1.2, quiet: true, min: 3,
+    id: 'lantern', towns: ['exercise', 'hearth', 'garden', 'wharf', 'blank'], periods: ['night'], fromDay: 2, weight: 1.2, quiet: true, min: 3, calls: 3,
     slots: [
       { id: 'elder', tag: 'elder', age: ['elder'], need: true, guest: 'ok', side: 1 },
       { id: 'k1', tag: 'kid', age: ['child'], need: true, guest: 'ok' },
@@ -896,7 +897,7 @@ export const EVENTS = [
   // ---------------------------------------------------------------------------------------------------------------
   // E10 a haggle at a stall (no new prop; no prices in any line)
   {
-    id: 'haggle', towns: ['market', 'wharf'], periods: ['morning', 'noon'], fromDay: 4, weight: 1, min: 2,
+    id: 'haggle', towns: ['market', 'wharf'], periods: ['morning', 'noon'], fromDay: 4, weight: 1, min: 2, calls: 0,
     slots: [
       { id: 'keeper', tag: 'keeper', need: true, guest: 'no', inPlace: true, job: true },
       { id: 'buyer', tag: 'buyer', age: ['teen', 'adult', 'elder'], need: true, guest: 'ok' },
@@ -986,48 +987,65 @@ export const EVENTS = [
   // ---------------------------------------------------------------------------------------------------------------
   // E11 a kids' race along the pavement
   {
-    id: 'race', towns: ['exercise', 'garden', 'hearth', 'blank'], periods: ['morning', 'noon', 'evening'], fromDay: 2, weight: 1, min: 3,
+    id: 'race', towns: ['exercise', 'garden', 'hearth', 'blank'], periods: ['morning', 'noon', 'evening'], fromDay: 2, weight: 1, min: 2, calls: 1,
+    // (the runners first: they take the guests when no child is about; a grown-up starter is found among the townsfolk,
+    // and without one the kids start it themselves)
     slots: [
-      { id: 'starter', tag: 'starter', age: ['teen', 'adult', 'elder'], need: true, guest: 'ok' },
       { id: 'k1', tag: 'kid', age: ['child', 'teen'], need: true, guest: 'ok' },
       { id: 'k2', tag: 'kid', age: ['child', 'teen'], need: true, guest: 'ok' },
+      { id: 'starter', tag: 'starter', age: ['teen', 'adult', 'elder'], guest: 'ok' },
       { id: 'k3', tag: 'kid', age: ['child', 'teen'], guest: 'ok' },
       { id: 'w', tag: 'watch', age: ['child', 'teen', 'adult', 'elder'], guest: 'no' },
     ],
     layout(k, cx, cz, s) {
-      const L = 5, lanes = [-0.8, 0, 0.8];
+      // the course: as long as the pavement allows (5 m each side of the centre at best, 2.8 at least), slid a little
+      // along the street when that fits it better
+      const lanes = [-0.8, 0, 0.8];
+      const clear = (x, z, r) => !k.solid(x, z, r) && k.roadDist(x, z) >= 1.8;
+      let L = 0;
+      for (const l of [5, 4.2, 3.4, 2.8]) {
+        for (const off of [0, 1.6, -1.6]) {
+          const ox = cx + off;
+          let ok = clear(ox, cz, 0.3) && clear(ox - s * (l + 0.7), cz - 2.0, 0.42) && clear(ox + s * (l + 0.6), cz - 2.0, 0.42);
+          for (let x = -l; ok && x <= l + 0.6; x += 1) for (const dz of lanes) if (!clear(ox + s * x, cz + dz, 0.3)) { ok = false; break; }
+          if (ok) { L = l; cx = ox; break; }
+        }
+        if (L) break;
+      }
+      if (!L) return null;
       const sx = cx - s * L, fx = cx + s * L, hh = s > 0 ? PI / 2 : -PI / 2;
       const sp = { k1: S(sx, cz + lanes[0], hh, { noLine: true }), k2: S(sx, cz + lanes[1], hh, { noLine: true }), k3: S(sx, cz + lanes[2], hh, { noLine: true }) };
       sp.starter = S(sx - s * 0.7, cz - 2.0, 0, { noLine: true }); sp.starter.h = face(sp.starter.x, sp.starter.z, sx, cz);
       sp.w = S(fx + s * 0.6, cz - 2.0, 0, { noLine: true }); sp.w.h = face(sp.w.x, sp.w.z, fx, cz);
       const lines = lanes.map((dz) => [sx, cz + dz, fx + s * 0.6, cz + dz, 0.3]);
       const pts = {};
-      for (let i = 0; i <= 10; i += 2) for (const dz of [-1.2, 0, 1.2]) pts[`s${i}_${dz}`] = { x: sx + s * i, z: cz + dz, r: 0.3, road: 1.8 };
-      pts.trip = { x: sx + s * 4, z: cz + lanes[0], r: 0.3 };
-      pts.help = { x: sx + s * 4.3, z: cz + lanes[1], r: 0.25 }; // (k2 turns back along its own lane)
-      return { spots: sp, pts, lines };
+      for (let i = 0; i <= 5; i++) for (const dz of [-1.2, 0, 1.2]) pts[`s${i}_${dz}`] = { x: sx + s * ((2 * L * i) / 5), z: cz + dz, r: 0.3, road: 1.8 };
+      pts.trip = { x: sx + s * 0.8 * L, z: cz + lanes[0], r: 0.3 };
+      pts.help = { x: sx + s * 0.86 * L, z: cz + lanes[1], r: 0.25 }; // (k2 turns back along its own lane)
+      return { spots: sp, pts, lines, L, cx, cz };
     },
     siteOk(k, lay) { // (not passing within 2 m of Maya)
-      const s = lay.s, sx = lay.cx - s * 5, fx = lay.cx + s * 5.6, K = k.K;
+      const s = lay.s, sx = lay.cx - s * lay.L, fx = lay.cx + s * (lay.L + 0.6), K = k.K;
       const t = Math.max(0, Math.min(1, (K.mx - sx) / (fx - sx)));
       return Math.hypot(K.mx - (sx + (fx - sx) * t), K.mz - lay.cz) < 2.6 ? 'maya' : '';
     },
-    setup(c) { c.mem.sx = c.cx - c.s * 5; c.mem.fx = c.cx + c.s * 5; },
+    setup(c) { const L = c.lay.L || 5; c.mem.sx = c.cx - c.s * L; c.mem.fx = c.cx + c.s * L; },
     *script(c) {
-      const st = c.p('starter'), kids = c.tag('kid');
-      if (!st || kids.length < 2) return;
+      const kids = c.tag('kid'), st = c.p('starter') || c.p('w'); // (no grown-up: the kids draw the lines and start it themselves)
+      if (kids.length < 2) return;
       yield gathered(c, c.all(), 18);
       for (const p of kids) c.face(p, c.h);
       // the chalk lines, drawn by the starter
       const a = { x: c.mem.sx, z: c.cz }, b = { x: c.mem.fx, z: c.cz };
       c.rig.chalkShow(true, a, b, c.h, 2.6); c.rig.chalkGrow(0, a, b, c.h);
       c.mem.chalk = true;
-      c.mood(st, 'work');
+      const drawer = st || kids[kids.length - 1];
+      c.mood(drawer, 'work');
       for (let i = 1; i <= 8; i++) { c.rig.chalkGrow(i / 8, a, b, c.h); yield 0.16; }
-      c.mood(st, null);
+      c.mood(drawer, null);
       c.lookAll(c.mem.fx, c.cz, kids);
-      c.act(st, 'pointAt', { target: { x: c.mem.fx, y: 0.6, z: c.cz } });
-      yield c.say([st, 'go']);
+      c.act(drawer, 'pointAt', { target: { x: c.mem.fx, y: 0.6, z: c.cz } });
+      yield c.say([drawer, 'go']);
       c.sfx('steps', c.cx, c.cz, 0.8);
       const k1 = c.p('k1') || kids[0], k2 = c.p('k2') || kids[1], k3 = c.p('k3');
       const lane = (p) => c.pos(p).z;
@@ -1123,7 +1141,7 @@ export const EVENTS = [
   // ---------------------------------------------------------------------------------------------------------------
   // E13 a puppet show for the children (from Day 9; original puppets: a proud parrot and a little frog)
   {
-    id: 'puppet', towns: ['hearth', 'garden', 'exercise', 'market'], periods: ['noon', 'evening'], fromDay: 9, weight: 1, min: 2,
+    id: 'puppet', towns: ['hearth', 'garden', 'exercise', 'market'], periods: ['noon', 'evening'], fromDay: 9, weight: 1, min: 2, calls: 3,
     slots: [
       { id: 'puppeteer', tag: 'puppeteer', age: ['adult'], need: true, guest: 'must', side: 1, wide: true },
       { id: 'k1', tag: 'kid', age: ['child'], need: true, guest: 'ok' },
@@ -1169,7 +1187,11 @@ export const EVENTS = [
       yield c.upto(() => !c.ok(pu) || c.at(pu), 30);
       if (!c.ok(pu) || !c.at(pu)) { if (c.ok(pu)) c.leave(pu, true); return; } // (the carrier never got here: nothing happens without them)
       // set down and unfolded
-      bo.place(c.cx, 0, c.cz, c.h - c.s * 0.6); bo.ob = c.block(c.cx, c.cz, 0.75); // (turned a little toward the camera: the show reads)
+      bo.place(c.cx, 0, c.cz, c.h - c.s * 0.6); // (turned a little toward the camera: the show reads)
+      // its footprint: two circles along the frame (1.42 x 0.47 m), not one round the whole of it, so the puppeteer
+      // stands just behind it, off it; each goes into the walk space once nobody stands on it
+      { const ry = bo.ry, cs = Math.cos(ry), sn = Math.sin(ry), at = (lx, lz) => [c.cx + lx * cs + lz * sn, c.cz - lx * sn + lz * cs];
+        const [ax, az] = at(-0.42, -0.12), [bx, bz] = at(0.42, -0.12); bo.ob = c.block(ax, az, 0.3, bo); bo.ob2 = c.block(bx, bz, 0.3, bo); }
       c.stopAct(pu); c.act(pu, 'pickUp');
       bo.grow(1, 0.7);
       c.burst('dust', c.cx, 0.2, c.cz, { count: 10, spread: 0.6, up: 0.4 });
@@ -1212,7 +1234,7 @@ export const EVENTS = [
       for (const p of [c.mem.parrot, c.mem.frog, ...c.mem.bars]) p?.grow(0, 0.3);
       c.mood(pu, null);
       yield 0.4;
-      c.unblock(bo.ob); bo.ob = null;
+      c.unblock(bo.ob); c.unblock(bo.ob2); bo.ob = bo.ob2 = null;
       bo.grow(0.42, 0.6); c.burst('dust', c.cx, 0.2, c.cz, { count: 8, spread: 0.5, up: 0.3 });
       const back = { x: c.cx - c.s * 0.62, z: c.cz };
       if (c.walk(pu, back.x, back.z, 0.8)) yield c.upto(() => c.at(pu), 4);
@@ -1226,7 +1248,7 @@ export const EVENTS = [
       c.mem.show = false; c.rig.stringsOn(0);
       for (const p of [c.mem.parrot, c.mem.frog, ...(c.mem.bars || [])]) p?.grow(0, 0.3);
       const pu = c.p('puppeteer'), bo = c.mem.booth;
-      if (pu && bo) { if (bo.ob) c.unblock(bo.ob); bo.ob = null; bo.grow(0.42, 0.5); c.carry(bo, pu, 0, 0, 0.62, 0); }
+      if (pu && bo) { if (bo.ob) c.unblock(bo.ob); if (bo.ob2) c.unblock(bo.ob2); bo.ob = bo.ob2 = null; bo.grow(0.42, 0.5); c.carry(bo, pu, 0, 0, 0.62, 0); }
     },
     propTap(c) { c.mem.pmood = { frog: 'bow' }; c.mayaAct('cheer'); setTimeout(() => { c.mem.pmood = {}; }, 1500); },
     joinEmote: 'cheer', joinFx: 'confetti',

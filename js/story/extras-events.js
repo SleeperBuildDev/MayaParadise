@@ -21,9 +21,16 @@
 //
 // HOW (all spread over frames: nothing heavy in any one frame)
 //   scheduler   once a second: Hein Htet's gates plus no cargo / carrying / overlay, not Day 1, 25 s after any of
-//               those, 60 s after a town arrival, draw calls <= 58 and triangles <= 140k. The first after 150 s of
-//               eligible time outdoors, then a gap of 240-480 s, then a 35 % roll a check. Each event once a story
-//               day, 4 a story day at most, 40 min of play between two of the same, never the same twice running.
+//               those, 60 s after a town arrival. The first after 150 s of eligible time outdoors, then a gap of
+//               240-480 s, then a 35 % roll a check. Each event once a story day, 4 a story day at most, 40 min of
+//               play between two of the same, never the same twice running.
+//   budget      (owner: "alive and complete": a gathering that starts plays to its end) an event may start when the
+//               frame's draw calls / triangles just before it (the median of the last 3 s) plus its own expected cost
+//               (its prop rig + the guests it may bring, measured off a real person) fit the tier's ALLOW. Once on,
+//               draw calls never cut it short: only a real, sustained slowdown does (PERF: the median frame time
+//               over 4 s well above the median of the 5 s before it started, for 3 s on end).
+//   talks       a talk with anyone (a participant, or someone else) holds the event still: its script, its props, its
+//               guests and its wrap-up clock, so nothing folds away while Maya talks.
 //   site        a centre 9-18 m from Maya in her own district (mostly in view), the event's layout round it (stages
 //               face east or west: the camera sees faces, not backs); every spot off every road and path edge
 //               (>= 1.8 m), not solid, a clear straight line to the centre, >= 3.6 m from doors and outside a 2 x 4 m
@@ -52,7 +59,15 @@ import { createPropRig } from './events/props.js';
 import { createEventSfx } from './events/sfx.js';
 
 const T = { first: 150, gap: [240, 480], retry: [30, 70], roll: 0.35, perDay: 4, cool: 40 * 60, afterGate: 25, afterArrive: 60 };
-const BUDGET = { calls: 58, tris: 140000, over: 66, overFor: 2 };
+// the most a frame may draw with a gathering in it, per quality tier (boot.js pickTier: low = weak phones, 30 fps, no
+// sun shadow; mid = most phones; high = flagships and computers). The towns alone draw ~56-68 calls and 105-150k
+// triangles; one event adds its rig (2-4 calls) and up to two guests.
+const ALLOW = { low: { calls: 76, tris: 160000 }, mid: { calls: 86, tris: 180000 }, high: { calls: 96, tris: 200000 } };
+// frame time: base = s of frames before the start that set the bar; win = s of frames judged while it runs; hold = s
+// the slowdown must last; slow = the window's median above base * ratio AND base + plus ms AND the tier's frame * 1.1;
+// warm = s of the event's own clock not judged (its people are being made); slowStart: no start while the median of
+// the last win s is above slowStart x the tier's frame (the game is already struggling)
+const PERF = { base: 5, win: 4, hold: 3, ratio: 1.3, plus: 5, warm: 3, slowStart: 2 };
 const SITE = { near: 6, far: 16, perFrame: 4, tries: 90 }; // (a portrait phone sees ~8-10 m up the street: in view means near)
 const KEEP = { road: 1.8, propRoad: 2.4, door: 3.6, spot: 2.6, desk: 6, hint: 10, cast: 8, maya: 4, car: 4, person: 0.9, pt: 1.4 };
 const RECRUIT_R = 18, FAR = 45, GUESTS = 2, BODY = 0.3;
@@ -60,8 +75,10 @@ const RECRUIT_R = 18, FAR = 45, GUESTS = 2, BODY = 0.3;
 // (everyone back to their day): soft = s after which the script and its extras are cut and whoever is left walks off,
 // hard = s after which the event is over for good (state, props, music, flags); a guest still in view then walks on
 // out of sight by themselves and is only taken away off screen. retry = s between two searches for a way out of sight.
-const CAP = { run: 105, joinMore: 30, soft: 10, hard: 18, retry: 2.5, strayFar: 40 };
+// talkMax = s of talks an event may stand still through on top of its run (the wall clock's limit).
+const CAP = { run: 105, joinMore: 30, soft: 10, hard: 18, retry: 2.5, strayFar: 40, talkMax: 150 };
 const BUSY = /\b(cinema|talking|choosing|acting|ti-flying|ti-naming|reading)\b/;
+const BUSY_TALK = /\b(acting|ti-flying|ti-naming|reading)\b/; // (in a talk: its letterbox, dialogue and choices are the talk itself)
 const DOM_BLOCK = '.act-wrap, .story-stamp, .story-letter, .rc-slip, .rc-lift, #story-panel, #story-choices, .story-got, #story-map, #story-fade.on';
 const CLOTHS = ['white', 'cream', 'maroon', 'rose', 'mustard', 'sky', 'navy', 'teal', 'olive', 'tan', 'plum', 'coral', 'leaf'];
 // the gesture names the catalog uses (anim library clips, js/story/anim) -> people.js's own emote when it is absent
@@ -93,6 +110,54 @@ export function installEvents(game, story, ow) {
   const callsNow = () => game.renderer?.info?.render?.calls || 0;
   const trisNow = () => game.renderer?.info?.render?.triangles || 0;
   const A = () => (story.anim && story.anim.enabled !== false ? story.anim : null);
+  // ---- the frame's load: draw calls / triangles (a sample every 0.1 s outdoors while no event runs: the last 3 s) and
+  // frame times (every frame: the last ~10 s), in preallocated rings; medians only on demand (a few times a second)
+  const CR = { calls: new Float32Array(30), tris: new Float32Array(30), n: 0, i: 0, t: 0 };
+  const FR = { d: new Float32Array(600), n: 0, i: 0, last: 0 };
+  const scratch = new Float32Array(600);
+  const sortedMid = (k) => { if (!k) return 0; const a = scratch.subarray(0, k); a.sort(); return a[k >> 1]; };
+  function ringMed(buf, n) { for (let k = 0; k < n; k++) scratch[k] = buf[k]; return sortedMid(n); }
+  /** the median frame time (ms) of the last sec seconds */
+  function frameMed(sec) {
+    const L = FR.d.length;
+    let sum = 0, k = 0;
+    for (let j = 0; j < FR.n && sum < sec * 1000; j++) { const x = FR.d[(FR.i - 1 - j + L) % L]; scratch[k++] = x; sum += x; }
+    return sortedMid(k);
+  }
+  const allow = () => ALLOW[game.tier] || ALLOW.mid;
+  const frameMs = () => 1000 / (low ? 30 : 60); // (config.js TIERS: the low tier draws at 30 fps)
+  // one person's own draw calls (+ their sun-shadow casts on mid / high) and triangles, measured off a real one
+  const PC = { calls: 4, tris: 3000, measured: false, tried: false }; // (until measured: a guest is ~4 calls, ~3k triangles)
+  function measurePerson(p) {
+    if (PC.measured || !p?.root) return;
+    let n = 0, sh = 0, tr = 0;
+    p.root.traverse((o) => {
+      if (!o.isMesh || !o.visible) return;
+      n++; if (o.castShadow) sh++;
+      const g = o.geometry;
+      if (g) tr += ((g.index ? g.index.count : g.attributes?.position?.count || 0) / 3) * (o.isInstancedMesh ? o.count : 1);
+    });
+    if (!n) return;
+    PC.calls = n + (game.worldShadow ? sh : 0); PC.tris = Math.round(tr); PC.measured = true;
+  }
+  /** what an event adds to the frame: its prop rig (catalog `calls`, `tris`), the guests it may bring, a little for
+   *  the borrowed townsfolk who walk into view */
+  function costOf(ev) {
+    if (!PC.measured && !PC.tried) { PC.tried = true; for (const e of story.people.values()) if (e?.p?.root?.parent) { measurePerson(e.p); break; } } // (else the first guest made)
+    let g = 0;
+    for (const sl of ev.slots) if (sl.guest !== 'no') g++;
+    g = Math.min(g, low ? 1 : GUESTS);
+    return { calls: (ev.calls ?? 2) + g * PC.calls + 2, tris: (ev.tris ?? 3000) + g * PC.tris, guests: g };
+  }
+  /** the frame just before: the medians of the last 3 s (the current frame until there are enough samples) */
+  function baseNow() {
+    const few = CR.n < 5;
+    return { calls: few ? callsNow() : ringMed(CR.calls, CR.n), tris: few ? trisNow() : ringMed(CR.tris, CR.n), ms: frameMed(PERF.base) };
+  }
+  function budgetWhy(ev, b = baseNow()) {
+    const al = allow(), k = costOf(ev);
+    return b.calls + k.calls > al.calls || b.tris + k.tris > al.tris ? 'budget' : '';
+  }
   let fT0 = 0;
   const seg = { pre: 0, script: 0, frame: 0, rig: 0 };
   let planAt = '';
@@ -296,18 +361,22 @@ export function installEvents(game, story, ow) {
 
   // ---- gates
   let domBlock = false, domT = 0;
-  function blockedWhy() {
+  /** talk: Maya is in a talk (a running event only holds still for it: its dialogue box, letterbox and close-up are
+   *  not reasons to end it; a scene, an act, an overlay, a room still are) */
+  function blockedWhy(talk = false) {
     if (!game.maya?.root) return 'nomaya';
     if (document.hidden) return 'hidden';
     if (game.mode !== 'world') return 'mode';
     if (story.inRoom) return 'room';
-    if (story.talking) return 'talking';
-    if (game.busy) return 'busy';
-    if (game.ui?.dialogOpen) return 'dialog';
+    if (!talk) {
+      if (story.talking) return 'talking';
+      if (game.busy) return 'busy';
+      if (game.ui?.dialogOpen) return 'dialog';
+    }
     if (game.ui?.sheetOpen) return 'sheet';
-    if (game.rig?.cinematic) return 'cinematic';
+    if (!talk && game.rig?.cinematic) return 'cinematic';
     if (story.townIntro || story.introActive || story.cutscene || story.starting) return 'intro';
-    if (BUSY.test(gameEl.className)) return 'scene';
+    if ((talk ? BUSY_TALK : BUSY).test(gameEl.className)) return 'scene';
     if (domBlock) return 'overlay';
     if (story.carrying) return 'carrying';
     try { if (story.blockedTravel?.()) return 'travel'; } catch { /* a day's guard */ }
@@ -316,13 +385,16 @@ export function installEvents(game, story, ow) {
     if (dayOwns('npcEvents') || dayOwns('ambientFolk')) return 'day';
     return '';
   }
-  /** more, only to start one: Hein Htet on stage, the chatter mid-line, her speed, the frame's budget */
+  /** more, only to start one: Hein Htet on stage, the chatter mid-line, her speed, the frame's budget (no event of this
+   *  town fits on top of the frame as it is), the frame time (the game already struggling) */
   function startWhy() {
     if ((save.day || 1) <= 1) return 'day1';
     if (story.heinhtet?.state?.on) return 'heinhtet';
     if (story.chatter?.busy) return 'chatter';
     if (!story.foot?.active && Math.abs(game.world?.drive?.state?.speed || 0) > 2) return 'driving';
-    if (callsNow() > BUDGET.calls || trisNow() > BUDGET.tris) return 'budget';
+    if (frameMed(PERF.win) > frameMs() * PERF.slowStart) return 'slow';
+    const b = baseNow(), d = districtAt(M.x, M.z);
+    if (!EVENTS.some((ev) => ev.towns.includes(d) && !budgetWhy(ev, b))) return 'budget';
     return '';
   }
 
@@ -388,6 +460,7 @@ export function installEvents(game, story, ow) {
       planAt = 'person';
       const p = yield* createPersonSteps(look);
       planAt = 'guest';
+      measurePerson(p);
       if (!c.alive || !offFrame(from.x, from.z)) { p.dispose?.(); return null; } // (the start came into view meanwhile: nobody pops up)
       const id = `ev:${c.id}:${guestSeq++}`;
       p.root.position.set(from.x, 0, from.z);
@@ -552,8 +625,10 @@ export function installEvents(game, story, ow) {
     const c = {
       ev, id: ev.id, cx: lay.cx, cz: lay.cz, s: lay.s, h: lay.s > 0 ? Math.PI / 2 : -Math.PI / 2, d: lay.d, lay,
       spots: lay.spots, pts: lay.pts || {}, low, ps: [], alive: true, phase: 'plan', t: 0, tasks: [], says: [], obs: [], parts: [], tapParts: [],
-      quiet: !!ev.quiet, joining: false, joined: false, wrapping: false, overT: 0, guests: 0, day: save.day, startT: performance.now(),
-      st: 0, // (the script's own clock: it stands still while Maya talks with one of them, so no wait runs out in a talk)
+      quiet: !!ev.quiet, joining: false, joined: false, wrapping: false, guests: 0, day: save.day, startT: performance.now(),
+      st: 0, // (the script's own clock: it stands still while Maya talks with anyone, so no wait runs out in a talk)
+      wt: 0, // (the wrap-up's clock: it stands still in a talk too, so nothing folds away or is taken off while she talks)
+      slowT: 0, base: null, est: null, load: { n: 0, sum: 0, peak: 0, msMax: 0 },
       L: LINES[ev.id] || {}, mem: {},
       // -- people
       p: (slot) => c.ps.find((p) => p.slot === slot && alive(p)) || null,
@@ -594,7 +669,7 @@ export function installEvents(game, story, ow) {
       stopAct: (p) => { const an = A(); if (an?.stop && alive(p)) try { an.stop(p.e); } catch { /* none */ } },
       // -- words: speech bubbles through the chatter's one exchange slot. say([p, key], [p2, key2], ...) -> wait fn
       say: (...pairs) => {
-        const st = { done: false, started: false, t0: c.t, sp: [], lines: [] };
+        const st = { done: false, started: false, t0: c.st, sp: [], lines: [] };
         for (const [p, k] of pairs) {
           const line = typeof k === 'string' ? c.L[k] : k;
           if (!line) continue;
@@ -612,15 +687,17 @@ export function installEvents(game, story, ow) {
       /** a speaker that is not a person (a puppet): { root: Object3D, height } */
       sayAs: (fake, k) => {
         const line = typeof k === 'string' ? c.L[k] : k;
-        const st = { done: false, started: false, t0: c.t, sp: [{ id: 'ev:' + c.id + ':' + (fake.name || 'thing'), p: fake }], lines: [{ who: 0, my: line.my, en: line.en }] };
+        const st = { done: false, started: false, t0: c.st, sp: [{ id: 'ev:' + c.id + ':' + (fake.name || 'thing'), p: fake }], lines: [{ who: 0, my: line.my, en: line.en }] };
         c.says.push(st); trySay(c, st);
         return () => st.done;
       },
       // -- things
       part: (kind) => { const pt = rig.add(kind); if (pt) c.parts.push(pt); return pt; },
       carry: (pt, p, ox, oy, oz, ry = 0) => { if (pt && alive(p)) { const k = p.e.p.height ? p.e.p.height / 1.15 : 1; pt.carry(p.e.p, ox, oy * k, oz, ry); pt.holder = p; } },
-      block: (x, z, r) => { const o = { type: 'circle', x, z, r }; space.add([o]); c.obs.push(o); return o; },
-      unblock: (o) => { const i = c.obs.indexOf(o); if (i >= 0) { c.obs.splice(i, 1); space.remove([o]); } },
+      /** a prop's footprint in the walk space (pt: the prop it belongs to). Someone standing on it (the carrier who
+       *  just set it down, Maya): it goes in once they have stepped off */
+      block: (x, z, r, pt = null) => { const o = { type: 'circle', x, z, r, pt, pend: false }; c.obs.push(o); if (clearOf(c, o)) space.add([o]); else o.pend = true; return o; },
+      unblock: (o) => { const i = c.obs.indexOf(o); if (i >= 0) { c.obs.splice(i, 1); if (!o.pend) space.remove([o]); o.pend = false; } },
       burst: (kind, x, y, z, o = {}) => { try { game.fx?.burst?.(kind, tmp.set(x, y, z), o); } catch { /* no fx */ } },
       sfx: (name, x = c.cx, z = c.cz, vol = 1) => {
         const d = Math.hypot(x - M.x, z - M.z), k = Math.max(0, 1 - d / 28);
@@ -666,7 +743,14 @@ export function installEvents(game, story, ow) {
     if (!ch) { st.done = true; return; }
     // (a speaker gone or walked off: their lines are left out)
     if (ch.play(st.sp, st.lines, () => { st.done = true; }, 'small')) st.started = true;
-    else if (c.t - st.t0 > 4) st.done = true; // (the slot never came free: the beat goes on without it)
+    else if (c.st - st.t0 > 4) st.done = true; // (the slot never came free: the beat goes on without it)
+  }
+  /** nobody (a participant, Maya) stands on footprint o */
+  function clearOf(c, o) {
+    const R = o.r + 0.22;
+    if (Math.hypot(M.x - o.x, M.z - o.z) < R) return false;
+    for (const p of c.ps) { if (!alive(p)) continue; const q = p.e.p.root.position; if (Math.hypot(q.x - o.x, q.z - o.z) < R) return false; }
+    return true;
   }
 
   // ---- recruiting
@@ -705,11 +789,20 @@ export function installEvents(game, story, ow) {
     }
     if (sl.guest !== 'must') { const k = 'cands:' + sl.id; lastFails[k] = (lastFails[k] || '') + cands.filter((e) => fits(e, sl)).length + '/' + cands.length + ' '; }
     if (sl.guest === 'no' || c.guests >= (low ? 1 : GUESTS)) return null;
-    const from = walkInFrom(spot.x, spot.z, sl.side ? -(c.s || 1) : 0, sl.wide ? 0.55 : BODY); // (a carrier walks in toward the stage: what they push leads)
+    const r = sl.wide ? 0.55 : BODY;
+    let from = walkInFrom(spot.x, spot.z, sl.side ? -(c.s || 1) : 0, r), legs = null; // (a carrier walks in toward the stage: what they push leads)
+    if (!from) {
+      // no straight way in from the side: the nearest way out of sight from the spot (the same search a guest uses to
+      // leave: clear of walls, never further into a road), walked the other way round
+      planAt = 'way-in';
+      const out = {};
+      yield* hideWayG(spot.x, spot.z, r, out);
+      if (out.route?.length) { legs = out.route.slice(0, -1).reverse(); from = out.route[out.route.length - 1]; }
+    }
     if (!from) return null;
     c.guests++;
     void late;
-    return { sl, spot, src: { kind: 'guest', from } };
+    return { sl, spot, src: { kind: 'guest', from, legs } };
   }
   function* commitOne(c, a) {
     const { sl, spot, src } = a;
@@ -725,6 +818,12 @@ export function installEvents(game, story, ow) {
       if (!e) { c.guests--; return null; }
       e.evt = { id: c.id, slot: sl.id };
       e.g.tx = spot.x; e.g.tz = spot.z; e.g.wide = !!sl.wide;
+      if (src.legs?.length) { // (the way in round the corner: leg by leg, then the spot; the same way back out)
+        const g = e.g, f = src.legs[0];
+        g.route = [...src.legs.slice(1), { x: spot.x, z: spot.z }]; g.tx = f.x; g.tz = f.z;
+        g.trail = [{ x: src.from.x, z: src.from.z }, ...src.legs.map((q) => ({ x: q.x, z: q.z })), { x: spot.x, z: spot.z }];
+        e.p.root.rotation.y = Math.atan2(f.x - src.from.x, f.z - src.from.z);
+      }
       p = { e, slot: sl.id, tag: sl.tag || sl.id, kind: 'guest', spot, mood: null };
     }
     c.ps.push(p);
@@ -817,7 +916,9 @@ export function installEvents(game, story, ow) {
     }
     if (plan.length < (ev.min || 2)) return fail(ev, 'few');
     if (blockedWhy()) return fail(ev, 'gate');
-    // go: the event is on from here (the people walk to it as they are found)
+    // go: the event is on from here (the people walk to it as they are found). The frame as it was just before: the
+    // bar a slowdown is judged against
+    c.base = baseNow(); c.est = costOf(ev);
     cur = c;
     Object.assign(npc, { active: true, id: ev.id, x: c.cx, z: c.cz, quiet: !!ev.quiet });
     try { if (SONG_KIND[ev.id] && !ev.quiet) story.sound?.gather?.('npcev', { kind: SONG_KIND[ev.id], x: c.cx, z: c.cz, r: 9 }); } catch { /* no sound */ } // its own gathering song + ambience (sound/songs-more.js)
@@ -872,7 +973,7 @@ export function installEvents(game, story, ow) {
   }
   function wrapUp(c, why = 'wrap') {
     if (!c || c.wrapping) return;
-    c.wrapping = true; c.wrapWhy = why; c.wrapT0 = c.t;
+    c.wrapping = true; c.wrapWhy = why; c.wrapT0 = c.t; c.wt = 0;
     try { story.sound?.ungather?.('npcev'); } catch { /* no sound */ } // the show is over: the place's own music returns
     if (why !== 'end') { c.tasks.length = 0; try { c.ev.onWrap?.(c); } catch (e) { console.error('event wrap', c.id, e); } }
     c.run(disperse(c));
@@ -913,7 +1014,13 @@ export function installEvents(game, story, ow) {
     try { story.sound?.ungather?.('npcev'); } catch { /* no sound */ }
     if (cur === c) { cur = null; Object.assign(npc, { active: false, id: null, quiet: false }); }
     try { story.flag(`ev.${c.id}.seen`, true); } catch { /* no save */ }
-    stats.ended = { id: c.id, why: c.wrapWhy || null, t: +c.t.toFixed(1), wrap: c.wrapT0 != null ? +(c.t - c.wrapT0).toFixed(1) : null, soft, strays: strayN, joined: c.joined };
+    const ld = c.load;
+    stats.ended = {
+      id: c.id, why: c.wrapWhy || null, t: +c.t.toFixed(1), st: +c.st.toFixed(1), wrap: c.wrapT0 != null ? +(c.t - c.wrapT0).toFixed(1) : null, soft, strays: strayN, joined: c.joined,
+      // the frame: calls just before (base), its expected cost (est), the mean / peak while it ran; frame ms before / the worst 4 s median
+      calls: c.base ? { base: c.base.calls, est: c.est?.calls ?? null, mean: ld.n ? +(ld.sum / ld.n).toFixed(1) : null, peak: ld.peak } : null,
+      ms: c.base ? { base: +c.base.ms.toFixed(1), worst: +ld.msMax.toFixed(1) } : null,
+    };
     (stats.ends ||= []).push(stats.ended); if (stats.ends.length > 30) stats.ends.shift();
     nextAt = elig + rand(T.gap[0], T.gap[1]);
   }
@@ -926,19 +1033,34 @@ export function installEvents(game, story, ow) {
     if (story.inRoom || game.mode !== 'world' || save.day !== c.day || ow?.overviewOn) { endNow(c); return; }
     // the join talk: the event holds still while Maya talks with one of them
     if (c.joining) joinWatch(c, dt);
-    const paused = c.joining && story.talking;
-    if (!paused) c.st += dt;
+    // any talk (one of them, or someone else she tapped): the event holds still, script, props, guests and wrap-up
+    const paused = !!story.talking;
+    if (!paused) { c.st += dt; if (c.wrapping) c.wt += dt; }
     c.gateT = (c.gateT || 0) - dt;
-    if (c.gateT <= 0 && !c.wrapping) {
+    if (c.gateT <= 0) {
       c.gateT = 0.25;
-      const why = c.joining ? '' : blockedWhy();
-      const d = Math.hypot(c.cx - M.x, c.cz - M.z);
-      const cap = c.ev.cap || CAP.run;
-      c.overT = callsNow() > BUDGET.over ? c.overT + 0.25 : 0;
-      if (why) wrapUp(c, why);
-      else if (d > FAR) wrapUp(c, 'far');
-      else if (c.overT > BUDGET.overFor && !c.noBudget) wrapUp(c, 'budget');
-      else if (c.t > cap + (c.joining ? CAP.joinMore : 0)) wrapUp(c, 'cap'); // (every event ends: a talk with one of them gets a little longer)
+      // footprints waiting for their carrier (or Maya) to step off
+      for (const o of c.obs) if (o.pend && clearOf(c, o)) { o.pend = false; space.add([o]); }
+      // the frame while it runs (stats), and a real slowdown: the frames of the last PERF.win s against the ones before
+      // it began, for PERF.hold s on end (a brief spike of calls or a hitch never ends it)
+      if (c.phase === 'run' && !paused && c.st > PERF.warm) {
+        const n = callsNow(), ld = c.load;
+        ld.n++; ld.sum += n; if (n > ld.peak) ld.peak = n;
+        const m = frameMed(PERF.win), b = c.base?.ms || 0;
+        if (m > ld.msMax) ld.msMax = m;
+        const slow = b > 0 && m > b * PERF.ratio && m > b + PERF.plus && m > frameMs() * 1.1;
+        c.slowT = slow && !c.noBudget && !c.wrapping ? c.slowT + 0.25 : 0;
+      }
+      if (!c.wrapping) {
+        const why = c.joining ? '' : blockedWhy(paused);
+        const d = Math.hypot(c.cx - M.x, c.cz - M.z);
+        const cap = c.ev.cap || CAP.run;
+        if (why) wrapUp(c, why);
+        else if (d > FAR) wrapUp(c, 'far');
+        else if (c.slowT >= PERF.hold) wrapUp(c, 'slow');
+        // (every event ends: its own clock (a talk stands it still) + a little more for a join's walk; the wall clock at most)
+        else if (c.st > cap + (c.joining ? CAP.joinMore : 0) || c.t > cap + CAP.talkMax) wrapUp(c, 'cap');
+      }
     }
     // lost people (a stream took them, a day claimed them): out of the cast list
     for (const p of c.ps) if (!p.gone && p.kind === 'roam' && !alive(p)) { p.gone = true; if (p.e) p.e.evt = null; }
@@ -948,8 +1070,8 @@ export function installEvents(game, story, ow) {
       const e = p.e;
       if (story.people.get(e.id) !== e) { p.gone = true; continue; }
       // in a wrap-up a guest out of the frame is gone at once (also mid-walk); one left standing in view finds a way
-      // out of sight
-      if (c.wrapping && guestOut(e, dt)) p.gone = true;
+      // out of sight (not in a talk: the close-up's frame is not the street's)
+      if (c.wrapping && !paused && guestOut(e, dt)) p.gone = true;
     }
     const tA = performance.now();
     // words waiting for the chatter's slot
@@ -975,12 +1097,13 @@ export function installEvents(game, story, ow) {
     rig.update(paused ? 0 : dt);
     const tD = performance.now();
     seg.pre = tA - fT0; seg.script = tB - tA; seg.frame = tC - tB; seg.rig = tD - tC;
-    // the end: once the last of it has gone, or at the latest CAP.hard s into the wrap-up
-    if (c.wrapping) {
+    // the end: once the last of it has gone, or at the latest CAP.hard s into the wrap-up (its own clock: not in a talk,
+    // whose close-up would count the props round it as out of the frame)
+    if (c.wrapping && !paused) {
       lingerT += dt;
       if (lingerT > 0.25) {
         lingerT = 0;
-        const wt = c.t - c.wrapT0, late = wt > CAP.soft;
+        const wt = c.wt, late = wt > CAP.soft;
         // late: the script's last moves are cut, and everyone not yet on their way leaves now
         if (late && !c.swept) {
           c.swept = true;
@@ -999,10 +1122,12 @@ export function installEvents(game, story, ow) {
           if (pt.gr && pt.gr.s1 <= 0) continue; // (folding already)
           if (late || wt > (holder ? 8 : 5)) { pt.drive = null; pt.grow(0, 0.35); }
         }
-        for (const o of c.obs.slice()) { if (!c.parts.some((pt) => pt.ob === o && pt.vis && pt.s > 0.01)) c.unblock(o); }
+        for (const o of c.obs.slice()) { if (!c.parts.some((pt) => (pt.ob === o || o.pt === pt) && pt.vis && pt.s > 0.01)) c.unblock(o); }
         if (finished(c, late)) endNow(c, true);
         else if (wt > CAP.hard) endNow(c, true);
       }
+    } else if (c.wrapping && paused && c.t - c.wrapT0 > CAP.hard + CAP.talkMax) {
+      endNow(c, true); // (a talk that never closes: the wrap-up's own clock stands still in it, so the wall clock ends it)
     }
   }
 
@@ -1083,7 +1208,8 @@ export function installEvents(game, story, ow) {
   const hookArrive = () => { if (arriveHooked || !story.events?.on) return; arriveHooked = true; story.events.on('town:arrive', () => { lastArrive = clock; }); }; // (story.events comes with the chatter)
   hookArrive();
   function chooseEvent(o = {}) {
-    const ok = EVENTS.filter((ev) => !eligibleWhy(ev, o));
+    const b = baseNow();
+    const ok = EVENTS.filter((ev) => !eligibleWhy(ev, o) && !budgetWhy(ev, b)); // (only those that fit the frame now)
     if (!ok.length) return null;
     let sum = 0;
     for (const ev of ok) sum += ev.weight || 1;
@@ -1126,6 +1252,14 @@ export function installEvents(game, story, ow) {
     try {
       clock += dt;
       const mp = mayaPos(); M.x = mp.x; M.z = mp.z;
+      // the frame's load: every frame's time (a hidden tab's gap or a stall over 250 ms is not a frame), and the calls
+      // and triangles outdoors while nothing of an event is in the scene
+      if (FR.last && !document.hidden) { const d = t0 - FR.last; if (d > 0 && d < 250) { FR.d[FR.i] = d; FR.i = (FR.i + 1) % FR.d.length; if (FR.n < FR.d.length) FR.n++; } }
+      FR.last = t0;
+      if ((CR.t -= dt) <= 0) {
+        CR.t = 0.1;
+        if (!cur && !rigClearAt && !strays.size && game.mode === 'world' && !story.inRoom) { CR.calls[CR.i] = callsNow(); CR.tris[CR.i] = trisNow(); CR.i = (CR.i + 1) % CR.calls.length; if (CR.n < CR.calls.length) CR.n++; }
+      }
       domT -= dt;
       if (domT <= 0) { domT = 0.3; domBlock = !!document.querySelector(DOM_BLOCK); }
       if (job) {
@@ -1138,7 +1272,7 @@ export function installEvents(game, story, ow) {
       seg.job = tJ - t0;
       if (cur) runFrame(cur, dt);
       else if (rigClearAt) { rig.update(dt); if (clock >= rigClearAt) { rig.clear(); rigClearAt = 0; } } // (the last props folding away)
-      if (strays.size) straysFrame(dt);
+      if (strays.size && !story.talking) straysFrame(dt); // (in a talk they stand still: guestStep)
       seg.pre = Math.max(0, seg.pre - seg.job);
       acc += dt;
       if (acc >= 1) { acc = 0; if (!mentionsIn) addMentions(); if (!arriveHooked) hookArrive(); schedule(); }
@@ -1169,13 +1303,15 @@ export function installEvents(game, story, ow) {
       const c = cur;
       if (!c) return { active: false, planning: !!job, lastWhy: jobWhy, nextIn: +(nextAt - elig).toFixed(0), elig: Math.round(elig), strays: strays.size, folding: !!rigClearAt };
       return {
-        active: true, id: c.id, phase: c.phase, t: +c.t.toFixed(1), st: +c.st.toFixed(1), wrapping: c.wrapping, wt: c.wrapping ? +(c.t - c.wrapT0).toFixed(1) : null, why: c.wrapWhy || null, x: +c.cx.toFixed(1), z: +c.cz.toFixed(1), s: c.s, strays: strays.size,
+        active: true, id: c.id, phase: c.phase, t: +c.t.toFixed(1), st: +c.st.toFixed(1), wrapping: c.wrapping, wt: c.wrapping ? +c.wt.toFixed(1) : null, why: c.wrapWhy || null, x: +c.cx.toFixed(1), z: +c.cz.toFixed(1), s: c.s, strays: strays.size,
         people: c.ps.map((p) => { const q = p.e.p.root.position, g = p.kind === 'guest' ? p.e.g : null; return { id: p.e.id, slot: p.slot, kind: p.kind, gone: !!p.gone, at: alive(p) ? pAt(p) : null, arr: !!p.arrived, d: g && g.tx != null ? +Math.hypot(g.tx - q.x, g.tz - q.z).toFixed(1) : undefined, off: alive(p) ? offFrame(q.x, q.z) : undefined }; }),
-        props: rig.stats(), calls: callsNow(), tris: trisNow(), joined: c.joined, tasks: c.tasks.filter((t) => !t.done).length, inView: inViewC(c.cx, c.cz),
+        props: rig.stats(), calls: callsNow(), tris: trisNow(), base: c.base && { calls: c.base.calls, tris: c.base.tris, ms: +c.base.ms.toFixed(1) }, est: c.est, ms: +frameMed(PERF.win).toFixed(1), slowT: c.slowT, pend: c.obs.filter((o) => o.pend).length, obs: c.obs.length, joined: c.joined, tasks: c.tasks.filter((t) => !t.done).length, inView: inViewC(c.cx, c.cz),
         maya: [+M.x.toFixed(1), +M.z.toFixed(1)], parts: c.parts.filter((pt) => pt.vis && pt.s > 0.01).map((pt) => pt.kind + (pt.held ? '@' + (pt.holder?.e?.id || '?') : '')),
       };
     },
     why: () => ({ gate: blockedWhy(), start: startWhy(), last: jobWhy, fails: { ...lastFails } }),
+    /** (tests) the frame's load now: base medians, the tier's allowance, each event's expected cost and whether it fits */
+    load: () => { const b = baseNow(); return { tier: game.tier, allow: allow(), base: { calls: b.calls, tris: b.tris, ms: +b.ms.toFixed(1) }, ms4: +frameMed(PERF.win).toFixed(1), person: { ...PC }, fit: EVENTS.map((ev) => ev.id + ':' + costOf(ev).calls + (budgetWhy(ev, b) ? 'x' : '')).join(' ') }; },
     end() { if (cur) wrapUp(cur, 'debug'); return !!cur; },
     stop() { if (cur) endNow(cur); job = null; return true; },
     stats: () => ({ ...stats, ms: +stats.ms.toFixed(3), msMax: +stats.msMax.toFixed(2), planMsMax: +stats.planMsMax.toFixed(2), elig: Math.round(elig), nextAt: Math.round(nextAt) }),

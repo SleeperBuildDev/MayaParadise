@@ -108,12 +108,17 @@ export const WORK = {
       P.torsoZ += 0.04 * c.s * c.w; P.headZ -= 0.05 * c.s * c.w;
     },
   },
-  carryHead: {
-    layer: 'base', dur: 4, loop: true, walkable: true, prop: 'basket', face: false,
+  carryHead: { // the basket balanced on the head, hands free: on these bodies the head stands 0.46-0.54 m above the
+    // shoulder and a raised arm reaches 0.26-0.37 m, so hands "on the basket" stopped 0.15-0.22 m short of it.
+    // Standing, the near hand rests on the hip; walking, the arms swing with the walk. A child (kid) carries it in
+    // front in both hands instead (index.js start()).
+    layer: 'base', dur: 4, loop: true, walkable: true, prop: 'basket', face: false, kid: 'carryFront', kidProp: 'basketFront',
     fn(P, c) {
-      const { w, t } = c;
-      arm(P, 1, -0.3, 2.85 + 0.04 * sin(t * 4), w); arm(P, -1, -0.3, 2.85 + 0.04 * sin(t * 4 + 1), w); // (hands up under the basket rim: 2.35 left them 0.25 m below it)
-      P.headX -= 0.04 * w; P.torsoX -= 0.03 * w;
+      const { w, t, s } = c, still = w * (1 - P.walk);
+      arm(P, s, 0.12, 0.4, still); // (no elbows: the arm out a little and back reads as a hand on the hip)
+      armAdd(P, -s, 0, 0.03, still);
+      P.torsoX -= 0.03 * w; P.headX -= 0.03 * w; // upright under the load
+      P.headZ += 0.02 * sin(t * 1.6) * w; // a slow balancing sway
     },
   },
   carryFront: {
