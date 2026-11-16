@@ -16,6 +16,7 @@
 //   cut.dispose()
 import * as THREE from '../../game/three.js';
 import { toon, outlineMaterial } from '../../game/toon.js';
+import { nightWarp } from '../../game/nightshadow.js';
 
 export const BLOCKERS = 6;
 
@@ -96,7 +97,7 @@ export function createCutaway() {
   const trees = solid; // instancing is a define: the same material serves the instanced trees
   // the sun's shadow pass draws with this, so what is cut away casts no shadow either (a faded
   // building would otherwise leave its whole footprint, and her, in its shade)
-  const depth = patch(new THREE.MeshDepthMaterial(), null, 'ow-cut3-depth', uniforms, false, true);
+  const depth = nightWarp(patch(new THREE.MeshDepthMaterial(), null, 'ow-cut3-depth', uniforms, false, true)); // (night: shadows lean away from the nearest lamp)
   return {
     solid, outline, outline14, trees, depth,
     set(cam, target, lens) {

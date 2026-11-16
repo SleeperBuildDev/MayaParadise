@@ -13,6 +13,7 @@
 import * as THREE from '../../game/three.js';
 import { basic, toon, addOutline, signTextureSteps, signMesh } from '../../game/toon.js';
 import { markShadows } from '../../game/shadows.js';
+import * as dayKit from '../../game/daytime.js'; // (namespace: a browser still holding an older daytime.js keeps working)
 import { chunkJob, treeGeo, chunkOf, CELL } from './build.js';
 import { CHUNK, GRID, ITEMS, REGIONS, LAZY, LOADED, regionReady } from './region.js';
 import { disposeMesh } from './kit.js';
@@ -84,6 +85,28 @@ export function createStreamer({ scene, net, edges, shadows = false, low = false
   glows.name = 'ow-glows';
   glows.count = 0;
   root.add(glows);
+  // the pool of warm light on the ground under every lamp, lantern and bulb (one draw call; the Home Book's lamps have
+  // had theirs since the night look was made: game/daytime.js buildLampPools). The material is the Home Book's, so
+  // its opacity is the hour's and every pool comes on together at dusk.
+  const poolMat = dayKit.lampPoolMaterial?.() || null;
+  const lampPools = poolMat ? new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2), poolMat, GLOW_CAP) : null;
+  if (lampPools) {
+    lampPools.name = 'ow-lampPools';
+    lampPools.count = 0;
+    lampPools.renderOrder = 2;
+    lampPools.frustumCulled = false;
+    lampPools.raycast = () => {};
+    lampPools.userData.shadow = 'none';
+    lampPools.castShadow = lampPools.receiveShadow = false;
+    lampPools.visible = false;
+    root.add(lampPools);
+  }
+  /** One pool under the glow at (x, y, z): a street lamp's is 4.2 m wide (as the Home Book's), a low bulb's smaller. */
+  const POOL_Y = 0.176; // just over the road's top (0.14 + its dashes): a pool is never cut off by the tarmac
+  function putPool(i, x, y, z) {
+    const w = y >= 2.15 ? 4.2 : y >= 1.4 ? 3.2 : 2.4;
+    lampPools.setMatrixAt(i, m4.compose(p.set(x, POOL_Y, z), q.identity(), sc.set(w, 1, w)));
+  }
   const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), p = new THREE.Vector3(), sc = new THREE.Vector3();
 
   function rebuildPools() {
@@ -97,13 +120,15 @@ export function createStreamer({ scene, net, edges, shadows = false, low = false
       }
       const G = ch.out.glows;
       for (let k = 0; k < G.length && ng < GLOW_CAP; k += 3) {
+        if (lampPools) putPool(ng, G[k], G[k + 1], G[k + 2]);
         glows.setMatrixAt(ng++, m4.compose(p.set(G[k], G[k + 1], G[k + 2]), q.identity(), sc.set(0.26, 0.3, 0.26)));
       }
     }
     const X = extraGlows ? extraGlows() : null; // lit Bookmark Desk lamps
-    if (X) for (let k = 0; k < X.length && ng < GLOW_CAP; k += 3) glows.setMatrixAt(ng++, m4.compose(p.set(X[k], X[k + 1], X[k + 2]), q.identity(), sc.set(0.26, 0.3, 0.26)));
+    if (X) for (let k = 0; k < X.length && ng < GLOW_CAP; k += 3) { if (lampPools) putPool(ng, X[k], X[k + 1], X[k + 2]); glows.setMatrixAt(ng++, m4.compose(p.set(X[k], X[k + 1], X[k + 2]), q.identity(), sc.set(0.26, 0.3, 0.26))); }
     glows.count = ng;
     glows.instanceMatrix.needsUpdate = true;
+    if (lampPools) { lampPools.count = ng; lampPools.instanceMatrix.needsUpdate = true; }
     glows.computeBoundingSphere();
     for (const kind in pools) for (const it of pools[kind].all) {
       it._ry ??= ((it.x * 12.9898 + it.z * 78.233) % 6.283);
@@ -506,6 +531,7 @@ export function createStreamer({ scene, net, edges, shadows = false, low = false
     refreshGlows() { rebuildPools(); },
     update(dt, t, x, z, camera = null, fogFar = 1e9) {
       painted?.update();
+      if (lampPools) lampPools.visible = poolMat.opacity > 0.015 && lampPools.count > 0; // (by day: not drawn at all)
       scanT -= dt;
       const fx = x, fz = z - AHEAD;
       if (scanT <= 0) {
@@ -568,6 +594,7 @@ export function createStreamer({ scene, net, edges, shadows = false, low = false
       for (const ch of chunks.values()) drop(ch);
       for (const kind in pools) { pools[kind].mesh.geometry.dispose(); pools[kind].mesh.dispose(); pools[kind].outline.dispose(); }
       glows.geometry.dispose(); glows.dispose();
+      if (lampPools) { lampPools.geometry.dispose(); lampPools.dispose(); } // (the material is the Home Book's: kept)
       if (treeMats) { treeMats.mat.dispose(); treeMats.depth.dispose(); }
       painted?.dispose();
       scene.remove(root);

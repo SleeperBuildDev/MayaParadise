@@ -18,6 +18,8 @@
 //   p.dispose()
 //   p.P / p.rig                        the pose record and body measures js/story/anim reads (PEOPLE_ANIM below)
 import * as THREE from '../game/three.js';
+import { depthTwin } from '../game/shadows.js';
+import { trackCaster, untrackCaster, NPC_SHADOWS } from '../game/nightshadow.js';
 import { mergeGeometries, mergeVertices } from '../game/three.js';
 import { PALETTE, toon, blobShadow } from '../game/toon.js';
 import { VoxelBuilder } from '../game/voxel.js';
@@ -819,6 +821,8 @@ export function* createPersonSteps(spec = {}) {
   mesh.updateMatrixWorld(true);
   const skeleton = new THREE.Skeleton(list);
   mesh.bind(skeleton);
+  // a real shadow, as Maya's (the sun's by day, the moon's or the nearest lamp's by night: game/nightshadow.js)
+  if (NPC_SHADOWS.on) { mesh.castShadow = true; depthTwin(mesh); }
   rayCache(mesh, list);
   const oMat = outlineMat();
   const outline = new THREE.SkinnedMesh(outGeo, oMat);
@@ -1003,6 +1007,7 @@ export function* createPersonSteps(spec = {}) {
       stick: (spec.extras || []).includes('cane'), chinlone: B.chinlone, age: spec.age || 'adult' },
     dispose() {
       LIVE_PEOPLE.delete(root);
+      untrackCaster(root);
       bodyGeo.dispose(); outGeo.dispose(); faceGeo.dispose(); skeleton.dispose();
       shadow.geometry?.dispose?.();
       releaseAtlas(atlas);
@@ -1011,6 +1016,7 @@ export function* createPersonSteps(spec = {}) {
   };
   void _q;
   LIVE_PEOPLE.set(root, { hips: bones.hips, hipY: B.hipY, mesh });
+  if (NPC_SHADOWS.on) trackCaster(root, { height: B.hc + B.HH / 2, blob: shadow });
   return api;
 }
 

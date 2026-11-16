@@ -154,13 +154,23 @@ function buildNightSky(radius = 170) {
   return group;
 }
 
+/** The one material of every lamp pool (the Home Book's and the story towns': js/story/world/stream.js). Its opacity
+ *  is the hour's (applyWorld: state.lamps), so every pool comes on together at dusk. */
+let poolMat = null;
+export function lampPoolMaterial() {
+  if (!poolMat) {
+    const tex = discTexture('rgba(255,214,140,0.85)', 'rgba(255,190,110,0.28)', 0.45);
+    poolMat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false, fog: true });
+  }
+  return poolMat;
+}
+
 /** Warm pools of light on the page under each street lamp (additive, unlit, no shadows). */
 function buildLampPools(glows) {
   const out = new THREE.Group();
   out.name = 'lampPools';
   if (!glows?.isInstancedMesh) return out;
-  const tex = discTexture('rgba(255,214,140,0.85)', 'rgba(255,190,110,0.28)', 0.45);
-  const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false, fog: true });
+  const mat = lampPoolMaterial();
   const m = new THREE.Matrix4(), p = new THREE.Vector3(), q = new THREE.Quaternion(), s = new THREE.Vector3();
   const lamps = [];
   for (let i = 0; i < glows.count; i++) {
@@ -200,7 +210,7 @@ function buildWindowLights(root) {
   const isActor = (o) => { for (let q = o; q; q = q.parent) if (/car|maya/i.test(q.name || '')) return true; return false; };
   const meshes = [];
   root.traverse((o) => { if (o.isMesh && !o.userData.isOutline && o.geometry?.attributes?.color && o.geometry?.attributes?.normal && !isActor(o)) meshes.push(o); });
-  const groups = [];
+  const groups = [], sources = [];
   let count = 0;
   const a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3(), n = new THREE.Vector3(), cen = new THREE.Vector3();
   const e1 = new THREE.Vector3(), e2 = new THREE.Vector3();
@@ -273,6 +283,8 @@ function buildWindowLights(root) {
         const reach = 1.2 + height * 0.25;
         const o = new THREE.Vector3(center.x, minY + 0.04, center.z).addScaledVector(cl.n, reach * 0.8);
         quad(sp, su, o, side.clone().multiplyScalar(w * 0.8 + 0.5), cl.n.clone().multiplyScalar(reach));
+        // (a lit window is a light source too: who stands in its spill casts a shadow away from the house, nightshadow.js)
+        sources.push({ mesh, c: cl.box.getCenter(new THREE.Vector3()), n: cl.n.clone(), reach: reach * 1.8 + 1.6 });
       }
       count++;
     }
@@ -295,7 +307,7 @@ function buildWindowLights(root) {
     groups.push(group);
   }
   if (!groups.length) return null;
-  return { panes: paneMat, halos: haloMat, spills: spillMat, groups, count };
+  return { panes: paneMat, halos: haloMat, spills: spillMat, groups, count, sources };
 }
 
 /**
@@ -654,6 +666,19 @@ export function createDaytime({ renderer, tier = 'mid', params = null, baseExpos
     get headlights() { return state.headlights; },
     get windows() { return state.windows; },
     get lamps() { return state.lamps; },
+    /** The lit windows as light sources for js/game/nightshadow.js: push(x, y, z, reach, power, nx, nz) for each. */
+    windowSource(push) {
+      if (!windowLights || !(state.windows > 0.5)) return;
+      const v = new THREE.Vector3(), d = new THREE.Vector3();
+      for (const w of windowLights.sources) {
+        if (!w.mesh.parent) continue;
+        v.copy(w.c).applyMatrix4(w.mesh.matrixWorld);
+        d.copy(w.n).transformDirection(w.mesh.matrixWorld);
+        const len = Math.hypot(d.x, d.z);
+        if (len < 0.5 || v.y > 5 || v.y < 0.4) continue;
+        push(v.x, Math.max(v.y, 1.5), v.z, w.reach, 0.85, d.x / len, d.z / len);
+      }
+    },
 
     /** Re-reads the clock every 30 s; returns true when the look changed (caller re-applies). */
     update(dt) {

@@ -97,7 +97,7 @@
   "js/story/extras-ui.js",
   "js/game/modeswitch.js",
   "js/game/keepplace.js",
-  "js/game/lampshadow.js",
+  "js/game/nightshadow.js",
   "js/story/intro.js",
   "js/story/intro-lines.js",
   "js/story/world/townintro.js",

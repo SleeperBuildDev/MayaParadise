@@ -13,6 +13,7 @@ import * as shadowKit from './shadows.js';
 const { enableShadows, setupSceneShadows } = shadowKit;
 const markShadows = shadowKit.markShadows || shadowKit.markCasters;
 import * as dayKit from './daytime.js';
+import * as nightKit from './nightshadow.js';
 // (namespace import: a browser still holding the previous daytime.js for a few minutes keeps working)
 const { createDaytime, buildHeadlightBeams } = dayKit;
 import { createMusic } from './music.js?v=6';
@@ -180,6 +181,17 @@ class Game {
     if (this.headlamp) this.car.root.add(this.headlamp);
     this.heroLight = dayKit.buildHeroLight?.() || null; // keeps Maya and the car easy to see at night
     if (this.heroLight) this.world.scene.add(this.heroLight);
+    // night: everyone's shadow falls away from the lamp, lantern or lit window they stand near (js/game/nightshadow.js)
+    if (this.worldShadow) {
+      nightKit.NPC_SHADOWS.on = this.tier !== 'low';
+      this.nightShadow = nightKit.createNightShadow({ day: this.day, shadow: this.worldShadow });
+      this.nightShadow.addSource(nightKit.glowSource(this.world.scene));
+      if (this.day.windowSource) this.nightShadow.addSource(this.day.windowSource);
+      this.nightShadow.track(this.maya.root, { height: 1.2, blob: this.maya.shadow || null, blobLive: true });
+      this.nightShadow.track(this.car.root, { height: 1.1 });
+      this.nightShadow.stills = this.tier !== 'low';
+      nightKit.nightWarpStatics(this.world.root); // the Home Book's benches, posts and trees
+    }
     this.gradeEl = document.createElement('div');
     this.gradeEl.id = 'grade';
     canvas.insertAdjacentElement('afterend', this.gradeEl);
@@ -360,6 +372,7 @@ class Game {
     this.fx.update(dt);
     this.rig.update(dt);
     // world: the sun's shadow covers exactly what the camera sees (texel-snapped); rooms: fitted once
+    if (this.mode === 'world') this.nightShadow?.update(dt, t); else this.nightShadow?.sleep();
     if (this.mode === 'world') this.worldShadow?.fitCamera?.(this.camera);
     if (this.heroLight && this.mode === 'world') {
       const p = this.mayaOut() ? this.maya.root.getWorldPosition(this.tmp2) : this.car.root.position;

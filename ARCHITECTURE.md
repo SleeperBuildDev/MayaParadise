@@ -164,9 +164,17 @@ The full content (prices, packages, links) lives in `index.html`; the original c
 ## The game director (`js/game/main.js`)
 - **Boot:** `js/boot.js` checks WebGL2, picks a tier (`?tier=low|mid|high` forces one), creates the
   AudioContext inside the Play tap and calls `startGame()`. The game is `window.__mwGame`.
-- **Tiers:** low = no shadows, pixel ratio 1, 30 fps cap, half particles, low-detail world;
-  mid/high = one small following sun shadow (Maya and the car cast, everything receives).
-  A governor lowers the pixel ratio if frames get slow.
+- **Tiers:** low = pixel ratio 1, 30 fps cap, half particles, low-detail world, a 1024 shadow map, townsfolk cast
+  no shadow; mid/high = a 2048 sun shadow fitted to the view (`js/game/shadows.js`): everything solid casts and
+  receives, the townsfolk included (`js/story/people.js`). A governor lowers the pixel ratio if frames get slow.
+- **Night shadows (`js/game/nightshadow.js`):** still the one shadow map (the moon's). After dark each character
+  (Maya, the car, every townsperson: `trackCaster(root)`) is sheared in the shadow pass by a per-mesh
+  `onBeforeShadow` hook so its shadow falls away from the lamp, lantern, bulb or lit window it stands near; still
+  things drawn with a depth material patched by `nightWarp()` (the story chunks, instanced and batched casters, the
+  Home Book) do the same per vertex from a small texture of the lights. A shadow depends only on where its own caster
+  stands: nothing else moves when the player walks. Far from every light it is the moon's. Lights are read from the
+  `glows` / `ow-glows` instanced meshes (`glowSource`) and `day.windowSource`; add others with `ns.addSource(fn)`.
+  Never turn the shadow light itself toward a lamp (tried on 2026-11-16: every shadow on screen swung).
 - **World:** the car is road-locked (`world.drive`); taps/dock buttons use the autopilot. Arriving
   shows the place card; the autopilot auto-enters. `atPad` is ignored while the autopilot drives.
 - **Entering:** close-up → Maya hops out (`maya.hopTiming`: the game slides her root from the seat

@@ -6,6 +6,7 @@
 //  - markShadows() decides who casts / receives: opaque lit solids cast and receive; outlines,
 //    unlit glows/signs, transparent and tiny bits do not. userData.shadow overrides it.
 import * as THREE from './three.js';
+import { nightWarp } from './nightshadow.js';
 
 /** Shadow-map sizes per tier (world follows the camera; rooms are static). */
 export const SHADOW_MAP = {
@@ -93,7 +94,9 @@ export function depthTwin(o, variant = '') {
     if (!m || (m.clipShadows && m.clippingPlanes?.length) || (m.displacementMap && m.displacementScale !== 0)
       || (m.alphaMap && m.alphaTest > 0) || (m.map && m.alphaTest > 0) || m.alphaToCoverage) return;
   }
-  o.customDepthMaterial = DEPTH_TWINS[kind] ||= new THREE.MeshDepthMaterial();
+  // (instanced and batched casters are still things or small rigid ones: at night their shadows lean away from the
+  // nearest lamp, js/game/nightshadow.js; skinned ones, the people, are sheared whole by that module's hook instead)
+  o.customDepthMaterial = DEPTH_TWINS[kind] ||= kind === 'skinned' ? new THREE.MeshDepthMaterial() : nightWarp(new THREE.MeshDepthMaterial());
 }
 
 /** Back-compat: opaque lit meshes in an object cast (and receive) shadows. */
@@ -254,8 +257,6 @@ export function setupSceneShadows(scene, opts = {}) {
       }
       apply(0, 1);
     },
-    /** Re-aim the light along dir (unit, toward the light) without refitting sizes (night lamp shadows, every frame). */
-    setDir(dir) { sun.position.copy(sun.target.position).addScaledVector(dir, 20); sun.updateMatrixWorld(); refreshBasis(); },
     /** Call if the light was re-aimed (e.g. a different lighting preset). */
     refresh() { refreshBasis(); curW = curH = 0; },
     dispose() { sun.shadow.map?.dispose(); sun.shadow.map = null; },
