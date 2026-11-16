@@ -1,7 +1,10 @@
-// Day 5 hints: what to do next (never where). Ordered by play order.
+// Day 5 hints: what to do next. Ordered by play order.
+// Where (owner 2026-11-16: the corner map's mark, the notebook map's pin, the tap pointer): who = the person, live (else
+// the room the day's roomCast puts them in, else `at`); go = where the step happens instead; hints-where.js has the specs.
 // (ch 10 and ch 2 can go in any order; the engine shows the first unfinished step. The night page needs
 //  d5.ch10Done and d5.ch2Done; the bridge and Nay Chi are the main thread. Every flag is set in day5.js.)
 const f = (s, k) => !!s.flag(`d5.${k}`);
+// (the bridge beat starts at Jetty End: the wharfEnd desk; Ko Thiha's five looks are round his raft)
 
 export default [
   { id: 'd5.morning', who: 'wintwar', done: (s) => f(s, 'morning'), my: 'မဝင့်ဝါနဲ့ အရင် စကားပြောပါ', en: 'Talk to Ma Wint War first' },
@@ -17,12 +20,12 @@ export default [
   { id: 'd5.maungnge', who: 'maungnge', done: (s) => f(s, 'mnMet') || f(s, 'thMet'), my: 'မောင်ငယ်ကို ရှာပြီး စကားပြောပါ', en: 'Find Maung Nge and talk to him' },
   { id: 'd5.thiha', who: 'kothiha', done: (s) => f(s, 'thMet'), my: 'မျောနေတဲ့ ကိုသီဟနဲ့ စကားပြောပါ', en: 'Talk to Ko Thiha, adrift on his raft' },
   { id: 'd5.sort', who: 'kothiha', done: (s) => f(s, 'sorted'), my: 'ကိုသီဟရဲ့ စာရင်းကို အတူ ခွဲကြည့်ပါ', en: "Sort Ko Thiha's list with him" },
-  { id: 'd5.looks2', done: (s) => f(s, 'looked2'), my: 'ကိုသီဟရဲ့ ဘဝကို ကိုယ်တိုင်ကြည့်ပါ (၅ ခု)', en: "Look at Ko Thiha's life yourself (5 things)" },
+  { id: 'd5.looks2', go: { who: 'kothiha', kind: 'area' }, done: (s) => f(s, 'looked2'), my: 'ကိုသီဟရဲ့ ဘဝကို ကိုယ်တိုင်ကြည့်ပါ (၅ ခု)', en: "Look at Ko Thiha's life yourself (5 things)" },
   { id: 'd5.thTalk', who: 'kothiha', done: (s) => f(s, 'thTalk'), my: 'ကိုသီဟနဲ့ စကားဆက်ပြောပါ', en: 'Talk with Ko Thiha again' },
   { id: 'd5.pole', who: 'kothiha', done: (s) => f(s, 'poled'), my: 'ကိုသီဟနဲ့အတူ ဖောင်ထိုးပြီး အထုပ်ပို့ပါ', en: 'Pole the raft with Ko Thiha and deliver' },
   { id: 'd5.mum', who: 'dawsanda', done: (s) => f(s, 'ch2Done'), my: 'ကိုသီဟနဲ့ သူ့အမေဆီ လိုက်သွားပါ', en: 'Go with Ko Thiha to his mother' },
   // main thread · the Painted Map's bridge, Nay Chi
-  { id: 'd5.bridge', done: (s) => f(s, 'bridge'), my: 'ခြယ်မြေပုံက တံတားကို ကိုယ်တိုင်စစ်ကြည့်ပါ', en: "Check the Painted Map's bridge yourself" },
+  { id: 'd5.bridge', go: { desk: 'wharfEnd', kind: 'area' }, done: (s) => f(s, 'bridge'), my: 'ခြယ်မြေပုံက တံတားကို ကိုယ်တိုင်စစ်ကြည့်ပါ', en: "Check the Painted Map's bridge yourself" },
   { id: 'd5.naychi', who: 'naychi', done: (s) => f(s, 'ncMet'), my: 'နေခြည်ကို ဘာလုပ်ရမလဲ ပြောပြပါ', en: 'Tell Nay Chi what to do' },
-  { id: 'd5.night', done: (s) => f(s, 'done'), my: 'အိမ်ပြန်ပြီး ဒီညစာ စာမျက်နှာ ရေးပါ', en: "Go home and write tonight's page" },
+  { id: 'd5.night', go: 'door:about', done: (s) => f(s, 'done'), my: 'အိမ်ပြန်ပြီး ဒီညစာ စာမျက်နှာ ရေးပါ', en: "Go home and write tonight's page" },
 ];

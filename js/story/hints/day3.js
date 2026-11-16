@@ -1,15 +1,18 @@
-// Day 3 hints: what to do next (never where). Ordered by play order.
+// Day 3 hints: what to do next. Ordered by play order.
+// Where (owner 2026-11-16: the corner map's mark, the notebook map's pin, the tap pointer): who = the person, live (else
+// the room the day's roomCast puts them in, else `at`); go = where the step happens instead; hints-where.js has the specs.
 // (ch 5, ch 9 and Nay Chi can go in any order; the engine shows the first unfinished step. The night page
 // needs all three: d3.ch5Done, d3.ch9Done, d3.ncAnswered.)
 // `who` = the person the step is about (story.people id); `target` = the thing, when the step is a thing.
 // The engine outlines them only while they are on screen.
 const F = (s, k) => !!s.flag(`d3.${k}`);
+// (the kiln's mouth: day3.js P.kiln; the pots and shards to tap stand round it)
 
 export default [
   { id: 'd3.morning', who: 'wintwar', done: (s) => F(s, 'morning'), my: 'မဝင့်ဝါ ခေါ်နေတယ်၊ သွားတွေ့လိုက်ပါ', en: 'Ma Wint War is calling: go and see her' },
   // ch 5 · the kiln opens
   { id: 'd3.kiln', who: 'dawohn', done: (s) => F(s, 'kilnOpen'), my: 'ဒေါ်အုန်း မီးဖိုဖွင့်တာ သွားကြည့်ရအောင်', en: "Go and see Daw Ohn's kiln opened" },
-  { id: 'd3.ring', done: (s) => F(s, 'rang'), my: 'အိုးတွေနဲ့ အကွဲပုံကို ခေါက်ပြီး နားထောင်ပါ', en: 'Tap the pots and the shards, and listen' },
+  { id: 'd3.ring', go: { x: 57.7, z: 113.2, kind: 'area' }, done: (s) => F(s, 'rang'), my: 'အိုးတွေနဲ့ အကွဲပုံကို ခေါက်ပြီး နားထောင်ပါ', en: 'Tap the pots and the shards, and listen' },
   { id: 'd3.shed', who: 'dawohn', done: (s) => F(s, 'ch5Done'), my: 'ဒေါ်အုန်း ခေါ်နေတယ်၊ သွားစကားပြောပါ', en: 'Daw Ohn asked you in: talk with her' },
   // ch 9 · Su Nwe and Maung Nge
   { id: 'd3.class', who: 'hninwai', done: (s) => F(s, 'hook9'), my: 'ဒေါ်နှင်းဝေရဲ့ အတန်းကို ဝင်ကြည့်ပါ', en: "Look in on Daw Hnin Wai's class" },
@@ -24,5 +27,5 @@ export default [
   { id: 'd3.answer', who: 'naychi', done: (s) => F(s, 'ncAnswered'), my: 'နေခြည့် မေးခွန်းကို ဖြေပေးပါ', en: "Answer Nay Chi's question" },
   // home · the "ask Maya" board (after Ma Wint War has mentioned the new notes)
   { id: 'd3.board', when: (s) => F(s, 'wwEvening'), target: (s) => s.board?.root, done: (s) => F(s, 'board'), my: 'ဘုတ်က စာအသစ်တွေ ဖတ်ပြီး တစ်စောင် ပြန်ဖြေပါ', en: 'Read the new notes on the board and answer one' },
-  { id: 'd3.night', done: (s) => F(s, 'done'), my: 'အိမ်ပြန်ပြီး ဒီညစာ စာမျက်နှာ ရေးပါ', en: "Go home and write tonight's page" },
+  { id: 'd3.night', go: 'door:about', done: (s) => F(s, 'done'), my: 'အိမ်ပြန်ပြီး ဒီညစာ စာမျက်နှာ ရေးပါ', en: "Go home and write tonight's page" },
 ];

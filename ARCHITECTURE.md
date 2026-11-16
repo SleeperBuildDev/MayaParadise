@@ -294,6 +294,24 @@ also moves to a new spot by itself every 30-80 s. `birds.wander(i)` forces a mov
 same toon material and outline as the doves in the sky. barks.js listens for `mw:birds`
 (`ahead` -> birdsAhead, `scatter` -> birdsScatter).
 
+### `js/story/hints.js` + `hints-where.js` — the hint line and the step's marks (story mode)
+
+The small "what next" line under the top label (tables in `js/story/hints/dayN.js`). It used to say what, never
+where (no markers). **The owner overrode that on 2026-11-16** ("its hard to locate to play the game, show a small
+mark on the map to show player where to go and if that place arrive on screen, show where to click"; the owner
+chose the DAY'S NEXT STORY PLACE). For the line's current step:
+- **corner map** (`world/minimap.js`, the stamp): a small gold pin inside the window, or a gold pin with a tiny arrow
+  on the window's rim pointing toward it when the place is further than the window reaches;
+- **notebook map** (`world/map.js`): a gold pin with its name, drawn over the paper (so it shows on unseen ground);
+  the page widens to take it in;
+- **on screen**: besides the soft breathing border, a gold tap ring and a small bouncing arrow above the name (icons
+  only) on the person / door / thing.
+Gold `#C9A24A` with a maroon `#6E1F2A` outline, a soft pulse, `pointer-events: none`; all hidden whenever the line
+is (rooms, talks, acts, overlays, cut-scenes, the intro). Positions come from data, never from loaded meshes
+(`hints-where.js`): the person's live spot, the room the day's `roomCast` puts them in (its door, `DOORS`), desks,
+town outlines, the Home Book's places; an entry may add `go` (where the step happens), `at` (where, when the person
+is not found) or `mark: false` (the page's surprise: the border only). Debug: `__hints.where()`, `__hints.mark`.
+
 ## Checking your work
 - Local server: `http://127.0.0.1:8123/` serves this folder (`python -m http.server 8123`).
 - Phone screenshots (exact viewport, DevTools emulation): `node tools/phone.mjs "<path?query>" <out-prefix> 412x915`

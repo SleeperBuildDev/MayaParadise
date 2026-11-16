@@ -1,6 +1,9 @@
 // The corner map (PREVIEW): a small map in the top-right corner of the screen that shows ONLY ground
 // Maya has already seen (the same seen mask as the notebook map, map.js), the roads and buildings on it,
-// and Maya herself with a facing arrow. No objective markers, no people, no doors, nothing "next".
+// and Maya herself with a facing arrow. No people, no doors. One mark (owner 2026-11-16, "show a small mark on the
+// map to show player where to go"): where the hint line's step happens (hints.js `mark`, from hints-where.js data),
+// a small gold pin inside the window, or, when it is further than the window reaches, a gold pin on the window's
+// rim with a tiny arrow pointing toward it. Soft pulse, never flashing; hidden whenever the hint line is.
 // Tapping it opens the notebook map.
 //
 //   const mm = createMinimap({ game, ow, story, style: 1|2|3, rotate: false })
@@ -92,7 +95,7 @@ const STYLES = {
   // 1 — a round paper medallion with a gold rim
   1: {
     name: { my: 'ရွှေကွင်း ဒင်္ဂါးပြား', en: 'Gold-rim medallion' },
-    w: 124, h: 124, cx: 62, cy: 62, r: 50,
+    w: 124, h: 124, cx: 62, cy: 62, r: 50, win: { r: 50 },
     clip(g, L) { g.beginPath(); g.arc(L.cx, L.cy, L.r, 0, Math.PI * 2); },
     under(g, L) {
       g.save(); g.shadowColor = 'rgba(42,33,24,.45)'; g.shadowBlur = 8; g.shadowOffsetY = 3;
@@ -122,7 +125,7 @@ const STYLES = {
   // 2 — a square scrap torn from the exercise book, pencil border, a strip of tape
   2: {
     name: { my: 'မှတ်စုစာရွက် အပိုင်းအစ', en: 'Torn notebook scrap' },
-    w: 136, h: 130, cx: 68, cy: 66, r: 52, tilt: -0.04,
+    w: 136, h: 130, cx: 68, cy: 66, r: 52, tilt: -0.04, win: { hw: 48, hh: 46 },
     shape(L) {
       if (L._pts) return L._pts;
       const R = rng(7), pts = [], x0 = 12, y0 = 12, x1 = 124, y1 = 120;
@@ -182,7 +185,7 @@ const STYLES = {
   // 3 — a postage stamp: perforated white edge, maroon frame, the district's name on the band
   3: {
     name: { my: 'တံဆိပ်ခေါင်း', en: 'Postage stamp' },
-    w: 124, h: 146, cx: 62, cy: 61, r: 46, band: true,
+    w: 124, h: 146, cx: 62, cy: 61, r: 46, band: true, win: { hw: 43, hh: 43 },
     clip(g) { g.beginPath(); g.rect(19, 18, 86, 86); },
     under(g) {
       // the perforated sheet edge: a white card with half-circle bites all round
@@ -253,6 +256,47 @@ function drawMaya(g, x, y, ang, car) {
   g.beginPath(); g.moveTo(7.5, 0); g.lineTo(-4.8, 5); g.lineTo(-2, 0); g.lineTo(-4.8, -5); g.closePath();
   g.fillStyle = MAROON; g.fill(); g.strokeStyle = CREAM; g.lineWidth = 1.3; g.stroke();
   if (car) { g.fillStyle = GOLD; g.beginPath(); g.arc(-0.8, 0, 1.6, 0, Math.PI * 2); g.fill(); }
+  g.restore();
+}
+
+// The step's mark (owner 2026-11-16): gold with a maroon outline, the hint border's family. (dx, dy) = CSS px from the
+// window's centre; inside the window a pin with its tip on the spot, else a pin on the rim with a tiny arrow outward.
+function drawGoal(g, L, dx, dy, now) {
+  const W = L.win || { r: L.r };
+  const glow = 0.5 + 0.5 * Math.sin(now * 0.0029); // ~2.2 s breath
+  let inside, ex = dx, ey = dy;
+  if (W.r) {
+    const d = Math.hypot(dx, dy);
+    inside = d < W.r - 7;
+    if (!inside) { const k = (W.r - 7) / Math.max(d, 1e-3); ex = dx * k; ey = dy * k; }
+  } else {
+    const q = Math.max(Math.abs(dx) / (W.hw - 7), Math.abs(dy) / (W.hh - 7));
+    inside = q < 1;
+    if (!inside) { ex = dx / q; ey = dy / q; }
+  }
+  const x = L.cx + ex, y = L.cy + ey;
+  g.save();
+  g.lineJoin = 'round';
+  if (inside) {
+    g.globalAlpha = 0.22 + 0.22 * glow; g.fillStyle = GOLD;
+    g.beginPath(); g.ellipse(x, y, 5.5 + glow, 2.6 + glow * 0.4, 0, 0, Math.PI * 2); g.fill();
+    g.globalAlpha = 1;
+    // the pin: head above the spot, tip on it
+    g.beginPath(); g.moveTo(x, y); g.lineTo(x - 3.3, y - 6.4); g.arc(x, y - 8, 3.7, Math.PI * 0.8, Math.PI * 0.2); g.closePath();
+    g.fillStyle = GOLD; g.fill(); g.strokeStyle = MAROON; g.lineWidth = 1.3; g.stroke();
+    g.fillStyle = CREAM; g.beginPath(); g.arc(x, y - 8, 1.3, 0, Math.PI * 2); g.fill();
+  } else {
+    const d = Math.hypot(dx, dy) || 1, ux = dx / d, uy = dy / d;
+    g.globalAlpha = 0.18 + 0.2 * glow; g.fillStyle = GOLD;
+    g.beginPath(); g.arc(x, y, 6.2 + glow, 0, Math.PI * 2); g.fill();
+    g.globalAlpha = 1;
+    // the tiny arrow, outward (toward the place)
+    g.beginPath(); g.moveTo(x + ux * 9.5, y + uy * 9.5); g.lineTo(x + ux * 4.6 - uy * 3.4, y + uy * 4.6 + ux * 3.4); g.lineTo(x + ux * 4.6 + uy * 3.4, y + uy * 4.6 - ux * 3.4); g.closePath();
+    g.fillStyle = MAROON; g.fill();
+    g.beginPath(); g.arc(x, y, 3.9, 0, Math.PI * 2);
+    g.fillStyle = GOLD; g.fill(); g.strokeStyle = MAROON; g.lineWidth = 1.3; g.stroke();
+    g.fillStyle = CREAM; g.beginPath(); g.arc(x, y, 1.2, 0, Math.PI * 2); g.fill();
+  }
   g.restore();
 }
 
@@ -411,6 +455,14 @@ export function createMinimap({ game, ow, story, style = 1, rotate = false, doc 
     g.setTransform(1, 0, 0, 1, 0, 0);
     g.drawImage(over, 0, 0);
     if (st.rotate) { g.setTransform(dpr, 0, 0, dpr, 0, 0); STYLES[st.style].north.call(L, g, L, -Math.PI / 2 + turn); }
+    // the step's mark (hints.js keeps it current; off whenever the hint line is hidden)
+    const gm = story?.hints?.mark;
+    if (gm && gm.on) {
+      let gx = (gm.x - p.x) * st.zoom, gy = (gm.z - p.z) * st.zoom;
+      if (turn) { const c = Math.cos(turn), s = Math.sin(turn), rx = gx * c - gy * s; gy = gx * s + gy * c; gx = rx; }
+      g.setTransform(dpr, 0, 0, dpr, 0, 0);
+      drawGoal(g, L, gx, gy, t0);
+    }
     const ms = performance.now() - t0;
     perf.ticks++; perf.tickMs += (ms - perf.tickMs) * 0.1; perf.maxMs = Math.max(perf.maxMs, ms);
   }

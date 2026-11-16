@@ -1,6 +1,8 @@
 // The notebook map: a parchment spread (portrait: the notebook turned so its spine runs across) that
-// shows ONLY what Maya has seen, in gold ink, and the Bookmark Desks she has unlocked. No objective
-// markers. Unseen land stays blank paper. Tap an unlocked desk to travel there (page-turn).
+// shows ONLY what Maya has seen, in gold ink, and the Bookmark Desks she has unlocked. Unseen land stays blank
+// paper. One mark (owner 2026-11-16): a gold pin with its name where the hint line's step happens (hints.js
+// mapPin(), from hints-where.js data), drawn over the paper, so it shows on ground she has not seen yet; the page
+// widens to take it in. Tap an unlocked desk to travel there (page-turn).
 //
 //   const seen = createSeen(save, persist)    seen.mark(x, z) every few frames; seen.has(x, z)
 //   openMap(ctx)                              ctx: { game, seen, desks, net, onTravel(desk) }
@@ -134,6 +136,11 @@ export function openMap({ game, seen, desks, net, places = [], onTravel }) {
     bx0 = Math.min(bx0, x); bz0 = Math.min(bz0, z); bx1 = Math.max(bx1, x + CELL); bz1 = Math.max(bz1, z + CELL);
   }
   for (const d of desks.list) if (d.unlocked) { bx0 = Math.min(bx0, d.x); bz0 = Math.min(bz0, d.z); bx1 = Math.max(bx1, d.x); bz1 = Math.max(bz1, d.z); }
+  // the step's place (the hint line's mark): on the page too
+  let goal = null;
+  try { goal = game.story?.hints?.mapPin?.() || null; } catch { goal = null; }
+  if (goal && !(Number.isFinite(goal.x) && Number.isFinite(goal.z))) goal = null;
+  if (goal) { bx0 = Math.min(bx0, goal.x); bz0 = Math.min(bz0, goal.z); bx1 = Math.max(bx1, goal.x); bz1 = Math.max(bz1, goal.z); }
   const availW = Math.min(window.innerWidth - 32, 520), availH = window.innerHeight - 150;
   const aspect = availW / availH;
   let vw = Math.max(bx1 - bx0 + 24, 90), vh = Math.max(bz1 - bz0 + 24, 110);
@@ -270,6 +277,27 @@ export function openMap({ game, seen, desks, net, places = [], onTravel }) {
   g.fillStyle = '#FFFDF8'; g.strokeStyle = MAROON; g.lineWidth = 2;
   g.beginPath(); g.arc(X(me.x), Y(me.z), 5, 0, Math.PI * 2); g.fill(); g.stroke();
   g.fillStyle = MAROON; g.beginPath(); g.arc(X(me.x), Y(me.z), 2, 0, Math.PI * 2); g.fill();
+  // the step's pin: gold with a maroon outline, its name above it (over the unseen paper too)
+  if (goal) {
+    const x = X(goal.x), y = Y(goal.z);
+    g.save();
+    g.fillStyle = 'rgba(201,162,74,.28)'; g.beginPath(); g.ellipse(x, y, 10, 4.5, 0, 0, Math.PI * 2); g.fill();
+    g.lineJoin = 'round';
+    g.beginPath(); g.moveTo(x, y); g.lineTo(x - 5.6, y - 10.6); g.arc(x, y - 13.4, 6.2, Math.PI * 0.8, Math.PI * 0.2); g.closePath();
+    g.fillStyle = '#C9A24A'; g.fill(); g.strokeStyle = MAROON; g.lineWidth = 1.8; g.stroke();
+    g.fillStyle = '#FFFDF8'; g.beginPath(); g.arc(x, y - 13.4, 2.2, 0, Math.PI * 2); g.fill();
+    const label = goal.name ? (typeof goal.name === 'string' ? goal.name : tr(goal.name)) : '';
+    if (label) {
+      g.font = '700 11px "Noto Sans Myanmar", sans-serif'; g.textAlign = 'left'; g.textBaseline = 'middle';
+      // (above the pin's head, centred: the desks' ribbons write their names to their right)
+      const lw = g.measureText(label).width;
+      const lx = Math.min(Math.max(x - lw / 2, 4), cw - lw - 4), ly = y - 31 < 10 ? y + 12 : y - 31;
+      g.fillStyle = 'rgba(247,241,225,.92)'; g.fillRect(lx - 3, ly - 9, lw + 6, 18);
+      g.strokeStyle = 'rgba(201,162,74,.9)'; g.lineWidth = 1; g.strokeRect(lx - 3, ly - 9, lw + 6, 18);
+      g.fillStyle = MAROON; g.fillText(label, lx, ly);
+    }
+    g.restore();
+  }
 
   // ---- interaction
   const close = () => { wrap.remove(); document.removeEventListener('keydown', onKey); };

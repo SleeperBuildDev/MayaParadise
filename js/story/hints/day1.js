@@ -1,4 +1,6 @@
-// Day 1 hints: what to do next (never where). Ordered by play order.
+// Day 1 hints: what to do next. Ordered by play order.
+// Where (owner 2026-11-16: the corner map's mark, the notebook map's pin, the tap pointer): who = the person, live (else
+// the room the day's roomCast puts them in, else `at`); go = where the step happens instead; hints-where.js has the specs.
 // (Day 1 is one straight thread: the letter, U Kyaw Nyunt, Pho Thar, the practice, the fair, the windmill.)
 // `who` = the person the step is about (story.people id): the engine outlines them only while on screen.
 const F = (s, k) => !!s.flag(`d1.${k}`);
@@ -11,5 +13,5 @@ export default [
   { id: 'd1.practise', who: 'phothar', done: (s) => F(s, 'practised'), my: 'ဖိုးသားနဲ့ ချုပ်ရိုး အတူ လေ့ကျင့်ပါ', en: 'Practise stitching with Pho Thar' },
   { id: 'd1.fair', who: 'phothar', done: (s) => F(s, 'chose'), my: 'ပွဲတော်အတွက် ဖိုးသား ကိုယ်တိုင် ရွေးပါစေလေ', en: 'Let Pho Thar choose for himself for the fair' },
   { id: 'd1.windmill', who: 'phothar', done: (s) => F(s, 'spun'), my: 'ဖိုးသားရဲ့ လေရဟတ် လည်အောင် ကူပေးပါ', en: "Help Pho Thar's windmill turn" },
-  { id: 'd1.night', done: (s) => F(s, 'done'), my: 'အိမ်ပြန်ပြီး ဒီညစာ စာမျက်နှာ ရေးပါ', en: "Go home and write tonight's page" },
+  { id: 'd1.night', go: 'door:about', done: (s) => F(s, 'done'), my: 'အိမ်ပြန်ပြီး ဒီညစာ စာမျက်နှာ ရေးပါ', en: "Go home and write tonight's page" },
 ];

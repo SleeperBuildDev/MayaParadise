@@ -1,7 +1,14 @@
 // The small "what next" line under the top place label (owner, 2026-11-15: "it's hard to start a mission,
 // show a very small hint ... but still struggle to complete the mission without finding it").
 //
-// A hint says WHAT to do next (the goal), never WHERE: no markers, arrows, directions or distances.
+// A hint says WHAT to do next (the goal). It used to say never WHERE (no markers); the owner overrode that on
+// 2026-11-16 ("its hard to locate to play the game, show a small mark on the map to show player where to go and if
+// that place arrive on screen, show where to click"; the owner chose the DAY'S NEXT STORY PLACE): the line's step
+// now has a small gold mark on the corner map (world/minimap.js: a pin inside its window, or a pin with a tiny
+// arrow on its rim when the place is further), a gold pin with the name on the notebook map (world/map.js, drawn
+// over the unseen ground), and, once the person / door / thing is on screen, a gold tap ring and a small bouncing
+// arrow over the border below. Where the step happens comes from data (hints-where.js: who / go / at / target);
+// an entry with `mark: false` (the page's surprise) keeps the old border-only behaviour.
 // The day tables live in js/story/hints/dayN.js (one per page, loaded lazily; a missing file = no hints):
 //
 //   export default [
@@ -17,17 +24,20 @@
 //   who: 'castId'          the person the step is about (story.people id / cast id / room walk-on id)
 //   target: (s) => obj     a thing instead (an Object3D, something with .root, or a {x, y, z} point);
 //                          a string is read as story.day[key]. label: { my, en } names it on the border.
+//   go / at / mark         where the step happens, for the marks (hints-where.js has the forms)
 // The person border (owner, 2026-11-15: "at least make a hint or border around that person when that person
 // is on the screen"): while the line's entry has who / target and that one is IN VIEW (in front of the camera,
 // on screen, visible, near enough, not behind a building) a soft breathing border with the name sits round
-// them. Off screen / not found = nothing at all: never an edge arrow or anything that points the way.
+// them. Off screen / not found = no border (the corner map's pin points the way; owner 2026-11-16).
 //
 // story.js calls installHints(game, story) once.
-// Debug: window.__hints = { current(), list(), refresh(), target(), pin(entry|null) }.
+// Debug: window.__hints = { current(), list(), refresh(), target(), pin(entry|null), where(), mark }.
+// mark = { on, x, z, kind } (read by the corner map each tick); mapPin() -> { x, z, name, kind } | null (the notebook map).
 // Pure DOM (no draw calls), pointer-events: none (never blocks a tap).
 import * as THREE from '../game/three.js';
 import { tr } from '../game/ui.js';
 import { castById } from './cast.js';
+import { createWhere } from './hints-where.js';
 
 const TICK = 500; // ms between checks
 const LAST_HINT_DAY = 15; // the last hints/dayN.js
@@ -35,6 +45,8 @@ const LAST_HINT_DAY = 15; // the last hints/dayN.js
 // the page turn, the lazy-town wait screen, the turn-based talk
 const OVERLAYS = '#story-map, #story-panel, .story-stamp, .story-letter, .act-wrap, #story-fade.on, .rc-lift, .rc-slip, #story-pageturn, #story-townwait, #rc-talk, #story-choices';
 const BUSY_CLASSES = /\b(cinema|talking|choosing|acting|ti-flying|ti-naming)\b/;
+// the tap pointer's arrow (pointing down at them; gold with a maroon outline, drawn here)
+const HAND_SVG = '<svg viewBox="0 0 20 24" width="16" height="19" aria-hidden="true"><path d="M7 2.2h6v8.6h4.4L10 21.6 2.6 10.8H7z" fill="#C9A24A" stroke="#6E1F2A" stroke-width="1.7" stroke-linejoin="round"/><path d="M9 4.5v7" stroke="#FFF3C8" stroke-width="1.3" stroke-linecap="round" opacity=".7"/></svg>';
 
 export function installHints(game, story) {
   if (story.hints) return story.hints;
@@ -54,6 +66,9 @@ export function installHints(game, story) {
   let shownLang = '';
   let visible = false;
   let fresh = false; // the text changed while hidden: fade + pulse when it shows
+  // where the line's step happens (hints-where.js), for the marks: refreshed every tick (a person walks)
+  const where = createWhere(game, story);
+  const mark = { on: false, x: 0, z: 0, kind: '' };
 
   async function load(day) {
     loading = day;
@@ -130,6 +145,10 @@ export function installHints(game, story) {
     }
     const show = !!shown && !busy();
     if (show) place();
+    // the marks: only while the line itself shows (rooms, talks, acts, overlays, cut-scenes, the intro hide it)
+    const w = show ? where.resolve(shown) : null;
+    mark.on = !!(w && w.ok);
+    if (mark.on) { mark.x = w.x; mark.z = w.z; mark.kind = w.kind; }
     if (show && fresh) {
       fresh = false;
       // a gentle fade with one small pulse (restart the animation)
@@ -145,15 +164,20 @@ export function installHints(game, story) {
   // second (cached), projected every frame, DOM only; nothing at all while they are out of view.
   const ring = document.createElement('div');
   ring.id = 'story-hint-who';
-  ring.innerHTML = '<div class="b"><i class="tl"></i><i class="tr"></i><i class="bl"></i><i class="br"></i></div><span></span>';
+  // (+ the tap pointer, owner 2026-11-16: a gold ring where to tap and a small bouncing arrow above the name; icons only)
+  ring.innerHTML = '<div class="b"><i class="tl"></i><i class="tr"></i><i class="bl"></i><i class="br"></i></div><u class="tap"></u><em class="hand">' + HAND_SVG + '</em><span></span>';
   const ringName = ring.lastChild;
+  const ringHand = ring.querySelector('.hand');
   host.appendChild(ring);
   const RESOLVE_MS = 400, SIGHT_MS = 250;
   const MAX_DIST = 60; // metres from the camera outdoors (the driving camera sits ~35 m back; rooms: no cap)
   const vFoot = new THREE.Vector3(), vTop = new THREE.Vector3(), vCam = new THREE.Vector3();
   const nearBuf = [];
   let tgt = { key: null, obj: null, person: null, point: null, name: null, at: -1e9, sightAt: -1e9, blocked: false };
-  let ringOn = false, ringNameKey = '';
+  let ringOn = false, ringNameKey = '', ringTap = false;
+  // the mark's own place on screen (a door, a thing, or the person when the border's lookup did not find them)
+  const altPoint = { x: 0, y: 1, z: 0 };
+  const alt = { key: null, h: null, room: null, kind: '', obj: null, person: null, point: null, name: null, at: 0, sightAt: -1e9, blocked: false };
   let last = { x: 0, y: 0, w: 0, h: 0 };
   let nameW = 0, nameShift = 0;
   let report = { who: null, found: false, onScreen: false, rect: null };
@@ -314,11 +338,27 @@ export function installHints(game, story) {
     const h = shown;
     const want = !!(h && (h.who || h.target));
     let rect = null, t = null;
-    if (want) {
-      t = resolve(h, ts);
-      if ((t.obj || t.point) && !busy()) { try { rect = project(t, ts); } catch { rect = null; } }
-    } else if (tgt.key) resolve(null, ts);
-    report = { who: h?.who || (h?.target ? h.id : null), found: !!(t && (t.obj || t.point)), onScreen: !!rect, rect: rect && { x: Math.round(rect.x), y: Math.round(rect.y), w: Math.round(rect.w), h: Math.round(rect.h) } };
+    if (want) t = resolve(h, ts);
+    else if (tgt.key) resolve(null, ts);
+    // the mark's place instead: a `go` place, or what go / at / the room casts found when the border's own lookup did not
+    // (a door, a thing; never a whole town or stretch of ground)
+    const w = where.out;
+    const useAlt = !!(h && h.mark !== false && mark.on && w.ok && w.kind !== 'area' && (h.go != null || !(t && (t.obj || t.point))));
+    if (useAlt) {
+      if (alt.h !== h || alt.room !== w.room || alt.kind !== w.kind) { // (a new place: no string built per frame)
+        alt.h = h; alt.room = w.room; alt.kind = w.kind;
+        alt.key = `alt:${h.id}|${w.room || w.kind}`; alt.sightAt = -1e9; alt.blocked = false;
+      }
+      alt.obj = w.obj; alt.person = w.person;
+      if (!w.obj) { altPoint.x = w.x; altPoint.y = w.y; altPoint.z = w.z; alt.point = altPoint; } else alt.point = null;
+      alt.name = w.name;
+      t = alt;
+    }
+    if (t && (t.obj || t.point) && !busy()) { try { rect = project(t, ts); } catch { rect = null; } }
+    // the tap pointer: on the step's own person / thing / door (not a person the step is only about, when it happens elsewhere)
+    const tap = !!(rect && h && h.mark !== false && (useAlt || h.go == null));
+    if (tap !== ringTap) { ringTap = tap; ring.classList.toggle('tap', tap); }
+    report = { who: h?.who || (h?.target ? h.id : null), found: !!(t && (t.obj || t.point)), onScreen: !!rect, tap, alt: useAlt, rect: rect && { x: Math.round(rect.x), y: Math.round(rect.y), w: Math.round(rect.w), h: Math.round(rect.h) } };
     if (rect) {
       if (Math.abs(rect.x - last.x) > 0.4 || Math.abs(rect.y - last.y) > 0.4) { ring.style.transform = `translate3d(${rect.x.toFixed(1)}px, ${rect.y.toFixed(1)}px, 0)`; last.x = rect.x; last.y = rect.y; }
       if (Math.abs(rect.w - last.w) > 0.4 || Math.abs(rect.h - last.h) > 0.4) { ring.style.width = `${rect.w.toFixed(1)}px`; ring.style.height = `${rect.h.toFixed(1)}px`; last.w = rect.w; last.h = rect.h; }
@@ -330,12 +370,14 @@ export function installHints(game, story) {
         ringName.style.display = n ? '' : 'none';
         ring.lang = /^en$/.test(document.documentElement.getAttribute('data-lang') || '') ? 'en' : 'my';
         nameW = n ? ringName.offsetWidth : 0;
+        ring.classList.toggle('noname', !n);
+        if (!n && nameShift) { nameShift = 0; ringName.style.marginLeft = ringHand.style.marginLeft = '0px'; }
       }
-      // the name stays readable at the screen's edges (the border itself may run off a little)
+      // the name stays readable at the screen's edges (the border itself may run off a little); the arrow rides on it
       if (nameW) {
         const want = rect.x + rect.w / 2 - nameW / 2;
         const shift = Math.round(Math.min(Math.max(want, 4), host.clientWidth - nameW - 4) - want);
-        if (shift !== nameShift) { nameShift = shift; ringName.style.marginLeft = `${shift}px`; }
+        if (shift !== nameShift) { nameShift = shift; ringName.style.marginLeft = `${shift}px`; ringHand.style.marginLeft = `${shift}px`; }
       }
     }
     if (!!rect !== ringOn) { ringOn = !!rect; ring.classList.toggle('on', ringOn); }
@@ -352,8 +394,14 @@ export function installHints(game, story) {
     current: () => (shown ? { id: shown.id, my: shown.my, en: shown.en, who: shown.who || null, visible } : null),
     list: () => (table || []).map((h) => ({ id: h?.id, when: test(h?.when, true), done: test(h?.done, false), my: h?.my, en: h?.en })),
     refresh: () => { tableDay = 0; loading = 0; table = null; shown = null; tick(); },
-    /** The border's state: { who, found, onScreen, rect } (rect in #game pixels). */
+    /** The border's state: { who, found, onScreen, tap, alt, rect } (rect in #game pixels). */
     target: () => report,
+    /** The corner map's mark (live object, refreshed every tick): { on, x, z, kind }. */
+    mark,
+    /** Where the line's step happens now (debug): hints-where.js's answer for the shown entry. */
+    where: () => { const o = where.resolve(pinned || shown); return o.ok ? { x: +o.x.toFixed(2), z: +o.z.toFixed(2), kind: o.kind, room: o.room, name: nameText(o.name) || null, live: !!o.obj } : null; },
+    /** The notebook map's pin (the map hides the line, so this asks directly): { x, z, name, kind } or null. */
+    mapPin: () => { const o = where.resolve(shown); return o.ok ? { x: o.x, z: o.z, name: o.name, kind: o.kind } : null; },
     /** Debug: force an entry ({ id, my, en, who?, target? }) on the line; null goes back to the table. */
     pin: (entry) => { pinned = entry || null; tick(); return api.current(); },
     dispose() { clearInterval(timer); cancelAnimationFrame(raf); document.removeEventListener('mw:lang', onLang); el.remove(); ring.remove(); story.hints = null; },
@@ -394,6 +442,16 @@ function injectStyle() {
     color: #6E1F2A; font: 600 10.5px/1.7 "Noto Sans Myanmar", system-ui, sans-serif; text-shadow: 0 1px 0 rgba(255, 255, 255, .8); }
   #story-hint-who[lang="en"] span { font-size: 11px; line-height: 1.45; }
   @keyframes rchwho { from { opacity: .5; } to { opacity: 1; } }
+  #story-hint-who .tap, #story-hint-who .hand { display: none; position: absolute; left: 50%; pointer-events: none; }
+  #story-hint-who .tap { top: 50%; width: min(44px, 92%); aspect-ratio: 1; border-radius: 50%; border: 2px solid rgba(201, 162, 74, .95);
+    box-shadow: 0 0 0 1px rgba(110, 31, 42, .5), inset 0 0 0 1px rgba(110, 31, 42, .35); opacity: .8; transform: translate(-50%, -50%) scale(.9); }
+  #story-hint-who .hand { top: -26px; transform: translate(-50%, -100%); filter: drop-shadow(0 1px 1px rgba(42, 33, 24, .35)); }
+  #story-hint-who.noname .hand { top: -4px; }
+  #story-hint-who .hand svg { display: block; animation: rchhand .9s ease-in-out infinite alternate; }
+  #story-hint-who.tap .tap { display: block; animation: rchtap 1.4s ease-in-out infinite alternate; }
+  #story-hint-who.tap .hand { display: block; }
+  @keyframes rchtap { from { opacity: .95; transform: translate(-50%, -50%) scale(.78); } to { opacity: .45; transform: translate(-50%, -50%) scale(1.02); } }
+  @keyframes rchhand { from { transform: translateY(-4px); } to { transform: translateY(1px); } }
   `;
   document.head.appendChild(s);
 }

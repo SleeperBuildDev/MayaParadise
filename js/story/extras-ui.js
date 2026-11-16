@@ -19,7 +19,8 @@
 //   in a scene, story.holdIntro, day.introHold()), and a scene that starts anyway cuts it (townintro.js).
 // - In the car the fly-over plays anyway: townintro sets game.busy, which lets go of the stick, so the car
 //   rolls to a stop during the lift and the camera comes back down to it.
-// - No guidance: the minimap shows only explored ground and Maya; the intro frames the town round her.
+// - The minimap shows only explored ground and Maya, plus one gold mark for the hint line's step (owner 2026-11-16:
+//   hints.js / hints-where.js); the intro frames the town round her.
 import { createMinimap } from './world/minimap.js';
 import { installTownIntro } from './world/townintro.js';
 
