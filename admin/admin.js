@@ -27,6 +27,10 @@ import {
 } from '../js/ebook/store.js';
 
 const LANG_KEY = 'wm-admin-lang';
+const WEB_SOUND_KEY = 'wm-admin-web-sound';
+const ADMIN_EMAIL_KEY = 'wm-admin-email';
+const BATTERY_TIP_KEY = 'wm-admin-battery-tip-dismissed';
+const BASE_DOC_TITLE = 'မာရာ Admin · Reality Check E-Book';
 const $ = (id) => document.getElementById(id);
 
 // ---------- State ----------
@@ -42,6 +46,33 @@ let bookStatus = null;
 let unsubReaders = null;
 let unsubStore = null;
 let adminSessionInfo = null;
+
+// Live payment notification & Android bridge state
+let webSoundEnabled = true;
+let audioCtx = null;
+let readersInitialized = false;
+const seenPendingKeys = new Set();
+let bannerPayment = null;
+let titleFlashTimer = null;
+let titleFlashPhase = false;
+let queuedOpenUid = '';
+let nativeActivating = false;
+let lastCtaSignature = '';
+let nativeStatus = {
+  nativeApp: false,
+  notificationPermission: false,
+  nativeSignedIn: false,
+  nativeEmail: '',
+  monitorEnabled: true,
+  monitorRunning: false,
+  batteryUnrestricted: true,
+  alarmMode: false,
+  repeatMinutes: 3,
+  pendingCount: 0,
+  sdkInt: 0,
+  manufacturer: '',
+  lastError: '',
+};
 
 // Cache compressed receipts by `${uid}:${updatedAt}` so re-uploads refresh automatically
 const receiptCache = new Map();
@@ -261,10 +292,610 @@ function applyLang(nextLang, { persist = true } = {}) {
   if (manualNote) manualNote.placeholder = t('Messenger KPay ငွေလွှဲပြီး', 'Paid via Messenger KPay');
 
   renderModeBadges();
+  renderNewPaymentBanner();
+  renderPendingAlertsCta(true);
   renderPendingTab();
   renderReadersTab();
+  renderAlertsSettingsCard();
   renderPaymentPreview();
   renderBookTab();
+  syncNativeLanguage();
+}
+
+// ---------- Unmissable Payment Alerts & Android Bridge ----------
+function hasNativeBridge() {
+  try {
+    return Boolean(
+      typeof window !== 'undefined' &&
+        window.MayaAndroid &&
+        (typeof window.MayaAndroid.isNativeAlertsSupported === 'function'
+          ? window.MayaAndroid.isNativeAlertsSupported()
+          : typeof window.MayaAndroid.getAlertStatus === 'function')
+    );
+  } catch {
+    return false;
+  }
+}
+
+function syncNativeLanguage() {
+  if (!hasNativeBridge()) return;
+  try {
+    window.MayaAndroid.setLanguage?.(lang);
+  } catch {
+    // Ignore bridge error.
+  }
+}
+
+function getCachedAdminEmail() {
+  if (adminSessionInfo?.email) return adminSessionInfo.email;
+  if (nativeStatus.nativeEmail) return nativeStatus.nativeEmail;
+  try {
+    return localStorage.getItem(ADMIN_EMAIL_KEY) || '';
+  } catch {
+    return '';
+  }
+}
+
+function setCachedAdminEmail(email) {
+  const clean = String(email || '').trim();
+  try {
+    if (clean) localStorage.setItem(ADMIN_EMAIL_KEY, clean);
+    else localStorage.removeItem(ADMIN_EMAIL_KEY);
+  } catch {
+    // Ignore storage error.
+  }
+}
+
+function applyNativeStatus(raw) {
+  let obj = raw;
+  if (typeof raw === 'string') {
+    try {
+      obj = JSON.parse(raw);
+    } catch {
+      return;
+    }
+  }
+  if (!obj || typeof obj !== 'object') return;
+  const wasSignedIn = nativeStatus.nativeSignedIn;
+  const wasActivating = nativeActivating;
+  nativeStatus = { ...nativeStatus, ...obj, nativeApp: true };
+  nativeActivating = false;
+
+  if (nativeStatus.nativeEmail) {
+    setCachedAdminEmail(nativeStatus.nativeEmail);
+    if (!adminSessionInfo) {
+      adminSessionInfo = { ok: true, mode: 'firebase', email: nativeStatus.nativeEmail };
+    } else if (!adminSessionInfo.email) {
+      adminSessionInfo.email = nativeStatus.nativeEmail;
+    }
+  }
+
+  if (wasActivating && !wasSignedIn && nativeStatus.nativeSignedIn) {
+    showToast(
+      t('🔔 ၂၄ နာရီ ဖုန်း Alert စတင်အလုပ်လုပ်နေပါပြီ ✓', '🔔 24/7 Phone Alerts activated ✓'),
+      'ok'
+    );
+  } else if (wasActivating && nativeStatus.lastError) {
+    showToast(nativeStatus.lastError, 'danger');
+  }
+
+  renderModeBadges();
+  renderPendingAlertsCta(true);
+  renderAlertsSettingsCard();
+}
+
+function readNativeStatus() {
+  if (!hasNativeBridge()) return null;
+  try {
+    const raw = window.MayaAndroid.getAlertStatus?.();
+    if (raw) applyNativeStatus(raw);
+    return nativeStatus;
+  } catch (err) {
+    console.warn('[admin] getAlertStatus error:', err);
+    return null;
+  }
+}
+
+function unlockAudio() {
+  const resume = () => {
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      if (!audioCtx) audioCtx = new AC();
+      if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
+    } catch {
+      // Ignore AudioContext restriction.
+    }
+  };
+  document.addEventListener('pointerdown', resume, { once: true, passive: true });
+  document.addEventListener('keydown', resume, { once: true, passive: true });
+}
+
+function playPaymentChime() {
+  try {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    if (!audioCtx) audioCtx = new AC();
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume().catch(() => {});
+    }
+    const now = audioCtx.currentTime + 0.02;
+    const notes = [
+      { freq: 659.25, at: 0.0, dur: 0.24, vol: 0.22, type: 'triangle' }, // E5
+      { freq: 830.61, at: 0.13, dur: 0.26, vol: 0.24, type: 'triangle' }, // G#5
+      { freq: 987.77, at: 0.27, dur: 0.48, vol: 0.26, type: 'sine' }, // B5
+      { freq: 1318.51, at: 0.27, dur: 0.52, vol: 0.14, type: 'sine' }, // E6 shimmer
+    ];
+    for (const n of notes) {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = n.type;
+      osc.frequency.setValueAtTime(n.freq, now + n.at);
+      gain.gain.setValueAtTime(0.0001, now + n.at);
+      gain.gain.linearRampToValueAtTime(n.vol, now + n.at + 0.018);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + n.at + n.dur);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(now + n.at);
+      osc.stop(now + n.at + n.dur + 0.03);
+    }
+  } catch {
+    // Ignore audio errors on restricted environments.
+  }
+}
+
+function updateStaticDocTitle(pendingCount) {
+  if (titleFlashTimer) return;
+  document.title = pendingCount > 0 ? `(${pendingCount}) 💰 Maya Admin` : BASE_DOC_TITLE;
+}
+
+function stopTitleFlash() {
+  if (titleFlashTimer) {
+    clearInterval(titleFlashTimer);
+    titleFlashTimer = null;
+  }
+  const pendingCount = allReaders.filter((r) => r.status === 'pending').length;
+  document.title = pendingCount > 0 ? `(${pendingCount}) 💰 Maya Admin` : BASE_DOC_TITLE;
+}
+
+function startTitleFlash(pendingCount) {
+  if (titleFlashTimer) clearInterval(titleFlashTimer);
+  const count = Math.max(1, Number(pendingCount) || 1);
+  titleFlashPhase = false;
+  document.title = `(${count}) 💰 Maya Admin`;
+  titleFlashTimer = setInterval(() => {
+    titleFlashPhase = !titleFlashPhase;
+    document.title = titleFlashPhase
+      ? t(`💰 ငွေလွှဲအသစ် (${count}) · မာရာ Admin`, `💰 New KPay (${count}) · Maya Admin`)
+      : `(${count}) 💰 Maya Admin`;
+  }, 1200);
+}
+
+function renderNewPaymentBanner() {
+  const banner = $('new-payment-banner');
+  if (!banner) return;
+  if (!bannerPayment) {
+    banner.hidden = true;
+    return;
+  }
+  const name = bannerPayment.name || t('ဝယ်ယူသူအသစ်', 'New Buyer');
+  const extra =
+    bannerPayment.extraCount > 0
+      ? t(` (+${bannerPayment.extraCount} ဦးထပ်ဝင်)`, ` (+${bannerPayment.extraCount} more)`)
+      : '';
+  $('pab-title').textContent = t(
+    `ငွေလွှဲအသစ်ရောက်ပါပြီ — ${name}${extra}`,
+    `New KPay Payment — ${name}${extra}`
+  );
+  const parts = [bannerPayment.orderId, bannerPayment.contact].filter(Boolean);
+  $('pab-sub').textContent =
+    parts.join(' · ') || t('KPay Slip ကို ချက်ချင်းစစ်ဆေးနိုင်ပါသည်', 'Tap to inspect the KPay slip now');
+  banner.hidden = false;
+}
+
+function dismissPaymentBanner() {
+  bannerPayment = null;
+  const banner = $('new-payment-banner');
+  if (banner) banner.hidden = true;
+  stopTitleFlash();
+}
+
+function openPaymentByUid(uid) {
+  const targetUid = String(uid || '').trim();
+  dismissPaymentBanner();
+  switchTab('pending');
+  if (!targetUid) return;
+
+  const reader = allReaders.find((r) => r.uid === targetUid);
+  if (!reader) {
+    queuedOpenUid = targetUid;
+    return;
+  }
+  queuedOpenUid = '';
+
+  setTimeout(() => {
+    const card = $('pending-list')?.querySelector(`.pending-card[data-uid="${CSS.escape(targetUid)}"]`);
+    if (card) {
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      card.classList.add('highlight-pulse');
+      setTimeout(() => card.classList.remove('highlight-pulse'), 2400);
+    }
+    openLightboxForReader(targetUid);
+  }, 80);
+}
+
+function handleNewPaymentsArrived(freshList, totalPendingCount) {
+  if (!freshList || !freshList.length) return;
+  const latest = freshList[0];
+  bannerPayment = {
+    uid: latest.uid,
+    name: latest.name || '',
+    contact: latest.contact || '',
+    orderId: latest.orderId || '',
+    extraCount: freshList.length - 1,
+  };
+  renderNewPaymentBanner();
+  startTitleFlash(totalPendingCount);
+
+  if (hasNativeBridge()) {
+    readNativeStatus();
+    if (!nativeStatus.monitorRunning) {
+      try {
+        window.MayaAndroid.notifyPaymentFromWeb?.(
+          latest.uid || '',
+          latest.name || '',
+          latest.contact || '',
+          latest.orderId || '',
+          lang
+        );
+      } catch {
+        // Ignore bridge error.
+      }
+      playPaymentChime();
+    }
+    return;
+  }
+
+  // Web Browser mode
+  if (webSoundEnabled) playPaymentChime();
+  try {
+    navigator.vibrate?.([300, 120, 300]);
+  } catch {
+    // Ignore vibrate error.
+  }
+  if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+    try {
+      const title = t(
+        `💰 ငွေလွှဲအသစ် — ${latest.name || 'စာဖတ်သူ'}`,
+        `💰 New KPay Payment — ${latest.name || 'Buyer'}`
+      );
+      const body = t(
+        `${latest.contact || ''} · ${latest.orderId || ''} — KPay Slip ကို အမြန်စစ်ဆေးရန် နှိပ်ပါ။`,
+        `${latest.contact || ''} · ${latest.orderId || ''} — Tap to check KPay slip now.`
+      );
+      const n = new Notification(title, {
+        body,
+        icon: '../img/icon-192.png',
+        tag: `maya-pay-${latest.uid}`,
+        requireInteraction: true,
+      });
+      n.onclick = () => {
+        try {
+          window.focus();
+        } catch {
+          // Ignore.
+        }
+        openPaymentByUid(latest.uid);
+        n.close();
+      };
+    } catch {
+      // Ignore browser notification errors.
+    }
+  }
+}
+
+function isBatteryTipDismissed() {
+  try {
+    return sessionStorage.getItem(BATTERY_TIP_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+function submitNativeActivation(email, password, errEl) {
+  const cleanEmail = String(email || '').trim();
+  const cleanPass = String(password || '');
+  if (!cleanEmail || !cleanPass) {
+    if (errEl) {
+      errEl.textContent = t(
+        'Admin အီးမေးလ်နှင့် စကားဝှက် နှစ်ခုလုံး ထည့်ပေးပါ။',
+        'Please enter both admin email and password.'
+      );
+      errEl.hidden = false;
+    }
+    return;
+  }
+  if (errEl) errEl.hidden = true;
+  nativeActivating = true;
+  setCachedAdminEmail(cleanEmail);
+  renderPendingAlertsCta(true);
+  renderAlertsSettingsCard();
+  try {
+    window.MayaAndroid.setLanguage?.(lang);
+    window.MayaAndroid.syncAdminLogin?.(
+      cleanEmail,
+      cleanPass,
+      JSON.stringify(getActiveFirebaseConfig())
+    );
+  } catch (err) {
+    nativeActivating = false;
+    if (errEl) {
+      errEl.textContent = errMsg(err, 'ဖုန်း Alert ဖွင့်၍ မရပါ', 'Could not activate native alerts');
+      errEl.hidden = false;
+    }
+    renderPendingAlertsCta(true);
+    renderAlertsSettingsCard();
+  }
+}
+
+function renderPendingAlertsCta(force = false) {
+  const box = $('pending-alerts-cta');
+  if (!box) return;
+
+  if (!hasNativeBridge()) {
+    box.hidden = true;
+    lastCtaSignature = 'none';
+    return;
+  }
+
+  const live = isFirebaseConfigured();
+  let mode = 'none';
+  if (live && !nativeStatus.nativeSignedIn) {
+    mode = 'activate';
+  } else if (!nativeStatus.notificationPermission) {
+    mode = 'permission';
+  } else if (!nativeStatus.batteryUnrestricted && !isBatteryTipDismissed()) {
+    mode = 'battery';
+  }
+
+  const sig = `${mode}|${lang}|${nativeActivating ? '1' : '0'}|${nativeStatus.lastError || ''}|${getCachedAdminEmail()}`;
+  if (!force && sig === lastCtaSignature) return;
+  lastCtaSignature = sig;
+
+  if (mode === 'none') {
+    box.hidden = true;
+    box.innerHTML = '';
+    return;
+  }
+
+  box.hidden = false;
+  box.className = `alerts-cta${mode === 'permission' ? ' cta-danger' : ''}`;
+
+  if (mode === 'activate') {
+    const cachedEmail = escHtml(getCachedAdminEmail());
+    const errBlock = nativeStatus.lastError
+      ? `<div class="alert alert-danger" style="padding:8px 10px;font-size:12.5px">${escHtml(nativeStatus.lastError)}</div>`
+      : '';
+    box.innerHTML = `
+      <div class="alerts-cta-copy">
+        <strong>🔔 ${escHtml(t('၂၄ နာရီ ဖုန်း Alert ဖွင့်ရန်', 'Activate 24/7 Phone Alerts'))}</strong>
+        <p>${escHtml(
+          t(
+            'ဖုန်းပိတ်ထားချိန်မှာပါ ငွေလွှဲအသစ်ဝင်တိုင်း အသံမြည်စေရန် Admin စကားဝှက်ကို တစ်ကြိမ်သာ ထပ်ထည့်ပေးပါ။',
+            'Enter your admin password once so your phone rings even when closed.'
+          )
+        )}</p>
+      </div>
+      <form id="cta-native-form" class="na-form">
+        <input id="cta-native-email" class="input" type="email" required value="${cachedEmail}" autocomplete="username" placeholder="admin@email.com">
+        <input id="cta-native-pw" class="input" type="password" required autocomplete="current-password" placeholder="${escHtml(t('Admin စကားဝှက်', 'Admin Password'))}">
+        <button type="submit" class="btn btn-primary btn-sm"${nativeActivating ? ' disabled' : ''}>
+          ${escHtml(nativeActivating ? t('ချိတ်ဆက်နေပါသည်...', 'Activating...') : t('အခုဖွင့်မည်', 'Activate Now'))}
+        </button>
+      </form>
+      <div id="cta-native-err" class="alert alert-danger" hidden></div>
+      ${errBlock}
+    `;
+    const form = $('cta-native-form');
+    form?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = $('cta-native-email')?.value || '';
+      const pw = $('cta-native-pw')?.value || '';
+      if ($('cta-native-pw')) $('cta-native-pw').value = '';
+      submitNativeActivation(email, pw, $('cta-native-err'));
+    });
+    return;
+  }
+
+  if (mode === 'permission') {
+    box.innerHTML = `
+      <div class="alerts-cta-row">
+        <div class="alerts-cta-copy">
+          <strong>🔔 ${escHtml(t('ဖုန်း Notification ခွင့်ပြုချက် လိုအပ်ပါသည်', 'Phone Notification Permission Required'))}</strong>
+          <p>${escHtml(
+            t(
+              'ငွေလွှဲအသစ်ဝင်တိုင်း မလွတ်သွားအောင် Notification ခွင့်ပြုပေးပါ။',
+              'Allow notifications so new KPay payments ring loudly on your phone.'
+            )
+          )}</p>
+        </div>
+        <div class="alerts-cta-btns">
+          <button id="btn-cta-perm" type="button" class="btn btn-danger btn-sm">
+            🔔 ${escHtml(t('Notification ဖွင့်မည်', 'Allow Phone Notifications'))}
+          </button>
+        </div>
+      </div>
+    `;
+    $('btn-cta-perm')?.addEventListener('click', () => {
+      try {
+        window.MayaAndroid.requestNotificationPermission?.();
+      } catch {
+        // Ignore.
+      }
+    });
+    return;
+  }
+
+  // mode === 'battery'
+  box.innerHTML = `
+    <div class="alerts-cta-row">
+      <div class="alerts-cta-copy">
+        <strong>🔋 ${escHtml(t('Battery အိပ်ခြင်း ပိတ်ထားပါ (အကြံပြု)', 'Disable Battery Sleep (Recommended)'))}</strong>
+        <p>${escHtml(
+          t(
+            'ဖုန်းလော့ခ်ချထားချိန် Alert မပျောက်စေရန် Battery Unrestricted ဖွင့်ထားပါ (Xiaomi / MIUI အတွက် အရေးကြီးသည်)။',
+            'Keep background alerts awake on Xiaomi / MIUI / Android when the screen is off.'
+          )
+        )}</p>
+      </div>
+      <div class="alerts-cta-btns">
+        <button id="btn-cta-battery" type="button" class="btn btn-gold btn-sm">
+          🔋 ${escHtml(t('Battery ပြင်မည်', 'Fix Battery Sleep'))}
+        </button>
+        <button id="btn-cta-battery-dismiss" type="button" class="btn btn-ghost btn-xs" aria-label="Dismiss">✕</button>
+      </div>
+    </div>
+  `;
+  $('btn-cta-battery')?.addEventListener('click', () => {
+    try {
+      window.MayaAndroid.requestIgnoreBatteryOptimization?.();
+    } catch {
+      // Ignore.
+    }
+  });
+  $('btn-cta-battery-dismiss')?.addEventListener('click', () => {
+    try {
+      sessionStorage.setItem(BATTERY_TIP_KEY, '1');
+    } catch {
+      // Ignore.
+    }
+    renderPendingAlertsCta(true);
+  });
+}
+
+function renderAlertsSettingsCard() {
+  const nativePane = $('alerts-native-pane');
+  const webPane = $('alerts-web-pane');
+  const modePill = $('alerts-mode-pill');
+  if (!nativePane || !webPane || !modePill) return;
+
+  if (hasNativeBridge()) {
+    nativePane.hidden = false;
+    webPane.hidden = true;
+
+    const live = isFirebaseConfigured();
+    const fullyReady =
+      nativeStatus.monitorRunning && nativeStatus.notificationPermission && (!live || nativeStatus.nativeSignedIn);
+    modePill.className = `badge ${fullyReady ? 'badge-approved' : 'badge-pending'}`;
+    modePill.innerHTML = `<span class="badge-dot"></span>${escHtml(
+      fullyReady ? t('24/7 အသင့်', '24/7 Active') : t('ပြင်ဆင်ရန်', 'Setup Needed')
+    )}`;
+
+    // 3 Status Pills
+    const statusRow = $('alerts-status-pills');
+    if (statusRow) {
+      const monCls = nativeStatus.monitorRunning ? 'badge-approved' : 'badge-neutral';
+      const monTxt = nativeStatus.monitorRunning
+        ? t('24/7 Monitor: ဖွင့်ထားသည်', '24/7 Monitor: Active')
+        : t('24/7 Monitor: ပိတ်ထားသည်', '24/7 Monitor: Off');
+      const permCls = nativeStatus.notificationPermission ? 'badge-approved' : 'badge-revoked';
+      const permTxt = nativeStatus.notificationPermission
+        ? t('Permission: ခွင့်ပြုပြီး', 'Permission: Allowed')
+        : t('Permission: ပိတ်ထားသည်', 'Permission: Blocked');
+      const batCls = nativeStatus.batteryUnrestricted ? 'badge-approved' : 'badge-pending';
+      const batTxt = nativeStatus.batteryUnrestricted
+        ? t('Battery: Unrestricted', 'Battery: Unrestricted')
+        : t('Battery: Restricted', 'Battery: Restricted');
+
+      statusRow.innerHTML = `
+        <span class="badge ${monCls}"><span class="badge-dot"></span>${escHtml(monTxt)}</span>
+        <button type="button" class="badge ${permCls} status-chip-btn" data-status-act="perm">
+          <span class="badge-dot"></span>${escHtml(permTxt)}
+        </button>
+        <button type="button" class="badge ${batCls} status-chip-btn" data-status-act="battery">
+          <span class="badge-dot"></span>${escHtml(batTxt)}
+        </button>
+      `;
+    }
+
+    // Inline 1-step activation box if upgraded from v1.0
+    const actBox = $('settings-native-activate');
+    if (actBox) {
+      const needAct = live && !nativeStatus.nativeSignedIn;
+      actBox.hidden = !needAct;
+      if (needAct) {
+        const emailInp = $('na-settings-email');
+        if (emailInp && !emailInp.value) emailInp.value = getCachedAdminEmail();
+        const submitBtn = $('btn-na-settings-submit');
+        if (submitBtn) submitBtn.disabled = nativeActivating;
+        const errEl = $('na-settings-err');
+        if (errEl && nativeStatus.lastError) {
+          errEl.textContent = nativeStatus.lastError;
+          errEl.hidden = false;
+        }
+      }
+    }
+
+    // Monitor switch
+    const chkMon = $('chk-native-monitor');
+    if (chkMon) chkMon.checked = Boolean(nativeStatus.monitorEnabled);
+
+    // Sound mode pills
+    document.querySelectorAll('#pref-sound-pills [data-alarm-mode]').forEach((btn) => {
+      const isAlarm = btn.dataset.alarmMode === 'true';
+      btn.setAttribute('aria-pressed', Boolean(nativeStatus.alarmMode) === isAlarm ? 'true' : 'false');
+    });
+
+    // Repeat interval pills
+    const curRepeat = Number(nativeStatus.repeatMinutes ?? 3);
+    document.querySelectorAll('#pref-repeat-pills [data-repeat-min]').forEach((btn) => {
+      const mins = Number(btn.dataset.repeatMin);
+      btn.setAttribute('aria-pressed', mins === curRepeat ? 'true' : 'false');
+    });
+    return;
+  }
+
+  // Web Browser Mode
+  nativePane.hidden = true;
+  webPane.hidden = false;
+
+  const notifSupported = typeof Notification !== 'undefined';
+  const perm = notifSupported ? Notification.permission : 'unsupported';
+  modePill.className = `badge ${perm === 'granted' || webSoundEnabled ? 'badge-approved' : 'badge-neutral'}`;
+  modePill.innerHTML = `<span class="badge-dot"></span>${escHtml(t('Web Alert', 'Web Mode'))}`;
+
+  const statusEl = $('web-notif-status');
+  const reqBtn = $('btn-web-notif-req');
+  if (statusEl) {
+    if (!notifSupported) {
+      statusEl.className = 'badge badge-neutral';
+      statusEl.textContent = t('Browser မပံ့ပိုးပါ', 'Not Supported');
+    } else if (perm === 'granted') {
+      statusEl.className = 'badge badge-approved';
+      statusEl.textContent = t('ခွင့်ပြုပြီး ✓', 'Allowed ✓');
+    } else if (perm === 'denied') {
+      statusEl.className = 'badge badge-revoked';
+      statusEl.textContent = t('Browser တွင် ပိတ်ထားသည်', 'Blocked in Browser');
+    } else {
+      statusEl.className = 'badge badge-pending';
+      statusEl.textContent = t('မဖွင့်ရသေးပါ', 'Not Enabled');
+    }
+  }
+  if (reqBtn) {
+    reqBtn.hidden = !notifSupported || perm === 'granted';
+  }
+  const chkSound = $('chk-web-sound');
+  if (chkSound) chkSound.checked = webSoundEnabled;
+}
+
+// Register Native -> JS bridge callbacks immediately
+if (typeof window !== 'undefined') {
+  window.__mayaNativeStatusChanged = (statusObj) => {
+    applyNativeStatus(statusObj);
+  };
+  window.__mayaOpenPayment = (uid) => {
+    openPaymentByUid(uid);
+  };
 }
 
 // ---------- Auth Gate & Mode ----------
@@ -302,7 +933,8 @@ function renderModeBadges() {
 
   const emailEl = $('hdr-admin-email');
   if (emailEl) {
-    emailEl.textContent = adminSessionInfo?.email || (live ? '' : t('Local Browser Sync', 'Local Browser Sync'));
+    emailEl.textContent =
+      getCachedAdminEmail() || (live ? '' : t('Local Browser Sync', 'Local Browser Sync'));
   }
 }
 
@@ -373,11 +1005,18 @@ function handleClearFirebaseConfig() {
 }
 
 async function enterAdminShell(sessionInfo = null) {
-  adminSessionInfo = sessionInfo || adminSessionInfo;
+  if (sessionInfo) {
+    adminSessionInfo = sessionInfo;
+    if (sessionInfo.email) setCachedAdminEmail(sessionInfo.email);
+  }
   $('auth-screen').hidden = true;
   $('app-shell').hidden = false;
+
+  readNativeStatus();
   renderModeBadges();
   prefillFirebaseTextareas();
+  renderPendingAlertsCta(true);
+  renderAlertsSettingsCard();
 
   // Sync live payment config
   loadConfigIntoForm(getConfig());
@@ -389,13 +1028,52 @@ async function enterAdminShell(sessionInfo = null) {
     }
   });
 
-  // Start real-time readers watcher
+  // Start real-time readers watcher with live new-payment detection
+  readersInitialized = false;
+  seenPendingKeys.clear();
   if (unsubReaders) unsubReaders();
   unsubReaders = adminWatchReaders((list) => {
     allReaders = Array.isArray(list) ? list : [];
+    const currentPending = allReaders.filter((r) => r.status === 'pending');
+    const pendingKey = (r) => `${r.uid}:${toMs(r.updatedAt) || toMs(r.createdAt) || 0}`;
+
+    if (!readersInitialized) {
+      for (const r of currentPending) seenPendingKeys.add(pendingKey(r));
+      readersInitialized = true;
+      updateStaticDocTitle(currentPending.length);
+    } else {
+      const fresh = currentPending.filter((r) => !seenPendingKeys.has(pendingKey(r)));
+      for (const r of currentPending) seenPendingKeys.add(pendingKey(r));
+      if (fresh.length > 0) {
+        handleNewPaymentsArrived(fresh, currentPending.length);
+      } else {
+        updateStaticDocTitle(currentPending.length);
+      }
+      if (bannerPayment && !currentPending.some((r) => r.uid === bannerPayment.uid)) {
+        dismissPaymentBanner();
+      }
+      if (currentPending.length === 0) {
+        stopTitleFlash();
+      }
+    }
+
     renderBadges();
     renderPendingTab();
     renderReadersTab();
+
+    // Handle notification tap cold-start or buffered UID
+    let openUid = queuedOpenUid;
+    if (!openUid && hasNativeBridge()) {
+      try {
+        openUid = String(window.MayaAndroid.consumePendingOpenUid?.() || '').trim();
+      } catch {
+        openUid = '';
+      }
+    }
+    if (openUid && allReaders.some((r) => r.uid === openUid)) {
+      queuedOpenUid = '';
+      openPaymentByUid(openUid);
+    }
   });
 
   // Load book chapter status
@@ -413,6 +1091,12 @@ function exitAdminShell() {
   }
   allReaders = [];
   receiptCache.clear();
+  readersInitialized = false;
+  seenPendingKeys.clear();
+  queuedOpenUid = '';
+  dismissPaymentBanner();
+  stopTitleFlash();
+  document.title = BASE_DOC_TITLE;
   $('app-shell').hidden = true;
   $('auth-screen').hidden = false;
   $('auth-error').hidden = true;
@@ -433,7 +1117,12 @@ function switchTab(tabName) {
   if (tabName === 'book') {
     refreshBookStatus();
   } else if (tabName === 'payments') {
+    readNativeStatus();
+    renderAlertsSettingsCard();
     loadConfigIntoForm(getConfig());
+  } else if (tabName === 'pending') {
+    readNativeStatus();
+    renderPendingAlertsCta();
   }
 }
 
@@ -1471,6 +2160,19 @@ function bindEvents() {
       const email = $('login-email').value.trim();
       const pass = $('login-password').value;
       const res = await adminSignIn(email, pass);
+      setCachedAdminEmail(email);
+      if (hasNativeBridge()) {
+        try {
+          window.MayaAndroid.setLanguage?.(lang);
+          window.MayaAndroid.syncAdminLogin?.(
+            email,
+            pass,
+            JSON.stringify(getActiveFirebaseConfig())
+          );
+        } catch (bridgeErr) {
+          console.warn('[admin] syncAdminLogin warning:', bridgeErr);
+        }
+      }
       $('login-password').value = '';
       await enterAdminShell(res);
       showToast(t('Admin အကောင့် ဝင်ရောက်ပြီးပါပြီ ✓', 'Signed in to Admin Console ✓'), 'ok');
@@ -1500,7 +2202,15 @@ function bindEvents() {
   // Sign out
   $('btn-signout').addEventListener('click', async () => {
     await adminSignOut();
+    setCachedAdminEmail('');
     adminSessionInfo = null;
+    if (hasNativeBridge()) {
+      try {
+        window.MayaAndroid.syncAdminLogout?.();
+      } catch {
+        // Ignore bridge error.
+      }
+    }
     exitAdminShell();
     showToast(t('ထွက်ပြီးပါပြီ', 'Signed out'));
   });
@@ -1821,11 +2531,204 @@ function bindEvents() {
     }
   });
 
+  // Live payment alert banner actions
+  $('btn-banner-check').addEventListener('click', () => {
+    const uid = bannerPayment?.uid || '';
+    openPaymentByUid(uid);
+  });
+  $('btn-banner-dismiss').addEventListener('click', dismissPaymentBanner);
+
+  // Settings: Phone Alerts & Sound controls (Android APK + Web Browser)
+  $('alerts-status-pills').addEventListener('click', (e) => {
+    const chip = e.target.closest('[data-status-act]');
+    if (!chip || !hasNativeBridge()) return;
+    if (chip.dataset.statusAct === 'perm') {
+      try {
+        window.MayaAndroid.requestNotificationPermission?.();
+      } catch {
+        // Ignore.
+      }
+    } else if (chip.dataset.statusAct === 'battery') {
+      try {
+        window.MayaAndroid.requestIgnoreBatteryOptimization?.();
+      } catch {
+        // Ignore.
+      }
+    }
+  });
+
+  $('settings-native-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const email = $('na-settings-email').value.trim();
+    const pw = $('na-settings-pw').value;
+    $('na-settings-pw').value = '';
+    submitNativeActivation(email, pw, $('na-settings-err'));
+  });
+
+  $('chk-native-monitor').addEventListener('change', (e) => {
+    if (!hasNativeBridge()) return;
+    const enabled = Boolean(e.target.checked);
+    nativeStatus.monitorEnabled = enabled;
+    try {
+      window.MayaAndroid.setMonitorEnabled?.(enabled);
+      showToast(
+        enabled
+          ? t('၂၄ နာရီ ငွေလွှဲစောင့်ကြည့်စနစ် ဖွင့်လိုက်ပါပြီ ✓', '24/7 Live Monitor enabled ✓')
+          : t('၂၄ နာရီ ငွေလွှဲစောင့်ကြည့်စနစ် ပိတ်လိုက်ပါပြီ', '24/7 Live Monitor paused'),
+        enabled ? 'ok' : 'info'
+      );
+    } catch {
+      // Ignore.
+    }
+    readNativeStatus();
+  });
+
+  $('pref-sound-pills').addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-alarm-mode]');
+    if (!btn || !hasNativeBridge()) return;
+    const alarmMode = btn.dataset.alarmMode === 'true';
+    nativeStatus.alarmMode = alarmMode;
+    try {
+      window.MayaAndroid.setAlertPrefs?.(alarmMode, Number(nativeStatus.repeatMinutes ?? 3));
+      showToast(
+        alarmMode
+          ? t('🚨 အချက်ပေးသံ (Ultra-Loud Alarm) ရွေးပြီးပါပြီ', '🚨 Switched to Ultra-Loud Alarm')
+          : t('🔔 ကျယ်လောင်သံ (Loud Chime) ရွေးပြီးပါပြီ', '🔔 Switched to Loud Chime'),
+        'ok'
+      );
+    } catch {
+      // Ignore.
+    }
+    renderAlertsSettingsCard();
+  });
+
+  $('pref-repeat-pills').addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-repeat-min]');
+    if (!btn || !hasNativeBridge()) return;
+    const mins = Number(btn.dataset.repeatMin);
+    nativeStatus.repeatMinutes = mins;
+    try {
+      window.MayaAndroid.setAlertPrefs?.(Boolean(nativeStatus.alarmMode), mins);
+      showToast(
+        mins > 0
+          ? t(`⏰ မစစ်ရသေးပါက ${mins} မိနစ်တိုင်း ထပ်သတိပေးမည် ✓`, `⏰ Repeating reminder set to every ${mins}m ✓`)
+          : t('ထပ်မံသတိပေးချက် ပိတ်ထားပါပြီ', 'Repeat reminders turned off'),
+        'ok'
+      );
+    } catch {
+      // Ignore.
+    }
+    renderAlertsSettingsCard();
+  });
+
+  $('btn-native-test').addEventListener('click', () => {
+    if (!hasNativeBridge()) return;
+    try {
+      window.MayaAndroid.sendTestNotification?.(lang);
+      showToast(t('🔔 စမ်းသပ် Notification ပို့လိုက်ပါပြီ!', '🔔 Test notification sent!'), 'ok');
+    } catch {
+      showToast(t('Notification ပို့၍ မရပါ', 'Could not send test notification'), 'danger');
+    }
+  });
+
+  $('btn-native-sound-settings').addEventListener('click', () => {
+    try {
+      window.MayaAndroid?.openNotificationSettings?.();
+    } catch {
+      // Ignore.
+    }
+  });
+
+  $('btn-native-battery').addEventListener('click', () => {
+    try {
+      window.MayaAndroid?.requestIgnoreBatteryOptimization?.();
+    } catch {
+      // Ignore.
+    }
+  });
+
+  $('btn-native-app-settings').addEventListener('click', () => {
+    try {
+      window.MayaAndroid?.openAppSettings?.();
+    } catch {
+      // Ignore.
+    }
+  });
+
+  // Web Browser alert controls
+  $('btn-web-notif-req').addEventListener('click', async () => {
+    if (typeof Notification === 'undefined') {
+      showToast(t('ဤ Browser သည် Notification မပံ့ပိုးပါ', 'Browser notifications not supported'), 'danger');
+      return;
+    }
+    try {
+      const res = await Notification.requestPermission();
+      renderAlertsSettingsCard();
+      if (res === 'granted') {
+        showToast(t('Browser Notification ခွင့်ပြုပြီးပါပြီ ✓', 'Browser notifications enabled ✓'), 'ok');
+      } else {
+        showToast(
+          t('Browser ဆက်တင်ထဲတွင် Notification ဖွင့်ပေးပါ', 'Please allow notifications in browser settings'),
+          'danger'
+        );
+      }
+    } catch {
+      showToast(t('Notification ခွင့်ပြုချက် တောင်း၍မရပါ', 'Could not request notification permission'), 'danger');
+    }
+  });
+
+  $('chk-web-sound').addEventListener('change', (e) => {
+    webSoundEnabled = Boolean(e.target.checked);
+    try {
+      localStorage.setItem(WEB_SOUND_KEY, webSoundEnabled ? '1' : '0');
+    } catch {
+      // Ignore.
+    }
+    if (webSoundEnabled) playPaymentChime();
+  });
+
+  $('btn-web-test-chime').addEventListener('click', () => {
+    playPaymentChime();
+    try {
+      navigator.vibrate?.([220, 100, 220]);
+    } catch {
+      // Ignore.
+    }
+    if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+      try {
+        new Notification(t('💰 စမ်းသပ် KPay အသိပေးချက်', '💰 Test KPay Payment Alert'), {
+          body: t(
+            'မာရာ Admin — ငွေလွှဲအသစ်ဝင်လာပါက ဤကဲ့သို့ ချက်ချင်းပြပေးပါမည်။',
+            'Maya Admin — New KPay slips will alert you right away like this.'
+          ),
+          icon: '../img/icon-192.png',
+        });
+      } catch {
+        // Ignore.
+      }
+    }
+    showToast(t('🔔 စမ်းသပ်အသံ ဖွင့်ပြီးပါပြီ ✓', '🔔 Test payment chime played ✓'), 'ok');
+  });
+
+  // Stop flashing title when admin returns to the tab
+  window.addEventListener('focus', () => {
+    stopTitleFlash();
+  });
+
   bindLightboxControls();
 }
 
 // ---------- Boot ----------
 async function boot() {
+  unlockAudio();
+
+  try {
+    const savedSound = localStorage.getItem(WEB_SOUND_KEY);
+    webSoundEnabled = savedSound !== '0';
+  } catch {
+    webSoundEnabled = true;
+  }
+
   try {
     const savedLang = localStorage.getItem(LANG_KEY);
     applyLang(savedLang === 'en' ? 'en' : 'my', { persist: false });
@@ -1834,8 +2737,10 @@ async function boot() {
   }
 
   bindEvents();
+  readNativeStatus();
   renderModeBadges();
   prefillFirebaseTextareas();
+  renderAlertsSettingsCard();
 
   try {
     await initStore();
@@ -1843,6 +2748,7 @@ async function boot() {
     console.warn('[admin] initStore warning:', err);
   }
 
+  readNativeStatus();
   renderModeBadges();
   if (adminIsSignedIn()) {
     await enterAdminShell();

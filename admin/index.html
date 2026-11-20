@@ -220,6 +220,24 @@
   </div>
 
   <main class="main-content">
+    <!-- Live In-App New Payment Alert Banner -->
+    <div id="new-payment-banner" class="payment-alert-banner" role="alert" aria-live="assertive" hidden>
+      <div class="pab-info">
+        <span class="pab-icon" aria-hidden="true">💰</span>
+        <div class="pab-text">
+          <strong id="pab-title"></strong>
+          <span id="pab-sub"></span>
+        </div>
+      </div>
+      <div class="pab-actions">
+        <button id="btn-banner-check" type="button" class="btn btn-gold btn-sm">
+          <span lang="my">Slip အခုစစ်မည်</span>
+          <span lang="en">Check Slip Now</span>
+        </button>
+        <button id="btn-banner-dismiss" type="button" class="pab-close" aria-label="Dismiss alert">✕</button>
+      </div>
+    </div>
+
     <!-- Demo Mode Banner inside Shell -->
     <div id="demo-ribbon" class="demo-ribbon" hidden>
       <div>
@@ -256,6 +274,9 @@
           </button>
         </div>
       </div>
+
+      <!-- Native APK 1-step Phone Alert Activation / Permission / Battery CTA -->
+      <div id="pending-alerts-cta" class="alerts-cta" hidden></div>
 
       <div id="pending-list" class="pending-grid"></div>
       <div id="pending-empty" class="empty-state" hidden>
@@ -378,6 +399,157 @@
             <span lang="my">သိမ်းဆည်းလိုက်သည်နှင့် ဝယ်ယူသည့်စာမျက်နှာတွင် ချက်ချင်းပြောင်းလဲပေါ်လာပါမည် (<code class="mono">config/ebook</code>)</span>
             <span lang="en">Updates the buyer checkout form live via <code class="mono">config/ebook</code></span>
           </p>
+        </div>
+      </div>
+
+      <!-- Phone Alerts & Sound Control Card -->
+      <div id="alerts-settings-card" class="panel alerts-card">
+        <div class="alerts-card-head">
+          <div>
+            <h3>
+              🔔 <span lang="my">ဖုန်းအသိပေးချက် &amp; အသံ</span>
+              <span lang="en">Phone Alerts &amp; Sound</span>
+            </h3>
+            <p class="section-sub" style="margin:2px 0 0;font-size:13px">
+              <span lang="my">KPay ငွေလွှဲအသစ်ဝင်တိုင်း ချက်ချင်းသိပြီး မြန်မြန်စစ်ဆေးနိုင်ရန်</span>
+              <span lang="en">Never miss a new KPay payment so you can verify slips fast</span>
+            </p>
+          </div>
+          <span id="alerts-mode-pill" class="badge badge-neutral">...</span>
+        </div>
+
+        <!-- Android APK Native 24/7 Alerts Controls -->
+        <div id="alerts-native-pane" class="form-stack" hidden>
+          <div id="alerts-status-pills" class="alerts-status-row"></div>
+
+          <!-- 1-step native activation when upgraded from v1.0 -->
+          <div id="settings-native-activate" class="native-activate-box" hidden>
+            <div class="na-head">
+              <strong>
+                🔔 <span lang="my">၂၄ နာရီ ဖုန်း Alert ဖွင့်ရန်</span>
+                <span lang="en">Activate 24/7 Phone Alerts</span>
+              </strong>
+              <p class="na-desc">
+                <span lang="my">ဖုန်းပိတ်ထားချိန်မှာပါ အသံမြည်စေရန် Admin စကားဝှက်ကို တစ်ကြိမ်သာ ထပ်ထည့်ပေးပါ။</span>
+                <span lang="en">Enter your admin password once so your phone rings even when closed.</span>
+              </p>
+            </div>
+            <form id="settings-native-form" class="na-form">
+              <input id="na-settings-email" class="input" type="email" required autocomplete="username" placeholder="admin@email.com">
+              <input id="na-settings-pw" class="input" type="password" required autocomplete="current-password" placeholder="Admin Password">
+              <button id="btn-na-settings-submit" type="submit" class="btn btn-primary btn-sm">
+                <span lang="my">အခုဖွင့်မည်</span>
+                <span lang="en">Activate Now</span>
+              </button>
+            </form>
+            <div id="na-settings-err" class="alert alert-danger" hidden></div>
+          </div>
+
+          <label class="toggle-row" for="chk-native-monitor">
+            <div class="toggle-copy">
+              <strong>
+                <span lang="my">၂၄ နာရီ ငွေလွှဲစောင့်ကြည့်စနစ်</span>
+                <span lang="en">24/7 Live Payment Monitor</span>
+              </strong>
+              <span>
+                <span lang="my">App ပိတ်ထား / ဖုန်းလော့ခ်ချထားချိန်တွင်ပင် ချက်ချင်းအသံမြည်မည်</span>
+                <span lang="en">Watches Firestore live even when the app is closed or phone is locked</span>
+              </span>
+            </div>
+            <input id="chk-native-monitor" class="switch-input" type="checkbox">
+          </label>
+
+          <div class="alert-pref-group">
+            <div class="alert-pref-label">
+              <span lang="my">အသိပေးအသံ ပုံစံ (Alert Sound)</span>
+              <span lang="en">Alert Sound Mode</span>
+            </div>
+            <div id="pref-sound-pills" class="seg-pills" role="group">
+              <button type="button" class="seg-pill" data-alarm-mode="false" aria-pressed="true">
+                🔔 <span lang="my">ကျယ်လောင်သံ</span><span lang="en">Loud Chime</span>
+              </button>
+              <button type="button" class="seg-pill" data-alarm-mode="true" aria-pressed="false">
+                🚨 <span lang="my">အချက်ပေးသံ (အကျယ်ဆုံး)</span><span lang="en">Ultra-Loud Alarm</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="alert-pref-group">
+            <div class="alert-pref-label">
+              <span lang="my">မစစ်ရသေးပါက ထပ်မံသတိပေးချိန် (Repeat Reminder)</span>
+              <span lang="en">Repeat Reminder if Unchecked</span>
+            </div>
+            <div id="pref-repeat-pills" class="seg-pills" role="group">
+              <button type="button" class="seg-pill" data-repeat-min="0" aria-pressed="false">
+                <span lang="my">ပိတ်</span><span lang="en">Off</span>
+              </button>
+              <button type="button" class="seg-pill" data-repeat-min="3" aria-pressed="true">
+                <span lang="my">၃ မိနစ်တိုင်း</span><span lang="en">Every 3m</span>
+              </button>
+              <button type="button" class="seg-pill" data-repeat-min="5" aria-pressed="false">
+                <span lang="my">၅ မိနစ်တိုင်း</span><span lang="en">Every 5m</span>
+              </button>
+              <button type="button" class="seg-pill" data-repeat-min="10" aria-pressed="false">
+                <span lang="my">၁၀ မိနစ်တိုင်း</span><span lang="en">Every 10m</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="alert-actions-grid">
+            <button id="btn-native-test" type="button" class="btn btn-primary btn-sm">
+              🔔 <span lang="my">စမ်းသပ် Alert ပို့မည်</span><span lang="en">Send Test Notification</span>
+            </button>
+            <button id="btn-native-sound-settings" type="button" class="btn btn-outline btn-sm">
+              🔊 <span lang="my">အသံဆက်တင်</span><span lang="en">Sound Settings</span>
+            </button>
+            <button id="btn-native-battery" type="button" class="btn btn-outline btn-sm">
+              🔋 <span lang="my">Battery အိပ်ခြင်းပြင်</span><span lang="en">Fix Battery Sleep</span>
+            </button>
+            <button id="btn-native-app-settings" type="button" class="btn btn-outline btn-sm">
+              ⚙ <span lang="my">App / Xiaomi Autostart</span><span lang="en">App / Xiaomi Autostart</span>
+            </button>
+          </div>
+
+          <div class="alert-tip-box">
+            💡 <span lang="my">Xiaomi / Redmi / POCO ဖုန်းများအတွက် — <strong>App Settings → Battery saver → No restrictions</strong> နှင့် <strong>Autostart → ON</strong> ထားပေးပါက ဖုန်းအိပ်သွားချိန်တွင်ပင် Alert မပျောက်ဘဲ ချက်ချင်းမြည်ပါမည်။</span>
+            <span lang="en">For Xiaomi / Redmi / POCO: set <strong>Battery Saver → No restrictions</strong> &amp; <strong>Autostart → ON</strong> so alerts never sleep.</span>
+          </div>
+        </div>
+
+        <!-- Web Browser Alerts Controls -->
+        <div id="alerts-web-pane" class="form-stack" hidden>
+          <div class="web-notif-row">
+            <div class="web-notif-info">
+              <strong>
+                <span lang="my">Browser Notification ခွင့်ပြုချက်</span>
+                <span lang="en">Browser Notifications</span>
+              </strong>
+              <span id="web-notif-status" class="badge badge-neutral">...</span>
+            </div>
+            <button id="btn-web-notif-req" type="button" class="btn btn-gold btn-sm">
+              🔔 <span lang="my">Browser Alert ဖွင့်မည်</span><span lang="en">Enable Browser Notifications</span>
+            </button>
+          </div>
+
+          <label class="toggle-row" for="chk-web-sound">
+            <div class="toggle-copy">
+              <strong>
+                <span lang="my">ငွေလွှဲအသစ်ဝင်လျှင် အသံမြည်မည် (In-App Chime)</span>
+                <span lang="en">In-App Payment Sound Chime</span>
+              </strong>
+              <span>
+                <span lang="my">ဤစာမျက်နှာဖွင့်ထားစဉ် ငွေလွှဲအသစ်ဝင်တိုင်း အသံမြည်ပြီး ထိပ်ဆုံးတွင် ပြပေးမည်</span>
+                <span lang="en">Plays a clear chime and shows an alert banner when a new payment arrives</span>
+              </span>
+            </div>
+            <input id="chk-web-sound" class="switch-input" type="checkbox" checked>
+          </label>
+
+          <div class="fb-connect-actions">
+            <button id="btn-web-test-chime" type="button" class="btn btn-primary btn-sm">
+              🔔 <span lang="my">အသံစမ်းနားထောင်မည်</span><span lang="en">Test Chime</span>
+            </button>
+          </div>
         </div>
       </div>
 
