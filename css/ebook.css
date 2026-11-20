@@ -849,20 +849,31 @@ body.eb-reader-open {
   min-height: 0;
   display: grid;
   place-items: center;
-  padding: 8px;
+  padding: 0;
   overflow: hidden;
-  touch-action: pan-y;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  overscroll-behavior: none;
 }
 .eb-rd-canvas-wrap {
   display: grid;
   place-items: center;
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 10px 30px rgba(24, 15, 10, .18), 0 0 0 1px var(--rd-border);
+  overflow: visible;
+  background: transparent;
 }
 .eb-rd-canvas {
   display: block;
-  pointer-events: none;
+  pointer-events: auto;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  cursor: grab;
+}
+.eb-rd-canvas.eb-dragging {
+  cursor: grabbing;
 }
 
 .eb-rd-loading {
