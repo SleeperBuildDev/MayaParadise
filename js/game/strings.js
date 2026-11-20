@@ -3,35 +3,135 @@
 
 export const LINES = {
   intro: [
-    { my: 'မင်္ဂလာပါရှင့်! ကျွန်မ မာရာပါ။ ကျွန်မရဲ့ စာအုပ်ကမ္ဘာလေးထဲကို ကြိုဆိုပါတယ်။', en: "Hello! I'm Maya. Welcome to my little book world!" },
+    {
+      my: 'မင်္ဂလာပါရှင့်! ကျွန်မ မာရာပါ။ ကျွန်မရဲ့ စာအုပ်ကမ္ဘာလေးထဲကို ကြိုဆိုပါတယ်။',
+      myNamed: 'မင်္ဂလာပါ {name} ရေ! ကျွန်မ မာရာပါ။ ကျွန်မရဲ့ စာအုပ်ကမ္ဘာလေးထဲကို ကြိုဆိုပါတယ်။',
+      en: "Hello! I'm Maya. Welcome to my little book world!",
+      enNamed: "Hello, {name}! I'm Maya. Welcome to my little book world!",
+    },
     { my: 'သွားချင်တဲ့ နေရာလေးကို နှိပ်လိုက်ရင် ကျွန်မ ကားမောင်းပြီး လိုက်ပို့ပေးမယ်နော်။', en: "Tap a place and I'll drive you there!" },
   ],
-  introAgain: [{ my: 'ပြန်လာတာ ဝမ်းသာလိုက်တာရှင့်! ဒီနေ့ ဘယ်ကို သွားကြမလဲ?', en: 'So happy to see you again! Where shall we go today?' }],
+  introAgain: [
+    {
+      my: 'ပြန်လာတာ ဝမ်းသာလိုက်တာရှင့်! ဒီနေ့ ဘယ်ကို သွားကြမလဲ?',
+      myNamed: '{name} ရေ၊ ပြန်လာတာ ဝမ်းသာလိုက်တာရှင့်! ဒီနေ့ ဘယ်ကို သွားကြမလဲ?',
+      en: 'So happy to see you again! Where shall we go today?',
+      enNamed: 'Welcome back, {name}! Where shall we go today?',
+    },
+  ],
   enter: {
-    about: { my: 'ကျွန်မရဲ့ စာရေးခန်းလေးကို ကြိုဆိုပါတယ်ရှင့်!', en: 'Welcome to my writing room!' },
-    templates: { my: 'Template လေးတွေ အတူတူ ရွေးကြည့်ကြရအောင်နော်!', en: "Let's pick a template together!" },
-    scripts: { my: 'Script စတူဒီယိုကို ရောက်ပါပြီရှင့်! ဘယ်လို Script မျိုး လိုချင်လဲ?', en: 'Welcome to the Script Studio! What kind of script do you need?' },
-    content: { my: 'သင့် Brand လေး တောက်ပလာအောင် ကူညီပေးမယ်နော်!', en: "I'll help your brand shine!" },
-    library: { my: 'ဒီမှာ ကျွန်မရဲ့ စာအုပ်လေး ရှိပါတယ်ရှင့်!', en: 'My book lives here!' },
-    contact: { my: 'စကားပြောချင်ရင် ဒီကနေ ဆက်သွယ်လို့ ရပါတယ်ရှင့်!', en: 'You can reach me from here!' },
+    about: {
+      my: 'ကျွန်မရဲ့ စာရေးခန်းလေးကို ကြိုဆိုပါတယ်ရှင့်!',
+      myNamed: '{name} ရေ၊ ကျွန်မရဲ့ စာရေးခန်းလေးကို ကြိုဆိုပါတယ်ရှင့်!',
+      en: 'Welcome to my writing room!',
+      enNamed: 'Welcome to my writing room, {name}!',
+    },
+    templates: {
+      my: 'Template လေးတွေ အတူတူ ရွေးကြည့်ကြရအောင်နော်!',
+      myNamed: '{name} ရေ၊ Template လေးတွေ အတူတူ ရွေးကြည့်ကြရအောင်နော်!',
+      en: "Let's pick a template together!",
+      enNamed: "Let's pick a template together, {name}!",
+    },
+    scripts: {
+      my: 'Script စတူဒီယိုကို ရောက်ပါပြီရှင့်! ဘယ်လို Script မျိုး လိုချင်လဲ?',
+      myNamed: '{name} ရေ၊ Script စတူဒီယိုကို ရောက်ပါပြီရှင့်! ဘယ်လို Script မျိုး လိုချင်လဲ?',
+      en: 'Welcome to the Script Studio! What kind of script do you need?',
+      enNamed: 'Welcome to the Script Studio, {name}! What kind of script do you need?',
+    },
+    content: {
+      my: 'မာရာ့ E-Book ဆိုင်လေးကို ကြိုဆိုပါတယ်ရှင့်! “အမှန်မြင်ခြင်း” စာအုပ်လေးကို မြည်းစမ်းဖတ်ကြည့်ပါဦးနော်!',
+      myNamed: '{name} ရေ၊ မာရာ့ E-Book ဆိုင်လေးကို ပြန်လာလို့ ဝမ်းသာပါတယ်ရှင့်! “အမှန်မြင်ခြင်း” လေး ဆက်ဖတ်ကြမလား?',
+      en: 'Welcome to my E-Book Shop! Come try a free chapter of “Reality Check”!',
+      enNamed: 'Welcome back to the E-Book Shop, {name}! Ready to keep reading “Reality Check”?',
+    },
+    library: {
+      my: 'ဒီမှာ ကျွန်မရဲ့ စာအုပ်လေး ရှိပါတယ်ရှင့်!',
+      myNamed: '{name} ရေ၊ ဒီမှာ ကျွန်မရဲ့ စာအုပ်လေး ရှိပါတယ်ရှင့်!',
+      en: 'My book lives here!',
+      enNamed: 'Welcome to the library, {name}! My book lives here!',
+    },
+    contact: {
+      my: 'စကားပြောချင်ရင် ဒီကနေ ဆက်သွယ်လို့ ရပါတယ်ရှင့်!',
+      myNamed: '{name} ရှင့်၊ စကားပြောချင်ရင် ဒီကနေ ဆက်သွယ်လို့ ရပါတယ်နော်!',
+      en: 'You can reach me from here!',
+      enNamed: 'You can always reach me from here, {name}!',
+    },
   },
   arrive: {
-    about: { my: 'ကျွန်မရဲ့ စာရေးခန်းလေးပါ', en: 'My writing room' },
+    about: { my: 'ကျွန်မရဲ့ စာရေးခန်းလေးပါ', myNamed: '{name} ရေ၊ ကျွန်မရဲ့ စာရေးခန်းလေးပါ', en: 'My writing room', enNamed: '{name}, this is my writing room' },
     templates: { my: 'Template ဆိုင်လေး ရောက်ပြီ!', en: 'The Template Shop!' },
     scripts: { my: 'Script စတူဒီယိုပါ', en: 'The Script Studio' },
-    content: { my: 'Content ဆိုင်လေးပါ', en: 'Content & Copywriting' },
+    content: {
+      my: 'E-Book ဆိုင်လေးပါ — အမှန်မြင်ခြင်း',
+      myNamed: '{name} ရေ၊ E-Book ဆိုင်လေး ရောက်ပါပြီ!',
+      en: 'Reality Check E-Book Shop',
+      enNamed: "{name}, we're at the E-Book Shop!",
+    },
     library: { my: 'ကျွန်မ စာအုပ်လေးရှိရာ!', en: 'Where my book lives!' },
     contact: { my: 'ကျွန်မကို ဒီကနေ ဆက်သွယ်ပါ', en: 'Reach me here' },
   },
-  order: [{ my: 'ကျေးဇူးတင်ပါတယ်ရှင့်! Message လေး စောင့်နေမယ်နော်။', en: "Thank you! I'll be waiting for your message!" }],
-  welcomeBack: [{ my: 'ပြန်လာတာ ဝမ်းသာတယ်ရှင့်! နောက်ထပ် ဘာကြည့်ချင်သေးလဲ?', en: 'Welcome back! What else would you like to see?' }],
-  allVisited: [{ my: 'နေရာအားလုံး ရောက်ပြီးပြီ! အချိန်ပေးပြီး လည်ပတ်ပေးလို့ ကျေးဇူးအများကြီး တင်ပါတယ်ရှင့်။', en: "You've seen every place! Thank you so much for visiting." }],
+  order: [
+    {
+      my: 'ကျေးဇူးတင်ပါတယ်ရှင့်! Message လေး စောင့်နေမယ်နော်။',
+      myNamed: '{name} ရှင့်၊ ကျေးဇူးတင်ပါတယ်နော်! Message လေး စောင့်နေမယ်။',
+      en: "Thank you! I'll be waiting for your message!",
+      enNamed: "Thank you, {name}! I'll be waiting for your message!",
+    },
+  ],
+  welcomeBack: [
+    {
+      my: 'ပြန်လာတာ ဝမ်းသာတယ်ရှင့်! နောက်ထပ် ဘာကြည့်ချင်သေးလဲ?',
+      myNamed: '{name} ရေ၊ ပြန်လာတာ ဝမ်းသာတယ်ရှင့်! နောက်ထပ် ဘာကြည့်ချင်သေးလဲ?',
+      en: 'Welcome back! What else would you like to see?',
+      enNamed: 'Welcome back, {name}! What else would you like to see?',
+    },
+  ],
+  allVisited: [
+    {
+      my: 'နေရာအားလုံး ရောက်ပြီးပြီ! အချိန်ပေးပြီး လည်ပတ်ပေးလို့ ကျေးဇူးအများကြီး တင်ပါတယ်ရှင့်။',
+      myNamed: '{name} ရေ၊ နေရာအားလုံး ရောက်ပြီးပြီ! အချိန်ပေးပြီး လည်ပတ်ပေးလို့ ကျေးဇူးအများကြီး တင်ပါတယ်ရှင့်။',
+      en: "You've seen every place! Thank you so much for visiting.",
+      enNamed: "You've seen every place, {name}! Thank you so much for visiting.",
+    },
+  ],
+  ebookSignedIn: [
+    {
+      my: '{name} ရေ! အမှန်မြင်ခြင်း E-Book လေးကို အခုပဲ စဖတ်လို့ရပါပြီရှင့်!',
+      en: 'Welcome, {name}! You can start reading Reality Check right now!',
+    },
+  ],
+  ebookStations: {
+    'eb-preview': {
+      my: 'အခန်း (၁) ကို အခမဲ့ မြည်းစမ်းဖတ်ကြည့်လို့ ရပါတယ်ရှင့်',
+      myNamed: '{name} ရေ၊ အခန်း (၁) ကို အခမဲ့ မြည်းစမ်းဖတ်ကြည့်လို့ ရပါတယ်ရှင့်!',
+      en: 'Try reading Chapter 1 for free right here!',
+      enNamed: 'Hey {name}! Try reading Chapter 1 for free right here!',
+    },
+    'eb-buy': {
+      my: 'အမှန်မြင်ခြင်း E-Book လေးကို ဒီမှာ ဝယ်ယူပြီး ချက်ချင်း ဖတ်လို့ရပါတယ်ရှင့်',
+      myNamed: '{name} ရှင့်၊ အမှန်မြင်ခြင်း E-Book လေးကို ဒီမှာ ဝယ်ယူပြီး ချက်ချင်း ဖတ်လို့ရပါတယ်နော်!',
+      en: 'Buy the Reality Check E-Book here and start reading right away!',
+      enNamed: '{name}, unlock the Reality Check E-Book here and start reading right away!',
+    },
+    'eb-read': {
+      my: 'ဝယ်ပြီးသားဆိုရင် ဖုန်းဘယ်လုံးကနေမဆို ဝင်ပြီး ဆက်ဖတ်လို့ ရပါတယ်နော်',
+      myNamed: '{name} ရေ၊ စာအုပ်လေး ဖွင့်ပြီး ဆက်ဖတ်ကြမယ်နော်!',
+      en: 'Already bought it? Sign in from any phone to continue reading!',
+      enNamed: 'Welcome back, {name}! Jump right back into Reality Check!',
+    },
+    'eb-chapters': {
+      my: 'အပိုင်း ၂ ပိုင်း၊ အခန်း ၂၃ ခန်းလုံး ဒီမှာ စုံစုံလင်လင် ရှိပါတယ်ရှင့်',
+      myNamed: '{name} ရေ၊ အပိုင်း ၂ ပိုင်း၊ အခန်း ၂၃ ခန်းလုံး ဒီမှာ ရွေးဖတ်လို့ရပါတယ်ရှင့်!',
+      en: 'All 23 chapters across Part 1 and Part 2 are right here!',
+      enNamed: '{name}, all 23 chapters across Part 1 and Part 2 are right here!',
+    },
+  },
   tapMaya: [
     { my: 'ဟီးဟီး… ယားတယ်နော်!', en: 'Hehe… that tickles!' },
-    { my: 'ဘယ်ကို သွားကြမလဲ?', en: 'Where shall we go?' },
+    { my: 'ဘယ်ကို သွားကြမလဲ?', myNamed: '{name} ရေ၊ ဒီနေ့ ဘယ်ကို သွားကြမလဲ?', en: 'Where shall we go?', enNamed: 'Where shall we go, {name}?' },
     { my: 'စာရေးရတာ အရမ်းပျော်တယ်!', en: 'I love writing!' },
-    { my: 'ဒီနေ့ ဘာရေးရမလဲ စဉ်းစားနေတာ…', en: "I'm thinking about what to write today…" },
-    { my: 'ကျွန်မရဲ့ “အမှန်မြင်ခြင်း” စာအုပ်လေး ဖတ်ပြီးပြီလား?', en: 'Have you read my book “Reality Check” yet?' },
+    { my: 'ဒီနေ့ ဘာရေးရမလဲ စဉ်းစားနေတာ…', myNamed: '{name} ရေ၊ ဒီနေ့ ဘာရေးရမလဲ စဉ်းစားနေတာ…', en: "I'm thinking about what to write today…", enNamed: "Hey {name}, I'm thinking about what to write today…" },
+    { my: 'ကျွန်မရဲ့ “အမှန်မြင်ခြင်း” E-Book လေး ဖတ်ပြီးပြီလား?', myNamed: '{name} ရေ၊ “အမှန်မြင်ခြင်း” E-Book လေး ကြိုက်ရဲ့လားဟင်?', en: 'Have you read my “Reality Check” E-Book yet?', enNamed: 'How are you liking “Reality Check”, {name}?' },
   ],
 };
 
@@ -64,10 +164,10 @@ export const STATION_LABELS = {
   'scr-long': { my: 'Long Form · 20,000/မိနစ်', en: 'Long Form · 20,000/min' },
   'scr-bundles': { my: 'Package များ', en: 'Bundles' },
   'scr-consult': { my: 'Consultation ဘွတ်ကင်', en: 'Book a consultation' },
-  'cc-trial': { my: 'Trial · 200,000', en: 'Trial · 200,000' },
-  'cc-essentials': { my: 'Essentials · 1,000,000', en: 'Essentials · 1,000,000' },
-  'cc-master': { my: 'Master · 1,600,000', en: 'Master · 1,600,000' },
-  'cc-compare': { my: 'နှိုင်းယှဉ်ကြည့်ရန်', en: 'Compare' },
+  'eb-preview': { my: 'အခမဲ့ မြည်းစမ်းဖတ်ရန် · အခန်း ၁', en: 'Free Preview · Ch. 1' },
+  'eb-buy': { my: 'E-Book ဝယ်ယူရန် · ချက်ချင်းဖတ်', en: 'Buy E-Book · Instant' },
+  'eb-read': { my: 'စာအုပ်ဖတ်ရန် · ဝင်မယ်', en: 'Read E-Book · Sign In' },
+  'eb-chapters': { my: 'အခန်း ၂၃ ခန်း · မာတိကာ', en: '23 Chapters · Contents' },
   'lib-book': { my: 'အမှန်မြင်ခြင်း စာအုပ်', en: 'Reality Check' },
   'lib-tiktok': { my: 'TikTok', en: 'TikTok' },
   'lib-shelf': { my: 'Playlist စင်', en: 'Playlists' },
@@ -84,7 +184,7 @@ export const ARRIVE_EMOTE = {
   about: ['wave', 'happy'],
   templates: ['point', 'star'],
   scripts: ['write', 'focus'],
-  content: ['phone', 'wink'],
+  content: ['hugBook', 'star'],
   library: ['hugBook', 'heart'],
   contact: ['kiss', 'kiss'],
 };
@@ -100,7 +200,7 @@ export const BARK_PLACES = {
   about: { my: 'ကျွန်မ စာရေးခန်းလေး', en: 'my Writing Room' },
   templates: { my: 'Template ဆိုင်လေး', en: 'the Template Shop' },
   scripts: { my: 'Script စတူဒီယို', en: 'the Script Studio' },
-  content: { my: 'Content ဆိုင်လေး', en: 'the Content shop' },
+  content: { my: 'E-Book ဆိုင်လေး', en: 'the E-Book Shop' },
   library: { my: 'စာကြည့်တိုက်', en: 'the Library' },
   contact: { my: 'စာတိုက်လေး', en: 'the Post Office' },
 };
@@ -109,7 +209,7 @@ export const BARKS = {
   // standing still: ~20 s, ~45 s, ~90 s without touching anything
   idle: [
     { my: 'အင်း… ဘယ်နေရာလေး သွားကြမလဲဟင်?', en: 'Hmm… which place shall we go to?' },
-    { my: '{place} ကို သွားကြည့်ရအောင်လား?', en: 'Shall we visit {place}?' },
+    { my: '{place} ကို သွားကြည့်ရအောင်လား?', myNamed: '{name} ရေ၊ {place} ကို သွားကြည့်ရအောင်လား?', en: 'Shall we visit {place}?', enNamed: 'Shall we visit {place}, {name}?' },
     { my: 'ဖြည်းဖြည်း ရွေးပါ၊ ကျွန်မ စောင့်နေမယ်ရှင့်', en: "Take your time, I'll wait!" },
   ],
   idleRoom: [
@@ -178,12 +278,12 @@ export const BARKS = {
     { my: 'ရွှေအဝိုင်းလေးတွေ ကျန်ခဲ့တယ်၊ နောက်မှ ကြည့်မယ်', en: 'We left the gold circles behind — next time!' },
   ],
   roomComplete: [
-    { my: 'ဒီအခန်းထဲက အားလုံး ကြည့်ပြီးပြီ! တော်လိုက်တာ', en: 'You saw everything in this room! Amazing!' },
+    { my: 'ဒီအခန်းထဲက အားလုံး ကြည့်ပြီးပြီ! တော်လိုက်တာ', myNamed: '{name} ရေ၊ ဒီအခန်းထဲက အားလုံး ကြည့်ပြီးပြီ! တော်လိုက်တာ', en: 'You saw everything in this room! Amazing!', enNamed: 'You saw everything in here, {name}! Amazing!' },
     { my: 'အားလုံး စုံသွားပြီ! စိတ်ရှည်ရှည် ကြည့်ပေးလို့ ကျေးဇူးနော်', en: 'All complete! Thanks for looking so patiently!' },
   ],
   allPlaces: [
     { my: 'ဒီနေ့လည်း ခြောက်နေရာလုံး ရောက်ပြီ! ဝမ်းသာလိုက်တာ', en: 'All six places again today! So happy!' },
-    { my: 'နေရာတိုင်း ထပ်ပတ်ပြီးပြီ! အကောင်းဆုံး ဧည့်သည်လေးပဲ', en: "Every place again! You're my best guest!" },
+    { my: 'နေရာတိုင်း ထပ်ပတ်ပြီးပြီ! အကောင်းဆုံး ဧည့်သည်လေးပဲ', myNamed: '{name} ရေ၊ နေရာတိုင်း ထပ်ပတ်ပြီးပြီ! အကောင်းဆုံး ဧည့်သည်လေးပဲ', en: "Every place again! You're my best guest!", enNamed: "Every place again, {name}! You're my best guest!" },
   ],
   roomLong: [
     { my: 'ဒီအခန်းလေးကို တကယ် ကြိုက်တာပဲ!', en: 'You really like this room!' },
@@ -195,7 +295,7 @@ export const BARKS = {
   ],
   // the price / order sheet (shown small, while the sheet is open)
   sheetPrice: [
-    { my: 'မေးစရာရှိရင် Message ပို့ပါနော်', en: 'Any questions? Message me!' },
+    { my: 'မေးစရာရှိရင် Message ပို့ပါနော်', myNamed: '{name} ရှင့်၊ မေးစရာရှိရင် Message ပို့ပါနော်', en: 'Any questions? Message me!', enNamed: 'Any questions, {name}? Message me!' },
     { my: 'အေးဆေး ဖတ်ကြည့်ပါ၊ မရှင်းတာရှိရင် မေးလို့ရတယ်ရှင့်', en: 'Take your time — ask me anything that’s unclear!' },
   ],
   sheetLong: [
@@ -226,35 +326,35 @@ export const BARKS = {
   ],
   // time and visits (at most once per visit)
   lateNight: [
-    { my: 'ညနက်နေပြီ… မျက်စိလေး အနားပေးပါဦးရှင့်', en: "It's late… please rest your eyes." },
+    { my: 'ညနက်နေပြီ… မျက်စိလေး အနားပေးပါဦးရှင့်', myNamed: '{name} ရေ၊ ညနက်နေပြီ… မျက်စိလေး အနားပေးပါဦးရှင့်', en: "It's late… please rest your eyes.", enNamed: "It's late, {name}… please rest your eyes." },
     { my: 'ညဉ့်နက်ထိ လာလည်တာ ကျေးဇူးပါ၊ အိပ်မက်လှလှ မက်ပါစေ', en: 'Thanks for visiting so late — sweet dreams!' },
   ],
   morning: [
-    { my: 'မင်္ဂလာနံနက်ခင်းပါ! မနက်စာ စားပြီးပြီလား?', en: 'Good morning! Had breakfast yet?' },
+    { my: 'မင်္ဂလာနံနက်ခင်းပါ! မနက်စာ စားပြီးပြီလား?', myNamed: '{name} ရေ၊ မင်္ဂလာနံနက်ခင်းပါ! မနက်စာ စားပြီးပြီလား?', en: 'Good morning! Had breakfast yet?', enNamed: 'Good morning, {name}! Had breakfast yet?' },
     { my: 'မနက်စောစော လာလည်တာ ဝမ်းသာတယ်!', en: 'So happy you came by this early!' },
   ],
   lunch: [
-    { my: 'နေ့လယ်စာ စားပြီးပြီလား? ထမင်းမှန်မှန် စားနော်', en: "Had lunch yet? Don't skip your meals!" },
+    { my: 'နေ့လယ်စာ စားပြီးပြီလား? ထမင်းမှန်မှန် စားနော်', myNamed: '{name} နေ့လယ်စာ စားပြီးပြီလား? ထမင်းမှန်မှန် စားနော်', en: "Had lunch yet? Don't skip your meals!", enNamed: "Had lunch yet, {name}? Don't skip your meals!" },
     { my: 'ထမင်းစားချိန် ရောက်ပြီ! စားပြီးမှ ဆက်လည်နော်', en: 'Lunchtime! Eat first, then explore.' },
   ],
   evening: [
-    { my: 'ညနေခင်းလေး သာယာလိုက်တာ! ညစာ စားပြီးပြီလား?', en: 'What a lovely evening! Had dinner?' },
+    { my: 'ညနေခင်းလေး သာယာလိုက်တာ! ညစာ စားပြီးပြီလား?', myNamed: '{name} ရေ၊ ညနေခင်းလေး သာယာလိုက်တာ! ညစာ စားပြီးပြီလား?', en: 'What a lovely evening! Had dinner?', enNamed: 'Lovely evening, {name}! Had dinner yet?' },
     { my: 'ဒီနေ့ ပင်ပန်းခဲ့လား? ဒီမှာ ခဏ အပန်းဖြေပါဦး', en: 'Long day? Relax here for a bit!' },
   ],
   returning: [
-    { my: 'မတွေ့တာ ကြာပြီနော်! သတိရနေတာရှင့်', en: 'Long time no see! I was thinking of you!' },
-    { my: 'နေကောင်းရဲ့လားဟင်? ပြန်လာလည်ပေးလို့ ကျေးဇူးပါ', en: 'How have you been? Thanks for coming back!' },
+    { my: 'မတွေ့တာ ကြာပြီနော်! သတိရနေတာရှင့်', myNamed: '{name} ရေ၊ မတွေ့တာ ကြာပြီနော်! သတိရနေတာရှင့်', en: 'Long time no see! I was thinking of you!', enNamed: 'Long time no see, {name}! I was thinking of you!' },
+    { my: 'နေကောင်းရဲ့လားဟင်? ပြန်လာလည်ပေးလို့ ကျေးဇူးပါ', myNamed: '{name} နေကောင်းရဲ့လားဟင်? ပြန်လာလည်ပေးလို့ ကျေးဇူးပါ', en: 'How have you been? Thanks for coming back!', enNamed: 'How have you been, {name}? Thanks for coming back!' },
   ],
   longSession: [
-    { my: 'ဒီလောက်ကြာကြာ နေပေးတာ ဝမ်းသာလိုက်တာရှင့်', en: "So happy you've stayed this long!" },
+    { my: 'ဒီလောက်ကြာကြာ နေပေးတာ ဝမ်းသာလိုက်တာရှင့်', myNamed: '{name} ဒီလောက်ကြာကြာ နေပေးတာ ဝမ်းသာလိုက်တာရှင့်', en: "So happy you've stayed this long!", enNamed: "So happy you've stayed this long, {name}!" },
     { my: '၁၀ မိနစ် ရှိပြီ! အတူရှိပေးလို့ ကျေးဇူးနော်', en: 'Ten minutes already! Thanks for staying!' },
   ],
   breakTime: [
-    { my: 'ရေလေး သောက်ပြီး ခဏ နားပါဦးနော်', en: 'Drink some water and take a little break!' },
+    { my: 'ရေလေး သောက်ပြီး ခဏ နားပါဦးနော်', myNamed: '{name} ရေ၊ ရေလေး သောက်ပြီး ခဏ နားပါဦးနော်', en: 'Drink some water and take a little break!', enNamed: 'Drink some water and take a little break, {name}!' },
     { my: 'မျက်စိ ညောင်းနေပြီလား? အဝေးကို ခဏ ငေးကြည့်လိုက်ပါဦး', en: 'Tired eyes? Look at something far away for a moment!' },
   ],
   tabBack: [
-    { my: 'ပြန်လာပြီလား! စောင့်နေတာ ဟီး', en: "You're back! I was waiting!" },
+    { my: 'ပြန်လာပြီလား! စောင့်နေတာ ဟီး', myNamed: '{name} ပြန်လာပြီလား! စောင့်နေတာ ဟီး', en: "You're back! I was waiting!", enNamed: "You're back, {name}! I was waiting!" },
     { my: 'ဟေး ပြန်ရောက်ပြီ! ဆက်လည်ကြမယ်', en: "Yay, you're back! Let's keep going." },
   ],
   landscape: [

@@ -26,7 +26,7 @@ export const LANDMARKS = [
 ];
 
 const STONE = '#D8CBAE';
-const MUG = '#FBF6EA';
+const EINK = '#FFF4D2';
 const GLOW = '#FFE7A8';
 
 // ---------------------------------------------------------------------------------
@@ -244,17 +244,17 @@ const SLOTS = {
   content: [512, 192, 512, 192],
   library: [0, 384, 512, 192],
   contact: [512, 384, 512, 192],
-  mug: [512, 576, 512, 192],
+  ebookTag: [512, 576, 512, 192],
   welcome: [512, 768, 512, 192],
 };
 const SIGNS = {
   about: [[{ text: 'မာရာ့ စာရေးခန်း', size: 66 }], { bg: PALETTE.cream, border: PALETTE.goldDeep, radius: 30, borderWidth: 12 }],
   templates: [[{ text: 'Template ဆိုင်', size: 74 }], { bg: PALETTE.paper, border: PALETTE.gold, radius: 18, borderWidth: 14 }],
   scripts: [[{ text: 'Script စတူဒီယို', size: 66, color: PALETTE.white }], { bg: '#2B2522', border: PALETTE.cream, radius: 8, borderWidth: 10 }],
-  content: [[{ text: 'Content နှင့်', size: 46 }, { text: 'Copywriting', size: 52, font: FONT_SERIF, weight: 600, color: PALETTE.maroon }], { bg: PALETTE.paper, border: PALETTE.maroon, radius: 26, borderWidth: 12 }],
+  content: [[{ text: 'E-Book ဆိုင်', size: 56, color: PALETTE.maroon }, { text: 'Reality Check', size: 40, font: FONT_SERIF, weight: 600, color: PALETTE.goldDeep }], { bg: PALETTE.paper, border: PALETTE.gold, radius: 24, borderWidth: 12 }],
   library: [[{ text: 'စာကြည့်တိုက်', size: 70 }], { bg: PALETTE.cream, border: PALETTE.goldDeep, radius: 24, borderWidth: 12 }],
   contact: [[{ text: 'စာတိုက်', size: 86 }], { bg: PALETTE.cream, border: PALETTE.maroon, radius: 24, borderWidth: 12 }],
-  mug: [[{ text: 'Writer', size: 132, font: FONT_SERIF, weight: 600, color: PALETTE.maroon }], { bg: null, border: null }],
+  ebookTag: [[{ text: 'အမှန်မြင်ခြင်း', size: 54, color: EINK }, { text: 'E-Book · 23 Chapters', size: 34, font: FONT_SERIF, weight: 600, color: PALETTE.gold }], { bg: PALETTE.maroon, border: PALETTE.gold, radius: 20, borderWidth: 10 }],
   welcome: [[{ text: 'မင်္ဂလာပါရှင့်', size: 60 }, { text: "Maya's Creations", size: 42, font: FONT_SERIF, weight: 600, color: PALETTE.goldDeep }], { bg: PALETTE.cream, border: PALETTE.goldDeep, radius: 26, borderWidth: 12 }],
 };
 
@@ -685,111 +685,265 @@ function buildScripts() {
 }
 
 // ---------------------------------------------------------------------------------
-// 4. content — café shaped like a giant "Writer" mug; the handle is the entrance arch
+// 4. content — E-Book Pavilion ("E-Book ဆိုင် / Reality Check"): raised stone & wood
+//    terrace, maroon-and-gold portico arch, illuminated open E-Reader canopy roof,
+//    curved golden halo, framed Reality Check cover kiosk, outdoor reading bench.
 // ---------------------------------------------------------------------------------
 function buildContent() {
   const v = new VoxelBuilder();
-  cyl(v, 0, 0, 0.14, 0, 3.35, PALETTE.goldDeep, 28);
-  cyl(v, 0, 0.14, 0.3, 0, 3.2, PALETTE.paper, 28, 3.0);
-  cyl(v, 0, 0.3, 4.7, 0, 2.5, MUG, 28, 2.62);
-  cyl(v, 0, 0.32, 0.8, 0, 2.535, PALETTE.maroon, 28, 2.55);
-  cyl(v, 0, 0.86, 0.95, 0, 2.555, PALETTE.gold, 28, 2.56);
-  cyl(v, 0, 4.64, 4.73, 0, 2.47, '#5B3A26', 28);
-  const torus = new THREE.TorusGeometry(2.58, 0.13, 6, 36);
-  v.add(torus, PALETTE.gold, _m.makeRotationX(Math.PI / 2).setPosition(0, 4.72, 0));
-  torus.dispose();
-  // Latte-art heart on the coffee (reads from the high camera).
-  for (const sx of [-1, 1]) v.box(sx * 0.21, 4.745, -0.14, 0.44, 0.03, 0.44, PALETTE.cream);
-  boxR(v, 0, 4.745, 0.13, 0.5, 0.03, 0.5, PALETTE.cream, 0, Math.PI / 4, 0);
-  // Handle = entrance arch (cream, protruding toward the camera) with a deep doorway.
-  const Z0 = 2.0, Z1 = 3.2;
+  const WARM_WOOD = '#8A5A2B';
+  const WARM_WOOD_L = '#A87442';
+  const EINK_LINE = '#8E7354';
+  const W = 2.68, D = 2.24, WALL = 3.32;
+
+  // 1) Raised stone & warm-wood reading terrace (y = 0..0.32) with gold edge trim & front steps.
+  v.boxMin(-3.16, 0, -2.64, 3.16, 0.18, 3.04, STONE);
+  for (let i = 0; i < 12; i++) {
+    const x0 = -3.12 + i * 0.52;
+    v.boxMin(x0, 0.03, 3.03, x0 + 0.49, 0.16, 3.065, shade(STONE, [0.9, 1.06, 0.96, 1.03][i % 4]));
+  }
+  v.boxMin(-2.96, 0.18, -2.44, 2.96, 0.32, 2.88, WARM_WOOD);
+  for (let z = -2.1; z <= 2.7; z += 0.48) v.boxMin(-2.92, 0.315, z - 0.015, 2.92, 0.326, z + 0.015, shade(WARM_WOOD, 0.82));
+  // Antique-gold terrace trim rail & corner pedestals
+  v.boxMin(-3.0, 0.27, 2.86, 3.0, 0.33, 2.94, PALETTE.gold);
+  v.boxMin(-3.0, 0.27, -2.5, 3.0, 0.33, -2.42, PALETTE.gold);
   for (const sx of [-1, 1]) {
-    v.boxMin(sx > 0 ? 0.72 : -1.34, 0.3, Z0, sx > 0 ? 1.34 : -0.72, 2.45, Z1, MUG);
-    v.boxMin(sx > 0 ? 0.6 : -1.32, 2.45, Z0, sx > 0 ? 1.32 : -0.6, 2.7, Z1, MUG);
-    v.boxMin(sx > 0 ? 0.38 : -1.24, 2.7, Z0, sx > 0 ? 1.24 : -0.38, 2.95, Z1, MUG);
-    v.boxMin(sx > 0 ? 0.72 : -0.84, 0.3, Z1 - 0.02, sx > 0 ? 0.84 : -0.72, 2.42, Z1 + 0.05, PALETTE.gold);
+    const x0 = sx < 0 ? -3.02 : 2.94;
+    v.boxMin(x0, 0.27, -2.5, x0 + 0.08, 0.33, 2.94, PALETTE.gold);
+    for (const sz of [-2.52, 2.92]) v.box(sx * 3.04, 0.22, sz, 0.34, 0.44, 0.34, PALETTE.goldDeep);
   }
-  v.boxMin(-1.1, 2.95, Z0, 1.1, 3.28, Z1, MUG);
-  v.boxMin(-0.7, 0.3, Z0 + 0.05, 0.7, 2.55, Z0 + 0.42, PALETTE.maroon);
-  v.box(0.42, 1.35, Z0 + 0.45, 0.12, 0.12, 0.08, PALETTE.gold);
-  v.boxMin(-0.5, 1.55, Z0 + 0.4, 0.5, 2.3, Z0 + 0.45, jitter(PALETTE.maroon, 0.18, 3));
-  v.boxMin(-0.85, 0.3, Z0 + 0.4, 0.85, 0.36, Z1 + 0.35, PALETTE.wood); // doormat/step
-  v.boxMin(-1.36, 2.4, Z1, 1.36, 3.43, Z1 + 0.08, PALETTE.gold); // sign board on the arch
-  // Café table with an umbrella and two stools (east side of the saucer).
-  const tx = 3.9, tz = 1.4;
-  cyl(v, tx, 0, 0.74, tz, 0.07, PALETTE.woodDark, 8);
-  cyl(v, tx, 0.72, 0.8, tz, 0.5, PALETTE.gold, 16);
-  v.box(tx, 1.5, tz, 0.06, 1.5, 0.06, PALETTE.cream);
-  cyl(v, tx, 2.2, 2.38, tz, 1.15, PALETTE.maroon, 8, 0.85);
-  cyl(v, tx, 2.38, 2.54, tz, 0.85, PALETTE.cream, 8, 0.42);
-  cyl(v, tx, 2.54, 2.64, tz, 0.42, PALETTE.maroon, 8, 0.12);
-  cyl(v, tx, 0.8, 0.83, tz, 0.44, PALETTE.cream, 16);
-  for (let i = 0; i < 8; i++) {
-    const a = (i / 8) * Math.PI * 2;
-    boxR(v, tx + Math.cos(a) * 1.0, 2.3, tz + Math.sin(a) * 1.0, 0.08, 0.16, 0.08, i % 2 ? PALETTE.gold : PALETTE.cream, 0, -a, 0);
+  // Wide front steps descending toward door at local z = +4.0 + maroon-and-gold welcome runner
+  v.boxMin(-1.18, 0, 3.04, 1.18, 0.22, 3.36, STONE);
+  v.boxMin(-1.18, 0.2, 3.33, 1.18, 0.23, 3.38, PALETTE.gold);
+  v.boxMin(-1.18, 0, 3.36, 1.18, 0.11, 3.66, shade(STONE, 1.05));
+  v.boxMin(-1.18, 0.09, 3.63, 1.18, 0.12, 3.68, PALETTE.gold);
+  v.boxMin(-0.56, 0.32, 2.28, 0.56, 0.345, 3.04, PALETTE.maroon);
+  v.boxMin(-0.46, 0.345, 2.34, 0.46, 0.352, 2.98, PALETTE.gold);
+  v.boxMin(-0.4, 0.352, 2.4, 0.4, 0.358, 2.92, PALETTE.maroon);
+  v.boxMin(-0.52, 0.22, 3.04, 0.52, 0.242, 3.36, PALETTE.maroon);
+  v.boxMin(-0.52, 0.11, 3.36, 0.52, 0.132, 3.66, PALETTE.maroon);
+
+  // 2) Main boutique hall (y = 0.32..3.32): cream walls, maroon wainscot, wood corner pilasters, windows
+  v.boxMin(-W, 0.32, -D, W, WALL, D, PALETTE.paper);
+  v.boxMin(-W - 0.02, 0.32, -D - 0.02, W + 0.02, 0.9, D + 0.02, PALETTE.maroon);
+  v.boxMin(-W - 0.04, 0.9, -D - 0.04, W + 0.04, 0.98, D + 0.04, PALETTE.gold);
+  v.boxMin(-W, 0.32, D + 0.015, W, 0.44, D + 0.03, shade(PALETTE.maroon, 0.72));
+  const seamC = shade(PALETTE.paper, 0.87);
+  const wallYs = [1.26, 1.54, 1.82, 2.1, 2.38, 2.66, 2.94];
+  seamsZ(v, -W + 0.16, W - 0.16, wallYs, D, seamC, [[-1.18, 0.32, 1.18, 3.32], [-2.22, 1.1, -1.26, 2.38], [1.26, 1.1, 2.22, 2.38]]);
+  for (const sx of [-1, 1]) {
+    seamsX(v, sx * W, -D + 0.16, -1.12, wallYs, sx, seamC);
+    seamsX(v, sx * W, 0.92, D - 0.16, wallYs, sx, seamC);
+    seamsX(v, sx * W, -1.12, 0.92, wallYs.filter((y) => y < 1.2 || y > 2.34), sx, seamC);
   }
-  // Two café chairs with slatted backs, facing the table; a cup and saucer on top.
-  for (const [sx, sz] of [[-0.68, 0.48], [0.66, -0.52]]) {
-    const ry = Math.atan2(-sx, -sz);
-    const c = new VoxelBuilder();
-    c.box(0, 0.45, 0, 0.44, 0.06, 0.42, PALETTE.maroon);
-    for (const lx of [-1, 1]) for (const lz of [-1, 1]) c.box(lx * 0.17, 0.21, lz * 0.16, 0.05, 0.42, 0.05, PALETTE.gold);
-    for (const lx of [-1, 1]) c.box(lx * 0.17, 0.72, -0.18, 0.05, 0.54, 0.05, PALETTE.gold);
-    for (const y of [0.62, 0.78, 0.92]) c.box(0, y, -0.18, 0.36, 0.07, 0.04, PALETTE.wood);
-    v.merge(c, _m.compose(_p.set(tx + sx, 0, tz + sz), _q.setFromEuler(_e.set(0, ry, 0)), _s.set(1, 1, 1)));
+  for (const sx of [-1, 1]) {
+    for (const sz of [-1, 1]) {
+      v.box(sx * W, (WALL + 0.32) / 2, sz * D, 0.28, WALL - 0.32, 0.28, WARM_WOOD);
+      v.box(sx * W, 0.48, sz * D, 0.34, 0.24, 0.34, PALETTE.goldDeep);
+      v.box(sx * W, WALL - 0.12, sz * D, 0.34, 0.2, 0.34, PALETTE.gold);
+    }
   }
-  cyl(v, tx - 0.1, 0.83, 0.86, tz + 0.1, 0.16, PALETTE.white, 10);
-  cyl(v, tx - 0.1, 0.86, 1.02, tz + 0.1, 0.08, PALETTE.white, 10, 0.1);
-  // Saucer: gold rim line, a gold spoon, sugar cubes and coffee beans.
-  const ringGeo = new THREE.TorusGeometry(3.08, 0.04, 4, 40);
-  v.add(ringGeo, PALETTE.gold, _m.makeRotationX(Math.PI / 2).setPosition(0, 0.3, 0));
-  ringGeo.dispose();
-  cyl(v, 0, 3.3, 3.36, 0, 2.5 + 3.0 * 0.0273 + 0.016, PALETTE.gold, 28);
-  const onSaucer = (deg, r) => [Math.cos((deg * Math.PI) / 180) * r, Math.sin((deg * Math.PI) / 180) * r];
+  // Upper maroon frieze & gold dentil cornice
+  v.boxMin(-W - 0.14, WALL - 0.22, -D - 0.14, W + 0.14, WALL, D + 0.14, PALETTE.maroon);
+  v.boxMin(-W - 0.22, WALL, -D - 0.22, W + 0.22, WALL + 0.12, D + 0.22, PALETTE.gold);
+  for (let x = -W + 0.16; x <= W - 0.14; x += 0.34) {
+    if (Math.abs(x) < 1.38) continue;
+    v.box(x, WALL - 0.08, D + 0.16, 0.12, 0.1, 0.08, PALETTE.goldDeep);
+  }
+  // Warm front & side windows (skyTop glass -> daytime.js auto-lights them warmly at dusk/night!)
+  for (const sx of [-1, 1]) {
+    win(v, sx * 1.76, 1.78, D, 0.7, 0.92, { frame: PALETTE.white, glass: PALETTE.skyTop, sill: PALETTE.goldDeep, curtain: PALETTE.maroon });
+    flowerBox(v, sx * 1.76, 1.0, D, 0.92, sx > 0 ? 1 : 3);
+    sideWin(v, sx * W, sx, 1.26, 2.26, -0.96, 0.78, PALETTE.white);
+    // decorative maroon side shutters flanking the side window
+    for (const sz of [-1.14, 0.96]) v.box(sx * (W + 0.05), 1.76, sz, 0.08, 1.02, 0.24, PALETTE.maroon);
+  }
+
+  // 3) Front Entrance Portico Arch (facing +Z, door aligns with world [13.8, -5.2])
+  door(v, 0, 0.32, D + 0.02, { w: 1.4, h: 2.3, panel: PALETTE.maroon, frame: PALETTE.gold, crown: true });
+  const PZ = 2.94;
+  for (const sx of [-1, 1]) {
+    v.box(sx * 1.04, 0.46, PZ, 0.36, 0.28, 0.36, PALETTE.goldDeep);
+    v.box(sx * 1.04, 1.54, PZ, 0.26, 1.92, 0.26, PALETTE.cream);
+    v.box(sx * 1.04, 1.54, PZ + 0.135, 0.07, 1.65, 0.02, PALETTE.gold);
+    v.box(sx * 1.04, 2.58, PZ, 0.36, 0.18, 0.36, PALETTE.gold);
+    v.boxMin(sx * 1.04 - 0.1, 2.54, D, sx * 1.04 + 0.1, 2.7, PZ, WARM_WOOD);
+    wallLantern(v, sx * 1.04, 2.02, PZ + 0.08, 0.95);
+  }
+  // Portico canopy & sign frame above arch
+  v.boxMin(-1.26, 2.66, D, 1.26, 2.82, PZ + 0.16, PALETTE.maroon);
+  v.boxMin(-1.38, 2.74, PZ - 0.06, 1.38, 3.58, PZ + 0.16, PALETTE.maroonDeep);
+  v.boxMin(-1.42, 2.7, PZ - 0.04, 1.42, 2.78, PZ + 0.2, PALETTE.gold);
+  v.boxMin(-1.42, 3.54, PZ - 0.04, 1.42, 3.63, PZ + 0.2, PALETTE.gold);
+  for (const sx of [-1, 1]) v.box(sx * 1.38, 3.16, PZ + 0.16, 0.08, 0.84, 0.08, PALETTE.gold);
+
+  // 4) Architectural Centerpiece: Illuminated Open E-Reader / Digital Book Pavilion Canopy
+  //    (two gently angled open-tablet wings spanning out from a central golden digital spine,
+  //     rising from y = 3.68 to ~5.0 m, crowned by a curved golden halo & 4-point sparkles!)
+  v.boxMin(-2.45, WALL + 0.12, -2.05, 2.45, 3.66, 2.05, WARM_WOOD);
+  v.boxMin(-2.52, 3.58, -2.12, 2.52, 3.66, 2.12, PALETTE.goldDeep);
+  // Central golden digital spine & hinge
+  v.box(0, 3.74, 0, 0.38, 0.26, 4.92, PALETTE.gold);
+  v.box(0, 3.84, 0, 0.22, 0.1, 4.86, PALETTE.maroonDeep);
+  v.box(0, 3.74, 2.48, 0.26, 0.18, 0.06, PALETTE.goldDeep);
+  v.box(0, 3.74, 2.52, 0.1, 0.1, 0.03, EINK);
+
+  const WING_W = 3.12, WING_D = 4.84, TILT = 0.33;
+  for (const side of [-1, 1]) {
+    const wg = new VoxelBuilder();
+    const x0 = side > 0 ? 0 : -WING_W;
+    const x1 = side > 0 ? WING_W : 0;
+    const cx = (x0 + x1) / 2;
+    // Outer maroon & wood protective tablet shell (underneath + beveled rim)
+    wg.boxMin(x0, -0.14, -WING_D / 2, x1, 0.02, WING_D / 2, PALETTE.maroon);
+    wg.boxMin(x0 + (side > 0 ? 0.06 : 0.02), -0.19, -WING_D / 2 + 0.14, x1 - (side > 0 ? 0.02 : 0.06), -0.14, WING_D / 2 - 0.14, PALETTE.maroonDeep);
+    // Layered glowing page-edge trim along outer rim
+    const ox = side > 0 ? WING_W - 0.14 : -WING_W;
+    wg.boxMin(ox, 0.02, -WING_D / 2 + 0.06, ox + 0.14, 0.13, WING_D / 2 - 0.06, PALETTE.cream);
+    wg.boxMin(x0, 0.02, -WING_D / 2, x1, 0.14, -WING_D / 2 + 0.1, PALETTE.gold);
+    wg.boxMin(x0, 0.02, WING_D / 2 - 0.1, x1, 0.14, WING_D / 2, PALETTE.gold);
+    wg.boxMin(side > 0 ? WING_W - 0.1 : -WING_W, 0.02, -WING_D / 2, side > 0 ? WING_W : -WING_W + 0.1, 0.16, WING_D / 2, PALETTE.gold);
+    // Gold corner clasps
+    for (const sz of [-1, 1]) wg.box(side > 0 ? WING_W - 0.08 : -WING_W + 0.08, 0.06, sz * (WING_D / 2 - 0.08), 0.24, 0.24, 0.24, PALETTE.goldDeep);
+    // Dark e-reader bezel & glowing warm-amber e-ink screen face on top (clearly visible from 50 deg camera!)
+    const bx0 = x0 + (side > 0 ? 0.1 : 0.16);
+    const bx1 = x1 - (side > 0 ? 0.16 : 0.1);
+    wg.boxMin(bx0, 0.02, -WING_D / 2 + 0.14, bx1, 0.15, WING_D / 2 - 0.14, PALETTE.ink);
+    wg.boxMin(bx0 + 0.12, 0.13, -WING_D / 2 + 0.28, bx1 - 0.12, 0.17, WING_D / 2 - 0.28, EINK);
+    // Inner antique-gold hairline border on the e-ink page
+    const sx0 = bx0 + 0.2, sx1 = bx1 - 0.2;
+    wg.boxMin(sx0, 0.168, -WING_D / 2 + 0.36, sx1, 0.178, -WING_D / 2 + 0.41, PALETTE.gold);
+    wg.boxMin(sx0, 0.168, WING_D / 2 - 0.41, sx1, 0.178, WING_D / 2 - 0.36, PALETTE.gold);
+    // Blocky digital book page graphics on the glowing screens
+    if (side < 0) {
+      // Left screen: chapter header bar, gold divider & stylized text lines + bookmark star
+      wg.boxMin(sx0 + 0.14, 0.172, -1.78, sx1 - 0.34, 0.184, -1.5, PALETTE.maroon);
+      wg.boxMin(sx0 + 0.14, 0.172, -1.36, sx1 - 0.56, 0.182, -1.26, PALETTE.gold);
+      const lens = [1.0, 0.86, 0.94, 0.72, 0.96, 0.82, 0.64];
+      lens.forEach((f, i) => {
+        const lw = (sx1 - sx0 - 0.32) * f;
+        wg.boxMin(sx0 + 0.14, 0.172, -0.96 + i * 0.4, sx0 + 0.14 + lw, 0.182, -0.84 + i * 0.4, i % 3 === 0 ? WARM_WOOD : EINK_LINE);
+      });
+      wg.box(sx1 - 0.28, 0.186, -1.62, 0.22, 0.03, 0.22, PALETTE.gold, Math.PI / 4);
+    } else {
+      // Right screen: warm amber sunset illustration card (nod to Reality Check) + text + progress bar
+      wg.boxMin(sx0 + 0.16, 0.172, -1.8, sx1 - 0.16, 0.184, -0.25, '#E9B96E');
+      wg.boxMin(sx0 + 0.24, 0.18, -1.68, sx1 - 0.24, 0.19, -0.96, '#F6D88C');
+      wg.box(cx, 0.192, -1.22, 0.52, 0.02, 0.52, '#FFF8DF', Math.PI / 4);
+      wg.boxMin(sx0 + 0.24, 0.18, -0.66, sx1 - 0.24, 0.19, -0.34, PALETTE.maroon);
+      const lens = [0.92, 0.84, 0.96, 0.68];
+      lens.forEach((f, i) => {
+        const lw = (sx1 - sx0 - 0.32) * f;
+        wg.boxMin(sx0 + 0.14, 0.172, 0.08 + i * 0.36, sx0 + 0.14 + lw, 0.182, 0.2 + i * 0.36, EINK_LINE);
+      });
+      // E-Reader bottom progress bar & page dots
+      wg.boxMin(sx0 + 0.14, 0.172, 1.56, sx1 - 0.14, 0.182, 1.66, PALETTE.parchment);
+      wg.boxMin(sx0 + 0.14, 0.176, 1.56, sx0 + 0.14 + (sx1 - sx0 - 0.28) * 0.62, 0.188, 1.66, PALETTE.gold);
+      wg.box(sx0 + 0.14 + (sx1 - sx0 - 0.28) * 0.62, 0.19, 1.61, 0.16, 0.04, 0.16, PALETTE.maroon);
+    }
+    // Front fascia glow edge along +Z so camera sees warm e-ink light peeking out
+    wg.boxMin(bx0 + 0.08, 0.04, WING_D / 2 - 0.03, bx1 - 0.08, 0.13, WING_D / 2 + 0.02, EINK);
+    v.merge(wg, _m.compose(_p.set(side * 0.16, 3.68, 0), _q.setFromEuler(_e.set(0, 0, side * TILT)), _s.set(1, 1, 1)));
+  }
+
+  // Curved golden halo arch bridging gracefully above the open wings + 4-point sparkles
+  const HALO_SEG = 9;
+  for (let i = 0; i < HALO_SEG; i++) {
+    const u0 = i / HALO_SEG, u1 = (i + 1) / HALO_SEG;
+    const x0 = -2.2 + 4.4 * u0, x1 = -2.2 + 4.4 * u1;
+    const y0 = 4.62 + Math.sin(u0 * Math.PI) * 0.66;
+    const y1 = 4.62 + Math.sin(u1 * Math.PI) * 0.66;
+    boxR(v, (x0 + x1) / 2, (y0 + y1) / 2, 0.18, Math.hypot(x1 - x0, y1 - y0) + 0.04, 0.09, 0.09, i % 2 ? PALETTE.gold : '#E6C266', 0, 0, Math.atan2(y1 - y0, x1 - x0));
+  }
+  sparkle(v, 0, 5.34, 0.22, 0.54, PALETTE.gold);
+  sparkle(v, -1.52, 4.98, 0.22, 0.34, '#FFE59A');
+  sparkle(v, 1.52, 4.98, 0.22, 0.34, '#FFE59A');
+
+  // 5) Framed "Reality Check" E-Book Cover Display Kiosk (front-west terrace, real cover artwork!)
+  const KX = -2.24, KZ = 3.06, KTILT = -0.14;
+  const CW = 0.7, CH = (CW * ART_SIZE.book[1]) / ART_SIZE.book[0];
+  v.box(KX, 0.16, KZ, 0.88, 0.32, 0.56, PALETTE.maroon);
+  v.box(KX, 0.35, KZ, 0.94, 0.07, 0.62, PALETTE.gold);
+  const kiosk = new VoxelBuilder();
+  kiosk.box(0, 0, -0.025, CW + 0.04, CH + 0.04, 0.05, PALETTE.ink);
+  const kb = 0.055;
+  kiosk.box(0, CH / 2 + kb / 2, 0.005, CW + kb * 2 + 0.02, kb, 0.07, PALETTE.gold);
+  kiosk.box(0, -CH / 2 - kb / 2, 0.005, CW + kb * 2 + 0.02, kb, 0.07, PALETTE.gold);
+  kiosk.box(-CW / 2 - kb / 2, 0, 0.005, kb, CH + 0.02, 0.07, PALETTE.gold);
+  kiosk.box(CW / 2 + kb / 2, 0, 0.005, kb, CH + 0.02, 0.07, PALETTE.gold);
+  kiosk.box(0, -CH / 2 - kb * 0.5, 0.044, 0.12, 0.025, 0.012, EINK);
+  v.merge(kiosk, _m.compose(_p.set(KX, 1.06, KZ + 0.02), _q.setFromEuler(_e.set(KTILT, 0, 0)), _s.set(1, 1, 1)));
+  // Header plaque backing above the framed cover
+  v.box(KX, 1.86, KZ - 0.08, 0.92, 0.36, 0.08, PALETTE.maroonDeep);
+  v.box(KX, 2.05, KZ - 0.08, 0.96, 0.05, 0.12, PALETTE.gold);
+  const coverGeo = new THREE.PlaneGeometry(CW, CH).translate(0, 0, ART_LIFT).rotateX(KTILT).translate(KX, 1.06, KZ + 0.02);
+  const art = [{ key: 'book', geo: coverGeo }];
+
+  // 6) Outdoor Detail: Cozy Wooden Reading Bench + Glowing Open Tablet Side Stand (east patio)
   {
-    const a = (158 * Math.PI) / 180, [sx, sz] = onSaucer(158, 2.78), ry = Math.atan2(-Math.cos(a), -Math.sin(a));
-    const sp = new VoxelBuilder();
-    sp.box(0, 0, 0, 1.15, 0.05, 0.12, PALETTE.gold);
-    sp.box(0.62, 0.02, 0, 0.36, 0.07, 0.28, PALETTE.gold);
-    sp.box(0.62, 0.05, 0, 0.24, 0.03, 0.18, shade(PALETTE.gold, 0.8));
-    sp.box(-0.58, 0.01, 0, 0.12, 0.06, 0.16, PALETTE.goldDeep);
-    v.merge(sp, _m.compose(_p.set(sx, 0.35, sz), _q.setFromEuler(_e.set(0, ry, 0)), _s.set(1, 1, 1)));
+    const bench = new VoxelBuilder();
+    for (let i = 0; i < 4; i++) bench.box(0, 0.44, -0.15 + i * 0.1, 1.48, 0.05, 0.085, shade(WARM_WOOD, [1, 0.92, 1.08, 0.96][i]));
+    bench.box(0, 0.5, 0, 1.24, 0.08, 0.36, PALETTE.maroon);
+    for (let i = 0; i < 3; i++) bench.box(0, 0.66 + i * 0.13, -0.21, 1.48, 0.09, 0.05, shade(WARM_WOOD_L, [0.94, 1.06, 0.9][i]));
+    bench.box(0, 1.04, -0.21, 1.54, 0.05, 0.08, PALETTE.woodDark);
+    for (const sx of [-1, 1]) {
+      bench.box(sx * 0.65, 0.22, 0.12, 0.07, 0.44, 0.07, PALETTE.ink);
+      bench.box(sx * 0.65, 0.52, -0.2, 0.07, 1.04, 0.07, PALETTE.ink);
+      bench.box(sx * 0.65, 0.4, -0.04, 0.06, 0.06, 0.38, PALETTE.ink);
+      bench.box(sx * 0.7, 0.64, 0, 0.08, 0.05, 0.46, PALETTE.gold);
+      bench.box(sx * 0.7, 0.55, 0.19, 0.05, 0.15, 0.05, PALETTE.gold);
+    }
+    v.merge(bench, _m.compose(_p.set(3.92, 0, 1.22), _q.setFromEuler(_e.set(0, -0.45, 0)), _s.set(1, 1, 1)));
   }
-  for (const [deg, r, s] of [[128, 2.8, 0.24], [135, 2.72, 0.2]]) {
-    const [sx, sz] = onSaucer(deg, r);
-    v.box(sx, 0.3 + s / 2, sz, s, s, s, PALETTE.white, deg * 0.05);
-  }
-  for (let i = 0; i < 7; i++) {
-    const [bx, bz] = onSaucer(188 + i * 5, 2.66 + (i % 3) * 0.1);
-    v.box(bx, 0.34, bz, 0.12, 0.08, 0.17, '#5B3A26', i * 0.9);
-    v.box(bx, 0.385, bz, 0.03, 0.012, 0.12, '#3A2418', i * 0.9);
-  }
-  // Round-topped windows on the mug wall (each built facing +Z, then turned onto the curve).
-  for (const deg of [35, 145]) {
-    const w = new VoxelBuilder();
-    win(w, 0, 0, 0, 0.66, 0.78, { frame: PALETTE.cream, curtain: PALETTE.rose });
-    blockDisc(w, 0, 0.47, 0.01, 0.42, 0.08, PALETTE.gold, 0.07, true);
-    blockDisc(w, 0, 0.47, 0.04, 0.32, 0.06, PALETTE.skyTop, 0.07, true);
-    flowerBox(w, 0, -0.8, 0.04, 0.8, deg > 90 ? 2 : 3);
-    const [wx, wz] = onSaucer(deg, 2.57);
-    v.merge(w, _m.compose(_p.set(wx, 1.6, wz), _q.setFromEuler(_e.set(0, Math.PI / 2 - (deg * Math.PI) / 180, 0)), _s.set(1, 1, 1)));
-  }
-  // A-frame chalk menu and flower pots beside the arch.
+  // Side reading stand with a little glowing open e-reader tablet & reading lantern
+  const SX = 3.28, SZ = 1.98;
+  v.box(SX, 0.03, SZ, 0.42, 0.06, 0.42, PALETTE.woodDark);
+  v.box(SX, 0.33, SZ, 0.1, 0.56, 0.1, WARM_WOOD);
+  v.box(SX, 0.64, SZ, 0.64, 0.06, 0.52, WARM_WOOD_L);
+  v.box(SX, 0.61, SZ, 0.66, 0.03, 0.54, PALETTE.gold);
   {
-    const af = new VoxelBuilder(), face = new VoxelBuilder();
-    for (const s of [-1, 1]) boxR(af, 0, 0.46, s * 0.11, 0.6, 0.9, 0.05, PALETTE.wood, -s * 0.24, 0, 0);
-    face.box(0, 0, 0.035, 0.5, 0.76, 0.02, '#2F3A33');
-    for (let i = 0; i < 4; i++) face.box(-0.05 + (i % 2) * 0.04, 0.2 - i * 0.15, 0.05, 0.3 - (i % 2) * 0.1, 0.03, 0.012, PALETTE.white);
-    face.box(0, 0.3, 0.05, 0.12, 0.08, 0.012, PALETTE.rose);
-    af.merge(face, _m.compose(_p.set(0, 0.46, 0.11), _q.setFromEuler(_e.set(-0.24, 0, 0)), _s.set(1, 1, 1)));
-    v.merge(af, _m.makeTranslation(2.1, 0, 3.0));
+    const tab = new VoxelBuilder();
+    tab.box(0, 0.14, 0, 0.42, 0.28, 0.04, PALETTE.gold);
+    tab.box(0, 0.14, 0.015, 0.36, 0.22, 0.02, PALETTE.ink);
+    tab.box(0, 0.14, 0.025, 0.31, 0.18, 0.012, EINK);
+    tab.box(0, 0.18, 0.033, 0.22, 0.022, 0.008, PALETTE.maroon);
+    tab.box(-0.02, 0.13, 0.033, 0.18, 0.016, 0.008, EINK_LINE);
+    tab.box(-0.04, 0.09, 0.033, 0.14, 0.016, 0.008, EINK_LINE);
+    tab.box(0, 0.08, -0.07, 0.08, 0.16, 0.04, PALETTE.goldDeep);
+    v.merge(tab, _m.compose(_p.set(SX - 0.06, 0.67, SZ), _q.setFromEuler(_e.set(-0.34, -0.35, 0)), _s.set(1, 1, 1)));
   }
-  pot(v, -1.62, 0.3, 2.3, 1.0, PALETTE.gold);
-  pot(v, 1.55, 0.3, 2.22, 0.8, PALETTE.rose);
-  const label = toSlot(new THREE.CylinderGeometry(2.635, 2.62, 1.05, 18, 1, true, -0.53, 1.06), 'mug');
-  label.translate(0, 4.0, 0);
-  const signs = [signQuad('content', 0, 2.915, Z1 + 0.09, 2.62), label];
-  return { v, signs, steam: [0, 4.75, 0] };
+  // Little brass tabletop lantern beside the tablet (glows warmly at dusk/night)
+  v.box(SX + 0.18, 0.7, SZ - 0.08, 0.14, 0.06, 0.14, PALETTE.goldDeep);
+  v.box(SX + 0.18, 0.89, SZ - 0.08, 0.18, 0.05, 0.18, PALETTE.maroon);
+  v.box(SX + 0.18, 0.94, SZ - 0.08, 0.07, 0.06, 0.07, PALETTE.gold);
+
+  // Book-stack bollards flanking the entrance steps + potted plants & topiaries
+  const bollardCols = [PALETTE.maroon, PALETTE.gold, '#2F5A4C', WARM_WOOD];
+  for (const sx of [-1, 1]) {
+    const bx = sx * 1.38, bz = 3.46;
+    for (let i = 0; i < 4; i++) {
+      const rot = (i % 2 ? 0.16 : -0.14) * sx;
+      const bw = 0.44 - i * 0.025, bd = 0.34 - i * 0.018;
+      v.box(bx, 0.07 + i * 0.135, bz, bw, 0.125, bd, bollardCols[(i + (sx > 0 ? 1 : 0)) % 4], rot);
+      v.box(bx, 0.07 + i * 0.135, bz, bw - 0.05, 0.095, bd + 0.012, PALETTE.paper, rot);
+    }
+    v.box(bx, 0.63, bz, 0.24, 0.06, 0.24, PALETTE.gold);
+    v.box(bx, 0.7, bz, 0.11, 0.09, 0.11, PALETTE.goldDeep);
+  }
+  topiary(v, -2.92, 0.18, 2.52, 0.84);
+  topiary(v, 2.92, 0.18, 2.52, 0.84);
+  pot(v, 2.2, 0.32, 2.66, 0.85, PALETTE.gold);
+
+  const signs = [
+    signQuad('content', 0, 3.16, PZ + 0.17, 2.56),
+    signQuad('ebookTag', KX, 1.86, KZ - 0.035, 0.86),
+  ];
+  const glows = [
+    [-1.04, 2.05, PZ + 0.24, 0.2],
+    [1.04, 2.05, PZ + 0.24, 0.2],
+    [SX + 0.18, 0.8, SZ - 0.08, 0.13],
+  ];
+  return { v, signs, art, glows, ebookSparkles: [0, 4.72, 0] };
 }
 
 // ---------------------------------------------------------------------------------
@@ -986,14 +1140,19 @@ export function createLandmarks() {
   const glows = [];
   const artPanels = [];
   let beacon = null;
-  let vane = null, clapper = null, steam = null, smoke = null, planes = null, towerPos = null;
-  // Soft blocky puffs (a box crossed with a wider, flatter one), same lifted white as the clouds;
-  // shared by the café steam and the cottage chimney smoke.
+  let vane = null, clapper = null, ebookSparkles = null, smoke = null, planes = null, towerPos = null;
+  // Soft blocky puffs (a box crossed with a wider, flatter one), same lifted white as the clouds,
+  // used by the cottage chimney smoke.
   const puff = new VoxelBuilder();
   puff.box(0, 0, 0, 1, 0.74, 0.9, PALETTE.white);
   puff.box(0, -0.06, 0, 1.3, 0.48, 0.62, '#F7EFF2');
   const steamGeo = puff.geometry();
   const puffMat = toon('#ffffff', { vertexColors: true, emissive: '#FFF6F0', emissiveIntensity: 0.2 });
+  // Glowing golden 4-point sparkle geometry rising subtly above the E-Book Pavilion roof.
+  const spkB = new VoxelBuilder();
+  sparkle(spkB, 0, 0, 0, 0.56, PALETTE.white);
+  const ebookStarGeo = spkB.geometry();
+  const ebookStarMat = basic('#FFFFFF');
 
   for (const L of LANDMARKS) {
     const g = new THREE.Group();
@@ -1023,11 +1182,13 @@ export function createLandmarks() {
       clapper.position.set(...b.clapper.pos);
       g.add(clapper);
     }
-    if (b.steam) {
-      steam = new THREE.InstancedMesh(steamGeo, puffMat, 9);
-      steam.frustumCulled = false;
-      steam.position.set(...b.steam);
-      g.add(steam);
+    if (b.ebookSparkles) {
+      ebookSparkles = new THREE.InstancedMesh(ebookStarGeo, ebookStarMat, 8);
+      ebookSparkles.frustumCulled = false;
+      ebookSparkles.position.set(...b.ebookSparkles);
+      const spkCols = ['#FFD86E', EINK, '#F2BE48', '#FFE9A6'].map((h) => new THREE.Color(h));
+      for (let i = 0; i < 8; i++) ebookSparkles.setColorAt(i, spkCols[i % spkCols.length]);
+      g.add(ebookSparkles);
     }
     if (b.smoke) {
       smoke = new THREE.InstancedMesh(steamGeo, puffMat, 5);
@@ -1091,16 +1252,18 @@ export function createLandmarks() {
         else if (ph >= 0.89) a = 0.3 * backOut(Math.min(1, (ph - 0.89) / 0.09));
         clapper.rotation.z = a;
       }
-      if (steam) {
-        for (let i = 0; i < 9; i++) {
-          const ph = (t * 0.3 + i / 9) % 1;
-          const ox = Math.cos(i * 2.4) * 1.05, oz = Math.sin(i * 2.4) * 0.9;
-          p.set(ox + ph * 0.9 + Math.sin(t * 0.9 + i * 2.1) * 0.18, ph * 3.4, oz + Math.cos(t * 0.7 + i) * 0.12);
-          const s = (0.2 + 0.7 * Math.sin(Math.PI * Math.pow(ph, 0.8))) * (i % 3 === 0 ? 1.25 : 0.9);
-          q.setFromEuler(e.set(0, ph * 0.9 + i, Math.sin(t + i) * 0.15));
-          steam.setMatrixAt(i, m4.compose(p, q, sc.set(s, s, s)));
+      if (ebookSparkles) {
+        for (let i = 0; i < 8; i++) {
+          const ph = (t * 0.24 + i / 8) % 1;
+          const ang = i * 2.399 + t * 0.35;
+          const rad = 1.0 + (i % 3) * 0.72;
+          p.set(Math.cos(ang) * rad, ph * 2.1 + Math.sin(t * 1.4 + i) * 0.12, Math.sin(ang) * rad * 0.65);
+          const tw = 0.55 + 0.45 * Math.sin(t * 3.1 + i * 1.9);
+          const s = Math.sin(Math.PI * ph) * (0.55 + (i % 2) * 0.35) * tw;
+          q.setFromEuler(e.set(-0.25, t * 1.1 + i, Math.sin(t + i) * 0.2, 'YXZ'));
+          ebookSparkles.setMatrixAt(i, m4.compose(p, q, sc.set(s, s, s)));
         }
-        steam.instanceMatrix.needsUpdate = true;
+        ebookSparkles.instanceMatrix.needsUpdate = true;
       }
       if (smoke) {
         // Chimney smoke: small puffs rise, drift east, swell and shrink away.
@@ -1125,10 +1288,11 @@ export function createLandmarks() {
     },
     dispose() {
       group.traverse((o) => {
-        if (o.geometry && o.geometry !== planeGeo && o.geometry !== steamGeo) o.geometry.dispose();
+        if (o.geometry && o.geometry !== planeGeo && o.geometry !== steamGeo && o.geometry !== ebookStarGeo) o.geometry.dispose();
         if (o.isInstancedMesh) o.dispose();
       });
       steamGeo?.dispose();
+      ebookStarGeo?.dispose();
       planeGeo.dispose();
       atlas.dispose();
       signMat.dispose();

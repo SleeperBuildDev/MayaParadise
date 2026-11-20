@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Writer Maya (မာရာ) · Script, Content &amp; Copywriting · Maya's Creations</title>
-<meta name="description" content="မာရာ (Writer Maya) — Script Writing Templates၊ Script ရေးပေးခြင်း၊ Content နှင့် Copywriting ဝန်ဆောင်မှုများ နှင့် 'အမှန်မြင်ခြင်း (Reality Check)' စာအုပ်။ Script writing templates, script writing, content and copywriting services by Maya.">
+<title>Writer Maya (မာရာ) · Reality Check E-Book &amp; Script Writing · Maya's Creations</title>
+<meta name="description" content="မာရာ (Writer Maya) — 'အမှန်မြင်ခြင်း (Reality Check)' E-Book စာအုပ်၊ Script Writing Templates နှင့် Script ရေးပေးခြင်း ဝန်ဆောင်မှုများ။ Reality Check E-Book, script writing templates and script writing services by Maya.">
 <link rel="canonical" href="https://writermaya.com/">
 <meta name="theme-color" content="#6E1F2A">
 <meta property="og:type" content="website">
@@ -12,7 +12,7 @@
 <meta property="og:locale" content="my_MM">
 <meta property="og:locale:alternate" content="en_US">
 <meta property="og:title" content="Writer Maya (မာရာ) · Maya's Creations">
-<meta property="og:description" content="ကားလေးစီးပြီး မာရာ့ စာအုပ်ကမ္ဘာထဲ လည်ပတ်ကြည့်ပါ — Script Templates, Script Writing, Content &amp; Copywriting.">
+<meta property="og:description" content="ကားလေးစီးပြီး မာရာ့ စာအုပ်ကမ္ဘာထဲ လည်ပတ်ကြည့်ပါ — Reality Check E-Book, Script Templates &amp; Script Writing.">
 <meta property="og:url" content="https://writermaya.com/">
 <meta property="og:image" content="https://writermaya.com/img/og.jpg">
 <meta name="twitter:card" content="summary_large_image">
@@ -32,6 +32,7 @@
 <link rel="preload" href="fonts/noto-sans-myanmar-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/noto-sans-myanmar-700.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="css/site.css">
+<link rel="stylesheet" href="css/ebook.css">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -41,7 +42,7 @@
       "@id": "https://writermaya.com/#maya",
       "name": "Maya",
       "alternateName": ["မာရာ", "Writer Maya", "Myat Thet Khaing"],
-      "jobTitle": "Script Writer, Content & Copywriter, Author",
+      "jobTitle": "Script Writer, Author",
       "url": "https://writermaya.com/",
       "sameAs": [
         "https://www.facebook.com/MsMayaOfficial",
@@ -53,6 +54,7 @@
     {
       "@type": "Book",
       "name": "အမှန်မြင်ခြင်း (Reality Check)",
+      "bookFormat": "https://schema.org/EBook",
       "image": "https://writermaya.com/img/book-cover.webp",
       "inLanguage": "my",
       "author": { "@id": "https://writermaya.com/#maya" }
@@ -61,16 +63,14 @@
       "@type": "OfferCatalog",
       "name": "Maya's Creations",
       "itemListElement": [
+        { "@type": "Offer", "name": "အမှန်မြင်ခြင်း (Reality Check) — E-Book", "image": "https://writermaya.com/img/book-cover.webp", "price": "15000", "priceCurrency": "MMK" },
         { "@type": "Offer", "name": "Script Writing Templates For Short Videos", "image": "https://writermaya.com/img/tpl-short.webp", "price": "50000", "priceCurrency": "MMK" },
         { "@type": "Offer", "name": "Script Writing Templates For Creators", "image": "https://writermaya.com/img/tpl-creator.webp", "price": "50000", "priceCurrency": "MMK" },
         { "@type": "Offer", "name": "Script Writing Templates For Business Use", "image": "https://writermaya.com/img/tpl-business.webp", "price": "80000", "priceCurrency": "MMK" },
         { "@type": "Offer", "name": "The Short Script (1-2 mins)", "price": "50000", "priceCurrency": "MMK" },
         { "@type": "Offer", "name": "Script Writing Basic Package", "price": "280000", "priceCurrency": "MMK" },
         { "@type": "Offer", "name": "Script Writing Advanced Package", "price": "750000", "priceCurrency": "MMK" },
-        { "@type": "Offer", "name": "Script Writing Master Package", "price": "1500000", "priceCurrency": "MMK" },
-        { "@type": "Offer", "name": "Content & Copywriting – The Trial Package", "price": "200000", "priceCurrency": "MMK" },
-        { "@type": "Offer", "name": "Content & Copywriting – The Essentials Package", "price": "1000000", "priceCurrency": "MMK" },
-        { "@type": "Offer", "name": "Content & Copywriting – The Master Package", "price": "1600000", "priceCurrency": "MMK" }
+        { "@type": "Offer", "name": "Script Writing Master Package", "price": "1500000", "priceCurrency": "MMK" }
       ]
     }
   ]
@@ -84,6 +84,7 @@
     <symbol id="i-box" viewBox="0 0 24 24"><path d="M12 2 3 7v10l9 5 9-5V7zm0 2.3L18.6 8 12 11.7 5.4 8zM5 9.7l6 3.4v6.6l-6-3.4zm8 10v-6.6l6-3.4v6.6z"/></symbol>
     <symbol id="i-clapper" viewBox="0 0 24 24"><path d="M3 10h18v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zm0-2 1-3.2a2 2 0 0 1 2.5-1.3L20 7.5l-.6 1.9z"/></symbol>
     <symbol id="i-mug" viewBox="0 0 24 24"><path d="M4 6h12v9a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5zm12 2h2a3 3 0 0 1 0 6h-2v-2h2a1 1 0 0 0 0-2h-2zM7 2h2v3H7zm4 0h2v3h-2z"/></symbol>
+    <symbol id="i-ebook" viewBox="0 0 24 24"><path d="M12 2 13.1 4.9 16 6 13.1 7.1 12 10 10.9 7.1 8 6 10.9 4.9zM3 8.5C5.8 8.5 8.6 9.4 11 10.9V20.5C8.7 19.1 5.9 18.3 3 18.3zM21 8.5C18.2 8.5 15.4 9.4 13 10.9V20.5C15.3 19.1 18.1 18.3 21 18.3z"/></symbol>
     <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v16H6.5a.5.5 0 0 0 0 1H20v3H6.5A2.5 2.5 0 0 1 4 19.5z"/></symbol>
     <symbol id="i-plane" viewBox="0 0 24 24"><path d="m2 11 20-8-6 18-4-7zm10 3 1.8 3.2L18.4 6z"/></symbol>
     <symbol id="i-chat" viewBox="0 0 24 24"><path d="M12 3C6.5 3 2 6.8 2 11.5c0 2.6 1.4 5 3.7 6.5L5 22l4.3-2.5c.9.2 1.8.3 2.7.3 5.5 0 10-3.8 10-8.5S17.5 3 12 3z"/></symbol>
@@ -108,7 +109,7 @@
     <p class="eyebrow">Maya's Creations</p>
     <h1><span lang="my">မာရာ</span><span lang="en">Writer Maya</span></h1>
     <p class="motto">“ဖန်တီးသူ ငြိမ်းချမ်းမှ၊ ဖန်တီးမှု တောက်ပမည်”<span lang="en" class="gloss">When the creator is at peace, the creation shines.</span></p>
-    <p class="tagline"><span lang="my">Script ရေးသားခြင်း · Content နှင့် Copywriting · စာရေးဆရာမ</span><span lang="en">Script writer · Content &amp; copywriter · Author</span></p>
+    <p class="tagline"><span lang="my">“အမှန်မြင်ခြင်း” E-Book · Script ရေးသားခြင်း · စာရေးဆရာမ</span><span lang="en">Reality Check E-Book · Script writer · Author</span></p>
     <button id="play" class="btn-play" type="button" disabled>
       <span class="play-fill" aria-hidden="true"></span>
       <svg width="22" height="22" aria-hidden="true"><use href="#i-play"/></svg>
@@ -138,7 +139,7 @@
     <a href="#about"><span lang="my">မာရာ</span><span lang="en">About</span></a>
     <a href="#templates">Template</a>
     <a href="#scripts">Script</a>
-    <a href="#content">Content</a>
+    <a href="#content">E-Book</a>
     <a href="#library"><span lang="my">စာအုပ်</span><span lang="en">Book</span></a>
     <a href="#contact"><span lang="my">ဆက်သွယ်ရန်</span><span lang="en">Contact</span></a>
     <button type="button" class="chip-play" data-action="play"><span lang="my">▶ ကမ္ဘာထဲ ဝင်မယ်</span><span lang="en">▶ Play the world</span></button>
@@ -155,9 +156,8 @@
       <li><a href="#scr-standard">The Standard Script <small>(<span lang="my">၃–၅ မိနစ်</span><span lang="en">3–5 mins</span>)</small></a><b>30,000 MMK / <span lang="my">မိနစ်</span><span lang="en">min</span></b></li>
       <li><a href="#scr-long">Long Form Script <small>(<span lang="my">၆ မိနစ်အထက်</span><span lang="en">6 mins +</span>)</small></a><b>20,000 MMK / <span lang="my">မိနစ်</span><span lang="en">min</span></b></li>
       <li><a href="#scr-bundles">Script Basic · Advanced · Master</a><b>280,000 · 750,000 · 1,500,000 MMK</b></li>
-      <li><a href="#cc-trial">The Trial Package</a><b>200,000 MMK</b></li>
-      <li><a href="#cc-essentials">The Essentials Package</a><b>1,000,000 MMK</b></li>
-      <li><a href="#cc-master">The Master Package</a><b>1,600,000 MMK</b></li>
+      <li><a href="#eb-preview"><span lang="my">“အမှန်မြင်ခြင်း” E-Book — အခန်း (၁) မြည်းစမ်းဖတ်ရန်</span><span lang="en">Reality Check E-Book — Free Chapter 1</span></a><b><span lang="my">အခမဲ့</span><span lang="en">Free</span></b></li>
+      <li><a href="#eb-buy"><span lang="my">“အမှန်မြင်ခြင်း” E-Book — အခန်း ၂၃ ခန်း အပြည့်အစုံ</span><span lang="en">Reality Check E-Book — Full 23 Chapters</span></a><b data-eb-price>15,000 MMK</b></li>
       <li><a href="#scr-consult">Script Writing Consultation</a><b><span lang="my">Google Form ဖြင့် ဘွတ်ကင်</span><span lang="en">Book via Google Form</span></b></li>
     </ul>
   </section>
@@ -169,7 +169,7 @@
     <article class="station" id="about-hello" data-station="about-hello">
       <img class="photo" src="img/maya-about.webp" width="480" height="600" loading="lazy" alt="မာရာ (Writer Maya)">
       <h3><span lang="my">မင်္ဂလာပါရှင့်၊ ကျွန်မ မာရာပါ</span><span lang="en">Hello, I'm Maya</span></h3>
-      <p><span lang="my">Script ရေးသားခြင်း၊ Content နှင့် Copywriting ဝန်ဆောင်မှုတွေကို <b>၃ နှစ်ကျော်</b> အတွေ့အကြုံနဲ့ ပေးနေတဲ့ စာရေးဆရာမပါ။ <b>“အမှန်မြင်ခြင်း (Reality Check)”</b> စာအုပ်ကိုလည်း ရေးသားခဲ့ပါတယ်။</span><span lang="en">I'm a writer offering script writing, content and copywriting, with <b>3+ years</b> of experience, and the author of the book <b>Reality Check (အမှန်မြင်ခြင်း)</b>.</span></p>
+      <p><span lang="my">Script ရေးသားခြင်း ဝန်ဆောင်မှုတွေကို <b>၃ နှစ်ကျော်</b> အတွေ့အကြုံနဲ့ ပေးနေတဲ့ စာရေးဆရာမပါ။ <b>“အမှန်မြင်ခြင်း (Reality Check)”</b> စာအုပ်နှင့် E-Book ကိုလည်း ရေးသားခဲ့ပါတယ်။</span><span lang="en">I'm a writer offering script writing and templates with <b>3+ years</b> of experience, and the author of the book &amp; E-Book <b>Reality Check (အမှန်မြင်ခြင်း)</b>.</span></p>
       <blockquote class="motto">“ဖန်တီးသူ ငြိမ်းချမ်းမှ၊ ဖန်တီးမှု တောက်ပမည်”<span lang="en" class="gloss">When the creator is at peace, the creation shines.</span></blockquote>
     </article>
 
@@ -314,91 +314,40 @@
     </article>
   </section>
 
-  <!-- 4. CONTENT & COPYWRITING -->
-  <section id="content" class="place" data-place="content" data-from="200,000 MMK">
-    <h2><span lang="my">Content နှင့် Copywriting</span><span lang="en">Content &amp; Copywriting</span></h2>
+  <!-- 4. E-BOOK SHOP : Reality Check -->
+  <section id="content" class="place" data-place="content">
+    <span id="ebook" aria-hidden="true"></span>
+    <h2><span lang="my">E-Book ဆိုင် · အမှန်မြင်ခြင်း</span><span lang="en">E-Book Shop · Reality Check</span></h2>
+    <p class="lead"><span lang="my">မာရာ့ “အမှန်မြင်ခြင်း (Reality Check)” စာအုပ်ကို ဖုန်းထဲမှာပဲ အခမဲ့ မြည်းစမ်းဖတ်ပြီး အခန်း ၂၃ ခန်းလုံး ချက်ချင်း ဝယ်ဖတ်နိုင်ပါပြီရှင့်။</span><span lang="en">Try Chapter 1 of Maya's “Reality Check” free on your phone, or unlock all 23 chapters instantly.</span></p>
 
-    <article class="station product" id="cc-trial" data-station="cc-trial">
-      <h3>The Trial Package</h3>
-      <p class="tagline"><span lang="my">Content အရည်အသွေးနဲ့ Brand နဲ့ ကိုက်ညီမှုကို စမ်းကြည့်ဖို့ အကောင်းဆုံးပါ။</span><span lang="en">Ideal for testing content quality and brand alignment.</span></p>
-      <dl class="rows">
-        <div><dt>Brand Awareness Post</dt><dd>1</dd></div>
-        <div><dt>Engagement Post</dt><dd>1</dd></div>
-        <div><dt>Sales Copy</dt><dd>1</dd></div>
-      </dl>
-      <p class="price">200,000 MMK</p>
-      <div class="actions">
-        <a class="btn tg order" href="https://t.me/Ms_Mayaofficial" data-msg="Hi, Trial Package လေးorder တင်ချင်လို့ပါ" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-plane"/></svg><span lang="my">Telegram မှ Order တင်မယ်</span><span lang="en">Order on Telegram</span></a>
-        <a class="btn ms order" href="https://m.me/MsMayaofficial" data-msg="Hi, Trial Package လေးorder တင်ချင်လို့ပါ" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-chat"/></svg><span lang="my">Messenger မှ Order တင်မယ်</span><span lang="en">Order on Messenger</span></a>
+    <article class="station" id="eb-preview" data-station="eb-preview">
+      <h3><span lang="my">အခန်း (၁) အခမဲ့ မြည်းစမ်းဖတ်ရန်</span><span lang="en">Read Chapter 1 Free</span></h3>
+      <div class="eb-mount" data-eb-station="eb-preview">
+        <img class="photo cover book" src="img/book-cover.webp" width="600" height="921" loading="lazy" alt="'အမှန်မြင်ခြင်း — Reality Check' E-Book (မာရာ)">
+        <p><span lang="my">စာအုပ်မိတ်ဆက်၊ စာရေးဆရာမအမှာစာ နှင့် အခန်း (၁) “ကျွန်မသည် သိုးမည်း” ကို အခမဲ့ မြည်းစမ်းဖတ်ကြည့်နိုင်ပါတယ်။</span><span lang="en">Read the front matter, foreword, and Chapter 1 free before deciding.</span></p>
       </div>
     </article>
 
-    <article class="station product" id="cc-essentials" data-station="cc-essentials">
-      <h3>The Essentials Package</h3>
-      <p class="tagline"><span lang="my">Brand ကို အမြဲမပြတ် မြင်သာစေပြီး Audience တဖြည်းဖြည်း တိုးလာစေဖို့ ဒီဇိုင်းထုတ်ထားပါတယ်။</span><span lang="en">Designed for consistent brand presence and steady audience growth.</span></p>
-      <p class="deliveries"><b>14</b> <span lang="my">ခု ပို့ပေးပါမယ် (Deliveries)</span><span lang="en">Deliveries</span></p>
-      <dl class="rows">
-        <div><dt>Engagement Post</dt><dd>3</dd></div>
-        <div><dt>Education Post</dt><dd>3</dd></div>
-        <div><dt>Brand Awareness Post</dt><dd>3</dd></div>
-        <div><dt>Sale/Promotion Post</dt><dd>2</dd></div>
-        <div><dt>Short Form Video</dt><dd>2</dd></div>
-        <div><dt><span lang="my">Copy ပုံစံ</span><span lang="en">Copy Format</span></dt><dd><span lang="my">အာရုံဖမ်းစားနိုင်သော Image Caption</span><span lang="en">High impact Image Caption</span></dd></div>
-        <div><dt><span lang="my">သုတေသနနှင့် Strategy</span><span lang="en">Research &amp; Strategy</span></dt><dd><span lang="my">စံနှုန်းမီ ဈေးကွက်သုတေသန</span><span lang="en">Standard Market Research</span></dd></div>
-        <div><dt><span lang="my">ပြိုင်ဘက် လေ့လာချက်</span><span lang="en">Competitor Analysis</span></dt><dd><span lang="my">ပြိုင်ဘက် ၂ ခု</span><span lang="en">2 Competitors</span></dd></div>
-        <div><dt><span lang="my">Brand စီမံခန့်ခွဲမှု</span><span lang="en">Brand Management</span></dt><dd>–</dd></div>
-        <div><dt>Content Calendar</dt><dd><span lang="my">၁ လ</span><span lang="en">1 Month</span></dd></div>
-        <div><dt><span lang="my">ပြင်ဆင်ပေးမှု</span><span lang="en">Revision</span></dt><dd>2</dd></div>
-      </dl>
-      <p class="price">1,000,000 MMK</p>
-      <p class="addon">+ 200,000 MMK <span lang="my">(Video တည်းဖြတ်ခ)</span><span lang="en">(Video Editing)</span></p>
-      <div class="actions">
-        <a class="btn tg order" href="https://t.me/Ms_Mayaofficial" data-msg="Hi, Essentials Package လေးorder တင်ချင်လို့ပါ" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-plane"/></svg><span lang="my">Telegram မှ Order တင်မယ်</span><span lang="en">Order on Telegram</span></a>
-        <a class="btn ms order" href="https://m.me/MsMayaofficial" data-msg="Hi, Essentials Package လေးorder တင်ချင်လို့ပါ" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-chat"/></svg><span lang="my">Messenger မှ Order တင်မယ်</span><span lang="en">Order on Messenger</span></a>
+    <article class="station product" id="eb-buy" data-station="eb-buy">
+      <h3><span lang="my">E-Book ဝယ်ယူရန် (ချက်ချင်း ဖတ်နိုင်)</span><span lang="en">Buy Reality Check E-Book (Instant Access)</span></h3>
+      <div class="eb-mount" data-eb-station="eb-buy">
+        <p><span lang="my">KBZPay ဖြင့် ငွေလွှဲပြီး ငွေလွှဲပြေစာပုံ (Screenshot) တင်လိုက်တာနဲ့ အခန်း ၂၃ ခန်းလုံးကို ချက်ချင်း ဖတ်လို့ရပါပြီရှင့်။</span><span lang="en">Transfer via KBZPay, upload your receipt screenshot, and unlock all 23 chapters right away.</span></p>
+        <p class="price" data-eb-price>15,000 MMK</p>
       </div>
     </article>
 
-    <article class="station product" id="cc-master" data-station="cc-master">
-      <h3>The Master Package</h3>
-      <p class="tagline"><span lang="my">ဈေးကွက်ထဲမှာ ယုံကြည်မှုအပြည့် ရစေပြီး အလှတရား မြင့်မားတဲ့ Content အတွက် အပြည့်အစုံ မူဘောင်ပါ။</span><span lang="en">A comprehensive framework for market authority and high-aesthetic content.</span></p>
-      <p class="deliveries"><b>30</b> <span lang="my">ခု ပို့ပေးပါမယ် (Deliveries)</span><span lang="en">Deliveries</span></p>
-      <dl class="rows">
-        <div><dt>Engagement Post</dt><dd>6</dd></div>
-        <div><dt>Education Post</dt><dd>8</dd></div>
-        <div><dt>Brand Awareness Post</dt><dd>6</dd></div>
-        <div><dt>Sale/Promotion Post</dt><dd>6</dd></div>
-        <div><dt>Short Form Video</dt><dd>4</dd></div>
-        <div><dt><span lang="my">Copy ပုံစံ</span><span lang="en">Copy Format</span></dt><dd><span lang="my">Copy အပြည့်အစုံ + Visual အလှတရား လမ်းညွှန်ချက်</span><span lang="en">Full Copy + Visual Aesthetic Direction</span></dd></div>
-        <div><dt><span lang="my">သုတေသနနှင့် Strategy</span><span lang="en">Research &amp; Strategy</span></dt><dd><span lang="my">နက်နက်ရှိုင်းရှိုင်း Strategy မူဘောင်</span><span lang="en">Deep-dive Strategic Framework</span></dd></div>
-        <div><dt><span lang="my">ပြိုင်ဘက် လေ့လာချက်</span><span lang="en">Competitor Analysis</span></dt><dd><span lang="my">ဈေးကွက်နှင့် ပြိုင်ဘက် အပြည့်အစုံ လေ့လာဆန်းစစ်ချက်</span><span lang="en">Comprehensive Market &amp; Competitor Analysis</span></dd></div>
-        <div><dt><span lang="my">Brand စီမံခန့်ခွဲမှု</span><span lang="en">Brand Management</span></dt><dd><span lang="my">ပရော်ဖက်ရှင်နယ် တုံ့ပြန်မှုနှင့် Engagement Template များ</span><span lang="en">Professional Response &amp; Engagement Templates</span></dd></div>
-        <div><dt>Content Calendar</dt><dd><span lang="my">၁ လ</span><span lang="en">1 month</span></dd></div>
-        <div><dt><span lang="my">ပြင်ဆင်ပေးမှု</span><span lang="en">Revision</span></dt><dd>3</dd></div>
-      </dl>
-      <p class="price">1,600,000 MMK</p>
-      <p class="addon">+ 400,000 MMK <span lang="my">(Video တည်းဖြတ်ခ)</span><span lang="en">(Video Editing)</span></p>
-      <div class="actions">
-        <a class="btn tg order" href="https://t.me/Ms_Mayaofficial" data-msg="Hi, Master Package လေးorder တင်ချင်လို့ပါ" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-plane"/></svg><span lang="my">Telegram မှ Order တင်မယ်</span><span lang="en">Order on Telegram</span></a>
-        <a class="btn ms order" href="https://m.me/MsMayaofficial" data-msg="Hi, Master Package လေးorder တင်ချင်လို့ပါ" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-chat"/></svg><span lang="my">Messenger မှ Order တင်မယ်</span><span lang="en">Order on Messenger</span></a>
+    <article class="station" id="eb-read" data-station="eb-read">
+      <h3><span lang="my">ဝယ်ပြီးသား စာအုပ်ဖတ်ရန် · ဝင်မယ်</span><span lang="en">Already Bought? Sign In &amp; Read</span></h3>
+      <div class="eb-mount" data-eb-station="eb-read">
+        <p><span lang="my">ဝယ်ယူပြီးသား စာဖတ်သူများ ဖုန်းနံပါတ် (သို့) အီးမေးလ် နှင့် PIN ဖြင့် ဝင်ရောက်ပြီး ဖုန်းဘယ်လုံးကနေမဆို ဆက်ဖတ်နိုင်ပါတယ်။</span><span lang="en">Sign in with your phone or email and PIN from any device to continue reading.</span></p>
       </div>
     </article>
 
-    <article class="station" id="cc-compare" data-station="cc-compare">
-      <h3><span lang="my">Package သုံးမျိုး နှိုင်းယှဉ်ချက်</span><span lang="en">Compare the three packages</span></h3>
-      <div class="compare" role="table" aria-label="Trial · Essentials · Master">
-        <div role="row" class="head"><span role="columnheader"></span><span role="columnheader">Trial</span><span role="columnheader">Essentials</span><span role="columnheader">Master</span></div>
-        <div role="row"><span role="rowheader"><span lang="my">ပို့ပေးမည့် အရေအတွက်</span><span lang="en">Deliveries</span></span><span>3</span><span>14</span><span>30</span></div>
-        <div role="row"><span role="rowheader">Brand Awareness Post</span><span>1</span><span>3</span><span>6</span></div>
-        <div role="row"><span role="rowheader">Engagement Post</span><span>1</span><span>3</span><span>6</span></div>
-        <div role="row"><span role="rowheader">Education Post</span><span>–</span><span>3</span><span>8</span></div>
-        <div role="row"><span role="rowheader">Sale/Promotion Post</span><span>1<small> (Sales Copy)</small></span><span>2</span><span>6</span></div>
-        <div role="row"><span role="rowheader">Short Form Video</span><span>–</span><span>2</span><span>4</span></div>
-        <div role="row"><span role="rowheader">Content Calendar</span><span>–</span><span><span lang="my">၁ လ</span><span lang="en">1 month</span></span><span><span lang="my">၁ လ</span><span lang="en">1 month</span></span></div>
-        <div role="row"><span role="rowheader"><span lang="my">ပြင်ဆင်ပေးမှု</span><span lang="en">Revision</span></span><span>–</span><span>2</span><span>3</span></div>
-        <div role="row" class="price-row"><span role="rowheader"><span lang="my">ဈေးနှုန်း</span><span lang="en">Price</span></span><span>200,000</span><span>1,000,000</span><span>1,600,000</span></div>
-        <div role="row"><span role="rowheader"><span lang="my">Video တည်းဖြတ်ခ</span><span lang="en">Video editing</span></span><span>–</span><span>+200,000</span><span>+400,000</span></div>
+    <article class="station" id="eb-chapters" data-station="eb-chapters">
+      <h3><span lang="my">မာတိကာ · အခန်း ၂၃ ခန်း</span><span lang="en">Table of Contents · 23 Chapters</span></h3>
+      <div class="eb-mount" data-eb-station="eb-chapters">
+        <p><span lang="my">အပိုင်း (၁) အခန်း ၁–၁၁ နှင့် အပိုင်း (၂) အခန်း ၁၂–၂၃ စုစုပေါင်း စာမျက်နှာ ၁၁၂ မျက်နှာ ပါဝင်ပါတယ်။</span><span lang="en">Part 1 (Chapters 1–11) and Part 2 (Chapters 12–23), 112 pages in total.</span></p>
       </div>
-      <p class="note">MMK</p>
     </article>
   </section>
 
@@ -582,5 +531,101 @@
 <script src="js/site.js" defer></script>
 <script type="module" src="js/boot.js?v=6"></script>
 <script type="module" src="js/sw-register.js"></script>
+<script type="module">
+const EBOOK_HASH = /^#(content|ebook|eb-(preview|buy|read|chapters))$/;
+const sec = document.getElementById('content');
+let mounted = false;
+let mounting = false;
+let cleanups = [];
+
+function unmountClassicEbook() {
+  for (const fn of cleanups) { try { fn(); } catch {} }
+  cleanups = [];
+  mounted = false;
+}
+
+async function mountClassicEbook() {
+  if (mounted || mounting || !sec || document.body.classList.contains('playing')) return;
+  mounting = true;
+  try {
+    const [storeMod, uiFlow] = await Promise.all([
+      import('./js/ebook/store.js'),
+      import('./js/ebook/ui-flow.js'),
+    ]);
+    await storeMod.initStore?.();
+    const syncPrice = (cfg) => {
+      if (cfg && cfg.priceMmk) {
+        const label = Number(cfg.priceMmk).toLocaleString('en-US') + ' MMK';
+        document.querySelectorAll('[data-eb-price]').forEach((el) => { el.textContent = label; });
+      }
+    };
+    syncPrice(storeMod.getConfig?.());
+    const unsubPrice = storeMod.onReaderChange?.((st) => syncPrice(st && st.config ? st.config : storeMod.getConfig?.()));
+    if (typeof unsubPrice === 'function') cleanups.push(unsubPrice);
+    if (document.body.classList.contains('playing')) { mounting = false; return; }
+    const openReader = async (opts) => {
+      const { openEbookReader } = await import('./js/ebook/reader.js');
+      openEbookReader({
+        ...(opts || {}),
+        onClose: (res) => {
+          const act = res && res.action;
+          if (act === 'buy') document.getElementById('eb-buy')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          else if (act === 'signin' || act === 'reupload') document.getElementById('eb-read')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        },
+      });
+    };
+    const onSignedIn = (reader) => {
+      const name = typeof reader === 'string' ? reader.trim() : (reader && reader.name ? String(reader.name).trim() : '');
+      if (name) {
+        window.MayaSite?.toast(
+          `${name} ရေ! အမှန်မြင်ခြင်း E-Book လေးကို အခုပဲ စဖတ်လို့ရပါပြီရှင့်!`,
+          `Welcome, ${name}! You can start reading Reality Check right now!`
+        );
+      } else {
+        window.MayaSite?.toast(
+          'အမှန်မြင်ခြင်း E-Book လေးကို အခုပဲ စဖတ်လို့ရပါပြီရှင့်!',
+          'You can start reading Reality Check right now!'
+        );
+      }
+    };
+    sec.querySelectorAll('.eb-mount[data-eb-station]').forEach((el) => {
+      const sid = el.getAttribute('data-eb-station');
+      if (sid) {
+        const fn = uiFlow.mountEbookStation(el, sid, { onOpenReader: openReader, onReaderSignedIn: onSignedIn });
+        if (typeof fn === 'function') cleanups.push(fn);
+      }
+    });
+    mounted = true;
+  } catch (err) {
+    console.warn('classic ebook mount', err);
+  } finally {
+    mounting = false;
+  }
+}
+
+if (sec) {
+  document.addEventListener('mw:play', unmountClassicEbook);
+  document.getElementById('play')?.addEventListener('click', unmountClassicEbook);
+  if (EBOOK_HASH.test(location.hash)) mountClassicEbook();
+  window.addEventListener('hashchange', () => {
+    if (EBOOK_HASH.test(location.hash)) mountClassicEbook();
+  });
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest('a[href]');
+    if (a && EBOOK_HASH.test(a.getAttribute('href') || '')) mountClassicEbook();
+  });
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((en) => en.isIntersecting)) {
+        io.disconnect();
+        mountClassicEbook();
+      }
+    }, { rootMargin: '320px 0px' });
+    io.observe(sec);
+  } else {
+    mountClassicEbook();
+  }
+}
+</script>
 </body>
 </html>

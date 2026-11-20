@@ -14,7 +14,7 @@
 //   __mwGame.barks.log                      what she said this visit [{ t, id, text }]
 import { PLACES } from './config.js';
 import { BARKS, BARK_PLACES } from './strings.js';
-import { tr } from './ui.js';
+import { tr, withReaderName } from './ui.js';
 
 const params = new URLSearchParams(location.search);
 const store = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } return null; };
@@ -79,7 +79,7 @@ const IDLE_AT = [20, 45, 90]; // standing still: seconds for each step
 const DRIVE_AT = [60, 180]; // continuous driving
 const SPIN_LIMIT = Math.PI * 3; // 540 degrees ...
 const SPIN_BUCKET = 0.5, SPIN_N = 8; // ... within 4 s
-const PRICE_SHEET = /^#(tpl-(short|creator|business)|scr-|cc-|templates-all|scripts-all|content-all)/;
+const PRICE_SHEET = /^#(tpl-(short|creator|business)|scr-|eb-buy|templates-all|scripts-all|content-all)/;
 
 export function createBarks(game) {
   const ui = game.ui;
@@ -121,7 +121,7 @@ export function createBarks(game) {
   // ---------------------------------------------------------------- gates
   const isCinema = () => gameEl.classList.contains('cinema') || !!ui.els.fader.className;
   function blocked(spec) {
-    if (document.hidden || game.busy || game.worldWalk || ui.dialogOpen || isCinema()) return true;
+    if (document.hidden || game.busy || game.worldWalk || game.ebookOpen || ui.dialogOpen || isCinema()) return true;
     if (ui.sheetOpen) return !spec.sheet;
     if (spec.sheet) return true;
     if (!spec.urgent && (game.reacting || game.rig?.cinematic)) return true;
@@ -158,7 +158,7 @@ export function createBarks(game) {
     let k = Math.floor(Math.random() * lines.length);
     if (lines.length > 1 && k === lastLine[id]) k = (k + 1 + Math.floor(Math.random() * (lines.length - 1))) % lines.length;
     lastLine[id] = k;
-    let text = tr(lines[k]);
+    let text = withReaderName(lines[k], { skipName: !!game.opts?.story });
     if (text.includes('{place}')) text = text.replace('{place}', tr(BARK_PLACES[place && BARK_PLACES[place] ? place : suggestPlace()]));
 
     const m = game.maya;
@@ -288,8 +288,8 @@ export function createBarks(game) {
     if (!game.maya || !game.world) return;
     const sheet = ui.sheetOpen;
 
-    // a bark on screen gives way to dialogue, cinematics and the sheet (and sheet ones leave with it)
-    if (ui.barkOpen && current && (ui.dialogOpen || game.busy || isCinema() || sheet !== !!current.sheet)) ui.hideBark();
+    // a bark on screen gives way to dialogue, cinematics, the reader and the sheet (and sheet ones leave with it)
+    if (ui.barkOpen && current && (ui.dialogOpen || game.busy || game.ebookOpen || isCinema() || sheet !== !!current.sheet)) ui.hideBark();
     if (!enabled) return;
 
     // ----- mode and room changes

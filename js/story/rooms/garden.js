@@ -3141,16 +3141,16 @@ function dressContent(room, opts) {
   L.group.add(lampGlow);
   const showLamp = (k) => { const on = !!opts.night || k > 0.5; lamp.visible = on; lampGlow.visible = on; };
   L.spot('kophyo', 1.7, -2.85, Math.PI);
-  L.spot('kophyoCounter', 2.55, -2.95, 0);
-  L.spot('sunwe', -2.4, 0.15, Math.PI, { sit: true, seat: 0.45 });
-  L.spot('khinmay', 2.1, -2.8, Math.PI);
-  L.spot('maungarkar', 3.0, -2.8, Math.PI);
-  L.spot('khinmayMid', 0.3, 0.15, Math.PI, { sit: true, seat: 0.45 });
-  L.spot('maungnge', 2.0, 3.0, [2.52, 2.92], { sit: true, seat: 0.3 });
-  L.spot('eimon', 3.05, 2.6, [2.52, 2.92], { sit: true, seat: 0.3 });
+  L.spot('kophyoCounter', 2.68, -2.92, 0);
+  L.spot('sunwe', -2.86, 2.1, 0.55, { sit: true, seat: 0.45 });
+  L.spot('khinmay', 2.18, -2.82, Math.PI);
+  L.spot('maungarkar', 3.04, -2.82, Math.PI);
+  L.spot('khinmayMid', 2.76, -0.82, -0.4, { sit: true, seat: 0.45 });
+  L.spot('maungnge', 1.96, 2.98, [2.58, 2.86], { sit: true, seat: 0.3 });
+  L.spot('eimon', 3.12, 2.66, [2.58, 2.86], { sit: true, seat: 0.3 });
   L.spot('maya', 1.0, 1.6, [1.7, -3.4]);
   L.tap('brazier', 1.7, -2.6, [1.7, -3.4], NAME('မီးဖို', "Ko Phyo's brazier"), 0.6);
-  L.tap('guests', 1.9, 2.3, [2.52, 2.92], NAME('ဧည့်သည် စားပွဲ', "the guests' table"), 0.6);
+  L.tap('guests', 1.9, 2.25, [2.58, 2.86], NAME('ဧည့်သည် စားပွဲ', "the guests' table"), 0.6);
   return L.finish({ onEvening: showLamp, api: { setLamp: (on) => { lamp.visible = lampGlow.visible = !!on; } } });
 }
 

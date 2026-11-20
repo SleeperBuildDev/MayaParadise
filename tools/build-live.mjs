@@ -581,6 +581,9 @@ if (flags.core) {
   const j = JSON.parse(readFileSync(resolve(flags.core), 'utf8'));
   const urls = (Array.isArray(j) ? j : j.core || []).map((s) => String(s).replace(/^\.?\//, ''));
   core = urls.map((u) => u.split('?')[0]).filter(exists);
+  for (const extra of ['css/ebook.css', 'js/ebook/store.js', 'js/ebook/firebase-config.js', 'js/ebook/sample-data.js']) {
+    if (exists(extra) && !core.includes(extra)) core.push(extra);
+  }
   coreSource = 'from ' + flags.core;
   // modulepreload: every core module, with the exact query the page imports it with (else it is fetched twice).
   // Left out: the towns (townboot.js preloads the ones this save needs) and the day's own files (the inline
@@ -629,7 +632,7 @@ if (flags.core) {
   }
   core = [...set];
 }
-core = core.filter((f) => !PRECACHE_SKIP.has(f));
+core = core.filter((f) => !PRECACHE_SKIP.has(f) && !/^admin\//.test(f));
 const coreSet = new Set(core);
 // rest: in the order the game wants them (the service worker fills its cache in this order): the towns (the
 // home book's neighbours first), the extras, the room files, the other days, the rest of the code, then images
@@ -648,7 +651,7 @@ const rank = (f) => {
   if (f.endsWith('.js') || f.endsWith('.css')) return [4, 0];
   return [5, 0];
 };
-const rest = [...outputs.keys()].filter((f) => !coreSet.has(f) && !PRECACHE_SKIP.has(f) && !/(^|\/)LICENSE$/.test(f) && !/^img\/og\./.test(f) && !/\.txt$/.test(f))
+const rest = [...outputs.keys()].filter((f) => !coreSet.has(f) && !PRECACHE_SKIP.has(f) && !/^admin\//.test(f) && !/(^|\/)LICENSE$/.test(f) && !/^img\/og\./.test(f) && !/\.txt$/.test(f))
   .sort((a, b) => { const x = rank(a), y = rank(b); return x[0] - y[0] || x[1] - y[1] || a.localeCompare(b, 'en', { numeric: true }); });
 // game: what the story game needs to start for a given save, for the service worker's website-mode warm-up (sw.js
 // firstFor(): today's page with everything it imports, then the towns townboot.js would start with for that save)

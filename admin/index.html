@@ -1,0 +1,713 @@
+<!doctype html>
+<html lang="my" data-lang="my">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="googlebot" content="noindex, nofollow">
+<meta name="theme-color" content="#6E1F2A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>မာရာ Admin · Reality Check E-Book</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="../img/favicon-48.png" sizes="48x48" type="image/png">
+<link rel="icon" href="../img/icon-192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="../img/apple-touch-icon.png">
+<link rel="preload" href="../fonts/noto-sans-myanmar-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../fonts/noto-sans-myanmar-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+<!-- ==================== AUTH GATE ==================== -->
+<section id="auth-screen" class="auth-screen">
+  <div class="auth-top-bar">
+    <a class="back-link" href="../" rel="noopener">
+      ← <span lang="my">ဝဘ်ဆိုဒ်သို့ ပြန်သွားရန်</span><span lang="en">Back to Site</span>
+    </a>
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <button type="button" data-set-lang="my" aria-pressed="true">မြန်မာ</button>
+      <button type="button" data-set-lang="en" aria-pressed="false">EN</button>
+    </div>
+  </div>
+
+  <div class="auth-card">
+    <div class="auth-brand">
+      <img class="auth-logo" src="../img/logo.webp" alt="မာရာ (Maya)" width="68" height="68">
+      <p class="auth-eyebrow">✦ Maya's Creations · Private Console ✦</p>
+      <h1>
+        <span lang="my">မာရာ E-Book စီမံခန်း</span>
+        <span lang="en">Maya E-Book Admin</span>
+      </h1>
+      <p class="auth-sub">
+        <span lang="my">အမှန်မြင်ခြင်း (Reality Check) ဝယ်ယူမှု၊ ငွေလွှဲပုံ နှင့် စာအုပ်ဖိုင် ထိန်းချုပ်ရန်</span>
+        <span lang="en">Manage Reality Check buyers, KPay slips, pricing &amp; chapters</span>
+      </p>
+    </div>
+
+    <!-- Live Firebase Sign-In Box -->
+    <div id="auth-firebase-box" class="auth-mode-box" hidden>
+      <div class="auth-mode-head">
+        <span class="badge badge-live">
+          <span class="badge-dot"></span>
+          <span lang="my">Firebase ချိတ်ဆက်ပြီး (Live)</span>
+          <span lang="en">Firebase Connected (Live)</span>
+        </span>
+        <span id="auth-fb-project" class="mono" style="font-size:12px;color:var(--muted)"></span>
+      </div>
+      <form id="login-form" class="auth-form" autocomplete="on">
+        <div class="field">
+          <label for="login-email">
+            <span lang="my">Admin အီးမေးလ်</span>
+            <span lang="en">Admin Email</span>
+          </label>
+          <input id="login-email" class="input" type="email" required autocomplete="username" placeholder="maya@example.com">
+        </div>
+        <div class="field">
+          <label for="login-password">
+            <span lang="my">စကားဝှက် (Password)</span>
+            <span lang="en">Password</span>
+          </label>
+          <div class="pw-wrap">
+            <input id="login-password" class="input" type="password" required autocomplete="current-password" placeholder="••••••••">
+            <button type="button" id="btn-toggle-pw" class="pw-toggle" aria-label="Show password" title="Show/Hide">👁</button>
+          </div>
+        </div>
+        <div id="auth-error" class="alert alert-danger" hidden></div>
+        <button id="btn-firebase-signin" type="submit" class="btn btn-primary btn-block">
+          <span lang="my">Admin အကောင့်ဖြင့် ဝင်မည်</span>
+          <span lang="en">Sign In as Admin</span>
+        </button>
+      </form>
+      <p class="auth-mode-desc" style="font-size:12.5px">
+        <span lang="my">Firestore ရှိ <code class="mono">admins/{uid}</code> ထဲတွင် စာရင်းသွင်းထားသော Admin အကောင့်ဖြင့်သာ ဝင်ရောက်နိုင်ပါသည်။</span>
+        <span lang="en">Only accounts registered under Firestore <code class="mono">admins/{uid}</code> can sign in.</span>
+      </p>
+    </div>
+
+    <!-- Local Demo Mode Box -->
+    <div id="auth-demo-box" class="auth-mode-box" hidden>
+      <div class="auth-mode-head">
+        <span class="badge badge-demo">
+          <span class="badge-dot"></span>
+          <span lang="my">စမ်းသပ်မုဒ် (Local Browser Sync)</span>
+          <span lang="en">Demo Mode (Local Browser Sync)</span>
+        </span>
+      </div>
+      <p class="auth-mode-desc">
+        <span lang="my">Firebase Config မထည့်ရသေးသဖြင့် ဤ Browser အတွင်းရှိ မာရာ့ဝဘ်ဆိုဒ်နှင့် တိုက်ရိုက်ချိတ်ဆက် စမ်းသပ်နိုင်ပါသည်။</span>
+        <span lang="en">Firebase is not configured yet. Test approvals, KPay settings, and book imports synced live with the main site in this browser.</span>
+      </p>
+      <button id="btn-demo-enter" type="button" class="btn btn-primary btn-block">
+        <span lang="my">စမ်းသပ် Admin ထဲ ချက်ချင်းဝင်မည်</span>
+        <span lang="en">Enter Demo Admin</span>
+      </button>
+    </div>
+
+    <!-- Expandable Connect Firebase Panel -->
+    <details id="auth-fb-panel" class="fb-connect">
+      <summary>
+        <span>
+          <span lang="my">⚙ Firebase Config ချိတ်ဆက် / စမ်းသပ်ရန်</span>
+          <span lang="en">⚙ Connect / Test Firebase Config</span>
+        </span>
+      </summary>
+      <div class="fb-connect-body">
+        <p class="auth-mode-desc" style="font-size:12.5px">
+          <span lang="my">Firebase Console မှ <code class="mono">firebaseConfig</code> JSON (သို့မဟုတ် JS Object) ကို ကူးထည့်ပြီး ဤ Browser တွင် ချက်ချင်းစမ်းသပ်နိုင်ပါသည်။</span>
+          <span lang="en">Paste your Firebase Console <code class="mono">firebaseConfig</code> JSON (or JS object) to connect in this browser.</span>
+        </p>
+        <textarea id="auth-fb-json" class="textarea mono" rows="6" spellcheck="false" placeholder='{
+  "apiKey": "...",
+  "authDomain": "...",
+  "projectId": "...",
+  "appId": "..."
+}'></textarea>
+        <div id="auth-fb-msg" class="alert" hidden></div>
+        <div class="fb-connect-actions">
+          <button id="btn-auth-fb-save" type="button" class="btn btn-gold btn-sm">
+            <span lang="my">Firebase ချိတ်ဆက်မည်</span>
+            <span lang="en">Save &amp; Connect</span>
+          </button>
+          <button id="btn-auth-fb-clear" type="button" class="btn btn-outline btn-sm" hidden>
+            <span lang="my">စမ်းသပ်မုဒ်သို့ ပြန်သွားမည်</span>
+            <span lang="en">Reset to Demo Mode</span>
+          </button>
+        </div>
+      </div>
+    </details>
+  </div>
+</section>
+
+<!-- ==================== MAIN ADMIN SHELL ==================== -->
+<div id="app-shell" class="app-shell" hidden>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand-cluster">
+        <img class="brand-avatar" src="../img/logo.webp" alt="မာရာ" width="38" height="38">
+        <div class="brand-text">
+          <h1 class="brand-title">
+            <span lang="my">မာရာ E-Book Admin</span>
+            <span lang="en">Maya E-Book Admin</span>
+          </h1>
+          <div class="brand-meta">
+            <span id="hdr-mode-badge" class="badge badge-demo" style="padding:1px 8px;font-size:11px">
+              <span class="badge-dot"></span>
+              <span id="hdr-mode-text">DEMO</span>
+            </span>
+            <span id="hdr-admin-email" class="hide-sm"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="topbar-actions">
+        <div class="lang-toggle" role="group" aria-label="Language">
+          <button type="button" data-set-lang="my" aria-pressed="true">မြန်မာ</button>
+          <button type="button" data-set-lang="en" aria-pressed="false">EN</button>
+        </div>
+        <a class="btn btn-outline btn-sm hide-sm" href="../#ebook" target="_blank" rel="noopener">
+          <span lang="my">ဆိုင်ဖွင့်ကြည့်</span>
+          <span lang="en">Open Shop</span> ↗
+        </a>
+        <button id="btn-signout" type="button" class="btn btn-outline btn-sm">
+          <span lang="my">ထွက်မည်</span>
+          <span lang="en">Sign Out</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="tabs-wrap">
+    <nav class="tabs-nav" role="tablist" aria-label="Admin sections">
+      <button type="button" class="tab-btn" role="tab" data-tab="pending" aria-selected="true">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm1 11h-5v-2h3V6h2Z"/></svg>
+        <span class="tab-label">
+          <span lang="my">စစ်ဆေးရန်</span>
+          <span lang="en">Pending</span>
+        </span>
+        <span id="badge-pending" class="tab-pill" hidden>0</span>
+      </button>
+
+      <button type="button" class="tab-btn" role="tab" data-tab="readers" aria-selected="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3Zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3Zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5Zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5Z"/></svg>
+        <span class="tab-label">
+          <span lang="my">စာဖတ်သူများ</span>
+          <span lang="en">Readers</span>
+        </span>
+        <span id="badge-readers" class="tab-pill">0</span>
+      </button>
+
+      <button type="button" class="tab-btn" role="tab" data-tab="payments" aria-selected="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Zm0 4H4V6h16Zm0 10H4v-6h16Zm-3-4h-4v2h4Z"/></svg>
+        <span class="tab-label">
+          <span lang="my">ငွေလွှဲ &amp; ဈေးနှုန်း</span>
+          <span lang="en">Payments</span>
+        </span>
+      </button>
+
+      <button type="button" class="tab-btn" role="tab" data-tab="book" aria-selected="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2ZM9 4h2v5l-1-.75L9 9Zm9 16H6V4h1v9l3-2.25L13 13V4h5Z"/></svg>
+        <span class="tab-label">
+          <span lang="my">စာအုပ်ဖိုင်</span>
+          <span lang="en">Book</span>
+        </span>
+        <span id="badge-book" class="tab-pill">0/24</span>
+      </button>
+    </nav>
+  </div>
+
+  <main class="main-content">
+    <!-- Demo Mode Banner inside Shell -->
+    <div id="demo-ribbon" class="demo-ribbon" hidden>
+      <div>
+        <strong>
+          <span lang="my">စမ်းသပ်မုဒ် (Demo Mode · Local Browser Sync)</span>
+          <span lang="en">Demo Mode (Local Browser Sync)</span>
+        </strong>
+        —
+        <span lang="my">ဤ Browser ရှိ E-Book ဆိုင်နှင့် တိုက်ရိုက်ချိတ်ဆက်နေပါသည်။</span>
+        <span lang="en">Changes sync live with the main site in this browser.</span>
+      </div>
+      <button id="btn-jump-fb" type="button" class="btn btn-outline btn-xs">
+        <span lang="my">Firebase ချိတ်ရန်</span>
+        <span lang="en">Connect Firebase</span>
+      </button>
+    </div>
+
+    <!-- ==================== TAB 1: PENDING APPROVALS ==================== -->
+    <section id="tab-pending" role="tabpanel">
+      <div class="section-head">
+        <div>
+          <h2>
+            <span lang="my">စစ်ဆေးရန် ငွေလွှဲပုံများ</span>
+            <span lang="en">Pending Approvals</span>
+          </h2>
+          <p class="section-sub">
+            <span lang="my">ငွေလွှဲပုံတင်ပြီး စာဖတ်ခွင့်ရထားသူများ၏ KPay Slip များကို စစ်ဆေးအတည်ပြုပါ</span>
+            <span lang="en">Verify KPay slips from buyers who received instant reading access</span>
+          </p>
+        </div>
+        <div class="section-actions">
+          <button id="btn-pending-add" type="button" class="btn btn-gold btn-sm">
+            + <span lang="my">စာဖတ်သူထည့်ရန်</span><span lang="en">Add Manually</span>
+          </button>
+        </div>
+      </div>
+
+      <div id="pending-list" class="pending-grid"></div>
+      <div id="pending-empty" class="empty-state" hidden>
+        <div class="empty-icon">✓</div>
+        <h3>
+          <span lang="my">စစ်ဆေးရန် ကျန်ရှိသော ငွေလွှဲပုံ မရှိပါ</span>
+          <span lang="en">All caught up!</span>
+        </h3>
+        <p>
+          <span lang="my">အသစ်ဝယ်ယူသူတင်လာသော KPay ငွေလွှဲပုံများ ဒီနေရာတွင် အလိုအလျောက် ပေါ်လာပါမည်။</span>
+          <span lang="en">New KPay slip uploads will appear here in real time.</span>
+        </p>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 2: ALL READERS ==================== -->
+    <section id="tab-readers" role="tabpanel" hidden>
+      <div class="section-head">
+        <div>
+          <h2>
+            <span lang="my">စာဖတ်သူများ အားလုံး</span>
+            <span lang="en">All Readers</span>
+          </h2>
+          <p class="section-sub">
+            <span lang="my">ဝယ်ယူသူစာရင်း၊ စာဖတ်နှုန်း၊ PIN ကုဒ်အသစ်ထုတ်ပေးခြင်း နှင့် CSV ထုတ်ယူခြင်း</span>
+            <span lang="en">Manage all buyers, reading progress, PIN resets, manual orders &amp; CSV export</span>
+          </p>
+        </div>
+        <div class="section-actions">
+          <button id="btn-export-csv" type="button" class="btn btn-outline btn-sm">
+            ↓ <span lang="my">CSV ထုတ်မည်</span><span lang="en">Export CSV</span>
+          </button>
+          <button id="btn-add-manual" type="button" class="btn btn-primary btn-sm">
+            + <span lang="my">စာဖတ်သူအသစ်ထည့်</span><span lang="en">Add Reader Manually</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="stats-grid" id="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label"><span lang="my">လက်ရှိ စာဖတ်ခွင့်ရသူ</span><span lang="en">Active Buyers</span></div>
+          <div class="stat-value" id="stat-active">0</div>
+          <div class="stat-sub"><span lang="my">အတည်ပြု + စစ်ဆေးဆဲ</span><span lang="en">Approved + Pending</span></div>
+        </div>
+        <div class="stat-card stat-warn">
+          <div class="stat-label"><span lang="my">စစ်ဆေးရန်</span><span lang="en">Pending</span></div>
+          <div class="stat-value" id="stat-pending">0</div>
+          <div class="stat-sub" id="stat-reupload-sub"></div>
+        </div>
+        <div class="stat-card stat-ok">
+          <div class="stat-label"><span lang="my">အတည်ပြုပြီး</span><span lang="en">Approved</span></div>
+          <div class="stat-value" id="stat-approved">0</div>
+        </div>
+        <div class="stat-card stat-danger">
+          <div class="stat-label"><span lang="my">ဖျက်သိမ်းပြီး</span><span lang="en">Revoked</span></div>
+          <div class="stat-value" id="stat-revoked">0</div>
+        </div>
+        <div class="stat-card stat-revenue">
+          <div class="stat-label"><span lang="my">ခန့်မှန်းရောင်းရငွေ</span><span lang="en">Est. Revenue</span></div>
+          <div class="stat-value" id="stat-revenue">0 MMK</div>
+          <div class="stat-sub" id="stat-revenue-sub"></div>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="toolbar-row">
+          <div class="search-wrap">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19Zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14Z"/></svg>
+            <input id="reader-search" class="input" type="search" autocomplete="off" placeholder="အမည်၊ ဖုန်း/အီးမေးလ်၊ Order ID ရှာရန်...">
+            <button id="btn-search-clear" type="button" class="search-clear" hidden aria-label="Clear search">×</button>
+          </div>
+        </div>
+        <div id="status-filters" class="filter-pills" role="group" aria-label="Filter by status">
+          <button type="button" class="pill-filter" data-filter="all" aria-pressed="true">
+            <span lang="my">အားလုံး</span><span lang="en">All</span>
+            <span class="pill-count" data-count="all">0</span>
+          </button>
+          <button type="button" class="pill-filter" data-filter="pending" aria-pressed="false">
+            <span lang="my">စစ်ဆေးရန်</span><span lang="en">Pending</span>
+            <span class="pill-count" data-count="pending">0</span>
+          </button>
+          <button type="button" class="pill-filter" data-filter="approved" aria-pressed="false">
+            <span lang="my">အတည်ပြုပြီး</span><span lang="en">Approved</span>
+            <span class="pill-count" data-count="approved">0</span>
+          </button>
+          <button type="button" class="pill-filter" data-filter="reupload" aria-pressed="false">
+            <span lang="my">ပုံပြန်တင်ရန်</span><span lang="en">Re-upload</span>
+            <span class="pill-count" data-count="reupload">0</span>
+          </button>
+          <button type="button" class="pill-filter" data-filter="revoked" aria-pressed="false">
+            <span lang="my">ဖျက်သိမ်းပြီး</span><span lang="en">Revoked</span>
+            <span class="pill-count" data-count="revoked">0</span>
+          </button>
+        </div>
+      </div>
+
+      <div id="readers-list" class="readers-list"></div>
+      <div id="readers-empty" class="empty-state" hidden>
+        <div class="empty-icon" style="background:var(--parchment);color:var(--muted)">📖</div>
+        <h3>
+          <span lang="my">ကိုက်ညီသော စာဖတ်သူ မတွေ့ပါ</span>
+          <span lang="en">No matching readers found</span>
+        </h3>
+        <p>
+          <span lang="my">ရှာဖွေမှုစကားလုံး ပြောင်းကြည့်ပါ သို့မဟုတ် စာဖတ်သူအသစ် ထည့်သွင်းပါ။</span>
+          <span lang="en">Try another search or filter, or add a buyer manually.</span>
+        </p>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 3: PAYMENT SETTINGS ==================== -->
+    <section id="tab-payments" role="tabpanel" hidden>
+      <div class="section-head">
+        <div>
+          <h2>
+            <span lang="my">ငွေလွှဲအချက်အလက် &amp; ဈေးနှုန်း</span>
+            <span lang="en">Payment Settings &amp; Pricing</span>
+          </h2>
+          <p class="section-sub">
+            <span lang="my">သိမ်းဆည်းလိုက်သည်နှင့် ဝယ်ယူသည့်စာမျက်နှာတွင် ချက်ချင်းပြောင်းလဲပေါ်လာပါမည် (<code class="mono">config/ebook</code>)</span>
+            <span lang="en">Updates the buyer checkout form live via <code class="mono">config/ebook</code></span>
+          </p>
+        </div>
+      </div>
+
+      <div class="settings-layout">
+        <form id="payment-form" class="panel form-stack">
+          <div class="form-two">
+            <div class="field">
+              <label for="cfg-price">
+                <span><span lang="my">E-Book ဈေးနှုန်း (ကျပ် / MMK)</span><span lang="en">E-Book Price (MMK)</span></span>
+              </label>
+              <input id="cfg-price" class="input mono" type="number" min="0" max="10000000" step="500" required placeholder="15000">
+            </div>
+            <div class="field">
+              <label for="cfg-kpay-number">
+                <span><span lang="my">KBZPay ဖုန်းနံပါတ်</span><span lang="en">KBZPay Number</span></span>
+              </label>
+              <input id="cfg-kpay-number" class="input mono" type="text" required maxlength="40" placeholder="09-XXX-XXX-XXX">
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="cfg-kpay-name">
+              <span><span lang="my">KBZPay အကောင့်ပိုင်ရှင်အမည်</span><span lang="en">Account Holder Name</span></span>
+            </label>
+            <input id="cfg-kpay-name" class="input" type="text" required maxlength="80" placeholder="Myat Thet Khaing / မာရာ">
+          </div>
+
+          <div class="field">
+            <label for="cfg-note-my">
+              <span><span lang="my">ငွေလွှဲမှတ်ချက် (မြန်မာ)</span><span lang="en">Payment Note (Burmese)</span></span>
+            </label>
+            <textarea id="cfg-note-my" class="textarea" rows="3" maxlength="1000" placeholder="ငွေလွှဲပြီးပါက ငွေလွှဲပြေစာ Screenshot ကို တင်ပေးပါရှင့်။"></textarea>
+          </div>
+
+          <div class="field">
+            <label for="cfg-note-en">
+              <span><span lang="my">ငွေလွှဲမှတ်ချက် (English)</span><span lang="en">Payment Note (English)</span></span>
+            </label>
+            <textarea id="cfg-note-en" class="textarea" rows="3" maxlength="1000" placeholder="Transfer via KBZPay and upload your payment screenshot for instant access."></textarea>
+          </div>
+
+          <div class="qr-manager">
+            <label style="font-size:13.5px;font-weight:700">
+              <span lang="my">KBZPay QR Code ပုံ (≤ 65 KB WebP အလိုအလျောက်ချုံ့ပေးသည်)</span>
+              <span lang="en">KBZPay QR Image (auto-compressed to WebP ≤ 65 KB)</span>
+            </label>
+            <div class="qr-preview-wrap">
+              <div id="qr-thumb" class="qr-thumb">
+                <span lang="my">QR ပုံ မတင်ရသေးပါ</span>
+                <span lang="en">No QR uploaded</span>
+              </div>
+              <div class="qr-controls">
+                <div class="qr-btn-row">
+                  <label class="btn btn-outline btn-sm" for="cfg-qr-file">
+                    <span lang="my">QR ပုံတင် / ပြောင်းမည်</span>
+                    <span lang="en">Upload / Replace QR</span>
+                  </label>
+                  <input id="cfg-qr-file" type="file" accept="image/*" hidden>
+                  <button id="btn-qr-remove" type="button" class="btn btn-danger-soft btn-sm" hidden>
+                    <span lang="my">QR ဖယ်ရှားမည်</span>
+                    <span lang="en">Remove QR</span>
+                  </button>
+                </div>
+                <div id="qr-meta" class="hint" style="font-size:12.5px;color:var(--muted)"></div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding-top:4px">
+            <span id="cfg-saved-at" class="hint" style="font-size:13px;color:var(--muted)"></span>
+            <button id="btn-save-config" type="submit" class="btn btn-primary">
+              <span lang="my">ငွေလွှဲဆက်တင် သိမ်းဆည်းမည်</span>
+              <span lang="en">Save Payment Settings</span>
+            </button>
+          </div>
+        </form>
+
+        <!-- Right column: Live Buyer Preview + Firebase Connection -->
+        <div class="form-stack">
+          <div class="buyer-preview">
+            <h3>
+              ✦ <span lang="my">ဝယ်ယူသူ မြင်ရမည့်ပုံစံ (Live Preview)</span>
+              <span lang="en">Buyer Checkout Preview</span>
+            </h3>
+            <div style="font-size:13px;color:var(--muted)">
+              <span lang="my">အမှန်မြင်ခြင်း (Reality Check) · E-Book</span>
+              <span lang="en">Reality Check · Digital E-Book</span>
+            </div>
+            <div id="prev-price" class="preview-price">15,000 MMK</div>
+            <div class="preview-kpay-card">
+              <div><strong style="color:var(--maroon)">KBZPay:</strong> <span id="prev-kpay-num" class="mono">—</span></div>
+              <div><strong><span lang="my">အမည်</span><span lang="en">Name</span>:</strong> <span id="prev-kpay-name">—</span></div>
+              <img id="prev-qr-img" class="preview-kpay-qr" alt="KBZPay QR" hidden>
+              <p id="prev-note" class="preview-note"></p>
+            </div>
+          </div>
+
+          <div class="panel form-stack" id="settings-fb-card">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
+              <strong style="color:var(--maroon)">
+                <span lang="my">Firebase ချိတ်ဆက်မှု</span>
+                <span lang="en">Firebase Connection</span>
+              </strong>
+              <span id="settings-fb-badge" class="badge badge-demo">DEMO</span>
+            </div>
+            <p class="section-sub" style="margin:0;font-size:13px">
+              <span lang="my">ဤ Browser တွင် စမ်းသပ်ရန် Firebase Config JSON ထည့်သွင်းခြင်း သို့မဟုတ် Demo Mode သို့ ပြန်ပြောင်းခြင်း ပြုလုပ်နိုင်ပါသည်။</span>
+              <span lang="en">Test a Firebase Config JSON in this browser or reset back to Local Demo Mode.</span>
+            </p>
+            <textarea id="settings-fb-json" class="textarea mono" rows="5" spellcheck="false" placeholder='{"apiKey":"...","authDomain":"...","projectId":"...","appId":"..."}'></textarea>
+            <div id="settings-fb-msg" class="alert" hidden></div>
+            <div class="fb-connect-actions">
+              <button id="btn-settings-fb-save" type="button" class="btn btn-gold btn-sm">
+                <span lang="my">သိမ်းပြီး ပြန်ချိတ်မည်</span>
+                <span lang="en">Save &amp; Reconnect</span>
+              </button>
+              <button id="btn-settings-fb-clear" type="button" class="btn btn-outline btn-sm" hidden>
+                <span lang="my">Demo Mode သို့ပြန်သွား</span>
+                <span lang="en">Reset to Demo</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 4: BOOK CHAPTERS ==================== -->
+    <section id="tab-book" role="tabpanel" hidden>
+      <div class="section-head">
+        <div>
+          <h2>
+            <span lang="my">စာအုပ်အခန်းဖိုင်များ (00 – 23)</span>
+            <span lang="en">Book Chapters (00 – 23)</span>
+          </h2>
+          <p class="section-sub">
+            <span lang="my">အမှန်မြင်ခြင်း (Reality Check) အခန်း ၂၃ ခန်းလုံးကို လုံခြုံသော Database ထဲသို့ တိုက်ရိုက်တင်ပါ</span>
+            <span lang="en">Upload compiled book chapters directly to protected storage without exposing paid text on GitHub</span>
+          </p>
+        </div>
+        <div class="section-actions">
+          <button id="btn-refresh-book" type="button" class="btn btn-outline btn-sm">
+            ↻ <span lang="my">ပြန်စစ်မည်</span><span lang="en">Refresh Status</span>
+          </button>
+        </div>
+      </div>
+
+      <div id="book-dropzone" class="upload-zone">
+        <h3>
+          <span lang="my">reality-check-book.json ဖိုင် တင်သွင်းရန်</span>
+          <span lang="en">Upload reality-check-book.json</span>
+        </h3>
+        <p>
+          <span lang="my">စာအုပ်အပြည့်အစုံ JSON ဖိုင်ကို ရွေးချယ်ပါ သို့မဟုတ် ဒီနေရာသို့ ဆွဲထည့်ပါ။ အခန်း 00 မှ 23 အထိ လုံခြုံစွာ သိမ်းဆည်းပေးပါမည်။</span>
+          <span lang="en">Select or drop your private compiled JSON file to import chapters 00–23 directly to Firestore (or Demo IndexedDB).</span>
+        </p>
+        <div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap">
+          <label class="btn btn-primary" for="book-json-file">
+            ⬆ <span lang="my">reality-check-book.json ရွေးမည်</span><span lang="en">Upload reality-check-book.json</span>
+          </label>
+          <input id="book-json-file" type="file" accept=".json,application/json" hidden>
+        </div>
+
+        <div id="book-progress-wrap" class="progress-wrap" hidden>
+          <div class="progress-meta">
+            <strong id="book-progress-label" style="color:var(--maroon)">...</strong>
+            <span id="book-progress-pct" class="mono">0%</span>
+          </div>
+          <div class="progress-bar-track">
+            <div id="book-progress-fill" class="progress-bar-fill"></div>
+          </div>
+          <div id="book-progress-detail" style="font-size:12.5px;color:var(--muted)"></div>
+        </div>
+      </div>
+
+      <div id="book-summary-bar" class="meta-strip" style="margin-top:14px;justify-content:space-between">
+        <span id="book-summary-count"></span>
+        <span id="book-summary-target"></span>
+      </div>
+
+      <div id="book-chapters-container"></div>
+    </section>
+  </main>
+</div>
+
+<!-- ==================== MODAL: ADD READER MANUALLY ==================== -->
+<div id="modal-manual" class="modal-backdrop" hidden role="dialog" aria-modal="true" aria-labelledby="modal-manual-title">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="modal-manual-title">
+        <span lang="my">+ စာဖတ်သူအသစ် ထည့်သွင်းရန်</span>
+        <span lang="en">+ Add Reader Manually</span>
+      </h3>
+      <button type="button" class="btn btn-ghost btn-icon" data-close-modal="modal-manual" aria-label="Close">✕</button>
+    </div>
+    <p class="section-sub" style="margin:0 0 14px">
+      <span lang="my">Messenger / Viber မှတစ်ဆင့် ဝယ်ယူသူများအတွက် ဂဏန်း ၆ လုံးပါ ဖွင့်ကုဒ် (Activation Code) ထုတ်ပေးပါမည်။</span>
+      <span lang="en">Generate a 6-digit activation code for buyers who paid via Messenger, Viber, or in person.</span>
+    </p>
+    <form id="manual-reader-form" class="form-stack">
+      <div class="field">
+        <label for="manual-name">
+          <span lang="my">စာဖတ်သူ အမည် *</span>
+          <span lang="en">Reader Name *</span>
+        </label>
+        <input id="manual-name" class="input" type="text" required maxlength="40" placeholder="ဥပမာ - မဆုမြတ်">
+      </div>
+      <div class="field">
+        <label for="manual-contact">
+          <span lang="my">ဖုန်းနံပါတ် သို့မဟုတ် အီးမေးလ် *</span>
+          <span lang="en">Phone or Email *</span>
+        </label>
+        <input id="manual-contact" class="input" type="text" required maxlength="120" placeholder="09-XXX-XXX-XXX / name@email.com">
+      </div>
+      <div class="field">
+        <label for="manual-note">
+          <span lang="my">မှတ်ချက် (မထည့်လည်းရသည်)</span>
+          <span lang="en">Note (Optional)</span>
+        </label>
+        <input id="manual-note" class="input" type="text" maxlength="120" placeholder="Messenger KPay ငွေလွှဲပြီး">
+      </div>
+      <div id="manual-error" class="alert alert-danger" hidden></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" data-close-modal="modal-manual">
+          <span lang="my">ပိတ်မည်</span><span lang="en">Cancel</span>
+        </button>
+        <button id="btn-manual-submit" type="submit" class="btn btn-primary">
+          <span lang="my">ဂဏန်း ၆ လုံးကုဒ် ထုတ်ပေးမည်</span>
+          <span lang="en">Generate 6-Digit Code</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ==================== MODAL: 6-DIGIT CODE RESULT ==================== -->
+<div id="modal-code" class="modal-backdrop" hidden role="dialog" aria-modal="true" aria-labelledby="modal-code-title">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="modal-code-title"></h3>
+      <button type="button" class="btn btn-ghost btn-icon" data-close-modal="modal-code" aria-label="Close">✕</button>
+    </div>
+
+    <div class="code-display-box">
+      <div id="code-digits" class="code-digits">000 000</div>
+      <div id="code-meta" class="code-meta"></div>
+      <div style="margin-top:12px">
+        <button id="btn-copy-code" type="button" class="btn btn-primary btn-sm">
+          <span lang="my">ကုဒ်ကို ကူးယူမည်</span>
+          <span lang="en">Copy 6-Digit Code</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="code-message">
+        <span lang="my">စာဖတ်သူထံ ပို့ရန် စာသား (Messenger / Viber)</span>
+        <span lang="en">Ready-to-send message (Messenger / Viber)</span>
+      </label>
+      <textarea id="code-message" class="msg-preview" readonly></textarea>
+    </div>
+
+    <div class="modal-footer">
+      <button id="btn-copy-message" type="button" class="btn btn-gold">
+        <span lang="my">စာသားတစ်ခုလုံး ကူးယူမည်</span>
+        <span lang="en">Copy Full Message</span>
+      </button>
+      <button type="button" class="btn btn-outline" data-close-modal="modal-code">
+        <span lang="my">ပြီးပါပြီ</span><span lang="en">Done</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== MODAL: CONFIRM / ACTION NOTE ==================== -->
+<div id="modal-confirm" class="modal-backdrop" hidden role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="confirm-title"></h3>
+      <button type="button" class="btn btn-ghost btn-icon" data-close-modal="modal-confirm" aria-label="Close">✕</button>
+    </div>
+    <p id="confirm-desc" style="margin:0 0 12px;font-size:14.5px;color:var(--muted)"></p>
+    <div id="confirm-note-wrap" class="field" hidden>
+      <label for="confirm-note-input">
+        <span lang="my">စာဖတ်သူထံ ပြသမည့် မှတ်ချက်</span>
+        <span lang="en">Admin note (shown to reader if applicable)</span>
+      </label>
+      <input id="confirm-note-input" class="input" type="text" maxlength="160">
+      <div id="confirm-presets" class="preset-chips"></div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline" data-close-modal="modal-confirm">
+        <span lang="my">မလုပ်တော့ပါ</span><span lang="en">Cancel</span>
+      </button>
+      <button id="btn-confirm-ok" type="button" class="btn btn-danger"></button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== FULL-SCREEN ZOOMABLE RECEIPT LIGHTBOX ==================== -->
+<div id="lightbox" class="lightbox" hidden role="dialog" aria-modal="true" aria-label="KPay Receipt Viewer">
+  <div class="lb-header">
+    <div class="lb-title">
+      <strong id="lb-reader-name">—</strong>
+      <span id="lb-reader-meta">—</span>
+    </div>
+    <div class="lb-tools">
+      <button type="button" id="lb-zoom-out" class="lb-btn" title="Zoom out" aria-label="Zoom out">−</button>
+      <button type="button" id="lb-zoom-reset" class="lb-btn" title="Reset zoom">100%</button>
+      <button type="button" id="lb-zoom-in" class="lb-btn" title="Zoom in" aria-label="Zoom in">+</button>
+      <button type="button" id="lb-rotate" class="lb-btn" title="Rotate 90°" aria-label="Rotate">⟳</button>
+      <button type="button" id="lb-close" class="lb-btn" title="Close (Esc)" aria-label="Close">✕</button>
+    </div>
+  </div>
+  <div id="lb-stage" class="lb-stage">
+    <img id="lb-img" alt="KPay payment slip">
+    <div id="lb-zoom-readout" class="lb-zoom-readout">100% · Double-tap or scroll to zoom</div>
+  </div>
+  <div id="lb-footer" class="lb-footer">
+    <button type="button" id="lb-act-approve" class="btn btn-ok btn-sm">
+      ✓ <span lang="my">အတည်ပြု</span><span lang="en">Approve</span>
+    </button>
+    <button type="button" id="lb-act-reupload" class="btn btn-reup btn-sm">
+      ↻ <span lang="my">ပုံပြန်တင်ခိုင်း</span><span lang="en">Ask Re-upload</span>
+    </button>
+    <button type="button" id="lb-act-revoke" class="btn btn-danger btn-sm">
+      ✕ <span lang="my">လိမ်လည်မှု / ဖျက်သိမ်း</span><span lang="en">Fraud / Revoke</span>
+    </button>
+  </div>
+</div>
+
+<!-- Toast Root -->
+<div id="toast-root" class="toast-root" aria-live="polite"></div>
+
+<script type="module" src="admin.js"></script>
+</body>
+</html>

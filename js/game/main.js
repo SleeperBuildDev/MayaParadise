@@ -4,7 +4,7 @@ import { PLACES, SCALE, TIERS } from './config.js';
 import { setOutlineResolution, fontsReady } from './toon.js';
 import { createInput } from './input.js';
 import { createCameraRig } from './camera.js?v=6'; // ?v= makes phones fetch the new copy
-import { createUI, tr, lang } from './ui.js';
+import { createUI, tr, lang, withReaderName } from './ui.js';
 import * as pages from './pages.js';
 import { createWalker } from './nav.js';
 import { LINES, TIPS, STATION_LABELS, ARRIVE_EMOTE } from './strings.js';
@@ -22,6 +22,9 @@ import { preloadArt } from './art.js';
 import { validPose, placeSite, placeCar, walkToCar } from './keepplace.js'; // Maya keeps her place across the Game | Website switch
 
 const PHOTOS = { about: 'img/maya-about.webp', library: 'img/maya-book.webp' };
+const PLACE_ALIASES = { ebook: 'content' };
+const resolvePlaceHash = (h) => PLACE_ALIASES[h] || h;
+const EBOOK_STATIONS = new Set(['eb-preview', 'eb-buy', 'eb-read', 'eb-chapters']);
 const ROOM_VIEW_W = 6.0; // metres of room visible across a portrait phone
 const ROOM_LOOK_Z = 0.7; // where the room camera aims front-to-back (room centre is 0, door +4)
 const deg = THREE.MathUtils.radToDeg;
@@ -105,6 +108,11 @@ class Game {
     this.pixelRatio = 1;
     this.ignorePop = 0;
     this.worldWalk = null;
+    this.ebookOpen = false;
+    this.ebookCleanups = [];
+    this.ebookReaderMod = null;
+    this.ebookSheetToken = 0;
+    this.readerPushed = false;
   }
 
   // ------------------------------------------------------------------ setup
@@ -215,8 +223,8 @@ class Game {
     this.fx.attach(this.world.scene);
     this.scene = this.world.scene;
 
-    // starting place (deep link aware)
-    const hash = (this.opts.startHash || '').replace(/^#/, '');
+    // starting place (deep link aware; #ebook aliases to 'content')
+    const hash = resolvePlaceHash((this.opts.startHash || '').replace(/^#/, ''));
     const startStation = pages.stationEl(hash) ? hash : null;
     const startPlace = PLACES.some((p) => p.id === hash) ? hash : startStation ? pages.placeOfStation(startStation) : null;
     // arriving by the Game | Website switch: the car (and Maya, if she was walking) where the other mode left them
@@ -261,6 +269,8 @@ class Game {
     this.timer.connect(document);
     this.renderer.setAnimationLoop((ts) => this.frame(ts));
     setTimeout(() => sessionStorage.removeItem('mw-running'), 20000);
+    // Keep returning E-Book buyers' session & live revocation status in sync (non-blocking)
+    import('../ebook/store.js').then((s) => s.initStore?.()).catch(() => {});
     this.setWorldLabels();
     this.ui.setWhere(tr({ my: 'မာရာ့ စာအုပ်ကမ္ဘာ', en: "Maya's Book World" }));
 
@@ -268,7 +278,7 @@ class Game {
       await this.enterPlace(startPlace, { fast: true, push: false });
       if (startStation) this.goToStation(startStation, { instant: true });
     } else if (params.get('room')) {
-      await this.enterPlace(params.get('room'), { fast: true, push: false });
+      await this.enterPlace(resolvePlaceHash(params.get('room')), { fast: true, push: false });
       if (params.get('station')) this.goToStation(params.get('station'), { instant: true });
     } else if (!params.has('nointro') && !this.opts.story && !this.opts.switched) { // (switched: arrived from the game by the mode switch)
       this.intro();
@@ -286,8 +296,9 @@ class Game {
       // a later tap can still unlock sound if the first one did not (iOS)
       if (this.audio && this.audio.state !== 'running' && !this.audio.muted) call(this.audio, 'unlock');
     });
-    inp.on('tap', (x, y) => this.onTap(x, y));
+    inp.on('tap', (x, y) => { if (!this.ebookOpen) this.onTap(x, y); });
     inp.on('action', () => {
+      if (this.ebookOpen) return;
       if (this.ui.dialogOpen) return this.ui.els.dialog.click();
       if (this.mode === 'world' && this.arrivedAt && !this.busy) this.enterPlace(this.arrivedAt);
       else if (this.mode === 'room' && !this.busy) {
@@ -296,13 +307,14 @@ class Game {
       }
     });
     inp.on('back', () => {
+      if (this.ebookOpen) return; // reader.js handles Escape (drawer/popover/close)
       if (this.letterReader?.open) this.letterReader.close(true);
       else if (this.ui.sheetOpen) this.closeSheet(true);
       else if (this.mode === 'room' && !this.busy) this.exitRoom();
     });
-    inp.on('dock', (i) => PLACES[i] && this.dock(PLACES[i].id));
-    inp.on('mute', () => this.toggleSound());
-    inp.on('lang', () => window.MayaSite?.setLang(lang() === 'my' ? 'en' : 'my'));
+    inp.on('dock', (i) => { if (!this.ebookOpen && PLACES[i]) this.dock(PLACES[i].id); });
+    inp.on('mute', () => { if (!this.ebookOpen) this.toggleSound(); });
+    inp.on('lang', () => { if (!this.ebookOpen) window.MayaSite?.setLang(lang() === 'my' ? 'en' : 'my'); });
   }
 
   bindEvents() {
@@ -326,6 +338,7 @@ class Game {
     });
     window.addEventListener('popstate', () => {
       if (this.ignorePop > 0) { this.ignorePop--; return; }
+      if (this.ebookOpen) { this.readerPushed = false; this.ebookReaderMod?.closeEbookReader?.(); return; }
       if (this.letterReader?.open) this.letterReader.close(false);
       else if (this.ui.sheetOpen) this.closeSheet(false);
       else if (this.mode === 'room' && !this.busy) this.exitRoom({ push: false });
@@ -357,6 +370,7 @@ class Game {
 
   // ------------------------------------------------------------------ frame loop
   frame(ts) {
+    if (this.ebookOpen) return;
     // low tier: 30 fps is smoother than a stuttering 60 and keeps older phones cool
     const cap = TIERS[this.tier]?.fps || 60;
     if (cap < 55) {
@@ -652,7 +666,7 @@ class Game {
   }
 
   idleCheck() {
-    if (this.opts.story || this.idleShown || this.busy || this.ui.sheetOpen || this.ui.dialogOpen) return; // (story: "tap a place, Maya drives you there" is the website's tip)
+    if (this.opts.story || this.idleShown || this.busy || this.ebookOpen || this.ui.sheetOpen || this.ui.dialogOpen) return; // (story: "tap a place, Maya drives you there" is the website's tip)
     if (performance.now() - this.lastInput > 12000) {
       this.idleShown = true;
       call(this.maya, 'emote', 'lookAround');
@@ -700,7 +714,7 @@ class Game {
   showArrivalCard(id) {
     if (this.opts.story) return; // story mode: no place card pointing at a door (doors are walked into, or tapped)
     const p = this.placeById(id);
-    this.ui.showCard({ title: tr(p.name), sub: pages.placeFrom(id) || tr(LINES.arrive[id]) });
+    this.ui.showCard({ title: tr(p.name), sub: pages.placeFrom(id) || withReaderName(LINES.arrive[id]) });
   }
 
   leavePad() {
@@ -1062,7 +1076,11 @@ class Game {
     call(this.audio, 'play', 'chime');
     const mp = this.maya.root.position;
     const az = this.stationAzimuth();
-    if (first && s.line && !quick) {
+    const ebLine = !this.opts.story ? LINES.ebookStations?.[s.id] : null;
+    const stationLine = s.line
+      ? (ebLine ? { ...s.line, myNamed: ebLine.myNamed, enNamed: ebLine.enNamed } : s.line)
+      : ebLine;
+    if (first && stationLine && !quick) {
       this.busy = true;
       this.ui.cinema(true);
       // a glance at the thing, then she turns to you and tells you about it
@@ -1077,7 +1095,7 @@ class Game {
       if (fc) this.ui.showBubble(fc, 1800);
       this.fx.burst('sparkle', this.tmp.set(mp.x, 1.75, mp.z), { count: 5, spread: 0.45, up: 0.4, size: 0.7 });
       call(this.maya, 'talk', 1.6);
-      await this.ui.say([s.line], { face: fc, onTick: () => call(this.audio, 'play', 'type') });
+      await this.ui.say([stationLine], { face: fc, greet: EBOOK_STATIONS.has(s.id), onTick: () => call(this.audio, 'play', 'type') });
       this.ui.cinema(false);
       this.busy = false;
     } else {
@@ -1117,15 +1135,20 @@ class Game {
 
   openSheetFor(ids, title, hashId) {
     this.ui.hideDialog();
+    this.unmountEbookStations();
     window.MayaSite?.prepareLinks(document);
     this.ui.openSheet({ title, stationIds: ids });
     call(this.audio, 'play', 'page');
     history.pushState({ mw: 'sheet' }, '', `#${hashId}`);
     this.sheetPushed = true;
+    const ebIds = ids.filter((id) => EBOOK_STATIONS.has(id));
+    if (ebIds.length) this.mountEbookStations(ebIds);
   }
 
   closeSheet(viaUI) {
     if (!this.ui.sheetOpen) return;
+    this.ebookSheetToken++;
+    this.unmountEbookStations();
     this.ui.closeSheet();
     this.rig.release();
     this.faceTarget = null;
@@ -1133,6 +1156,100 @@ class Game {
     call(this.maya, 'emote', 'nod');
     if (viaUI && this.sheetPushed) { this.ignorePop++; history.back(); }
     this.sheetPushed = false;
+  }
+
+  unmountEbookStations() {
+    if (!this.ebookCleanups?.length) return;
+    for (const fn of this.ebookCleanups) { try { fn(); } catch { /* ignore */ } }
+    this.ebookCleanups.length = 0;
+  }
+
+  async mountEbookStations(ebIds) {
+    const token = ++this.ebookSheetToken;
+    try {
+      const [uiFlow, readerMod] = await Promise.all([
+        import('../ebook/ui-flow.js'),
+        import('../ebook/reader.js'),
+      ]);
+      this.ebookReaderMod = readerMod;
+      if (!this.ui.sheetOpen || token !== this.ebookSheetToken) return;
+      const body = this.ui.els.sheetBody;
+      for (const sid of ebIds) {
+        const art = body.querySelector(`[data-station="${sid}"]`);
+        const target = art?.querySelector('.eb-mount') || art || body;
+        const cleanup = uiFlow.mountEbookStation(target, sid, {
+          onOpenReader: (opts) => this.openEbookReaderView(opts),
+          onReaderSignedIn: (reader) => this.onEbookReaderSignedIn(reader),
+        });
+        if (typeof cleanup === 'function') this.ebookCleanups.push(cleanup);
+      }
+    } catch (err) {
+      console.error('ebook mount', err);
+    }
+  }
+
+  onEbookReaderSignedIn(reader) {
+    const name = typeof reader === 'string' ? reader.trim() : (reader?.name || '').trim();
+    call(this.audio, 'play', 'sparkle');
+    call(this.maya, 'setFace', 'happy', 3.0);
+    call(this.maya, 'emote', 'cheer');
+    const head = this.maya.getHeadTop
+      ? this.maya.getHeadTop(this.tmp)
+      : this.maya.root.getWorldPosition(this.tmp).add(new THREE.Vector3(0, 1.4, 0));
+    this.fx.burst('sparkle', head, { count: 14, spread: 0.55, up: 0.65 });
+    const fc = call(this.maya, 'faceCanvas', 'happy');
+    if (fc) this.ui.showBubble(fc, 2200);
+    if (this.ebookOpen) return;
+    call(this.maya, 'talk', 2.4);
+    this.ui.say(LINES.ebookSignedIn, {
+      face: fc,
+      readerName: name || undefined,
+      aboveSheet: this.ui.sheetOpen,
+      onTick: () => call(this.audio, 'play', 'type'),
+    });
+  }
+
+  async openEbookReaderView({ chapter, page, sampleOnly } = {}) {
+    if (this.ebookOpen) return;
+    try {
+      const readerMod = this.ebookReaderMod || (this.ebookReaderMod = await import('../ebook/reader.js'));
+      const wasSheetPushed = this.sheetPushed;
+      if (this.ui.sheetOpen) this.closeSheet(false);
+      this.ui.hideDialog();
+      this.ui.hideBark?.();
+      this.ebookOpen = true;
+      this.input.reset();
+      this.renderer.domElement.style.pointerEvents = 'none';
+      call(this.audio, 'engine', 0);
+      if (wasSheetPushed) history.replaceState({ mw: 'ebook-reader' }, '', '#ebook-reader');
+      else history.pushState({ mw: 'ebook-reader' }, '', '#ebook-reader');
+      this.readerPushed = true;
+      const onClose = (result) => {
+        if (!this.ebookOpen) return;
+        this.ebookOpen = false;
+        this.renderer.domElement.style.pointerEvents = '';
+        this.input.reset();
+        this.lastInput = performance.now();
+        if (this.readerPushed) {
+          this.readerPushed = false;
+          this.ignorePop++;
+          history.back();
+        }
+        const act = result?.action;
+        if (act === 'buy') {
+          setTimeout(() => this.openSheetFor(['eb-buy'], tr(STATION_LABELS['eb-buy']) || pages.stationTitle('eb-buy'), 'eb-buy'), 60);
+        } else if (act === 'signin' || act === 'reupload') {
+          setTimeout(() => this.openSheetFor(['eb-read'], tr(STATION_LABELS['eb-read']) || pages.stationTitle('eb-read'), 'eb-read'), 60);
+        } else if (act === 'finished') {
+          setTimeout(() => this.react('cheer', 'heart', null), 200);
+        }
+      };
+      await readerMod.openEbookReader({ chapter, page, sampleOnly, onClose });
+    } catch (err) {
+      this.ebookOpen = false;
+      this.renderer.domElement.style.pointerEvents = '';
+      console.error('ebook reader', err);
+    }
   }
 
   onOrder() {
@@ -1180,6 +1297,8 @@ class Game {
   quit() {
     this.renderer.setAnimationLoop(null);
     call(this.audio, 'engine', 0);
+    if (this.ebookOpen) { this.ebookOpen = false; this.ebookReaderMod?.closeEbookReader?.(); }
+    this.unmountEbookStations();
     this.ui.closeSheet();
     document.getElementById('game').hidden = true;
     document.body.classList.remove('playing');

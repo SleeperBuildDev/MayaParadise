@@ -18,7 +18,7 @@
 // comes from this version's cache, so the page and its code always match; in the background
 // the network copy is checked, and if it carries a newer build the page is told (it then
 // registers the new worker, which installs quietly and takes over on the next visit).
-// Never touched: dev/, tools/, out-*.txt, *.md, other origins, non-GET, range requests.
+// Never touched: admin/, dev/, tools/, out-*.txt, *.md, Firebase/Google hosts, other origins, non-GET, range requests.
 // Storage full or any cache error: it fails soft and the request just goes to the network.
 
 const VERSION = new URL(self.location.href).searchParams.get('v') || 'dev';
@@ -26,7 +26,8 @@ const PREFIX = 'rc-';
 const CACHE = PREFIX + VERSION;
 const META = 'https://rc-meta.invalid/'; // keys for our own records inside the cache
 const SCOPE = new URL(self.registration.scope);
-const SKIP = /^(dev|tools)\/|^out-[^/]*\.txt$|\.md$|^sw\.js$|^precache\.json$/;
+const SKIP = /^(dev|tools|admin)\/|^admin$|^out-[^/]*\.txt$|\.md$|^sw\.js$|^precache\.json$/;
+const NETWORK_ONLY_HOSTS = /(^|\.)(googleapis\.com|gstatic\.com|firebaseio\.com|firebasestorage\.app|firebaseapp\.com)$/i;
 
 let manifest = null; // { version, core, rest, hash }
 let full = false; // storage quota reached: stop filling
@@ -160,8 +161,8 @@ self.addEventListener('install', (event) => {
       return;
     }
     if (!man) throw new Error('precache.json not reachable');
-    man.core = [...new Set(['index.html', ...(man.core || [])])];
-    man.rest = (man.rest || []).filter((p) => !man.core.includes(p));
+    man.core = [...new Set(['index.html', ...(man.core || [])])].filter((p) => !SKIP.test(p));
+    man.rest = (man.rest || []).filter((p) => !man.core.includes(p) && !SKIP.test(p));
     await put(cache, META + 'manifest', new Response(JSON.stringify(man), { headers: { 'content-type': 'application/json' } }));
     manifest = man;
     const hadOld = (await caches.keys()).some((n) => n.startsWith(PREFIX) && n !== CACHE);
@@ -202,6 +203,10 @@ async function checkLatest(url) {
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET' || req.headers.has('range')) return;
+  let url;
+  try { url = new URL(req.url); } catch { return; }
+  if (NETWORK_ONLY_HOSTS.test(url.hostname)) return;
+  if (/^\/admin(\/|$)/.test(url.pathname)) return;
   const p = rel(req.url);
   if (!p || SKIP.test(p)) return;
   const nav = req.mode === 'navigate';

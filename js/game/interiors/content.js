@@ -1,150 +1,225 @@
-// Content & Copywriting (Content နှင့် Copywriting): a warm café-office.
-//   - three café tables, each with a laptop and a "Writer" mug that grows with the package:
-//     small mug = Trial (cc-trial), medium = Essentials (cc-essentials), large = Master (cc-master);
-//   - a big chalk compare board on the back wall with 3D bars for 3 / 14 / 30 deliveries (cc-compare);
-//   - props: coffee counter with pendant lamps, plants, a content calendar, social-media icon blocks.
+// E-Book Boutique (E-Book စာအုပ်ဆိုင်): Maya's warm, cozy showcase for "အမှန်မြင်ခြင်း / Reality Check" E-Book.
+//   - West (`eb-preview`): illuminated wooden reading lectern with an open glowing Chapter 1 digital book;
+//   - Center (`eb-buy`): grand tiered maroon-velvet & gold showcase pedestal with Maya's real Reality Check
+//     cover inside a glowing e-reader frame, KPay instant-unlock badge, and orbiting golden sparkles;
+//   - East (`eb-read`): cozy returning-reader nook with walnut sync desk, plush maroon armchair, brass floor lamp;
+//   - Back (`eb-chapters`): ornate antique-gold framed 23-chapter gallery board (Part 1 Ch. 1-11 & Part 2 Ch. 12-23)
+//     with animated golden chapter-progress bars, flanked by carved bookshelves & warm pendant lamps;
+//   - Story Mode Day 15 compatible: clear reception/tea counter (x: 2.06..3.38, top y = 0.98) beside Ko Phyo's
+//     brazier space (x = 1.7, z = -3.4), cozy low lounge table (x = 2.58, z = 2.86, top y = 0.38) with two 0.30 m
+//     floor poufs, and two 0.45 m reading armchairs for seated guests.
 // Shared building blocks (canvas atlas, skinned "rig" for moving props, springs) live in scripts.js.
-import { THREE, PALETTE, VoxelBuilder, jitter, createRoom, plant, counter } from './kit.js';
+import { THREE, PALETTE, VoxelBuilder, createRoom, plant, counter } from './kit.js';
 import { fontsReady, FONT_SERIF } from '../toon.js';
+import { artTexture, artMaterial, ART_SIZE } from '../art.js';
+import { mergeGeometries } from '../three.js';
 import {
   createAtlas, createRig, drawSparkle, drawGlow, drawShadow, fillRound, strokeRound, floorShadow,
-  UNIT_BOX, boxMatrix, segmentMatrix, createSpring, stepSpring, stationTarget, frac, clamp01, easeOut,
-  blockBox, blockCircle, chainDispose,
+  UNIT_BOX, boxMatrix, segmentMatrix, createSpring, stepSpring, stationTarget, frac, clamp01,
+  blockBox, chainDispose,
 } from './scripts.js';
 
+const WOOD_WARM = '#8A5A2B';
 const WOOD_TOP = '#BE8F5E';
-const MUG = PALETTE.white;
-const BOARD = '#2F2A25';
+const EINK = '#FFF4D2';
+const BOARD = '#2B1B1E';
+const NO_LINE = { outline: false };
 
-// Asymmetric on purpose: keeps a straight 1 m lane from the door to the compare-board spot.
-const TABLES = [
-  {
-    key: 'trial', id: 'cc-trial', name: 'Trial', count: '၃', x: -2.4, z: -0.45, mugW: 0.15, mugH: 0.17, cards: 3, steam: 1,
-    cardColors: [PALETTE.rose, PALETTE.paper, PALETTE.gold], rug: '#E7B3AC', rugEdge: PALETTE.gold, bar: '#E7A7A0',
-  },
-  {
-    key: 'essentials', id: 'cc-essentials', name: 'Essentials', count: '၁၄', x: 0.3, z: -0.45, mugW: 0.21, mugH: 0.27, cards: 14, steam: 2,
-    cardColors: [PALETTE.paper, PALETTE.gold, PALETTE.rose, '#BFD9EC'], rug: '#C5DCEC', rugEdge: PALETTE.gold, bar: '#BFD9EC',
-  },
-  {
-    key: 'master', id: 'cc-master', name: 'Master', count: '၃၀', x: 2.62, z: -0.45, mugW: 0.3, mugH: 0.4, cards: 30, steam: 3,
-    cardColors: [PALETTE.maroon, PALETTE.paper, PALETTE.gold, PALETTE.rose, '#BFD9EC'], rug: PALETTE.maroon, rugEdge: PALETTE.gold, bar: '#C04A5A',
-  },
-];
+const COVER_ASPECT = ART_SIZE.book[0] / ART_SIZE.book[1];
 
-const BOARD_Y = 1.57;
-const BOARD_W = 3.04;
-const BOARD_H = 1.52;
+const BOARD_X = -1.1;
+const BOARD_Y = 1.64;
+const BOARD_W = 2.94;
+const BOARD_H = 1.47;
 const BOARD_Z = -3.93;
 
-const RUG_FRONT = 1.86;
+const LECTERN = { x: -2.4, z: -0.78 };
+const SHOWCASE = { x: 0, z: -0.68 };
+const NOOK_DESK = { x: 2.02, z: -0.82 };
+const NOOK_CHAIR = { x: 2.76, z: -0.82, ry: -0.4 };
+const WEST_CHAIR = { x: -2.86, z: 2.1, ry: 0.55 };
+const AFRAME = { x: -1.68, z: 3.16 };
+const LOUNGE = { x: 2.58, z: 2.86 };
+const COUNTER = { x: 2.72, z: -3.62, w: 1.32, d: 0.62, h: 0.98 };
 
 const STATIONS = [
   {
-    id: 'cc-trial', x: -2.4, z: 1.06, look: { x: -2.4, z: -0.45 }, emote: 'nod', face: 'wink', labelY: 1.85,
-    line: { my: 'စမ်းကြည့်ချင်ရင် Trial လေးနဲ့ စလို့ရပါတယ်ရှင့်', en: 'Want to try first? Start with the Trial!' },
+    id: 'eb-preview', x: -2.4, z: 0.7, look: { x: -2.4, z: -0.78 }, emote: 'nod', face: 'smile', labelY: 1.95,
+    line: { my: 'အခန်း (၁) ကို အခမဲ့ မြည်းစမ်းဖတ်ကြည့်လို့ ရပါတယ်ရှင့်', en: 'Try reading Chapter 1 for free right here!' },
   },
   {
-    id: 'cc-essentials', x: 0.3, z: 1.06, look: { x: 0.3, z: -0.45 }, emote: 'thumbsUp', face: 'happy', labelY: 1.85,
-    line: { my: 'Brand လေး ပုံမှန် တောက်ပနေအောင် Essentials နော်', en: 'Essentials keeps your brand shining, week after week.' },
+    id: 'eb-buy', x: 0, z: 0.85, look: { x: 0, z: -0.68 }, emote: 'cheer', face: 'star', labelY: 2.15,
+    line: { my: 'အမှန်မြင်ခြင်း E-Book လေးကို ဒီမှာ ဝယ်ယူပြီး ချက်ချင်း ဖတ်လို့ရပါတယ်ရှင့်', en: 'Buy the Reality Check E-Book here and start reading right away!' },
   },
   {
-    id: 'cc-master', x: 2.62, z: 1.06, look: { x: 2.62, z: -0.45 }, emote: 'phone', face: 'star', labelY: 1.85,
-    line: { my: 'Master နဲ့ဆို ဈေးကွက်မှာ ထင်ရှားလာမှာပါရှင့်', en: 'With Master, your brand stands out in the market!' },
+    id: 'eb-read', x: 2.35, z: 0.7, look: { x: 2.45, z: -0.75 }, emote: 'phone', face: 'happy', labelY: 1.95,
+    line: { my: 'ဝယ်ပြီးသားဆိုရင် ဖုန်းဘယ်လုံးကနေမဆို ဝင်ပြီး ဆက်ဖတ်လို့ ရပါတယ်နော်', en: 'Already bought it? Sign in from any phone to continue reading!' },
   },
   {
-    id: 'cc-compare', x: -1.55, z: -2.3, look: { x: 0, z: BOARD_Z }, emote: 'point', face: 'smile', labelY: 2.6,
-    line: { my: 'သုံးမျိုးလုံး ယှဉ်ကြည့်ပြီး ရွေးလို့ရပါတယ်နော်', en: 'Compare all three, then pick the one for you.' },
+    id: 'eb-chapters', x: -1.1, z: -2.1, look: { x: -1.1, z: BOARD_Z }, emote: 'point', face: 'smile', labelY: 1.48,
+    line: { my: 'အပိုင်း ၂ ပိုင်း၊ အခန်း ၂၃ ခန်းလုံး ဒီမှာ စုံစုံလင်လင် ရှိပါတယ်ရှင့်', en: 'All 23 chapters across Part 1 and Part 2 are right here!' },
   },
 ];
 
-// ---------- atlas ----------
-/** Faint chalk doodles around the compare board: smudges, a heart, a cup, an arrow, stars. */
-function drawChalkDoodles(g, r) {
-  const { x, y, w, h } = r;
-  g.save();
-  g.fillStyle = 'rgba(246,238,220,0.06)';
-  for (const [sx, sy, sw, sh] of [[0.08, 0.3, 0.14, 0.12], [0.62, 0.62, 0.18, 0.1], [0.4, 0.2, 0.2, 0.08]]) g.fillRect(x + w * sx, y + h * sy, w * sw, h * sh);
-  g.strokeStyle = 'rgba(246,238,220,0.55)';
-  g.lineWidth = 2.5;
-  g.lineCap = 'round';
-  // a little coffee cup with steam, in the empty margin left of the Trial bar
-  const cx = x + 32;
-  const cy = y + 206;
-  g.strokeRect(cx - 12, cy - 10, 22, 18);
-  g.beginPath();
-  g.arc(cx + 14, cy - 1, 6, -Math.PI / 2, Math.PI / 2);
-  g.moveTo(cx - 6, cy - 16);
-  g.quadraticCurveTo(cx - 10, cy - 22, cx - 5, cy - 28);
-  g.moveTo(cx + 3, cy - 16);
-  g.quadraticCurveTo(cx - 1, cy - 22, cx + 4, cy - 28);
-  g.stroke();
-  // an arrow curling up toward the Master column
-  g.beginPath();
-  g.moveTo(x + w * 0.56, y + 236);
-  g.quadraticCurveTo(x + w * 0.62, y + 200, x + w * 0.69, y + 206);
-  g.moveTo(x + w * 0.69, y + 206);
-  g.lineTo(x + w * 0.675, y + 196);
-  g.moveTo(x + w * 0.69, y + 206);
-  g.lineTo(x + w * 0.675, y + 214);
-  g.stroke();
-  g.restore();
-  drawHeart(g, x + w - 44, y + h - 30, 22, 'rgba(232,160,168,0.8)');
-  for (const [px, py, s] of [[0.2, 0.36, 6], [0.47, 0.33, 5], [0.8, 0.3, 6], [0.9, 0.58, 4], [0.12, 0.62, 4]]) drawSparkle(g, x + w * px, y + h * py, s, 'rgba(240,213,142,0.85)');
-}
-
-/** Chalk café menu (Burmese first): coffee, tea, cake, each with a tiny drawing. */
-function drawMenu(A, r) {
+// ---------- canvas atlas (single 1024x1024 sheet for every sign, screen & glow) ----------
+function drawChaptersBoard(A, r) {
   const g = A.g;
   const { x, y, w, h } = r;
-  g.fillStyle = '#2B2622';
+  g.fillStyle = BOARD;
   g.fillRect(x, y, w, h);
-  g.strokeStyle = 'rgba(246,238,220,0.35)';
-  g.lineWidth = 2;
-  g.strokeRect(x + 8, y + 8, w - 16, h - 16);
-  A.text(x + 20, y + 6, w - 40, 50, [{ text: 'မီနူး', size: 30, color: '#E8C878' }]);
-  g.fillStyle = 'rgba(246,238,220,0.5)';
-  g.fillRect(x + w * 0.32, y + 52, w * 0.36, 2);
-  const items = ['ကော်ဖီ', 'လက်ဖက်ရည်', 'ကိတ်မုန့်'];
-  items.forEach((text, i) => {
-    const ly = y + 60 + i * 40;
-    A.text(x + 58, ly, w - 120, 42, [{ text, size: 21, color: '#F6EEDC' }]);
-    g.fillStyle = 'rgba(246,238,220,0.35)';
-    for (let k = 0; k < 6; k++) g.fillRect(x + w - 70 + k * 9, ly + 22, 4, 2);
-    // tiny chalk icon on the left
-    g.strokeStyle = i === 2 ? PALETTE.rose : '#F6EEDC';
-    g.lineWidth = 2;
-    const ix = x + 36;
-    const iy = ly + 21;
-    if (i === 0) {
-      g.strokeRect(ix - 8, iy - 6, 14, 12);
-      g.beginPath();
-      g.arc(ix + 8, iy, 4, -Math.PI / 2, Math.PI / 2);
-      g.stroke();
-    } else if (i === 1) {
-      g.beginPath();
-      g.arc(ix, iy + 2, 8, Math.PI, 0);
-      g.lineTo(ix + 8, iy + 6);
-      g.lineTo(ix - 8, iy + 6);
-      g.closePath();
-      g.moveTo(ix + 8, iy);
-      g.lineTo(ix + 14, iy - 5);
-      g.stroke();
-    } else {
-      g.beginPath();
-      g.moveTo(ix - 10, iy + 7);
-      g.lineTo(ix + 10, iy + 7);
-      g.lineTo(ix + 10, iy - 2);
-      g.lineTo(ix - 10, iy + 2);
-      g.closePath();
-      g.stroke();
-    }
-  });
-  drawSparkle(g, x + 26, y + 28, 8, PALETTE.gold);
-  drawSparkle(g, x + w - 26, y + 28, 8, PALETTE.gold);
+  strokeRound(g, x + 8, y + 8, w - 16, h - 16, 12, PALETTE.gold, 3);
+  strokeRound(g, x + 15, y + 15, w - 30, h - 30, 8, 'rgba(201,162,74,0.35)', 1.5);
+
+  A.text(x + 36, y + 14, w - 72, 54, [{ text: 'အမှန်မြင်ခြင်း · အခန်း (၂၃) ခန်း', size: 32, color: EINK }]);
+  A.text(x + 36, y + 60, w - 72, 34, [{ text: 'Reality Check  —  Part 1 & Part 2  ·  112 Pages', size: 22, font: FONT_SERIF, weight: 600, color: '#E8C878' }]);
+  g.fillStyle = 'rgba(201,162,74,0.6)';
+  g.fillRect(x + 42, y + 96, w - 84, 2);
+  g.fillRect(x + w / 2 - 1, y + 108, 2, h - 142);
+
+  // Left column: Part 1 (Ch. 1 - 11)
+  const colW = w / 2 - 42;
+  A.text(x + 26, y + 102, colW, 42, [{ text: 'အပိုင်း (၁) · အခန်း ၁–၁၁', size: 22, color: '#F2D58A' }]);
+  for (let i = 0; i < 6; i++) {
+    const ry = y + 148 + i * 24;
+    const isFree = i === 0;
+    fillRound(g, x + 36, ry, colW - 22, 16, 5, isFree ? 'rgba(201,162,74,0.32)' : 'rgba(246,240,226,0.12)');
+    g.fillStyle = isFree ? PALETTE.gold : '#C7A97C';
+    g.fillRect(x + 42, ry + 5, (colW - 60) * (isFree ? 0.88 : 0.52 + ((i * 37) % 35) / 100), 6);
+  }
+  fillRound(g, x + 36, y + 296, 134, 24, 12, PALETTE.gold);
+  A.text(x + 36, y + 294, 134, 28, [{ text: 'အခန်း (၁) အခမဲ့', size: 15, color: PALETTE.ink }]);
+
+  // Right column: Part 2 (Ch. 12 - 23)
+  const rx = x + w / 2 + 16;
+  A.text(rx, y + 102, colW, 42, [{ text: 'အပိုင်း (၂) · အခန်း ၁၂–၂၃', size: 22, color: '#F2D58A' }]);
+  for (let i = 0; i < 6; i++) {
+    const ry = y + 148 + i * 24;
+    fillRound(g, rx + 10, ry, colW - 22, 16, 5, 'rgba(246,240,226,0.12)');
+    g.fillStyle = i === 5 ? '#E8A0A8' : '#D9B66B';
+    g.fillRect(rx + 16, ry + 5, (colW - 60) * (0.56 + ((i * 29 + 11) % 34) / 100), 6);
+  }
+  A.text(rx + 6, y + 292, colW - 12, 32, [{ text: 'စာမျက်နှာ ၁၁၂ · KPay ချက်ချင်းဖတ်', size: 16, color: '#EADCC2' }]);
+
+  drawSparkle(g, x + 32, y + 40, 12, PALETTE.gold, '#FFF8DF');
+  drawSparkle(g, x + w - 32, y + 40, 12, PALETTE.gold, '#FFF8DF');
 }
 
-/** A cream clock face with gold ring and maroon hour marks (hands are 3D). */
+function drawAFrame(A, r) {
+  const g = A.g;
+  fillRound(g, r.x + 2, r.y + 2, r.w - 4, r.h - 4, 22, '#FBF5E8');
+  strokeRound(g, r.x + 7, r.y + 7, r.w - 14, r.h - 14, 18, PALETTE.goldDeep, 5);
+  strokeRound(g, r.x + 15, r.y + 15, r.w - 30, r.h - 30, 12, 'rgba(201,162,74,0.45)', 2);
+  A.text(r.x + 14, r.y + 22, r.w - 28, 56, [{ text: 'E-Book ဆိုင်', size: 34, color: PALETTE.maroon }]);
+  A.text(r.x + 14, r.y + 74, r.w - 28, 48, [{ text: 'အမှန်မြင်ခြင်း', size: 28, color: PALETTE.ink }]);
+  A.text(r.x + 14, r.y + 116, r.w - 28, 42, [{ text: 'Reality Check', size: 30, font: FONT_SERIF, weight: 600, color: PALETTE.goldDeep }]);
+  // Illustrated open glowing e-book emblem
+  const cx = r.x + r.w / 2;
+  const cy = r.y + 212;
+  fillRound(g, cx - 64, cy - 34, 128, 72, 10, PALETTE.maroon);
+  strokeRound(g, cx - 64, cy - 34, 128, 72, 10, PALETTE.gold, 4);
+  fillRound(g, cx - 54, cy - 26, 51, 56, 4, EINK);
+  fillRound(g, cx + 3, cy - 26, 51, 56, 4, EINK);
+  g.fillStyle = PALETTE.gold;
+  g.fillRect(cx - 2, cy - 28, 4, 60);
+  g.fillStyle = '#9C7B56';
+  for (let i = 0; i < 4; i++) {
+    g.fillRect(cx - 46, cy - 16 + i * 11, 35 - (i % 2) * 8, 4);
+    g.fillRect(cx + 11, cy - 16 + i * 11, 35 - ((i + 1) % 2) * 8, 4);
+  }
+  drawSparkle(g, cx, cy - 48, 13, PALETTE.gold, '#FFF8DF');
+  drawSparkle(g, r.x + 36, r.y + 266, 9, PALETTE.gold);
+  drawSparkle(g, r.x + r.w - 36, r.y + 266, 9, PALETTE.gold);
+}
+
+function drawPreviewScreen(A, r) {
+  const g = A.g;
+  const { x, y, w, h } = r;
+  g.fillStyle = EINK;
+  g.fillRect(x, y, w, h);
+  g.fillStyle = 'rgba(138,90,43,0.16)';
+  g.fillRect(x + w / 2 - 4, y, 8, h);
+  g.fillStyle = PALETTE.gold;
+  g.fillRect(x + w / 2 - 1, y, 2, h);
+  strokeRound(g, x + 6, y + 6, w / 2 - 12, h - 12, 6, 'rgba(201,162,74,0.55)', 2);
+  strokeRound(g, x + w / 2 + 6, y + 6, w / 2 - 12, h - 12, 6, 'rgba(201,162,74,0.55)', 2);
+  // Left e-ink page: Chapter 1 title
+  A.text(x + 10, y + 18, w / 2 - 20, 38, [{ text: 'အခန်း (၁)', size: 22, color: PALETTE.maroon }]);
+  A.text(x + 10, y + 54, w / 2 - 20, 40, [{ text: 'ကျွန်မသည် သိုးမည်း', size: 16, color: PALETTE.ink }]);
+  fillRound(g, x + 22, y + 104, w / 2 - 44, 24, 12, PALETTE.maroon);
+  A.text(x + 22, y + 102, w / 2 - 44, 28, [{ text: 'အခမဲ့ မြည်းစမ်း', size: 13, color: EINK }]);
+  drawSparkle(g, x + w / 4, y + 150, 10, PALETTE.gold);
+  // Right e-ink page: crisp simulated reading lines
+  const rx = x + w / 2 + 16;
+  const rw = w / 2 - 32;
+  g.fillStyle = PALETTE.maroon;
+  g.fillRect(rx, y + 20, rw * 0.55, 6);
+  g.fillStyle = '#7E654B';
+  const lens = [0.95, 0.88, 0.92, 0.72, 0.96, 0.84, 0.9, 0.62];
+  lens.forEach((f, i) => g.fillRect(rx, y + 36 + i * 14, rw * f, 5));
+  g.fillStyle = PALETTE.gold;
+  g.fillRect(rx, y + h - 22, rw * 0.4, 4);
+}
+
+function drawReadScreen(A, r) {
+  const g = A.g;
+  const { x, y, w, h } = r;
+  g.fillStyle = '#FBF4E4';
+  g.fillRect(x, y, w, h);
+  g.fillStyle = PALETTE.maroon;
+  g.fillRect(x, y, w, 54);
+  A.text(x + 8, y + 4, w - 16, 46, [{ text: 'အမှန်မြင်ခြင်း', size: 20, color: EINK }]);
+  A.text(x + 8, y + 60, w - 16, 36, [{ text: 'ဝယ်ပြီးသား ဝင်ဖတ်', size: 16, color: PALETTE.maroon }]);
+  // Simulated phone + PIN input cards
+  fillRound(g, x + 16, y + 100, w - 32, 26, 8, PALETTE.white);
+  strokeRound(g, x + 16, y + 100, w - 32, 26, 8, PALETTE.gold, 2);
+  g.fillStyle = '#B8A080';
+  g.fillRect(x + 26, y + 111, w - 76, 5);
+  fillRound(g, x + 16, y + 134, w - 32, 26, 8, PALETTE.white);
+  strokeRound(g, x + 16, y + 134, w - 32, 26, 8, PALETTE.gold, 2);
+  for (let i = 0; i < 4; i++) {
+    g.fillStyle = PALETTE.maroon;
+    g.beginPath();
+    g.arc(x + 36 + i * 22, y + 147, 4, 0, Math.PI * 2);
+    g.fill();
+  }
+  fillRound(g, x + 22, y + 172, w - 44, 32, 16, PALETTE.gold);
+  A.text(x + 22, y + 171, w - 44, 34, [{ text: 'ဆက်ဖတ်မယ်', size: 15, color: PALETTE.ink }]);
+  drawSparkle(g, x + w - 18, y + 18, 7, PALETTE.gold);
+}
+
+function drawWallPlaque(A, r) {
+  const g = A.g;
+  const { x, y, w, h } = r;
+  fillRound(g, x + 2, y + 2, w - 4, h - 4, 16, PALETTE.maroon);
+  strokeRound(g, x + 6, y + 6, w - 12, h - 12, 12, PALETTE.gold, 4);
+  A.text(x + 16, y + 12, w - 32, 54, [{ text: 'E-Book စာအုပ်ဆိုင်', size: 28, color: EINK }]);
+  g.fillStyle = 'rgba(201,162,74,0.65)';
+  g.fillRect(x + 42, y + 68, w - 84, 2);
+  A.text(x + 12, y + 74, w - 24, 44, [{ text: 'KPay ဖြင့် ချက်ချင်းဝယ်ယူ', size: 19, color: '#F2D58A' }]);
+  A.text(x + 12, y + 118, w - 24, 42, [{ text: 'ဖုန်းဘယ်လုံးမဆို ဖတ်နိုင်', size: 18, color: '#F6EEDC' }]);
+  drawSparkle(g, x + 24, y + 32, 8, PALETTE.gold);
+  drawSparkle(g, x + w - 24, y + 32, 8, PALETTE.gold);
+}
+
+function drawStationBanner(A, r, titleMy, subEn) {
+  const g = A.g;
+  fillRound(g, r.x + 2, r.y + 2, r.w - 4, r.h - 4, 14, '#FBF5E8');
+  strokeRound(g, r.x + 5, r.y + 5, r.w - 10, r.h - 10, 11, PALETTE.gold, 4);
+  A.text(r.x + 8, r.y + 6, r.w - 16, 56, [{ text: titleMy, size: 25, color: PALETTE.maroon }]);
+  A.text(r.x + 8, r.y + 58, r.w - 16, 44, [{ text: subEn, size: 22, font: FONT_SERIF, weight: 600, color: PALETTE.goldDeep }]);
+}
+
+function drawKpayBadge(A, r) {
+  const g = A.g;
+  const { x, y, w, h } = r;
+  fillRound(g, x + 2, y + 2, w - 4, h - 4, 14, '#184A8C');
+  strokeRound(g, x + 5, y + 5, w - 10, h - 10, 11, PALETTE.gold, 4);
+  A.text(x + 8, y + 6, w - 16, 54, [{ text: 'KPay', size: 34, font: FONT_SERIF, weight: 700, color: '#FFFFFF' }]);
+  fillRound(g, x + 16, y + 64, w - 32, 32, 10, PALETTE.gold);
+  A.text(x + 16, y + 62, w - 32, 36, [{ text: 'ချက်ချင်းဖတ်', size: 17, color: PALETTE.ink }]);
+  drawSparkle(g, x + w - 22, y + 24, 8, '#FFE59A');
+}
+
 function drawClock(A, r) {
   const g = A.g;
   const cx = r.x + r.w / 2;
@@ -170,268 +245,55 @@ function drawClock(A, r) {
   drawSparkle(g, cx, cy + 18, 6, PALETTE.gold);
 }
 
-function drawHeart(g, cx, cy, s, fill) {
-  g.beginPath();
-  g.moveTo(cx, cy + s * 0.42);
-  g.bezierCurveTo(cx - s * 0.62, cy, cx - s * 0.48, cy - s * 0.52, cx, cy - s * 0.2);
-  g.bezierCurveTo(cx + s * 0.48, cy - s * 0.52, cx + s * 0.62, cy, cx, cy + s * 0.42);
-  g.closePath();
-  g.fillStyle = fill;
-  g.fill();
-}
-
-function drawIcon(A, r, kind) {
-  const g = A.g;
-  const cx = r.x + r.w / 2;
-  const cy = r.y + r.h / 2;
-  const s = r.w;
-  const bg = { heart: PALETTE.rose, play: PALETTE.maroon, chat: PALETTE.gold, plane: PALETTE.skyTop, hash: PALETTE.ink, star: PALETTE.paper }[kind];
-  g.fillStyle = bg;
-  g.fillRect(r.x, r.y, r.w, r.h);
-  strokeRound(g, r.x + 5, r.y + 5, r.w - 10, r.h - 10, 14, 'rgba(255,255,255,0.55)', 3);
-  if (kind === 'heart') drawHeart(g, cx, cy + 2, s * 0.62, PALETTE.white);
-  else if (kind === 'play') {
-    g.beginPath();
-    g.moveTo(cx - s * 0.14, cy - s * 0.2);
-    g.lineTo(cx + s * 0.22, cy);
-    g.lineTo(cx - s * 0.14, cy + s * 0.2);
-    g.closePath();
-    g.fillStyle = PALETTE.white;
-    g.fill();
-  } else if (kind === 'chat') {
-    fillRound(g, cx - s * 0.28, cy - s * 0.2, s * 0.56, s * 0.36, s * 0.1, PALETTE.white);
-    g.beginPath();
-    g.moveTo(cx - s * 0.14, cy + s * 0.15);
-    g.lineTo(cx - s * 0.2, cy + s * 0.3);
-    g.lineTo(cx + s * 0.0, cy + s * 0.15);
-    g.closePath();
-    g.fill();
-    g.fillStyle = PALETTE.goldDeep;
-    for (const dx of [-0.13, 0, 0.13]) {
-      g.beginPath();
-      g.arc(cx + dx * s, cy - s * 0.02, s * 0.04, 0, Math.PI * 2);
-      g.fill();
-    }
-  } else if (kind === 'plane') {
-    g.beginPath();
-    g.moveTo(cx - s * 0.3, cy - s * 0.02);
-    g.lineTo(cx + s * 0.3, cy - s * 0.24);
-    g.lineTo(cx + s * 0.1, cy + s * 0.28);
-    g.lineTo(cx - s * 0.02, cy + s * 0.06);
-    g.closePath();
-    g.fillStyle = PALETTE.white;
-    g.fill();
-    g.beginPath();
-    g.moveTo(cx - s * 0.02, cy + s * 0.06);
-    g.lineTo(cx + s * 0.3, cy - s * 0.24);
-    g.strokeStyle = PALETTE.maroon;
-    g.lineWidth = 3;
-    g.stroke();
-  } else if (kind === 'hash') {
-    g.fillStyle = PALETTE.gold;
-    for (const k of [-1, 1]) {
-      g.fillRect(cx + k * s * 0.1 - s * 0.035, cy - s * 0.27, s * 0.07, s * 0.54);
-      g.fillRect(cx - s * 0.27, cy + k * s * 0.1 - s * 0.035, s * 0.54, s * 0.07);
-    }
-  } else {
-    drawSparkle(g, cx, cy, s * 0.34, PALETTE.gold, PALETTE.white);
-  }
-}
-
-function drawScreen(A, r, kind) {
-  const g = A.g;
-  const { x, y, w, h } = r;
-  g.fillStyle = '#FBF6EC';
-  g.fillRect(x, y, w, h);
-  g.fillStyle = PALETTE.maroon;
-  g.fillRect(x, y, w, 12);
-  g.fillStyle = PALETTE.gold;
-  for (let i = 0; i < 3; i++) g.fillRect(x + 6 + i * 7, y + 4, 4, 4);
-  const post = (px, py, pw, ph, sky = PALETTE.skyTop) => {
-    g.fillStyle = sky;
-    g.fillRect(px, py, pw, ph * 0.66);
-    fillRound(g, px + pw * 0.14, py + ph * 0.3, pw * 0.42, ph * 0.18, ph * 0.08, PALETTE.white);
-    g.fillStyle = PALETTE.gold;
-    g.beginPath();
-    g.arc(px + pw * 0.76, py + ph * 0.2, ph * 0.1, 0, Math.PI * 2);
-    g.fill();
-    g.fillStyle = '#B8A88E';
-    g.fillRect(px, py + ph * 0.74, pw * 0.86, Math.max(2, ph * 0.07));
-    g.fillRect(px, py + ph * 0.88, pw * 0.6, Math.max(2, ph * 0.07));
-  };
-  if (kind === 'trial') {
-    post(x + 14, y + 20, 74, 72);
-    g.fillStyle = '#B8A88E';
-    for (let i = 0; i < 4; i++) g.fillRect(x + 98, y + 26 + i * 12, 48 - (i % 2) * 14, 4);
-    drawHeart(g, x + 116, y + 84, 22, PALETTE.rose);
-  } else if (kind === 'essentials') {
-    for (let i = 0; i < 4; i++) post(x + 10 + (i % 2) * 52, y + 18 + Math.floor(i / 2) * 42, 46, 38, i % 3 ? PALETTE.skyTop : '#F2C6A0');
-    g.fillStyle = PALETTE.parchment;
-    g.fillRect(x + 114, y + 18, 38, 74);
-    for (let i = 0; i < 4; i++) {
-      g.fillStyle = i % 2 ? PALETTE.gold : PALETTE.rose;
-      g.fillRect(x + 120, y + 24 + i * 17, 26, 10);
-    }
-  } else {
-    const cols = [PALETTE.rose, PALETTE.skyTop, PALETTE.gold, '#F2C6A0', PALETTE.maroon, PALETTE.parchment];
-    for (let i = 0; i < 9; i++) {
-      g.fillStyle = cols[i % cols.length];
-      g.fillRect(x + 10 + (i % 3) * 30, y + 18 + Math.floor(i / 3) * 26, 26, 22);
-    }
-    g.strokeStyle = PALETTE.goldDeep;
-    g.lineWidth = 4;
-    g.beginPath();
-    g.moveTo(x + 108, y + 88);
-    g.lineTo(x + 122, y + 72);
-    g.lineTo(x + 134, y + 78);
-    g.lineTo(x + 150, y + 30);
-    g.stroke();
-    drawSparkle(g, x + 150, y + 26, 9, PALETTE.gold);
-  }
-}
-
-function drawContentAtlas(A) {
+function drawBoutiqueAtlas(A) {
   const g = A.g;
   const R = A.pack({
-    board: [704, 352],
+    chapters: [680, 340],
     aframe: [240, 300],
-    calendar: [200, 236],
-    banner_trial: [240, 120],
-    banner_essentials: [240, 120],
-    banner_master: [240, 120],
+    screen_read: [160, 220],
+    screen_preview: [260, 180],
+    wall_plaque: [280, 176],
+    sign_preview: [230, 110],
+    sign_buy: [230, 110],
+    sign_read: [230, 110],
+    kpay_badge: [160, 110],
     pool: [112, 112],
-    screen_trial: [160, 100],
-    screen_essentials: [160, 100],
-    screen_master: [160, 100],
-    icon_heart: [88, 88],
-    icon_play: [88, 88],
-    icon_chat: [88, 88],
-    icon_plane: [88, 88],
-    icon_hash: [88, 88],
-    icon_star: [88, 88],
+    clock: [96, 96],
+    eink_glow: [96, 96],
     sparkle: [88, 88],
     shadow: [88, 88],
-    coffee: [220, 80],
+    counter_sign: [240, 84],
     bulb: [64, 64],
-    writer: [120, 56],
-    menu: [300, 190],
-    clock: [96, 96],
   });
-  drawMenu(A, R.menu);
+
+  drawChaptersBoard(A, R.chapters);
+  drawAFrame(A, R.aframe);
+  drawPreviewScreen(A, R.screen_preview);
+  drawReadScreen(A, R.screen_read);
+  drawWallPlaque(A, R.wall_plaque);
+  drawStationBanner(A, R.sign_preview, 'အခမဲ့ မြည်းစမ်း', 'Free Chapter 1');
+  drawStationBanner(A, R.sign_buy, 'အမှန်မြင်ခြင်း E-Book', 'Buy & Read Now');
+  drawStationBanner(A, R.sign_read, 'ဝယ်ပြီးသား ဝင်ဖတ်', 'Any Phone · Sign In');
+  drawKpayBadge(A, R.kpay_badge);
   drawClock(A, R.clock);
 
-  // Compare board (chalk on a dark board); the bars are 3D boxes in front of it.
   {
-    const r = R.board;
-    const { x, y, w, h } = r;
-    g.fillStyle = BOARD;
-    g.fillRect(x, y, w, h);
-    A.text(x + 20, y + 6, w - 40, 70, [{ text: 'ဘယ် Package လေး ရွေးမလဲ?', size: 38, color: '#F6EEDC' }]);
-    g.fillStyle = 'rgba(246,238,220,0.75)';
-    g.fillRect(x + w * 0.3, y + 74, w * 0.4, 3);
-    g.fillRect(x + w * 0.05, y + 262, w * 0.9, 3);
-    g.fillStyle = 'rgba(246,238,220,0.28)';
-    for (const k of [1, 2]) for (let yy = y + 92; yy < y + h - 12; yy += 16) g.fillRect(x + (w * k) / 3 - 1, yy, 2, 9);
-    TABLES.forEach((tb, i) => {
-      const cx = x + (w * i) / 3;
-      A.text(cx + 8, y + 80, w / 3 - 16, 60, [{ text: tb.name, size: 38, font: FONT_SERIF, weight: 600, color: '#E8C878' }]);
-      A.text(cx + 8, y + 264, w / 3 - 16, 44, [{ text: `Content ${tb.count} ခု`, size: 24, color: '#F6EEDC' }]);
-      A.text(cx + 8, y + 300, w / 3 - 16, 48, [{ text: ['200,000 MMK', '1,000,000 MMK', '1,600,000 MMK'][i], size: 26, font: FONT_SERIF, weight: 600, color: '#E8C878' }]);
-    });
-    drawSparkle(g, x + 26, y + 40, 11, PALETTE.gold);
-    drawSparkle(g, x + w - 26, y + 40, 11, PALETTE.gold);
-    drawChalkDoodles(g, r);
+    const r = R.counter_sign;
+    fillRound(g, r.x + 2, r.y + 2, r.w - 4, r.h - 4, 16, PALETTE.maroon);
+    strokeRound(g, r.x + 5, r.y + 5, r.w - 10, r.h - 10, 13, PALETTE.gold, 4);
+    A.text(r.x + 26, r.y + 2, r.w - 52, r.h - 4, [{ text: 'E-Book ကောင်တာ', size: 24, color: EINK }]);
+    drawSparkle(g, r.x + 20, r.y + r.h / 2, 8, PALETTE.gold);
+    drawSparkle(g, r.x + r.w - 20, r.y + r.h / 2, 8, PALETTE.gold);
   }
-  // Welcome A-frame.
-  {
-    const r = R.aframe;
-    fillRound(g, r.x + 2, r.y + 2, r.w - 4, r.h - 4, 22, '#FBF5E8');
-    strokeRound(g, r.x + 6, r.y + 6, r.w - 12, r.h - 12, 18, PALETTE.goldDeep, 6);
-    A.text(r.x + 12, r.y + 18, r.w - 24, 150, [
-      { text: 'Content နှင့်', size: 38, color: PALETTE.maroon },
-      { text: 'Copywriting', size: 40, font: FONT_SERIF, weight: 600, color: PALETTE.maroon },
-    ]);
-    // a little steaming Writer mug
-    const mx = r.x + r.w / 2;
-    const my = r.y + 222;
-    fillRound(g, mx - 34, my - 26, 68, 58, 10, PALETTE.white);
-    strokeRound(g, mx - 34, my - 26, 68, 58, 10, PALETTE.ink, 3);
-    g.beginPath();
-    g.arc(mx + 38, my + 2, 13, -Math.PI / 2, Math.PI / 2);
-    g.strokeStyle = PALETTE.ink;
-    g.lineWidth = 4;
-    g.stroke();
-    A.text(mx - 34, my - 14, 68, 34, [{ text: 'Writer', size: 17, font: FONT_SERIF, weight: 600, color: PALETTE.ink }]);
-    g.strokeStyle = PALETTE.goldDeep;
-    g.lineWidth = 3;
-    for (const dx of [-12, 8]) {
-      g.beginPath();
-      g.moveTo(mx + dx, my - 32);
-      g.bezierCurveTo(mx + dx - 8, my - 42, mx + dx + 8, my - 50, mx + dx, my - 60);
-      g.stroke();
-    }
-    drawSparkle(g, r.x + 40, r.y + 250, 12, PALETTE.gold);
-    drawSparkle(g, r.x + r.w - 40, r.y + 196, 10, PALETTE.gold);
-  }
-  // Content calendar.
-  {
-    const r = R.calendar;
-    g.fillStyle = '#FCF7EA';
-    g.fillRect(r.x, r.y, r.w, r.h);
-    g.fillStyle = PALETTE.maroon;
-    g.fillRect(r.x, r.y, r.w, 58);
-    A.text(r.x + 6, r.y + 6, r.w - 12, 50, [{ text: 'Content ပြက္ခဒိန်', size: 21, color: '#F6EEDC' }]);
-    const marks = { 1: 'gold', 4: 'rose', 8: 'heart', 10: 'gold', 13: 'gold', 15: 'rose', 19: 'gold', 22: 'heart', 24: 'gold', 27: 'rose', 29: 'gold', 33: 'heart' };
-    for (let i = 0; i < 35; i++) {
-      const cx = r.x + 12 + (i % 7) * 26.5;
-      const cy = r.y + 68 + Math.floor(i / 7) * 33;
-      g.fillStyle = '#EFE5CF';
-      g.fillRect(cx, cy, 22, 27);
-      const m = marks[i];
-      if (m === 'gold') {
-        g.fillStyle = PALETTE.gold;
-        g.beginPath();
-        g.arc(cx + 11, cy + 13.5, 8, 0, Math.PI * 2);
-        g.fill();
-      } else if (m === 'rose') {
-        g.fillStyle = PALETTE.rose;
-        g.fillRect(cx + 3, cy + 5, 16, 17);
-      } else if (m === 'heart') drawHeart(g, cx + 11, cy + 14, 20, PALETTE.maroon);
-    }
-  }
-  // Package banners over the tables.
-  for (const tb of TABLES) {
-    const r = R[`banner_${tb.key}`];
-    fillRound(g, r.x + 2, r.y + 2, r.w - 4, r.h - 4, 16, '#FBF5E8');
-    strokeRound(g, r.x + 5, r.y + 5, r.w - 10, r.h - 10, 13, PALETTE.gold, 5);
-    for (const dx of [-1, 0, 1]) A.text(r.x + 8 + dx, r.y + 4, r.w - 16, 68, [{ text: tb.name, size: 44, font: FONT_SERIF, weight: 600, color: PALETTE.maroon }]);
-    A.text(r.x + 8, r.y + 64, r.w - 16, 50, [{ text: `Content ${tb.count} ခု`, size: 24, color: PALETTE.goldDeep }]);
-  }
-  for (const tb of TABLES) drawScreen(A, R[`screen_${tb.key}`], tb.key);
-  for (const k of ['heart', 'play', 'chat', 'plane', 'hash', 'star']) drawIcon(A, R[`icon_${k}`], k);
-  // Coffee counter sign.
-  {
-    const r = R.coffee;
-    fillRound(g, r.x + 2, r.y + 2, r.w - 4, r.h - 4, 18, PALETTE.maroon);
-    strokeRound(g, r.x + 5, r.y + 5, r.w - 10, r.h - 10, 15, PALETTE.gold, 4);
-    A.text(r.x + 30, r.y + 2, r.w - 60, r.h - 4, [{ text: 'ကော်ဖီ', size: 34, color: '#F6EEDC' }]);
-    drawSparkle(g, r.x + 26, r.y + r.h / 2, 9, PALETTE.gold);
-    drawSparkle(g, r.x + r.w - 26, r.y + r.h / 2, 9, PALETTE.gold);
-  }
-  // "Writer" mug label.
-  {
-    const r = R.writer;
-    g.fillStyle = MUG;
-    g.fillRect(r.x, r.y, r.w, r.h);
-    for (const dx of [-0.8, 0, 0.8]) A.text(r.x + dx, r.y, r.w, r.h, [{ text: 'Writer', size: 30, font: FONT_SERIF, weight: 600, color: PALETTE.ink }]);
-  }
-  drawSparkle(g, R.sparkle.x + 44, R.sparkle.y + 44, 40, PALETTE.gold, '#FFF6D8');
-  drawGlow(g, R.bulb, 'rgba(255,255,250,1)', 'rgba(255,224,140,0.9)', 0.35);
+
+  drawSparkle(g, R.sparkle.x + 44, R.sparkle.y + 44, 40, PALETTE.gold, '#FFF8DF');
+  drawGlow(g, R.bulb, 'rgba(255,255,250,1)', 'rgba(255,224,140,0.9)', 0.36);
+  drawGlow(g, R.eink_glow, 'rgba(255,244,210,0.75)', 'rgba(255,214,120,0.32)', 0.45);
   {
     const r = R.pool;
     const grd = g.createRadialGradient(r.x + 56, r.y + 56, 0, r.x + 56, r.y + 56, 56);
-    grd.addColorStop(0, 'rgba(255,240,200,0.6)');
-    grd.addColorStop(0.6, 'rgba(255,232,180,0.25)');
+    grd.addColorStop(0, 'rgba(255,240,200,0.62)');
+    grd.addColorStop(0.6, 'rgba(255,232,180,0.24)');
     grd.addColorStop(1, 'rgba(255,232,180,0)');
     g.fillStyle = grd;
     g.fillRect(r.x, r.y, r.w, r.h);
@@ -440,250 +302,452 @@ function drawContentAtlas(A) {
   return R;
 }
 
-// ---------- props ----------
-function buildMug(S, rig, R, x, y, z, w, h) {
-  const t = 0.018;
-  S.boxMin(x - w / 2, y, z - w / 2, x + w / 2, y + 0.02, z + w / 2, MUG);
-  S.boxMin(x - w / 2, y, z + w / 2 - t, x + w / 2, y + h, z + w / 2, MUG);
-  S.boxMin(x - w / 2, y, z - w / 2, x + w / 2, y + h, z - w / 2 + t, MUG);
-  S.boxMin(x - w / 2, y, z - w / 2, x - w / 2 + t, y + h, z + w / 2, MUG);
-  S.boxMin(x + w / 2 - t, y, z - w / 2, x + w / 2, y + h, z + w / 2, MUG);
-  S.boxMin(x - w / 2 + t, y, z - w / 2 + t, x + w / 2 - t, y + h - 0.025, z + w / 2 - t, '#6B4428');
-  S.boxMin(x - w / 2 - 0.004, y + h - 0.016, z - w / 2 - 0.004, x + w / 2 + 0.004, y + h, z + w / 2 + 0.004, PALETTE.gold);
-  // handle
-  const hx = x + w / 2;
-  S.boxMin(hx, y + h * 0.66, z - 0.016, hx + w * 0.3, y + h * 0.66 + 0.03, z + 0.016, MUG);
-  S.boxMin(hx, y + h * 0.18, z - 0.016, hx + w * 0.3, y + h * 0.18 + 0.03, z + 0.016, MUG);
-  S.boxMin(hx + w * 0.3 - 0.03, y + h * 0.18, z - 0.016, hx + w * 0.3, y + h * 0.66 + 0.03, z + 0.016, MUG);
-  rig.root.quad(R.writer, x, y + h * 0.48, z + w / 2 + 0.002, w * 0.86, w * 0.86 * (56 / 120), { lit: true });
+// ---------- reusable boutique furniture helpers ----------
+function buildRug(p, x0, x1, z0, z1, base, edge, accent) {
+  p.boxMin(x0, 0, z0, x1, 0.008, z1, edge, NO_LINE);
+  p.boxMin(x0 + 0.08, 0, z0 + 0.08, x1 - 0.08, 0.013, z1 - 0.08, base, NO_LINE);
+  const ix0 = x0 + 0.2, ix1 = x1 - 0.2, iz0 = z0 + 0.2, iz1 = z1 - 0.2;
+  const t = 0.024;
+  p.boxMin(ix0, 0.013, iz0, ix1, 0.0145, iz0 + t, accent, NO_LINE);
+  p.boxMin(ix0, 0.013, iz1 - t, ix1, 0.0145, iz1, accent, NO_LINE);
+  p.boxMin(ix0, 0.013, iz0, ix0 + t, 0.0145, iz1, accent, NO_LINE);
+  p.boxMin(ix1 - t, 0.013, iz0, ix1, 0.0145, iz1, accent, NO_LINE);
+  const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2 + 0.16;
+  p.box(cx, 0.014, cz, 0.34, 0.002, 0.34, accent, { ry: Math.PI / 4, outline: false });
+  p.box(cx, 0.0146, cz, 0.18, 0.002, 0.18, edge, { ry: Math.PI / 4, outline: false });
+  for (let fx = x0 + 0.06; fx < x1 - 0.04; fx += 0.09) {
+    p.box(fx, 0.003, z1 + 0.032, 0.03, 0.005, 0.065, PALETTE.cream, NO_LINE);
+  }
 }
 
-function buildTable(S, rig, R, tb) {
-  const { x, z } = tb;
-  const top = 0.68;
-  // a colour-coded rug under the table and Maya's spot (kept below the station ring at y = 0.03)
-  const rx0 = Math.max(-3.42, x - 0.98);
-  const rx1 = Math.min(3.42, x + 0.98);
-  S.boxMin(rx0, 0, z - 0.62, rx1, 0.008, RUG_FRONT, tb.rugEdge);
-  S.boxMin(rx0 + 0.09, 0, z - 0.53, rx1 - 0.09, 0.013, RUG_FRONT - 0.09, tb.rug);
-  for (const [cxr, czr] of [[rx0 + 0.2, z - 0.42], [rx1 - 0.2, z - 0.42], [rx0 + 0.2, RUG_FRONT - 0.2], [rx1 - 0.2, RUG_FRONT - 0.2]]) S.box(cxr, 0.0135, czr, 0.1, 0.002, 0.1, tb.rugEdge, Math.PI / 4);
-  // pedestal café table with a chamfered wooden top
-  S.box(x, 0.03, z, 0.7, 0.06, 0.14, PALETTE.woodDark);
-  S.box(x, 0.03, z, 0.14, 0.06, 0.6, PALETTE.woodDark);
-  S.box(x, 0.34, z, 0.12, 0.58, 0.12, PALETTE.woodDark);
-  S.box(x, top - 0.065, z, 1.02, 0.03, 0.7, PALETTE.woodDark);
-  S.box(x, top - 0.025, z, 1.1, 0.05, 0.66, WOOD_TOP);
-  S.box(x, top - 0.025, z, 0.98, 0.05, 0.78, WOOD_TOP);
-  // laptop (the lid is a rig part so it can "wake up")
-  const lx = x - 0.17;
-  const lz = z + 0.04;
-  S.box(lx, top + 0.014, lz, 0.5, 0.028, 0.33, '#D8C7A6');
-  S.box(lx, top + 0.03, lz - 0.025, 0.43, 0.004, 0.16, '#5E4C3A');
-  S.box(lx, top + 0.03, lz + 0.115, 0.12, 0.004, 0.06, '#C7B48F');
-  const lid = rig.part({ name: `lid_${tb.key}`, position: [lx, top + 0.028, lz - 0.165], rotation: [-0.26, 0, 0] });
-  lid.boxMin(-0.25, 0, -0.02, 0.25, 0.32, 0, '#D8C7A6');
-  lid.quad(R[`screen_${tb.key}`], 0, 0.163, 0.0015, 0.44, 0.275);
-  const pops = [];
-  ['icon_heart', 'icon_chat'].forEach((reg, i) => {
-    const p = rig.part({ name: `pop_${tb.key}${i}`, parent: lid, position: [i ? 0.16 : -0.16, 0.32, 0.06] });
-    p.quad(R[reg], 0, 0, 0, 0.17, 0.17);
-    pops.push(p);
+/** Plush velvet reading armchair with seat cushion top at EXACTLY y = 0.45 m (matches Day 15 seated NPCs!). */
+function buildArmchair(S, x, z, ry, body = PALETTE.maroon, cushion = '#8E2936') {
+  const v = new VoxelBuilder();
+  // Turned walnut legs
+  for (const sx of [-0.28, 0.28]) {
+    for (const sz of [-0.26, 0.26]) v.box(sx, 0.1, sz, 0.07, 0.2, 0.07, PALETTE.woodDark);
+  }
+  // Base apron + seat deck + plush seat cushion ending cleanly at y = 0.45
+  v.boxMin(-0.36, 0.18, -0.34, 0.36, 0.35, 0.32, body);
+  v.boxMin(-0.27, 0.35, -0.25, 0.27, 0.45, 0.33, cushion);
+  v.boxMin(-0.26, 0.438, 0.31, 0.26, 0.452, 0.335, PALETTE.gold);
+  // Rolled armrests + gold front trim studs
+  for (const sx of [-1, 1]) {
+    const ax0 = sx < 0 ? -0.38 : 0.26;
+    const ax1 = sx < 0 ? -0.26 : 0.38;
+    v.boxMin(ax0, 0.35, -0.34, ax1, 0.62, 0.32, body);
+    v.boxMin(ax0 - 0.015, 0.6, -0.35, ax1 + 0.015, 0.66, 0.34, PALETTE.maroonDeep);
+    v.box(sx * 0.32, 0.48, 0.33, 0.045, 0.045, 0.018, PALETTE.gold);
+  }
+  // Stepped tufted backrest (on -Z in local frame, so facing forward keeps camera sightline open)
+  v.boxMin(-0.36, 0.35, -0.36, 0.36, 0.96, -0.22, body);
+  v.boxMin(-0.32, 0.96, -0.34, 0.32, 1.04, -0.23, PALETTE.maroonDeep);
+  v.boxMin(-0.34, 0.94, -0.23, 0.34, 0.98, -0.205, PALETTE.gold);
+  // Cozy cream lumbar accent pillow tucked against backrest
+  v.box(0.1, 0.56, -0.17, 0.24, 0.2, 0.08, PALETTE.cream, -0.15);
+  const m = new THREE.Matrix4().makeRotationY(ry).setPosition(x, 0, z);
+  S.merge(v, m);
+}
+
+// ---------- Station 1: West Illuminated Free-Preview Lectern (eb-preview) ----------
+function buildPreviewLectern(S, rig, R) {
+  const { x, z } = LECTERN;
+  buildRug(rig.root, -3.26, -1.56, -1.42, 1.32, '#E7C0B8', PALETTE.gold, PALETTE.white);
+
+  // Carved wooden lectern base & pedestal
+  S.box(x, 0.04, z, 0.72, 0.08, 0.56, PALETTE.woodDark);
+  S.box(x, 0.1, z, 0.62, 0.05, 0.46, PALETTE.goldDeep);
+  S.box(x, 0.48, z - 0.02, 0.26, 0.72, 0.24, WOOD_WARM);
+  S.box(x, 0.48, z + 0.105, 0.14, 0.52, 0.02, PALETTE.maroon);
+  S.box(x, 0.48, z + 0.118, 0.06, 0.06, 0.015, PALETTE.gold);
+  S.box(x, 0.86, z, 0.46, 0.08, 0.36, PALETTE.gold);
+
+  // Tilted reading desk + lip + open glowing digital tablet-book
+  const tilt = 0.32;
+  S.add(UNIT_BOX, WOOD_WARM, boxMatrix(x, 0.96, z, 0.82, 0.06, 0.56, tilt));
+  S.add(UNIT_BOX, PALETTE.gold, boxMatrix(x, 0.89, z + 0.25, 0.84, 0.04, 0.05, tilt));
+  // Open e-reader tablet casing resting flush on the slanted lectern
+  const tablet = rig.part({ name: 'previewTablet', position: [x, 0.99, z + 0.01], rotation: [tilt, 0, 0] });
+  tablet.box(0, 0.02, 0, 0.7, 0.04, 0.46, PALETTE.maroon);
+  tablet.box(0, 0.042, 0, 0.66, 0.016, 0.42, PALETTE.ink);
+  tablet.quad(R.screen_preview, 0, 0.053, 0, 0.61, 0.39, { rx: -Math.PI / 2 });
+  tablet.quad(R.eink_glow, 0, 0.058, 0, 0.88, 0.64, { rx: -Math.PI / 2 });
+
+  // Clip-on curved brass gooseneck reading lamp above lectern
+  S.box(x - 0.28, 1.18, z - 0.24, 0.03, 0.32, 0.03, PALETTE.goldDeep);
+  S.box(x - 0.16, 1.34, z - 0.16, 0.28, 0.03, 0.03, PALETTE.gold);
+  S.box(x, 1.34, z - 0.08, 0.26, 0.07, 0.12, PALETTE.maroon);
+  S.box(x, 1.31, z - 0.08, 0.28, 0.02, 0.14, PALETTE.gold);
+  rig.root.quad(R.bulb, x, 1.27, z - 0.04, 0.18, 0.18, { color: '#FFE7A8' });
+
+  // Hanging gold "Free Ch. 1" banner on a slim brass pole beside lectern
+  const px = x - 0.44, pz = z - 0.26;
+  S.box(px, 0.9, pz, 0.032, 1.8, 0.032, PALETTE.gold);
+  S.box(px, 1.82, pz, 0.065, 0.065, 0.065, PALETTE.goldDeep);
+  S.box(px + 0.44, 1.76, pz, 0.88, 0.026, 0.026, PALETTE.gold);
+  const banner = rig.part({ name: 'previewBanner', position: [px + 0.44, 1.75, pz] });
+  banner.box(0, -0.24, -0.004, 0.8, 0.38, 0.022, '#FBF5E8');
+  banner.quad(R.sign_preview, 0, -0.24, 0.008, 0.78, 0.37);
+
+  // Floating glowing golden page & 2 sparkles rising softly above the open tablet
+  const page = rig.part({ name: 'previewPage', position: [x, 1.2, z] });
+  page.box(0, 0, 0, 0.18, 0.012, 0.24, EINK, { outline: false });
+  page.box(0, 0.008, -0.04, 0.12, 0.004, 0.02, PALETTE.gold, { outline: false });
+  const spks = [0, 1].map((i) => {
+    const p = rig.part({ name: `previewSpk${i}`, position: [x + (i ? 0.28 : -0.26), 1.32 + i * 0.12, z + 0.06] });
+    p.quad(R.sparkle, 0, 0, 0, 0.16, 0.16);
+    return p;
   });
-  // the Writer mug (size = package) and its steam
-  const mx = x + 0.3;
-  const mz = z + 0.15;
-  buildMug(S, rig, R, mx, top, mz, tb.mugW, tb.mugH);
-  const steam = [];
-  for (let i = 0; i < tb.steam; i++) {
-    const p = rig.part({ name: `steam_${tb.key}${i}`, position: [mx + (i - (tb.steam - 1) / 2) * 0.06, top + tb.mugH, mz] });
-    const k = 0.8 + tb.mugW * 1.6;
-    p.box(0, 0.02 * k, 0, 0.06 * k, 0.05 * k, 0.06 * k, PALETTE.white, { outline: false });
-    p.box(0.028 * k, 0.05 * k, 0, 0.045 * k, 0.04 * k, 0.045 * k, PALETTE.white, { outline: false });
-    steam.push(p);
-  }
-  // a stack of content cards, one per delivery: 3 / 14 / 30. Only the core carries an outline,
-  // so thin cards don't turn into a dark stripe (that is why the stack lives in the rig).
-  const cx = x + 0.34;
-  const cz = z - 0.2;
-  const ch = 0.0115;
-  rig.root.box(cx, top + (tb.cards * ch) / 2, cz, 0.17, tb.cards * ch, 0.13, PALETTE.paper);
-  for (let i = 0; i < tb.cards; i++) {
-    const j = Math.sin(i * 12.9898) * 0.012;
-    rig.root.box(cx + j, top + ch * (i + 0.5), cz - j * 0.6, 0.172, ch - 0.0025, 0.132, tb.cardColors[i % tb.cardColors.length], { ry: j * 6, outline: false });
-  }
-  // package banner on a gold pole
-  const px = x - 0.5;
-  const pz = z - 0.33;
-  const bw = 0.9;
-  S.box(px, top + 0.56, pz, 0.035, 1.12, 0.035, PALETTE.gold);
-  S.box(px, top + 1.14, pz, 0.07, 0.07, 0.07, PALETTE.goldDeep);
-  S.box(px + bw / 2 + 0.03, top + 1.09, pz, bw + 0.06, 0.028, 0.028, PALETTE.gold);
-  const banner = rig.part({ name: `banner_${tb.key}`, position: [px + bw / 2 + 0.03, top + 1.08, pz] });
-  for (const sx of [-bw * 0.36, bw * 0.36]) banner.box(sx, -0.035, 0, 0.014, 0.07, 0.014, PALETTE.goldDeep, { outline: false });
-  banner.box(0, -0.3, -0.004, bw, bw / 2, 0.022, '#FBF5E8');
-  banner.quad(R[`banner_${tb.key}`], 0, -0.3, 0.0075, bw - 0.02, (bw - 0.02) / 2);
-  return { tb, lid, pops, steam, banner, spring: createSpring(110, 9) };
+
+  return { tablet, banner, page, spks, spring: createSpring(120, 10) };
 }
 
-function buildBoard(S, rig, R) {
+// ---------- Station 2: Center Grand Reality Check E-Book Showcase (eb-buy) ----------
+function buildShowcasePedestal(S, rig, R, coverQuads) {
+  const { x, z } = SHOWCASE;
+  buildRug(rig.root, -0.94, 0.94, -1.32, 1.44, PALETTE.maroon, PALETTE.gold, '#F6E8C4');
+
+  // Stepped velvet-and-gold dais (y = 0..0.14)
+  S.boxMin(x - 0.56, 0, z - 0.44, x + 0.56, 0.07, z + 0.44, PALETTE.woodDark);
+  S.boxMin(x - 0.52, 0.07, z - 0.4, x + 0.52, 0.11, z + 0.4, PALETTE.gold);
+  S.boxMin(x - 0.48, 0.11, z - 0.36, x + 0.48, 0.14, z + 0.36, PALETTE.maroon);
+
+  // Sculpted cream, maroon-velvet & gold display plinth (y = 0.14..0.84)
+  S.box(x, 0.19, z - 0.02, 0.78, 0.1, 0.62, PALETTE.gold);
+  S.box(x, 0.49, z - 0.02, 0.66, 0.52, 0.52, PALETTE.paper);
+  S.box(x, 0.49, z + 0.245, 0.54, 0.36, 0.018, PALETTE.maroon);
+  for (const sx of [-1, 1]) {
+    for (const sz of [-1, 1]) S.box(x + sx * 0.33, 0.49, z - 0.02 + sz * 0.26, 0.06, 0.52, 0.06, PALETTE.gold);
+  }
+  S.box(x, 0.79, z - 0.02, 0.82, 0.09, 0.66, PALETTE.gold);
+  S.box(x, 0.85, z - 0.02, 0.72, 0.04, 0.56, PALETTE.maroon);
+  // Front showcase sign plaque
+  rig.root.quad(R.sign_buy, x, 0.49, z + 0.258, 0.5, 0.24);
+
+  // Hero Reality Check E-Book Tablet Edition resting on an illuminated golden cradle
+  const tilt = -0.14;
+  const CW = 0.54;
+  const CH = CW / COVER_ASPECT; // 0.8289 m
+  const cy = 1.32;
+  const cz = z - 0.06;
+  const cradleM = new THREE.Matrix4().compose(
+    new THREE.Vector3(x, cy, cz),
+    new THREE.Quaternion().setFromEuler(new THREE.Euler(tilt, 0, 0)),
+    new THREE.Vector3(1, 1, 1),
+  );
+  const tab = new VoxelBuilder();
+  tab.box(0, 0, -0.028, CW + 0.08, CH + 0.08, 0.056, PALETTE.ink);
+  const b = 0.042;
+  tab.box(0, CH / 2 + b / 2, 0.005, CW + b * 2 + 0.02, b, 0.068, PALETTE.gold);
+  tab.box(0, -CH / 2 - b / 2, 0.005, CW + b * 2 + 0.02, b, 0.068, PALETTE.gold);
+  tab.box(-CW / 2 - b / 2, 0, 0.005, b, CH + 0.02, 0.068, PALETTE.gold);
+  tab.box(CW / 2 + b / 2, 0, 0.005, b, CH + 0.02, 0.068, PALETTE.gold);
+  // Soft warm e-ink halo border on the bezel edge & gold home-dot
+  tab.box(0, -CH / 2 - b * 0.5, 0.04, 0.09, 0.018, 0.008, EINK);
+  S.merge(tab, cradleM);
+  // Real Reality Check cover quad (merged into ONE artQuads mesh!)
+  coverQuads.push({
+    w: CW,
+    h: CH,
+    m: new THREE.Matrix4().multiplyMatrices(cradleM, new THREE.Matrix4().makeTranslation(0, 0, 0.006)),
+  });
+  // Support cradle ledge & rear gold easel strut
+  S.box(x, 0.885, z + 0.03, CW + 0.14, 0.05, 0.14, PALETTE.goldDeep);
+  S.add(UNIT_BOX, PALETTE.goldDeep, boxMatrix(x, 1.12, z - 0.24, 0.1, 0.52, 0.04, 0.28));
+
+  // KPay Instant-Unlock Badge on miniature easel beside the hero tablet
+  const kx = x + 0.32, kz = z + 0.2;
+  S.add(UNIT_BOX, PALETTE.goldDeep, boxMatrix(kx, 0.96, kz, 0.26, 0.19, 0.024, -0.22, -0.25, 0));
+  const kpayM = rig.part({ name: 'kpayBadge', position: [kx, 0.96, kz], rotation: [-0.22, -0.25, 0] });
+  kpayM.quad(R.kpay_badge, 0, 0, 0.014, 0.24, 0.165);
+
+  // Warm ambient glow halo behind the showcase tablet & overhead golden sparkles
+  const aura = rig.part({ name: 'buyAura', position: [x, cy + 0.04, cz - 0.08] });
+  aura.quad(R.eink_glow, 0, 0, 0, 1.25, 1.45);
+  rig.root.quad(R.pool, x, 0.875, z + 0.04, 0.9, 0.65, { rx: -Math.PI / 2, color: '#FFE9B8' });
+
+  const spks = [0, 1, 2].map((i) => {
+    const p = rig.part({ name: `buySpk${i}`, position: [x, cy + 0.18, cz] });
+    p.quad(R.sparkle, 0, 0, 0, 0.19, 0.19);
+    return p;
+  });
+  return { aura, spks, kpayM, spring: createSpring(120, 10) };
+}
+
+// ---------- Station 3: East Returning-Reader Nook (eb-read) ----------
+function buildReadingNook(S, rig, R) {
+  buildRug(rig.root, 1.54, 3.36, -1.56, 1.32, '#C8DCEA', PALETTE.gold, PALETTE.white);
+
+  // Walnut reading desk (x: 2.02, z: -0.82, top y = 0.68)
+  const { x: dx, z: dz } = NOOK_DESK;
+  const top = 0.68;
+  S.box(dx, 0.03, dz, 0.44, 0.06, 0.44, PALETTE.woodDark);
+  S.box(dx, 0.34, dz, 0.11, 0.58, 0.11, PALETTE.woodDark);
+  S.box(dx, top - 0.025, dz, 0.56, 0.05, 0.54, WOOD_TOP);
+  S.box(dx, top - 0.055, dz, 0.52, 0.024, 0.5, PALETTE.gold);
+
+  // Tilted smartphone / reader sync dock on the desk (wakes up on approach!)
+  S.box(dx - 0.04, top + 0.015, dz - 0.02, 0.24, 0.03, 0.18, PALETTE.goldDeep);
+  const phone = rig.part({ name: 'readPhone', position: [dx - 0.04, top + 0.03, dz - 0.04], rotation: [-0.24, 0.18, 0] });
+  phone.box(0, 0.16, -0.012, 0.22, 0.32, 0.024, PALETTE.ink);
+  phone.box(0, 0.16, -0.015, 0.24, 0.34, 0.014, PALETTE.gold);
+  phone.quad(R.screen_read, 0, 0.16, 0.002, 0.195, 0.27);
+
+  // Sync sparkle icons popping gently over the reader phone
+  const syncSpks = [0, 1].map((i) => {
+    const p = rig.part({ name: `syncSpk${i}`, parent: phone, position: [i ? 0.12 : -0.12, 0.34, 0.04] });
+    p.quad(R.sparkle, 0, 0, 0, 0.14, 0.14);
+    return p;
+  });
+
+  // Mini book stack + brass candle dish on the desk beside the phone
+  S.box(dx + 0.16, top + 0.02, dz + 0.12, 0.18, 0.04, 0.14, PALETTE.maroon, 0.16);
+  S.box(dx + 0.15, top + 0.055, dz + 0.12, 0.16, 0.03, 0.12, PALETTE.cream, -0.1);
+  S.box(dx - 0.16, top + 0.025, dz + 0.16, 0.08, 0.05, 0.08, PALETTE.gold);
+  S.box(dx - 0.16, top + 0.058, dz + 0.16, 0.05, 0.02, 0.05, EINK);
+
+  // Plush maroon velvet reading armchair (seat top = 0.45 m — Day 15 khinmayMid sits right here!)
+  buildArmchair(S, NOOK_CHAIR.x, NOOK_CHAIR.z, NOOK_CHAIR.ry);
+
+  // Tall warm brass floor lamp behind the armchair (x = 3.16, z = -1.36)
+  const lx = 3.16, lz = -1.36;
+  S.box(lx, 0.03, lz, 0.32, 0.06, 0.32, PALETTE.bronze);
+  S.box(lx, 0.075, lz, 0.22, 0.03, 0.22, PALETTE.gold);
+  S.box(lx, 0.92, lz, 0.048, 1.66, 0.048, PALETTE.goldDeep);
+  S.box(lx, 1.76, lz, 0.1, 0.06, 0.1, PALETTE.gold);
+  S.box(lx, 1.9, lz, 0.38, 0.28, 0.38, '#FBF3E0');
+  S.box(lx, 2.04, lz, 0.32, 0.04, 0.32, PALETTE.maroon);
+  S.box(lx, 1.76, lz, 0.4, 0.025, 0.4, PALETTE.gold);
+  rig.root.quad(R.bulb, lx, 1.72, lz + 0.14, 0.26, 0.26, { color: '#FFE7A8' });
+  rig.root.quad(R.pool, lx - 0.3, 0.018, lz + 0.42, 1.25, 1.15, { rx: -Math.PI / 2, color: '#FFE9B8' });
+
+  // Hanging gold "Continue Reading" sign banner on slim stand behind desk
+  const bx = 1.84, bz = -1.24;
+  S.box(bx, 0.88, bz, 0.032, 1.76, 0.032, PALETTE.gold);
+  S.box(bx, 1.78, bz, 0.065, 0.065, 0.065, PALETTE.goldDeep);
+  S.box(bx + 0.42, 1.72, bz, 0.84, 0.026, 0.026, PALETTE.gold);
+  const banner = rig.part({ name: 'readBanner', position: [bx + 0.42, 1.71, bz] });
+  banner.box(0, -0.22, -0.004, 0.78, 0.37, 0.022, '#FBF5E8');
+  banner.quad(R.sign_read, 0, -0.22, 0.008, 0.76, 0.36);
+
+  return { phone, syncSpks, banner, spring: createSpring(120, 10) };
+}
+
+// ---------- Station 4: Back-Wall 23-Chapter Gallery Board & Credenza (eb-chapters) ----------
+function buildChaptersGallery(S, rig, R, coverQuads) {
+  const x0 = BOARD_X - BOARD_W / 2;
+  const x1 = BOARD_X + BOARD_W / 2;
   const y0 = BOARD_Y - BOARD_H / 2;
   const y1 = BOARD_Y + BOARD_H / 2;
-  S.boxMin(-BOARD_W / 2 - 0.1, y0 - 0.1, -3.99, BOARD_W / 2 + 0.1, y1 + 0.1, -3.95, PALETTE.woodDark);
-  S.boxMin(-BOARD_W / 2 - 0.03, y0 - 0.03, -3.99, BOARD_W / 2 + 0.03, y1 + 0.03, -3.94, PALETTE.gold);
-  S.boxMin(-BOARD_W / 2, y0, -3.99, BOARD_W / 2, y1, -3.935, BOARD);
-  S.boxMin(-BOARD_W / 2 - 0.12, y0 - 0.16, -3.99, BOARD_W / 2 + 0.12, y0 - 0.1, -3.84, PALETTE.woodDark); // chalk ledge
-  S.box(-0.9, y0 - 0.085, -3.9, 0.16, 0.03, 0.03, PALETTE.white);
-  S.box(-0.62, y0 - 0.085, -3.9, 0.12, 0.03, 0.03, PALETTE.rose);
-  rig.root.quad(R.board, 0, BOARD_Y, BOARD_Z + 0.001, BOARD_W, BOARD_H);
-  // 3D bars rising from the chalk baseline
-  const base = y1 - (262 / 352) * BOARD_H;
-  const maxH = 0.52;
-  return TABLES.map((tb, i) => {
-    const bx = ((i - 1) * BOARD_W) / 3;
-    const hgt = Math.max(0.05, (maxH * tb.cards) / 30);
-    const bar = rig.part({ name: `bar_${tb.key}`, position: [bx, base, BOARD_Z] });
-    bar.boxMin(-0.17, 0, 0, 0.17, hgt, 0.07, tb.bar);
-    bar.boxMin(-0.17, hgt - 0.012, 0.0, 0.17, hgt, 0.072, PALETTE.white, { outline: false });
-    const cap = rig.part({ name: `cap_${tb.key}`, parent: bar, position: [0, hgt + 0.09, 0.08] });
-    cap.quad(R.sparkle, 0, 0, 0, 0.15, 0.15);
+
+  // Ornate dark-wood & gold gallery frame + corner rosettes
+  S.boxMin(x0 - 0.1, y0 - 0.1, -3.99, x1 + 0.1, y1 + 0.1, -3.945, PALETTE.woodDark);
+  S.boxMin(x0 - 0.035, y0 - 0.035, -3.99, x1 + 0.035, y1 + 0.035, -3.938, PALETTE.gold);
+  S.boxMin(x0, y0, -3.99, x1, y1, -3.934, BOARD);
+  for (const sx of [x0 - 0.06, x1 + 0.06]) {
+    for (const sy of [y0 - 0.06, y1 + 0.06]) S.box(sx, sy, -3.93, 0.12, 0.12, 0.05, PALETTE.goldDeep);
+  }
+  // Brass gallery picture-light bar across top of the board
+  S.box(BOARD_X, y1 + 0.15, -3.86, 1.4, 0.04, 0.08, PALETTE.gold);
+  for (const gx of [-0.46, 0.46]) S.box(BOARD_X + gx, y1 + 0.15, -3.92, 0.04, 0.04, 0.14, PALETTE.goldDeep);
+  rig.root.quad(R.bulb, BOARD_X - 0.36, y1 + 0.12, -3.82, 0.22, 0.16, { color: '#FFE7A8' });
+  rig.root.quad(R.bulb, BOARD_X + 0.36, y1 + 0.12, -3.82, 0.22, 0.16, { color: '#FFE7A8' });
+  rig.root.quad(R.chapters, BOARD_X, BOARD_Y, BOARD_Z + 0.002, BOARD_W, BOARD_H);
+
+  // Two 3D animated golden chapter-ribbon bars (Part 1 & Part 2) + spinning stars
+  const partBars = [
+    { key: 'p1', bx: BOARD_X - 0.72, color: PALETTE.gold },
+    { key: 'p2', bx: BOARD_X + 0.72, color: '#E8A0A8' },
+  ].map((pb) => {
+    const bar = rig.part({ name: `chapBar_${pb.key}`, position: [pb.bx, y0 + 0.18, BOARD_Z + 0.01] });
+    bar.box(0, 0, 0.015, 0.96, 0.032, 0.025, pb.color);
+    const star = rig.part({ name: `chapStar_${pb.key}`, parent: bar, position: [0.52, 0.01, 0.03] });
+    star.quad(R.sparkle, 0, 0, 0, 0.14, 0.14);
     const spring = createSpring(130, 10);
-    spring.x = 1; // full height from the start; they regrow when Maya steps up
-    return { bar, cap, spring, delay: 0 };
+    spring.x = 1;
+    return { bar, star, spring, delay: 0 };
   });
-}
 
-function buildCounter(S, rig, R, room) {
-  const cx = 2.55;
-  const cz = -3.6;
-  room.place(counter({ w: 1.6, d: 0.62, h: 0.98, top: PALETTE.gold, body: PALETTE.maroon, panel: PALETTE.cream }), cx, cz);
-  const top = 0.98;
-  rig.root.quad(R.coffee, cx, 0.57, cz + 0.31 + 0.025, 0.66, 0.24);
-  // espresso machine
-  const ex = 2.08;
-  S.box(ex, top + 0.2, cz - 0.05, 0.4, 0.4, 0.32, PALETTE.bronze);
-  S.box(ex, top + 0.41, cz - 0.05, 0.42, 0.03, 0.34, PALETTE.goldDeep);
-  S.box(ex, top + 0.27, cz + 0.13, 0.3, 0.08, 0.06, PALETTE.ink);
-  S.box(ex, top + 0.22, cz + 0.16, 0.06, 0.05, 0.06, PALETTE.ink);
-  S.box(ex, top + 0.02, cz + 0.12, 0.34, 0.04, 0.12, PALETTE.ink);
-  S.box(ex + 0.1, top + 0.08, cz + 0.13, 0.07, 0.07, 0.07, MUG);
-  S.box(ex - 0.1, top + 0.08, cz + 0.13, 0.07, 0.07, 0.07, MUG);
-  for (let i = 0; i < 3; i++) S.box(ex - 0.12 + i * 0.12, top + 0.44, cz - 0.1, 0.07, 0.04, 0.07, MUG);
-  // cake stand
-  const kx = 3.0;
-  S.box(kx, top + 0.06, cz, 0.06, 0.12, 0.06, PALETTE.gold);
-  S.box(kx, top + 0.125, cz, 0.36, 0.015, 0.36, PALETTE.white);
-  S.box(kx, top + 0.18, cz, 0.24, 0.1, 0.24, PALETTE.cream);
-  S.box(kx, top + 0.19, cz, 0.245, 0.025, 0.245, PALETTE.rose);
-  S.box(kx, top + 0.245, cz, 0.04, 0.04, 0.04, PALETTE.maroon);
-  // cup tower
-  for (let i = 0; i < 4; i++) S.box(2.55, top + 0.04 + i * 0.07, cz + 0.02, 0.09 - i * 0.005, 0.06, 0.09 - i * 0.005, i % 2 ? PALETTE.cream : MUG);
-  // wall rail and two pendant lamps that sway
-  S.boxMin(1.85, 2.88, -3.99, 3.3, 2.94, -3.88, PALETTE.gold);
-  const lamps = [];
-  for (const lx of [1.98, 3.14]) {
-    S.box(lx, 2.91, -3.75, 0.05, 0.05, 0.3, PALETTE.goldDeep);
-    const lamp = rig.part({ name: 'pendant', position: [lx, 2.9, -3.6] });
-    lamp.box(0, -0.31, 0, 0.022, 0.62, 0.022, PALETTE.goldDeep, { outline: false });
-    lamp.box(0, -0.66, 0, 0.12, 0.08, 0.12, PALETTE.maroon);
-    lamp.box(0, -0.74, 0, 0.24, 0.09, 0.24, PALETTE.maroon);
-    lamp.box(0, -0.82, 0, 0.32, 0.07, 0.32, PALETTE.maroon);
-    lamp.box(0, -0.86, 0, 0.33, 0.02, 0.33, PALETTE.gold);
-    lamp.quad(R.bulb, 0, -0.9, 0.12, 0.2, 0.2, { color: '#FFE7A8' });
-    lamps.push(lamp);
-    rig.root.quad(R.pool, lx, top + 0.004, cz, 0.6, 0.45, { rx: -Math.PI / 2, color: '#FFE9B8' });
-  }
-  const steam = [];
+  // Low walnut display credenza under the board (stops at x = +0.34 so Ko Phyo's brazier at x = 1.7 is wide open!)
+  const cx0 = -2.56, cx1 = 0.34, ch = 0.56;
+  S.boxMin(cx0, 0, -3.98, cx1, ch, -3.56, WOOD_WARM);
+  S.boxMin(cx0 - 0.02, ch - 0.04, -3.98, cx1 + 0.02, ch, -3.54, PALETTE.woodDark);
+  S.boxMin(cx0, 0, -3.56, cx1, 0.06, -3.545, PALETTE.goldDeep);
   for (let i = 0; i < 3; i++) {
-    const p = rig.part({ name: `esteam${i}`, position: [ex + 0.16, top + 0.45, cz - 0.05] });
-    p.box(0, 0, 0, 0.06, 0.05, 0.06, PALETTE.white, { outline: false });
-    p.box(-0.02, 0.03, 0, 0.045, 0.04, 0.045, PALETTE.white, { outline: false });
-    steam.push(p);
+    const px = cx0 + 0.48 + i * 0.96;
+    S.box(px, ch * 0.5, -3.555, 0.82, 0.36, 0.014, PALETTE.cream);
+    S.box(px, ch * 0.52, -3.542, 0.08, 0.025, 0.018, PALETTE.gold);
   }
-  // two bar stools
-  for (const sx of [2.15, 2.95]) {
-    S.box(sx, 0.02, -2.78, 0.3, 0.04, 0.3, PALETTE.goldDeep);
-    S.box(sx, 0.3, -2.78, 0.06, 0.56, 0.06, PALETTE.goldDeep);
-    S.box(sx, 0.28, -2.78, 0.24, 0.025, 0.24, PALETTE.gold);
-    S.box(sx, 0.6, -2.78, 0.34, 0.05, 0.34, PALETTE.woodDark);
-    S.box(sx, 0.64, -2.78, 0.3, 0.04, 0.3, PALETTE.maroon);
+  // Keepsake book stack + mini easel with real cover on credenza top
+  const bookCols = [PALETTE.maroon, PALETTE.gold, '#2F5A4C', PALETTE.cream];
+  for (let i = 0; i < 4; i++) {
+    S.box(-2.12 + (i % 2) * 0.02, ch + 0.022 + i * 0.044, -3.76, 0.28, 0.04, 0.2, bookCols[i], (i - 1.5) * 0.08);
   }
-  return { lamps, steam };
+  // Mini framed Reality Check display copy on credenza right
+  const mw = 0.22, mh = mw / COVER_ASPECT;
+  const miniM = new THREE.Matrix4().compose(
+    new THREE.Vector3(-0.08, ch + mh / 2 + 0.03, -3.74),
+    new THREE.Quaternion().setFromEuler(new THREE.Euler(-0.18, -0.22, 0)),
+    new THREE.Vector3(1, 1, 1),
+  );
+  const mb = new VoxelBuilder();
+  mb.box(0, 0, -0.014, mw + 0.03, mh + 0.03, 0.028, PALETTE.gold);
+  S.merge(mb, miniM);
+  coverQuads.push({ w: mw, h: mh, m: new THREE.Matrix4().multiplyMatrices(miniM, new THREE.Matrix4().makeTranslation(0, 0, 0.005)) });
+  // Small decorative open golden bookends in the middle of the credenza
+  for (let k = 0; k < 5; k++) {
+    S.box(-1.38 + k * 0.09, ch + 0.12, -3.76, 0.075, 0.24 - (k % 2) * 0.03, 0.18, bookCols[(k + 1) % 4]);
+  }
+  S.box(-1.46, ch + 0.08, -3.76, 0.04, 0.16, 0.16, PALETTE.gold);
+  S.box(-0.92, ch + 0.08, -3.76, 0.04, 0.16, 0.16, PALETTE.gold);
+
+  return partBars;
 }
 
-function buildIconShelf(S, rig, R) {
-  const cx = -2.62;
-  const cz = -3.62;
-  const w = 1.36;
-  const d = 0.48;
-  const h = 0.56;
-  S.boxMin(cx - w / 2, 0, cz - d / 2, cx + w / 2, h, cz + d / 2, PALETTE.wood);
-  S.boxMin(cx - w / 2 - 0.02, h - 0.04, cz - d / 2 - 0.02, cx + w / 2 + 0.02, h, cz + d / 2 + 0.02, PALETTE.woodDark);
-  for (const k of [-1, 1]) {
-    S.boxMin(cx + k * 0.33 - 0.29, 0.07, cz + d / 2, cx + k * 0.33 + 0.29, h - 0.1, cz + d / 2 + 0.012, PALETTE.cream);
-    S.box(cx + k * 0.07, 0.3, cz + d / 2 + 0.02, 0.03, 0.08, 0.02, PALETTE.gold);
-  }
-  const cube = (p, x, y, z, s, kind, ry = 0) => {
-    const bg = { heart: PALETTE.rose, play: PALETTE.maroon, chat: PALETTE.gold, plane: PALETTE.skyTop, hash: PALETTE.ink, star: PALETTE.paper }[kind];
-    p.box(x, y, z, s, s, s, bg, { ry });
-    const off = s / 2 + 0.003;
-    p.quad(R[`icon_${kind}`], x + Math.sin(ry) * off, y, z + Math.cos(ry) * off, s * 0.98, s * 0.98, { ry, lit: true });
-  };
-  // resting blocks on the shelf
-  cube(rig.root, cx - 0.44, h + 0.16, cz + 0.02, 0.32, 'heart', 0.12);
-  cube(rig.root, cx - 0.08, h + 0.15, cz + 0.06, 0.3, 'play', -0.1);
-  cube(rig.root, cx - 0.27, h + 0.45, cz + 0.02, 0.27, 'star', 0.22);
-  // floating blocks (bob and turn)
-  const floaters = [
-    ['chat', cx + 0.34, h + 0.5, cz + 0.1, 0.3],
-    ['plane', cx + 0.62, h + 0.86, cz + 0.06, 0.27],
-    ['hash', cx + 0.12, h + 0.98, cz - 0.02, 0.25],
-  ].map(([kind, x, y, z, s], i) => {
-    const p = rig.part({ name: `float_${kind}`, position: [x, y, z] });
-    cube(p, 0, 0, 0, s, kind);
-    return { p, phase: i * 2.1 };
-  });
-  // the calendar on the wall above (its top sheet lifts in a breeze)
-  const kx = cx;
-  const ky = 1.78;
-  S.boxMin(kx - 0.42, ky - 0.5, -3.99, kx + 0.42, ky + 0.5, -3.965, PALETTE.woodDark);
-  rig.root.quad(R.calendar, kx, ky - 0.03, -3.962, 0.76, 0.76 * (236 / 200));
-  for (const rx of [-0.24, 0, 0.24]) {
-    S.box(kx + rx, ky + 0.43, -3.95, 0.05, 0.08, 0.03, PALETTE.gold);
-  }
-  const sheet = rig.part({ name: 'calSheet', position: [kx, ky + 0.42, -3.955] });
-  sheet.quad(R.calendar, 0, -0.45, 0.0005, 0.76, 0.76 * (236 / 200));
-  return { floaters, sheet };
-}
-
-function buildStringLights(S, rig, R) {
-  const bulbs = [];
-  const hooks = [-3.3, -1.65, 0, 1.65, 3.3];
-  for (let k = 0; k < hooks.length - 1; k++) {
-    const a = hooks[k];
-    const b = hooks[k + 1];
-    const n = 5;
-    let prev = null;
-    for (let i = 0; i <= n; i++) {
-      const u = i / n;
-      const x = a + (b - a) * u;
-      const y = 2.5 - Math.sin(u * Math.PI) * 0.1;
-      const pt = [x, y, -3.86];
-      if (prev) S.add(UNIT_BOX, PALETTE.ink, segmentMatrix(prev, pt, 0.012));
-      prev = pt;
-      if (i > 0 && i < n) {
-        const p = rig.part({ name: 'fairy', position: [x, y - 0.045, -3.85] });
-        p.quad(R.bulb, 0, 0, 0, 0.12, 0.12, { color: i % 2 ? '#FFE3A0' : '#FFD2C0' });
-        bulbs.push(p);
-      }
+// ---------- Back-Left Carved Bookcase, Ivy Vine, Wall Clock & High Shelf ----------
+function buildBackLeftShelf(S, rig, R) {
+  const x0 = -3.44, x1 = -2.66, zb = -3.99, zf = -3.56;
+  const h = 2.02;
+  S.boxMin(x0, 0, zb, x1, h, zb + 0.04, PALETTE.woodDark);
+  for (const sx of [x0, x1 - 0.05]) S.boxMin(sx, 0, zb, sx + 0.05, h, zf, WOOD_WARM);
+  S.boxMin(x0 - 0.02, h, zb, x1 + 0.02, h + 0.06, zf + 0.03, PALETTE.gold);
+  const spines = [PALETTE.maroon, PALETTE.goldDeep, '#2F5DB3', '#3E6B4F', PALETTE.cream, '#8E5A3C', PALETTE.ink];
+  const shelfYs = [0.14, 0.52, 0.9, 1.28, 1.66];
+  shelfYs.forEach((sy, rIdx) => {
+    S.boxMin(x0, sy - 0.03, zb, x1, sy, zf, WOOD_WARM);
+    S.boxMin(x0, sy - 0.015, zf - 0.006, x1, sy, zf + 0.008, PALETTE.gold);
+    let bx = x0 + 0.08;
+    for (let k = 0; k < 8 && bx < x1 - 0.12; k++) {
+      const bw = 0.055 + ((rIdx * 3 + k) % 3) * 0.014;
+      const bh = 0.21 + ((rIdx * 5 + k * 7) % 4) * 0.028;
+      S.boxMin(bx, sy, zb + 0.06, bx + bw, sy + bh, zf - 0.04, spines[(rIdx * 4 + k) % spines.length]);
+      if ((k + rIdx) % 2 === 0) S.boxMin(bx + 0.006, sy + bh * 0.72, zf - 0.04, bx + bw - 0.006, sy + bh * 0.78, zf - 0.034, PALETTE.gold);
+      bx += bw + 0.012;
     }
-    S.box(a, 2.5, -3.9, 0.05, 0.05, 0.08, PALETTE.gold);
+  });
+  // Potted trailing ivy vine on top of the bookcase
+  const px = (x0 + x1) / 2;
+  S.box(px, h + 0.12, -3.76, 0.18, 0.14, 0.18, PALETTE.maroon);
+  S.box(px, h + 0.2, -3.76, 0.21, 0.03, 0.21, PALETTE.gold);
+  S.box(px, h + 0.26, -3.76, 0.24, 0.12, 0.2, PALETTE.leaf);
+  const vines = [px - 0.12, px + 0.12].map((vx, i) => {
+    const v = rig.part({ name: `vine${i}`, position: [vx, h + 0.2, -3.65] });
+    for (let k = 0; k < 4 + i; k++) {
+      v.box(k % 2 ? 0.012 : -0.012, -0.05 - k * 0.075, 0, 0.008, 0.08, 0.008, PALETTE.leafDark, NO_LINE);
+      v.box(k % 2 ? 0.03 : -0.03, -0.06 - k * 0.075, 0.01, 0.05, 0.035, 0.035, k % 2 ? PALETTE.leaf : PALETTE.leafDark);
+    }
+    return v;
+  });
+
+  // Boutique wall clock cleanly above bookcase
+  const cx = -3.05, cy = 2.66;
+  for (const rz of [0, Math.PI / 4]) S.add(UNIT_BOX, PALETTE.goldDeep, boxMatrix(cx, cy, -3.985, 0.34, 0.34, 0.03, 0, 0, rz));
+  rig.root.quad(R.clock, cx, cy, -3.966, 0.3, 0.3);
+  const hour = rig.part({ name: 'clockHour', position: [cx, cy, -3.96] });
+  hour.box(0, 0.035, 0, 0.018, 0.08, 0.006, PALETTE.ink, NO_LINE);
+  const minute = rig.part({ name: 'clockMin', position: [cx, cy, -3.957] });
+  minute.box(0, 0.05, 0, 0.012, 0.11, 0.006, PALETTE.maroon, NO_LINE);
+  rig.root.box(cx, cy, -3.954, 0.022, 0.022, 0.006, PALETTE.gold, NO_LINE);
+
+  // High floating display wall shelves above the brazier bay (x: 0.72..1.72, y: 1.66 & 2.08 — completely above floor!)
+  for (const sy of [1.66, 2.08]) {
+    S.boxMin(0.72, sy - 0.03, -3.99, 1.68, sy, -3.76, WOOD_WARM);
+    S.boxMin(0.72, sy - 0.015, -3.77, 1.68, sy, -3.752, PALETTE.gold);
   }
-  S.box(3.3, 2.5, -3.9, 0.05, 0.05, 0.08, PALETTE.gold);
-  return bulbs;
+  for (let i = 0; i < 6; i++) S.box(0.84 + i * 0.09, 1.79, -3.86, 0.07, 0.24 - (i % 2) * 0.03, 0.16, spines[i % spines.length]);
+  S.box(1.5, 1.74, -3.86, 0.12, 0.14, 0.12, PALETTE.cream);
+  S.box(1.5, 1.82, -3.86, 0.13, 0.025, 0.13, PALETTE.gold);
+  S.box(0.96, 2.18, -3.86, 0.24, 0.18, 0.04, PALETTE.maroon);
+  S.box(0.96, 2.18, -3.835, 0.18, 0.12, 0.01, EINK);
+  for (let i = 0; i < 4; i++) S.box(1.26 + i * 0.085, 2.2, -3.86, 0.068, 0.22 - (i % 2) * 0.04, 0.16, spines[(i + 2) % spines.length]);
+
+  return { vines, clock: { hour, minute } };
 }
 
-const AFRAME = { x: -1.78, z: 3.12 };
+// ---------- Back-Right Boutique Reception & Tea Counter (Day 15 breadTray compatible!) ----------
+function buildReceptionCounter(S, rig, R, room) {
+  const { x: cx, z: cz, w, d, h: top } = COUNTER;
+  room.place(counter({ w, d, h: top, top: PALETTE.gold, body: PALETTE.maroon, panel: PALETTE.cream }), cx, cz);
+  S.boxMin(cx - w / 2, 0, cz + d / 2, cx + w / 2, 0.07, cz + d / 2 + 0.02, PALETTE.goldDeep);
+  rig.root.quad(R.counter_sign, cx, 0.56, cz + d / 2 + 0.025, 0.72, 0.25);
 
+  // Left half of counter top (x: 2.12..2.56): sleek boutique register tablet, service bell & bud vase.
+  // Right half (x: 2.66..3.34) stays completely flat & open at y = 0.98 for Day 15's bread tray at (3.0, 0.98, -3.55)!
+  const tx = 2.26;
+  S.box(tx, top + 0.02, cz - 0.02, 0.28, 0.04, 0.2, PALETTE.woodDark);
+  S.add(UNIT_BOX, PALETTE.ink, boxMatrix(tx, top + 0.15, cz - 0.05, 0.28, 0.2, 0.024, -0.32));
+  S.add(UNIT_BOX, EINK, boxMatrix(tx, top + 0.15, cz - 0.036, 0.23, 0.15, 0.008, -0.32));
+  // Tiny brass boutique bell
+  S.box(2.5, top + 0.015, cz + 0.14, 0.09, 0.03, 0.09, PALETTE.goldDeep);
+  S.box(2.5, top + 0.045, cz + 0.14, 0.07, 0.04, 0.07, PALETTE.gold);
+  S.box(2.5, top + 0.07, cz + 0.14, 0.024, 0.02, 0.024, PALETTE.goldDeep);
+  // Small bud vase with a rose on back-left corner
+  S.box(2.14, top + 0.06, cz - 0.22, 0.07, 0.12, 0.07, PALETTE.cream);
+  S.box(2.14, top + 0.16, cz - 0.22, 0.015, 0.08, 0.015, PALETTE.leafDark);
+  S.box(2.14, top + 0.22, cz - 0.22, 0.07, 0.055, 0.07, PALETTE.rose);
+
+  // Wall plaque above the counter (sits cleanly below the high pendant lamps so all text reads clearly)
+  const my = 1.56, mw = 0.88, mh = mw * (176 / 280);
+  S.boxMin(cx - mw / 2 - 0.05, my - mh / 2 - 0.05, -4.0, cx + mw / 2 + 0.05, my + mh / 2 + 0.05, -3.965, PALETTE.woodDark);
+  S.boxMin(cx - mw / 2 - 0.02, my - mh / 2 - 0.02, -4.0, cx + mw / 2 + 0.02, my + mh / 2 + 0.02, -3.96, PALETTE.gold);
+  rig.root.quad(R.wall_plaque, cx, my, -3.956, mw, mh);
+
+  S.boxMin(2.02, 2.88, -3.99, 3.4, 2.94, -3.88, PALETTE.gold);
+  const lamps = [];
+  for (const lx of [2.12, 3.3]) {
+    S.box(lx, 2.91, -3.79, 0.05, 0.05, 0.22, PALETTE.goldDeep);
+    const lamp = rig.part({ name: 'pendant', position: [lx, 2.9, -3.68] });
+    lamp.box(0, -0.14, 0, 0.022, 0.28, 0.022, PALETTE.goldDeep, NO_LINE);
+    lamp.box(0, -0.32, 0, 0.12, 0.07, 0.12, PALETTE.maroon);
+    lamp.box(0, -0.39, 0, 0.22, 0.08, 0.22, PALETTE.maroon);
+    lamp.box(0, -0.46, 0, 0.29, 0.06, 0.29, PALETTE.maroon);
+    lamp.box(0, -0.5, 0, 0.3, 0.02, 0.3, PALETTE.gold);
+    lamp.quad(R.bulb, 0, -0.54, 0.1, 0.19, 0.19, { color: '#FFE7A8' });
+    lamps.push(lamp);
+    rig.root.quad(R.pool, lx, top + 0.004, cz, 0.56, 0.42, { rx: -Math.PI / 2, color: '#FFE9B8' });
+  }
+  return { lamps };
+}
+
+// ---------- Front-Right Cozy Reading Lounge (Day 15 guests' table & poufs compatible!) ----------
+function buildLounge(S, p) {
+  const { x, z } = LOUNGE;
+  // Soft layered oval rug
+  [[1.52, PALETTE.gold], [1.4, '#E8D2B5'], [0.96, PALETTE.maroon], [0.84, '#E8D2B5'], [0.38, PALETTE.gold]].forEach(([s, c], i) => {
+    const hgt = 0.004 + i * 0.0014;
+    p.box(x, hgt / 2, z, s * 0.94, hgt, s * 0.56, c, NO_LINE);
+    p.box(x, hgt / 2, z, s * 0.76, hgt, s * 0.72, c, NO_LINE);
+  });
+
+  // Warm-wood & gold-trimmed low reading-lounge table: tabletop spans x: 2.16..3.00, z: 2.48..3.24,
+  // top surface EXACTLY y = 0.38 m, kept flat and unobstructed for Day 15 teapot, cups & weave lamp!
+  S.box(x, 0.02, z, 0.44, 0.04, 0.4, PALETTE.woodDark);
+  S.box(x, 0.175, z, 0.1, 0.29, 0.1, PALETTE.woodDark);
+  S.box(x, 0.325, z, 0.76, 0.024, 0.68, PALETTE.gold);
+  S.boxMin(x - 0.42, 0.335, z - 0.38, x + 0.42, 0.38, z + 0.38, WOOD_TOP);
+  // Subtle recessed gold border strip flush on tabletop edge (leaves center clear for Day 15 props)
+  p.boxMin(x - 0.38, 0.379, z - 0.34, x + 0.38, 0.381, z - 0.325, PALETTE.gold, NO_LINE);
+  p.boxMin(x - 0.38, 0.379, z + 0.325, x + 0.38, 0.381, z + 0.34, PALETTE.gold, NO_LINE);
+
+  // Two plush round velvet floor poufs (seat top EXACTLY y = 0.30 m for Day 15 maungnge & eimon!)
+  const poufBody = new THREE.CylinderGeometry(0.22, 0.24, 0.26, 12);
+  const poufTop = new THREE.CylinderGeometry(0.205, 0.215, 0.04, 12);
+  const poufCord = new THREE.CylinderGeometry(0.226, 0.226, 0.016, 12);
+  for (const [px, pz, c] of [[1.96, 2.98, PALETTE.maroon], [3.12, 2.66, PALETTE.gold]]) {
+    S.add(poufBody, c, boxMatrix(px, 0.13, pz, 1, 1, 1));
+    S.add(poufTop, PALETTE.cream, boxMatrix(px, 0.28, pz, 1, 1, 1));
+    S.add(poufCord, PALETTE.goldDeep, boxMatrix(px, 0.258, pz, 1, 1, 1));
+  }
+  poufBody.dispose();
+  poufTop.dispose();
+  poufCord.dispose();
+  // Decorative book stack tucked neatly beside the east corner
+  for (let k = 0; k < 4; k++) {
+    S.box(3.22, 0.012 + k * 0.024, 3.24, 0.24 - (k % 2) * 0.02, 0.022, 0.18, [PALETTE.maroon, PALETTE.paper, '#2F5A4C', PALETTE.gold][k], (k - 1.5) * 0.14);
+  }
+}
+
+// ---------- Front-Left Welcome E-Book Stand & String Lights & Gliding Motes ----------
 function buildAFrame(S, rig, R) {
   const { x, z } = AFRAME;
   const lean = 0.17;
@@ -693,468 +757,281 @@ function buildAFrame(S, rig, R) {
     S.add(UNIT_BOX, PALETTE.woodDark, boxMatrix(x + sx, legY, z + 0.085, 0.05, hgt * 1.02, 0.04, -lean));
     S.add(UNIT_BOX, PALETTE.woodDark, boxMatrix(x + sx, legY, z - 0.085, 0.05, hgt * 1.02, 0.04, lean));
   }
-  S.add(UNIT_BOX, PALETTE.wood, boxMatrix(x, legY + 0.04, z + 0.07, 0.62, 0.78, 0.025, -lean));
-  S.add(UNIT_BOX, PALETTE.wood, boxMatrix(x, legY + 0.04, z - 0.07, 0.62, 0.78, 0.025, lean));
+  S.add(UNIT_BOX, WOOD_WARM, boxMatrix(x, legY + 0.04, z + 0.07, 0.62, 0.78, 0.025, -lean));
+  S.add(UNIT_BOX, WOOD_WARM, boxMatrix(x, legY + 0.04, z - 0.07, 0.62, 0.78, 0.025, lean));
   S.box(x, hgt - 0.01, z, 0.7, 0.04, 0.06, PALETTE.gold);
   const face = rig.part({ name: 'aframeFace', position: [x, legY + 0.04, z + 0.07], rotation: [-lean, 0, 0] });
-  face.quad(R.aframe, 0, 0, 0.0135, 0.58, 0.58 * (300 / 240));
+  face.quad(R.aframe, 0, 0, 0.014, 0.58, 0.58 * (300 / 240));
 }
 
-const LOUNGE = { x: 2.52, z: 2.92 };
-
-/** A small lounge corner by the door: low round table, two poufs, a latte and a notebook. */
-function buildLounge(S, rig, R) {
-  const { x, z } = LOUNGE;
-  S.box(x, 0.02, z, 0.36, 0.04, 0.36, PALETTE.woodDark);
-  S.box(x, 0.18, z, 0.08, 0.3, 0.08, PALETTE.woodDark);
-  S.box(x, 0.355, z, 0.62, 0.05, 0.5, WOOD_TOP);
-  S.box(x, 0.355, z, 0.5, 0.05, 0.62, WOOD_TOP);
-  S.box(x, 0.33, z, 0.58, 0.02, 0.58, PALETTE.gold);
-  // latte in a small Writer mug, a notebook with a pen
-  S.box(x + 0.12, 0.43, z + 0.08, 0.1, 0.1, 0.1, MUG);
-  S.box(x + 0.12, 0.475, z + 0.08, 0.075, 0.012, 0.075, '#C9A27A');
-  S.box(x - 0.12, 0.392, z - 0.04, 0.26, 0.024, 0.2, PALETTE.maroon, 0.2);
-  S.box(x - 0.12, 0.406, z - 0.04, 0.22, 0.006, 0.17, PALETTE.paper, 0.2);
-  S.box(x - 0.1, 0.415, z - 0.02, 0.02, 0.012, 0.2, PALETTE.gold, -0.6);
-  // poufs
-  for (const [ox, oz, c] of [[-0.6, 0.12, PALETTE.maroon], [0.58, -0.1, PALETTE.gold]]) {
-    S.add(new THREE.CylinderGeometry(0.22, 0.24, 0.34, 12), c, boxMatrix(x + ox, 0.17, z + oz, 1, 1, 1));
-    S.add(new THREE.CylinderGeometry(0.2, 0.2, 0.04, 12), PALETTE.cream, boxMatrix(x + ox, 0.355, z + oz, 1, 1, 1));
+function buildStringLights(S, rig, R) {
+  const bulbs = [];
+  const hooks = [-2.56, -1.1, 0.38, 1.86, 3.32];
+  for (let k = 0; k < hooks.length - 1; k++) {
+    const a = hooks[k], b = hooks[k + 1], n = 5;
+    let prev = null;
+    for (let i = 0; i <= n; i++) {
+      const u = i / n;
+      const x = a + (b - a) * u;
+      const y = 2.64 - Math.sin(u * Math.PI) * 0.1;
+      const pt = [x, y, -3.86];
+      if (prev) S.add(UNIT_BOX, PALETTE.ink, segmentMatrix(prev, pt, 0.012));
+      prev = pt;
+      if (i > 0 && i < n) {
+        const p = rig.part({ name: 'fairy', position: [x, y - 0.045, -3.85] });
+        p.quad(R.bulb, 0, 0, 0, 0.12, 0.12, { color: i % 2 ? '#FFE3A0' : '#FFD4C0' });
+        bulbs.push(p);
+      }
+    }
+    S.box(a, 2.64, -3.9, 0.05, 0.05, 0.08, PALETTE.gold);
   }
-  const steam = rig.part({ name: 'latteSteam', position: [x + 0.12, 0.48, z + 0.08] });
-  steam.box(0, 0.03, 0, 0.05, 0.04, 0.05, PALETTE.white, { outline: false });
-  return { steam };
+  S.box(3.32, 2.64, -3.9, 0.05, 0.05, 0.08, PALETTE.gold);
+  return bulbs;
 }
 
-/* ---------- detail pass: wallpaper, tiles, rug patterns, shelves, menu, cart, small life ---------- */
-const NO_LINE = { outline: false };
+/** Two miniature open golden glowing pages gliding slowly overhead (boutique motif). */
+function buildFloatingPages(rig, R) {
+  return [0, 1].map((i) => {
+    const p = rig.part({ name: `floatPage${i}`, position: [0, 2.24 - i * 0.18, -1.2 - i * 0.3], scale: 1.15 });
+    p.box(-0.075, 0, 0, 0.14, 0.008, 0.19, EINK, { rz: 0.24 });
+    p.box(0.075, 0, 0, 0.14, 0.008, 0.19, PALETTE.paper, { rz: -0.24 });
+    p.box(0, -0.012, 0, 0.018, 0.016, 0.2, PALETTE.gold);
+    p.quad(R.sparkle, 0, 0.08, 0, 0.12, 0.12);
+    return { p, phase: i * 3.1, rx: 2.25 - i * 0.5, rz: 0.9 - i * 0.2, speed: 0.28 + i * 0.05 };
+  });
+}
 
-/** Wallpaper stripes (back + side walls) and raised panels on the back wainscot. Flat, no outlines. */
-function addCafeWalls(p) {
+// ---------- Wall & floor detail overlays (flat in rig.root, no outlines) ----------
+function addBoutiqueWalls(p) {
   const z = -4.0;
   let i = 0;
   for (let x = -3.46; x < 3.46; x += 0.36, i++) {
-    p.boxMin(x, 1.065, z, x + 0.16, 2.88, z + 0.004, '#F1E2C6', NO_LINE);
-    p.boxMin(x + 0.255, 1.065, z, x + 0.267, 2.88, z + 0.005, i % 2 ? '#E3C990' : '#EBB9B3', NO_LINE);
+    p.boxMin(x, 1.065, z, x + 0.16, 2.88, z + 0.004, '#EFE2C8', NO_LINE);
+    p.boxMin(x + 0.255, 1.065, z, x + 0.267, 2.88, z + 0.005, i % 2 ? '#DFC286' : '#E7B7B0', NO_LINE);
   }
   for (const sx of [-1, 1]) {
-    for (let zz = -3.9; zz < -0.55; zz += 0.36) p.boxMin(sx * 3.496, 1.065, zz, sx * 3.5, 2.88, zz + 0.16, '#F1E2C6', NO_LINE);
+    for (let zz = -3.9; zz < -0.55; zz += 0.36) {
+      p.boxMin(sx * 3.496, 1.065, zz, sx * 3.5, 2.88, zz + 0.16, '#EFE2C8', NO_LINE);
+    }
   }
   for (let x = -3.4; x < 3.3; x += 0.7) {
     const x1 = x + 0.58;
-    const c = '#B3845A';
+    const c = '#7B4E2D';
     p.boxMin(x, 0.8, z, x1, 0.835, z + 0.012, c, NO_LINE);
     p.boxMin(x, 0.22, z, x1, 0.255, z + 0.012, c, NO_LINE);
     p.boxMin(x, 0.22, z, x + 0.035, 0.835, z + 0.012, c, NO_LINE);
     p.boxMin(x1 - 0.035, 0.22, z, x1, 0.835, z + 0.012, c, NO_LINE);
-    p.boxMin(x + 0.035, 0.255, z, x1 - 0.035, 0.8, z + 0.006, '#D6AA79', NO_LINE);
+    p.boxMin(x + 0.035, 0.255, z, x1 - 0.035, 0.8, z + 0.006, '#A37043', NO_LINE);
   }
 }
 
-/** Grout lines between the floor tiles and small gold-and-maroon diamonds at their corners. */
 function addTileDetail(p) {
   for (let k = 1; k < 10; k++) {
     const x = -3.5 + k * 0.7;
-    p.boxMin(x - 0.008, 0, -4, x + 0.008, 0.0014, 4, '#CDB892', NO_LINE);
+    p.boxMin(x - 0.008, 0, -4, x + 0.008, 0.0014, 4, '#CBB58D', NO_LINE);
   }
   for (let k = 1; k < 12; k++) {
     const z = -4 + k * 0.7;
-    p.boxMin(-3.5, 0, z - 0.008, 3.5, 0.0014, z + 0.008, '#CDB892', NO_LINE);
+    p.boxMin(-3.5, 0, z - 0.008, 3.5, 0.0014, z + 0.008, '#CBB58D', NO_LINE);
   }
   for (let i = 1; i < 10; i++) {
     for (let k = 1; k < 12; k++) {
       const x = -3.5 + i * 0.7;
       const z = -4 + k * 0.7;
-      p.box(x, 0.0014, z, 0.12, 0.0028, 0.12, PALETTE.gold, { ry: Math.PI / 4, outline: false });
-      p.box(x, 0.0018, z, 0.045, 0.0036, 0.045, PALETTE.maroon, { ry: Math.PI / 4, outline: false });
+      p.box(x, 0.0014, z, 0.11, 0.0028, 0.11, PALETTE.gold, { ry: Math.PI / 4, outline: false });
+      p.box(x, 0.0018, z, 0.042, 0.0036, 0.042, PALETTE.maroon, { ry: Math.PI / 4, outline: false });
     }
   }
 }
 
-/** Rug patterns: an inner border with dots, a medallion in front of the table, front fringe. */
-function addRugDetail(p, tb) {
-  const { x, z } = tb;
-  const ox0 = Math.max(-3.42, x - 0.98);
-  const ox1 = Math.min(3.42, x + 0.98);
-  const x0 = ox0 + 0.25;
-  const x1 = ox1 - 0.25;
-  const z0 = z - 0.37;
-  const z1 = RUG_FRONT - 0.17;
-  const line = tb.key === 'master' ? PALETTE.gold : PALETTE.white;
-  const y0 = 0.013;
-  const y1 = 0.0146;
-  const t = 0.028;
-  p.boxMin(x0, y0, z0, x1, y1, z0 + t, line, NO_LINE);
-  p.boxMin(x0, y0, z1 - t, x1, y1, z1, line, NO_LINE);
-  p.boxMin(x0, y0, z0, x0 + t, y1, z1, line, NO_LINE);
-  p.boxMin(x1 - t, y0, z0, x1, y1, z1, line, NO_LINE);
-  for (let zz = z0 + 0.22; zz < z1 - 0.1; zz += 0.24) {
-    for (const xx of [x0 - 0.08, x1 + 0.08]) p.box(xx, 0.0142, zz, 0.045, 0.0024, 0.045, PALETTE.gold, { ry: Math.PI / 4, outline: false });
-  }
-  const mz = 0.22;
-  [[0.36, line], [0.26, tb.key === 'master' ? '#8E2B38' : tb.rugEdge], [0.15, line], [0.065, PALETTE.maroon]].forEach(([s, c], i) => {
-    p.box(x, 0.013 + (i + 1) * 0.0008, mz, s, 0.0016, s, c, { ry: Math.PI / 4, outline: false });
-  });
-  for (let fx = ox0 + 0.05; fx < ox1 - 0.03; fx += 0.085) p.box(fx, 0.003, RUG_FRONT + 0.035, 0.032, 0.006, 0.07, PALETTE.cream, NO_LINE);
-}
-
-/** Little things on each café table: bud vase with a flower, sticky notes, a pen. */
-function addTableClutter(S, tb, i) {
-  const { x, z } = tb;
-  const top = 0.68;
-  const vx = x + 0.14;
-  const vz = z - 0.27;
-  S.box(vx, top + 0.06, vz, 0.06, 0.12, 0.06, PALETTE.cream);
-  S.box(vx, top + 0.125, vz, 0.07, 0.012, 0.07, PALETTE.gold);
-  S.box(vx, top + 0.17, vz, 0.012, 0.09, 0.012, PALETTE.leafDark);
-  S.box(vx + 0.03, top + 0.16, vz, 0.04, 0.02, 0.025, PALETTE.leaf);
-  S.box(vx, top + 0.23, vz, 0.065, 0.05, 0.065, [PALETTE.rose, PALETTE.lily, PALETTE.gold][i]);
-  S.box(vx, top + 0.255, vz, 0.03, 0.02, 0.03, i === 1 ? PALETTE.gold : PALETTE.white);
-  S.box(x - 0.43, top + 0.003, z + 0.29, 0.08, 0.006, 0.08, [PALETTE.rose, '#BFD9EC', PALETTE.gold][i], 0.2);
-  S.box(x - 0.36, top + 0.005, z + 0.31, 0.07, 0.006, 0.07, PALETTE.paper, -0.15);
-  S.box(x - 0.24, top + 0.008, z + 0.3, 0.014, 0.014, 0.15, PALETTE.maroon, 1.25);
-  S.box(x - 0.24 + 0.065, top + 0.008, z + 0.3 + 0.022, 0.016, 0.016, 0.02, PALETTE.gold, 1.25);
-}
-
-/** A narrow wall shelf of mugs and jars between the calendar and the board; a trailing plant on top. */
-function addMugShelf(S, rig) {
-  const x0 = -2.16;
-  const x1 = -1.68;
-  const zb = -3.99;
-  const zf = -3.79;
-  for (const sx of [x0, x1 - 0.03]) S.boxMin(sx, 1.1, zb, sx + 0.03, 2.25, zf + 0.01, PALETTE.woodDark);
-  for (const y of [1.15, 1.5, 1.85, 2.2]) S.boxMin(x0 - 0.02, y - 0.03, zb, x1 + 0.02, y, zf, PALETTE.wood);
-  const mug = (mx, y, c) => {
-    S.box(mx, y + 0.045, -3.88, 0.075, 0.09, 0.075, c);
-    S.box(mx, y + 0.087, -3.88, 0.08, 0.01, 0.08, PALETTE.gold);
-    S.box(mx + 0.05, y + 0.045, -3.88, 0.025, 0.05, 0.015, c);
-  };
-  mug(-2.07, 1.15, PALETTE.white);
-  mug(-1.93, 1.15, PALETTE.rose);
-  mug(-1.79, 1.15, PALETTE.maroon);
-  const jar = (jx, y, fill, hgt) => {
-    S.box(jx, y + hgt / 2, -3.88, 0.1, hgt, 0.1, fill);
-    S.box(jx, y + hgt * 0.45, -3.828, 0.08, 0.04, 0.004, PALETTE.paper);
-    S.box(jx, y + hgt + 0.015, -3.88, 0.11, 0.03, 0.11, PALETTE.gold);
-  };
-  jar(-2.06, 1.5, '#5C3A22', 0.17);
-  jar(-1.9, 1.5, '#8A8F4E', 0.13);
-  jar(-1.78, 1.5, PALETTE.white, 0.1);
-  // saucers and a little teapot
-  for (let k = 0; k < 4; k++) S.box(-2.06, 1.855 + k * 0.014, -3.88, 0.11, 0.01, 0.11, k % 2 ? PALETTE.cream : PALETTE.white);
-  S.box(-1.84, 1.92, -3.88, 0.13, 0.12, 0.11, PALETTE.white);
-  S.box(-1.84, 1.99, -3.88, 0.06, 0.03, 0.06, PALETTE.gold);
-  S.add(UNIT_BOX, PALETTE.white, segmentMatrix([-1.77, 1.9, -3.88], [-1.72, 1.97, -3.88], 0.025));
-  // trailing plant on top: a pot, a leafy crown, and three vines that sway
-  S.boxMin(-2.02, 2.2, -3.95, -1.86, 2.32, -3.81, PALETTE.maroon);
-  S.boxMin(-2.035, 2.3, -3.965, -1.845, 2.33, -3.795, PALETTE.gold);
-  S.box(-1.94, 2.38, -3.88, 0.2, 0.1, 0.16, PALETTE.leaf);
-  S.box(-1.98, 2.44, -3.87, 0.11, 0.08, 0.1, PALETTE.leafDark);
-  return [[-2.04, 0], [-1.84, 1], [-1.655, 2]].map(([vx, i]) => {
-    const v = rig.part({ name: `vine${i}`, position: [vx, 2.34, -3.8] });
-    const n = 4 + i;
-    for (let k = 0; k < n; k++) {
-      v.box((k % 2 ? 0.012 : -0.012), -0.05 - k * 0.075, 0, 0.008, 0.08, 0.008, PALETTE.leafDark, NO_LINE);
-      v.box((k % 2 ? 0.03 : -0.03), -0.06 - k * 0.075, 0.01, 0.05, 0.035, 0.035, k % 3 ? PALETTE.leaf : PALETTE.leafDark);
-    }
-    return v;
-  });
-}
-
-/** Chalk menu above the counter (between the pendant lamps). */
-function addMenuBoard(S, p, R) {
-  const mx = 2.56;
-  const my = 1.8;
-  const mw = 0.86;
-  const mh = mw * (190 / 300);
-  S.boxMin(mx - mw / 2 - 0.05, my - mh / 2 - 0.05, -4.0, mx + mw / 2 + 0.05, my + mh / 2 + 0.05, -3.966, PALETTE.woodDark);
-  S.boxMin(mx - mw / 2 - 0.02, my - mh / 2 - 0.02, -4.0, mx + mw / 2 + 0.02, my + mh / 2 + 0.02, -3.962, PALETTE.gold);
-  p.quad(R.menu, mx, my, -3.958, mw, mh);
-  S.box(mx - 0.36, my + mh / 2 + 0.06, -3.97, 0.04, 0.04, 0.04, PALETTE.goldDeep);
-  S.box(mx + 0.36, my + mh / 2 + 0.06, -3.97, 0.04, 0.04, 0.04, PALETTE.goldDeep);
-}
-
-/** Wall clock above the calendar; its hands turn with t. */
-function addClock(S, rig, R) {
-  const x = -2.62;
-  const y = 2.68;
-  for (const rz of [0, Math.PI / 4]) S.add(UNIT_BOX, PALETTE.goldDeep, boxMatrix(x, y, -3.985, 0.34, 0.34, 0.03, 0, 0, rz));
-  rig.root.quad(R.clock, x, y, -3.966, 0.3, 0.3);
-  const hour = rig.part({ name: 'clockHour', position: [x, y, -3.96] });
-  hour.box(0, 0.035, 0, 0.018, 0.08, 0.006, PALETTE.ink, NO_LINE);
-  const minute = rig.part({ name: 'clockMin', position: [x, y, -3.957] });
-  minute.box(0, 0.05, 0, 0.012, 0.11, 0.006, PALETTE.maroon, NO_LINE);
-  rig.root.box(x, y, -3.954, 0.022, 0.022, 0.006, PALETTE.gold, NO_LINE);
-  return { hour, minute };
-}
-
-/** The espresso corner gets gauges, group heads, a grinder, syrup bottles, macarons, a tip jar. */
-function addCounterDetail(S, p) {
-  const cz = -3.6;
-  const top = 0.98;
-  const ex = 2.08;
-  const front = cz + 0.11;
-  for (const sx of [-1, 1]) {
-    S.box(ex + sx * 0.1, top + 0.33, front + 0.008, 0.075, 0.075, 0.016, PALETTE.gold);
-    S.box(ex + sx * 0.1, top + 0.33, front + 0.018, 0.052, 0.052, 0.004, PALETTE.cream);
-    S.box(ex + sx * 0.09, top + 0.2, front + 0.03, 0.07, 0.04, 0.06, PALETTE.goldDeep);
-    S.box(ex + sx * 0.09, top + 0.185, front + 0.115, 0.03, 0.03, 0.13, PALETTE.ink);
-  }
-  S.add(UNIT_BOX, PALETTE.goldDeep, segmentMatrix([ex + 0.22, top + 0.32, cz + 0.02], [ex + 0.27, top + 0.1, cz + 0.12], 0.018));
-  for (let i = 0; i < 5; i++) p.box(ex - 0.12 + i * 0.06, top + 0.0415, cz + 0.12, 0.022, 0.003, 0.1, '#6B5A48', NO_LINE);
-  const gx = 2.39;
-  const gz = -3.74;
-  S.box(gx, top + 0.1, gz, 0.12, 0.2, 0.14, PALETTE.maroonDeep);
-  S.box(gx, top + 0.24, gz, 0.1, 0.08, 0.1, '#5C3A22');
-  S.box(gx, top + 0.29, gz, 0.12, 0.025, 0.12, PALETTE.gold);
-  S.box(gx, top + 0.07, gz + 0.09, 0.05, 0.04, 0.05, PALETTE.ink);
-  [[2.66, PALETTE.maroon], [2.73, PALETTE.gold], [2.8, '#7A4A2B']].forEach(([bx, c]) => {
-    S.box(bx, top + 0.12, -3.84, 0.06, 0.24, 0.06, c);
-    S.box(bx, top + 0.27, -3.84, 0.025, 0.06, 0.025, c);
-    S.box(bx, top + 0.31, -3.84, 0.035, 0.025, 0.035, PALETTE.ink);
-    S.box(bx, top + 0.12, -3.808, 0.045, 0.06, 0.004, PALETTE.cream);
-  });
-  S.box(2.62, top + 0.008, -3.38, 0.24, 0.016, 0.15, PALETTE.white);
-  [PALETTE.rose, '#BFD9EC', PALETTE.gold, '#CFE3B8', PALETTE.rose].forEach((c, i) => {
-    S.box(2.53 + i * 0.045, top + 0.031, -3.38 + ((i % 2) - 0.5) * 0.04, 0.038, 0.028, 0.038, c);
-  });
-  S.box(3.24, top + 0.06, -3.38, 0.08, 0.12, 0.08, '#F3EBDD');
-  S.box(3.24, top + 0.125, -3.38, 0.085, 0.012, 0.085, PALETTE.gold);
-  S.boxMin(1.75, 0, -3.29, 3.35, 0.07, -3.268, PALETTE.goldDeep);
-}
-
-const CART = { x: -2.55, z: 2.33 };
-
-/** A little coffee cart with a striped awning, an urn (it steams), cups and a cookie jar. */
-function addCoffeeCart(S, rig, room) {
-  const { x, z } = CART;
-  const w = 0.62;
-  const d = 0.4;
-  const h = 0.74;
-  S.boxMin(x - w / 2, 0.12, z - d / 2, x + w / 2, h, z + d / 2, PALETTE.maroon);
-  S.boxMin(x - w / 2 + 0.05, 0.2, z + d / 2, x + w / 2 - 0.05, h - 0.08, z + d / 2 + 0.012, PALETTE.cream);
-  S.boxMin(x - w / 2 + 0.09, 0.24, z + d / 2 + 0.012, x + w / 2 - 0.09, h - 0.12, z + d / 2 + 0.018, '#F6EBD6');
-  S.boxMin(x - w / 2 - 0.03, h, z - d / 2 - 0.03, x + w / 2 + 0.03, h + 0.04, z + d / 2 + 0.03, WOOD_TOP);
-  S.boxMin(x - w / 2 - 0.01, 0.1, z - d / 2 - 0.01, x + w / 2 + 0.01, 0.14, z + d / 2 + 0.01, PALETTE.gold);
-  for (const sx of [-1, 1]) {
-    S.add(new THREE.CylinderGeometry(0.1, 0.1, 0.04, 14), PALETTE.ink, boxMatrix(x + sx * (w / 2 + 0.025), 0.1, z, 1, 1, 1, 0, 0, Math.PI / 2));
-    S.add(new THREE.CylinderGeometry(0.035, 0.035, 0.05, 8), PALETTE.gold, boxMatrix(x + sx * (w / 2 + 0.03), 0.1, z, 1, 1, 1, 0, 0, Math.PI / 2));
-    S.box(x + sx * (w / 2 - 0.03), h + 0.37, z - d / 2 + 0.03, 0.03, 0.72, 0.03, PALETTE.gold);
-  }
-  S.box(x - w / 2 - 0.08, h - 0.05, z, 0.03, 0.03, d * 0.8, PALETTE.gold);
-  for (const sz of [-1, 1]) S.box(x - w / 2 - 0.045, h - 0.05, z + sz * d * 0.38, 0.07, 0.025, 0.025, PALETTE.gold);
-  // striped awning sloping toward the front, with a scalloped edge
-  const stripes = 6;
-  const aw = w + 0.14;
-  for (let i = 0; i < stripes; i++) {
-    const sx = x - aw / 2 + (aw * (i + 0.5)) / stripes;
-    S.add(UNIT_BOX, i % 2 ? PALETTE.cream : PALETTE.maroon, boxMatrix(sx, h + 0.66, z + 0.05, aw / stripes, 0.03, d + 0.2, 0.3, 0, 0));
-    S.box(sx, h + 0.53, z + d / 2 + 0.16, aw / stripes - 0.01, 0.06, 0.03, i % 2 ? PALETTE.maroon : PALETTE.cream);
-  }
-  // urn, cups, cookie jar, a flower
-  const ty = h + 0.04;
-  S.add(new THREE.CylinderGeometry(0.075, 0.085, 0.26, 12), PALETTE.bronze, boxMatrix(x - 0.15, ty + 0.13, z - 0.04, 1, 1, 1));
-  S.add(new THREE.CylinderGeometry(0.065, 0.075, 0.035, 12), PALETTE.gold, boxMatrix(x - 0.15, ty + 0.275, z - 0.04, 1, 1, 1));
-  S.box(x - 0.15, ty + 0.31, z - 0.04, 0.03, 0.03, 0.03, PALETTE.goldDeep);
-  S.box(x - 0.15, ty + 0.06, z + 0.06, 0.03, 0.03, 0.05, PALETTE.ink);
-  for (let k = 0; k < 4; k++) S.box(x + 0.04, ty + 0.03 + k * 0.045, z + 0.06, 0.07 - k * 0.004, 0.04, 0.07 - k * 0.004, k % 2 ? PALETTE.cream : PALETTE.white);
-  S.box(x + 0.19, ty + 0.07, z - 0.02, 0.11, 0.14, 0.11, '#F3EBDD');
-  S.box(x + 0.19, ty + 0.1, z - 0.02, 0.09, 0.05, 0.09, '#C08A55');
-  S.box(x + 0.19, ty + 0.15, z - 0.02, 0.12, 0.025, 0.12, PALETTE.gold);
-  S.box(x + 0.21, ty + 0.03, z + 0.13, 0.05, 0.06, 0.05, PALETTE.cream);
-  S.box(x + 0.21, ty + 0.1, z + 0.13, 0.01, 0.08, 0.01, PALETTE.leafDark);
-  S.box(x + 0.21, ty + 0.15, z + 0.13, 0.05, 0.045, 0.05, PALETTE.rose);
-  blockBox(room, x - w / 2 - 0.1, z - d / 2 - 0.04, x + w / 2 + 0.05, z + d / 2 + 0.17);
-  const steam = rig.part({ name: 'urnSteam', position: [x - 0.15, ty + 0.34, z - 0.04] });
-  steam.box(0, 0.02, 0, 0.05, 0.04, 0.05, PALETTE.white, NO_LINE);
-  steam.box(0.02, 0.045, 0, 0.035, 0.03, 0.035, PALETTE.white, NO_LINE);
-  return { steam };
-}
-
-/** A soft round rug and a stack of magazines in the lounge corner. */
-function addLoungeDetail(S, p) {
-  const { x, z } = LOUNGE;
-  [[1.42, PALETTE.gold], [1.32, '#E7CDB0'], [0.9, PALETTE.rose], [0.8, '#E7CDB0'], [0.36, PALETTE.gold]].forEach(([s, c], i) => {
-    const hgt = 0.004 + i * 0.0014; // stepped corners read as a soft, blocky oval
-    p.box(x - 0.02, hgt / 2, z - 0.02, s * 0.92, hgt, s * 0.5, c, NO_LINE);
-    p.box(x - 0.02, hgt / 2, z - 0.02, s * 0.72, hgt, s * 0.68, c, NO_LINE);
-  });
-  for (let k = 0; k < 4; k++) S.box(x + 0.62, 0.012 + k * 0.022, z + 0.42, 0.24 - (k % 2) * 0.02, 0.02, 0.18, [PALETTE.maroon, PALETTE.paper, '#BFD9EC', PALETTE.gold][k], (k - 1.5) * 0.12);
-}
-
-/** Two paper planes (her Telegram motif) gliding slow loops above the tables. */
-function addPaperPlanes(rig) {
-  return [0, 1].map((i) => {
-    const p = rig.part({ name: `plane${i}`, position: [0, 2.12 - i * 0.22, -1.5 - i * 0.2], scale: 1.5 });
-    for (const s of [-1, 1]) {
-      p.box(s * 0.022, 0, 0.0, 0.04, 0.008, 0.24, s < 0 ? PALETTE.white : PALETTE.paper, { rz: s * 0.18 });
-      p.box(s * 0.062, 0.006, -0.06, 0.05, 0.008, 0.12, s < 0 ? PALETTE.white : PALETTE.paper, { rz: s * 0.18 });
-    }
-    p.box(0, -0.022, 0.01, 0.008, 0.04, 0.2, PALETTE.cream);
-    return { p, phase: i * 2.6, rx: 2.4 - i * 0.55, rz: 1.0 - i * 0.25, speed: 0.34 + i * 0.06 };
-  });
-}
-
-/** Content & Copywriting interior. ctx is accepted for future options (unused). */
+/** E-Book Boutique interior (`content`). */
 export async function buildInterior(ctx = {}) {
-  await fontsReady();
+  const [, bookTex] = await Promise.all([fontsReady(), artTexture('book')]);
   const room = createRoom({
     width: 7,
     depth: 8,
-    wall: '#F7EEDD',
-    wainscot: '#C99B6B',
+    wall: '#F6EFE0',
+    wainscot: '#926038',
     trim: PALETTE.goldDeep,
     floor: 'tiles',
-    floorColor: '#E3D2B2',
-    floorColor2: '#F3EAD7',
+    floorColor: '#E1CFAF',
+    floorColor2: '#F3EAD8',
     background: PALETTE.cream,
   });
   room.id = 'content';
 
-  const atlas = createAtlas();
-  const R = drawContentAtlas(atlas);
+  const atlas = createAtlas(1024, 6);
+  const R = drawBoutiqueAtlas(atlas);
   const texture = atlas.texture();
   room.textures.push(texture);
 
   const S = new VoxelBuilder();
   const rig = createRig();
+  const coverQuads = [];
 
-  const tables = TABLES.map((tb) => buildTable(S, rig, R, tb));
-  const bars = buildBoard(S, rig, R);
-  const cafe = buildCounter(S, rig, R, room);
-  const shelf = buildIconShelf(S, rig, R);
+  const preview = buildPreviewLectern(S, rig, R);
+  const showcase = buildShowcasePedestal(S, rig, R, coverQuads);
+  const nook = buildReadingNook(S, rig, R);
+  const partBars = buildChaptersGallery(S, rig, R, coverQuads);
+  const backLeft = buildBackLeftShelf(S, rig, R);
+  const counterRig = buildReceptionCounter(S, rig, R, room);
   const fairy = buildStringLights(S, rig, R);
   buildAFrame(S, rig, R);
-  const lounge = buildLounge(S, rig, R);
-  room.place(plant({ size: 1.35 }), -3.05, -1.75);
-  room.place(plant({ size: 1.35 }), 3.05, -1.75);
-  room.place(plant({ size: 1.0 }), -3.06, 3.36);
-  // detail pass (flat overlays live in the rig without outlines; solid props bake with S)
-  addCafeWalls(rig.root);
-  addTileDetail(rig.root);
-  for (const tb of TABLES) addRugDetail(rig.root, tb);
-  TABLES.forEach((tb, i) => addTableClutter(S, tb, i));
-  const vines = addMugShelf(S, rig);
-  addMenuBoard(S, rig.root, R);
-  const clock = addClock(S, rig, R);
-  addCounterDetail(S, rig.root);
-  const cart = addCoffeeCart(S, rig, room);
-  addLoungeDetail(S, rig.root);
-  const planes = addPaperPlanes(rig);
+  buildArmchair(S, WEST_CHAIR.x, WEST_CHAIR.z, WEST_CHAIR.ry);
+  buildLounge(S, rig.root);
+  const pages = buildFloatingPages(rig, R);
 
-  // soft contact shadows (unlit layer, no extra draw calls)
-  for (const tb of TABLES) floorShadow(rig, R.shadow, tb.x, tb.z, 1.45, 1.1, 0.016);
-  floorShadow(rig, R.shadow, LOUNGE.x, LOUNGE.z, 1.5, 1.0, 0.012);
-  floorShadow(rig, R.shadow, CART.x, CART.z + 0.05, 1.0, 0.75);
-  floorShadow(rig, R.shadow, -2.62, -3.5, 1.7, 0.8);
-  floorShadow(rig, R.shadow, 2.55, -3.45, 2.0, 0.85);
-  for (const sx of [2.15, 2.95]) floorShadow(rig, R.shadow, sx, -2.78, 0.55, 0.55);
-  for (const [px, pz, s] of [[-3.05, -1.75, 0.8], [3.05, -1.75, 0.8], [-3.06, 3.36, 0.62]]) floorShadow(rig, R.shadow, px, pz, s, s);
-  floorShadow(rig, R.shadow, AFRAME.x, AFRAME.z, 0.95, 0.6);
+  room.place(plant({ size: 1.2 }), -3.08, -2.05);
+  room.place(plant({ size: 1.2 }), 3.12, -2.25);
+  room.place(plant({ size: 0.95 }), -3.08, 3.4);
+
+  addBoutiqueWalls(rig.root);
+  addTileDetail(rig.root);
+
+  // Soft floor contact shadows (unlit rig layer = 0 extra draw calls)
+  floorShadow(rig, R.shadow, LECTERN.x, LECTERN.z, 1.15, 0.95, 0.016);
+  floorShadow(rig, R.shadow, SHOWCASE.x, SHOWCASE.z, 1.4, 1.1, 0.016);
+  floorShadow(rig, R.shadow, NOOK_DESK.x, NOOK_DESK.z, 0.85, 0.8, 0.016);
+  floorShadow(rig, R.shadow, NOOK_CHAIR.x, NOOK_CHAIR.z, 1.1, 1.0, 0.016);
+  floorShadow(rig, R.shadow, WEST_CHAIR.x, WEST_CHAIR.z, 1.1, 1.0, 0.006);
+  floorShadow(rig, R.shadow, LOUNGE.x, LOUNGE.z, 1.6, 1.05, 0.012);
+  floorShadow(rig, R.shadow, COUNTER.x, COUNTER.z + 0.14, 1.65, 0.82);
+  floorShadow(rig, R.shadow, -1.1, -3.66, 3.1, 0.65);
+  floorShadow(rig, R.shadow, -3.04, -3.68, 1.0, 0.68);
+  floorShadow(rig, R.shadow, AFRAME.x, AFRAME.z, 0.9, 0.56);
+  for (const [px, pz, s] of [[-3.08, -2.05, 0.72], [3.12, -2.25, 0.72], [-3.08, 3.4, 0.58]]) floorShadow(rig, R.shadow, px, pz, s, s);
 
   const staticMesh = S.mesh({ outline: true, px: 1.5 });
-  staticMesh.name = 'cafeStatic';
+  staticMesh.name = 'ebookStatic';
   room.group.add(staticMesh);
+
   const built = rig.build({ atlas, texture });
   room.group.add(built.mesh);
 
-  for (const tb of TABLES) blockBox(room, tb.x - 0.55, tb.z - 0.39, tb.x + 0.55, tb.z + 0.39);
-  blockBox(room, LOUNGE.x - 0.84, LOUNGE.z - 0.34, LOUNGE.x + 0.82, LOUNGE.z + 0.36);
-  for (const sx of [2.15, 2.95]) blockCircle(room, sx, -2.78, 0.2);
-  blockBox(room, -3.3, -3.86, -1.94, -3.38);
-  blockBox(room, AFRAME.x - 0.36, AFRAME.z - 0.15, AFRAME.x + 0.36, AFRAME.z + 0.15);
+  // One merged unlit mesh for Maya's real Reality Check book cover (shared art.js texture)
+  let coverMat = null;
+  if (coverQuads.length) {
+    const geos = coverQuads.map(({ w, h, m }) => new THREE.PlaneGeometry(w, h).applyMatrix4(m));
+    coverMat = bookTex
+      ? artMaterial(bookTex, { polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 })
+      : new THREE.MeshBasicMaterial({ color: '#83602C', toneMapped: false });
+    const coverMesh = new THREE.Mesh(mergeGeometries(geos, false), coverMat);
+    for (const g of geos) g.dispose();
+    coverMesh.name = 'ebookCovers';
+    coverMesh.userData.dynamic = true;
+    room.group.add(coverMesh);
+  }
+
+  // Collision obstacles (generous >= 1.05 m corridors on BOTH sides of center showcase!)
+  blockBox(room, LECTERN.x - 0.44, LECTERN.z - 0.38, LECTERN.x + 0.44, LECTERN.z + 0.38);
+  blockBox(room, SHOWCASE.x - 0.54, SHOWCASE.z - 0.42, SHOWCASE.x + 0.54, SHOWCASE.z + 0.42);
+  blockBox(room, 1.76, -1.52, 3.28, -0.44); // East reading nook (desk + armchair + lamp)
+  blockBox(room, -3.44, -3.98, 0.34, -3.54); // Back-left bookcase + credenza (keeps x=1.7 brazier open)
+  blockBox(room, WEST_CHAIR.x - 0.4, WEST_CHAIR.z - 0.38, WEST_CHAIR.x + 0.4, WEST_CHAIR.z + 0.38);
+  blockBox(room, AFRAME.x - 0.34, AFRAME.z - 0.15, AFRAME.x + 0.34, AFRAME.z + 0.15);
+  blockBox(room, 1.72, 2.46, 3.36, 3.28, 0.06); // Front-right reading lounge (keeps Day 15 guests tap clear)
 
   for (const s of STATIONS) room.addStation({ ...s, look: { ...s.look }, line: { ...s.line } });
   const reactions = STATIONS.map((s) => ({ id: s.id, spring: createSpring(150, 13) }));
   const springOf = (id) => reactions.find((r) => r.id === id).spring;
-  const tableSprings = tables.map((tbl) => springOf(tbl.tb.id));
-  const compareSpring = springOf('cc-compare');
-  let compareWas = 0;
+  const previewSpring = springOf('eb-preview');
+  const buySpring = springOf('eb-buy');
+  const readSpring = springOf('eb-read');
+  const chapSpring = springOf('eb-chapters');
+  let chapWas = 0;
 
   room.bake();
 
   const animate = (dt, t, state) => {
     for (let i = 0; i < reactions.length; i++) stepSpring(reactions[i].spring, stationTarget(state, reactions[i].id), dt, 0.18);
 
-    // Tables: the banner swings, the mug steams (more steam for bigger packages), and when
-    // Maya comes close the laptop wakes up and likes pop out of the screen.
-    for (let i = 0; i < tables.length; i++) {
-      const tbl = tables[i];
-      const k = Math.max(0, tableSprings[i].x);
-      const wake = stepSpring(tbl.spring, k, dt);
-      tbl.banner.rot(Math.sin(t * 1.3 + i) * 0.03, 0, Math.sin(t * 1.1 + i * 1.7) * 0.05 + (wake - k) * 0.4);
-      tbl.lid.rot(-0.12 * wake, 0, 0);
-      for (let j = 0; j < tbl.pops.length; j++) {
-        const p = frac(t * 0.7 + j * 0.5);
-        tbl.pops[j].move(0, p * 0.4, 0).size(clamp01(wake * 1.8) * Math.sin(p * Math.PI)).rot(0, 0, Math.sin(t * 3 + j) * 0.2);
-      }
-      for (let j = 0; j < tbl.steam.length; j++) {
-        const p = frac(t * 0.5 + j / tbl.steam.length + i * 0.13);
-        tbl.steam[j].move(Math.sin(p * 7 + j) * 0.025, p * 0.36, 0).size((0.45 + p) * Math.sin(p * Math.PI) * (1 + k * 0.6));
-      }
-    }
-
-    // Compare board: when Maya steps up, the bars regrow one after another with a bounce.
-    const kc = compareSpring.last;
-    if (kc > 0 && compareWas === 0) for (let i = 0; i < bars.length; i++) {
-      bars[i].spring.x = 0.06;
-      bars[i].spring.v = 0;
-      bars[i].delay = 0.12 + i * 0.16;
-    }
-    compareWas = kc;
-    for (let i = 0; i < bars.length; i++) {
-      const b = bars[i];
-      if (b.delay > 0) b.delay -= dt;
-      const v = stepSpring(b.spring, b.delay > 0 ? 0.06 : 1, dt);
-      b.bar.size(1, Math.max(0.04, v), 1);
-      b.cap.size(clamp01(v) * (0.75 + 0.25 * Math.sin(t * 3 + i))).rot(0, 0, t * 0.8 + i);
-    }
-
-    // Café life: pendant lamps sway, the espresso machine steams, fairy lights twinkle.
-    for (let i = 0; i < cafe.lamps.length; i++) cafe.lamps[i].rot(Math.sin(t * 0.9 + i * 2) * 0.03, 0, Math.sin(t * 0.7 + i * 1.3) * 0.05);
-    for (let i = 0; i < cafe.steam.length; i++) {
-      const p = frac(t * 0.45 + i / cafe.steam.length);
-      cafe.steam[i].move(Math.sin(p * 6 + i) * 0.03, p * 0.45, 0).size((0.5 + p) * Math.sin(p * Math.PI));
-    }
+    // 1) Preview lectern: banner sways, glowing sample page gently floats & sparkles wake on approach
     {
-      const p = frac(t * 0.5);
-      lounge.steam.move(Math.sin(p * 6) * 0.02, p * 0.3, 0).size((0.5 + p) * Math.sin(p * Math.PI));
+      const k = Math.max(0, previewSpring.x);
+      const wake = stepSpring(preview.spring, k, dt);
+      preview.banner.rot(Math.sin(t * 1.2) * 0.03, 0, Math.sin(t * 1.05) * 0.045 + (wake - k) * 0.35);
+      preview.tablet.move(0, wake * 0.025, 0);
+      const lift = Math.sin(t * 1.8) * 0.04 + wake * 0.12;
+      preview.page.move(Math.sin(t * 1.1) * 0.03, lift, 0).rot(0.18 + Math.sin(t * 1.5) * 0.12, Math.sin(t * 0.8) * 0.22, Math.cos(t * 1.2) * 0.08);
+      for (let i = 0; i < preview.spks.length; i++) {
+        const s = (0.7 + 0.35 * Math.sin(t * 2.8 + i * 2.1)) * (1 + wake * 0.55);
+        preview.spks[i].move(0, Math.sin(t * 1.6 + i * 1.9) * 0.06 + wake * 0.08, 0).size(s).rot(0, 0, t * 0.7 + i);
+      }
+    }
+
+    // 2) Center showcase pedestal: golden sparkles orbit the Reality Check E-Book & glow breathes
+    {
+      const k = Math.max(0, buySpring.x);
+      const wake = stepSpring(showcase.spring, k, dt);
+      const pulse = 0.92 + 0.12 * Math.sin(t * 2.1) + wake * 0.25;
+      showcase.aura.size(pulse, pulse, 1);
+      showcase.kpayM.move(0, wake * 0.03, 0);
+      for (let i = 0; i < showcase.spks.length; i++) {
+        const a = t * (0.75 + wake * 0.55) + i * ((Math.PI * 2) / 3);
+        const rx = 0.52 + wake * 0.08;
+        const ry = 0.22 + Math.sin(t * 1.7 + i * 2) * 0.18;
+        const rz = -0.06 - Math.abs(Math.sin(a)) * 0.16; // stay behind/beside cover plane so artwork stays unobstructed
+        const sc = (0.72 + 0.38 * Math.sin(t * 3.1 + i * 1.7)) * (1 + wake * 0.4);
+        showcase.spks[i].move(Math.cos(a) * rx, ry, rz).size(sc).rot(0, 0, t * 1.2 + i);
+      }
+    }
+
+    // 3) East reading nook: phone tilts forward & sync sparkles pop on approach
+    {
+      const k = Math.max(0, readSpring.x);
+      const wake = stepSpring(nook.spring, k, dt);
+      nook.banner.rot(Math.sin(t * 1.15 + 1.2) * 0.03, 0, Math.sin(t * 1.0 + 0.9) * 0.045 + (wake - k) * 0.35);
+      nook.phone.rot(0.1 * wake, 0, 0).move(0, wake * 0.02, 0);
+      for (let i = 0; i < nook.syncSpks.length; i++) {
+        const p = frac(t * 0.65 + i * 0.5);
+        const sc = (0.35 + clamp01(wake * 1.5)) * Math.sin(p * Math.PI);
+        nook.syncSpks[i].move(0, p * 0.28, 0).size(sc).rot(0, 0, Math.sin(t * 2.5 + i) * 0.3);
+      }
+    }
+
+    // 4) Back 23-chapter gallery board: Part 1 & Part 2 bars spring-grow when visited
+    const kc = chapSpring.last;
+    if (kc > 0 && chapWas === 0) {
+      for (let i = 0; i < partBars.length; i++) {
+        partBars[i].spring.x = 0.08;
+        partBars[i].spring.v = 0;
+        partBars[i].delay = 0.1 + i * 0.18;
+      }
+    }
+    chapWas = kc;
+    for (let i = 0; i < partBars.length; i++) {
+      const pb = partBars[i];
+      if (pb.delay > 0) pb.delay -= dt;
+      const v = stepSpring(pb.spring, pb.delay > 0 ? 0.08 : 1, dt);
+      pb.bar.size(Math.max(0.06, v), 1, 1);
+      pb.star.size(clamp01(v) * (0.78 + 0.26 * Math.sin(t * 3 + i))).rot(0, 0, t * 0.9 + i);
+    }
+
+    // 5) Ambient boutique life: pendant lamps, fairy string lights, ivy vines, wall clock, gliding pages
+    for (let i = 0; i < counterRig.lamps.length; i++) {
+      counterRig.lamps[i].rot(Math.sin(t * 0.9 + i * 2) * 0.025, 0, Math.sin(t * 0.72 + i * 1.3) * 0.045);
     }
     for (let i = 0; i < fairy.length; i++) {
-      const c = 0.5 + 0.5 * Math.sin(t * 2.3 + i * 1.7);
-      fairy[i].size(0.7 + 0.4 * c * c);
+      const c = 0.5 + 0.5 * Math.sin(t * 2.2 + i * 1.7);
+      fairy[i].size(0.7 + 0.42 * c * c);
     }
-
-    // Social blocks bob and turn; the calendar's top page lifts in a little breeze.
-    for (let i = 0; i < shelf.floaters.length; i++) {
-      const f = shelf.floaters[i];
-      f.p.move(0, Math.sin(t * 1.4 + f.phase) * 0.05, 0).rot(Math.sin(t * 0.9 + f.phase) * 0.08, Math.sin(t * 0.6 + f.phase) * 0.45, 0);
+    for (let i = 0; i < backLeft.vines.length; i++) {
+      backLeft.vines[i].rot(Math.sin(t * 0.9 + i * 1.8) * 0.045, 0, Math.sin(t * 1.1 + i * 2.2) * 0.08);
     }
-    {
-      const p = frac(t / 6.5);
-      const lift = p < 0.25 ? Math.sin((p / 0.25) * Math.PI) : 0;
-      shelf.sheet.rot(-0.55 * lift * easeOut(Math.min(1, p * 8)), 0, 0);
-    }
-
-    // Detail life: vines sway, the clock ticks, the urn steams, two paper planes glide loops.
-    for (let i = 0; i < vines.length; i++) vines[i].rot(Math.sin(t * 0.9 + i * 1.7) * 0.05, 0, Math.sin(t * 1.1 + i * 2.3) * 0.09);
-    clock.minute.rot(0, 0, -Math.floor(t) * ((Math.PI * 2) / 60) - 0.6);
-    clock.hour.rot(0, 0, -t * ((Math.PI * 2) / 720) - 2.1);
-    {
-      const p = frac(t * 0.45);
-      cart.steam.move(Math.sin(p * 6) * 0.025, p * 0.32, 0).size((0.5 + p) * Math.sin(p * Math.PI));
-    }
-    for (let i = 0; i < planes.length; i++) {
-      const f = planes[i];
+    backLeft.clock.minute.rot(0, 0, -Math.floor(t) * ((Math.PI * 2) / 60) - 0.6);
+    backLeft.clock.hour.rot(0, 0, -t * ((Math.PI * 2) / 720) - 2.1);
+    for (let i = 0; i < pages.length; i++) {
+      const f = pages[i];
       const a = t * f.speed + f.phase;
-      const s = Math.sin(a);
-      const c = Math.cos(a);
-      // nose follows the climb, wings bank into the turn
-      f.p.move(c * f.rx, Math.sin(a * 2) * 0.1, s * f.rz).rot(-Math.cos(a * 2) * 0.12, Math.atan2(-s * f.rx, c * f.rz), 0.32);
+      const s = Math.sin(a), c = Math.cos(a);
+      f.p.move(c * f.rx, Math.sin(a * 2) * 0.09, s * f.rz).rot(-Math.cos(a * 2) * 0.1, Math.atan2(-s * f.rx, c * f.rz), 0.16);
     }
   };
   room.animators.push(animate);
 
-  chainDispose(room, () => built.dispose());
+  chainDispose(room, () => {
+    built.dispose();
+    coverMat?.dispose();
+  });
   return room;
 }

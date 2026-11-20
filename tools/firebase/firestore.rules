@@ -1,0 +1,511 @@
+rules_version = '2';
+
+// ===============================================================
+// Assumed Data Model — Maya's Reality Check E-Book System
+// (Firebase Spark Free Tier: Auth + Cloud Firestore only)
+// ===============================================================
+//
+// Collection: admins
+// Document ID: {uid} (Firebase Auth UID; managed only in Firebase Console)
+// Fields: (presence of document grants admin role; all client writes denied)
+//
+// Collection: config
+// Document ID: ebook (singleton public storefront & KPay settings)
+// Fields:
+//   - priceMmk: int (required, 0..10000000) - book price in MMK
+//   - kpayNumber: string (required, 1..40 chars) - merchant KPay phone number
+//   - kpayName: string (required, 1..80 chars) - merchant KPay account name
+//   - kpayNoteMy: string|null (optional, 0..1000 chars) - Burmese payment note
+//   - kpayNoteEn: string|null (optional, 0..1000 chars) - English payment note
+//   - kpayQrDataUrl: string|null (optional, empty or raster data:image URL <350KB) - KPay QR image
+//   - bookTitleMy: string|null (optional, 0..200 chars) - Burmese book title
+//   - bookTitleEn: string|null (optional, 0..200 chars) - English book title
+//   - updatedAt: timestamp (optional) - last update timestamp
+//
+// Collection: books/{bookId}/meta
+// Document ID: {docId} (e.g. books/reality-check/meta/toc)
+// Fields: Public table of contents & book metadata (admin-writable only)
+//   - title / titleMy / titleEn: string|null (optional, 0..300 chars)
+//   - chapters: list (optional, <=200 entries)
+//   - updatedAt: timestamp (optional)
+//
+// Collection: books/{bookId}/chapters
+// Document ID: {chapterId} ('00' front matter, '01' free sample, '02'..'23' paid)
+// Fields: Chapter content (admin-writable only)
+//   - isFree: bool (optional; chapters '00', '01', or isFree == true are public)
+//   - order: int (optional, 0..500)
+//   - updatedAt: timestamp (optional)
+//
+// Collection: readers
+// Document ID: {uid} (Firebase Auth UID; contains buyer PII — strictly owner + admin only)
+// Fields:
+//   - uid: string (required, immutable, must equal document {uid})
+//   - name: string (required, 1..40 chars) - reader display name
+//   - contact: string (required, immutable by reader, 3..120 chars) - raw phone/email
+//   - contactType: string (required, immutable by reader, 'phone' | 'email')
+//   - contactNorm: string (required, immutable by reader, 3..120 chars) - normalized phone/email
+//   - orderId: string (required, immutable by reader, 3..24 chars) - order reference ID
+//   - status: string (required, 'pending' | 'approved' | 'reupload' | 'revoked')
+//       * Option B: 'pending' and 'approved' grant full paid-chapter read access.
+//       * 'reupload' pauses paid-chapter access until buyer re-uploads a slip (-> 'pending').
+//       * 'revoked' permanently locks the reader out of paid chapters and self-updates.
+//   - activeSessionId: string (required, 1..64 chars) - single-device session token
+//   - deviceLabel: string (required, 0..80 chars) - current device description
+//   - lastChapter: string (required, 0..8 chars) - reading bookmark chapter ID
+//   - lastPage: int (required, 0..10000) - reading bookmark page index
+//   - createdAt: timestamp (required, immutable by reader)
+//   - updatedAt: timestamp (required)
+//   - lastSeenAt: timestamp (required)
+//   - claimCode: string|null (optional, immutable by reader, 0..32 chars) - admin reclaim code used
+//   - approvedAt: timestamp|null (optional, immutable by reader)
+//   - revokedAt: timestamp|null (optional, immutable by reader)
+//   - adminNote: string|null (optional, immutable by reader, 0..1000 chars)
+//
+// Collection: receipts
+// Document ID: {uid} (Firebase Auth UID; contains buyer PII & payment slip — owner + admin only)
+// Fields:
+//   - uid: string (required, immutable, must equal document {uid})
+//   - orderId: string (required, 3..24 chars; must match readers/{uid}.orderId once reader exists)
+//   - name: string (required, 1..40 chars)
+//   - contact: string (required, 3..120 chars)
+//   - amountMmk: int (required, 0..10000000)
+//   - imageDataUrl: string (required, >30 and <200000 chars, raster image base64 data URL)
+//   - uploadedAt: timestamp (required)
+//   - historyCount: int (optional, 0..50, non-decreasing on reader update)
+//
+// Collection: reclaims
+// Document ID: {code} (admin-generated activation / PIN-reset code, 4..32 alphanumeric/_/- chars)
+// Fields:
+//   - code: string (required, immutable by non-admin, must equal {code}, 4..32 chars)
+//   - kind: string (required, immutable by non-admin, 'manual' | 'reset')
+//   - name: string (required, immutable by non-admin, 1..40 chars)
+//   - contact: string (required, immutable by non-admin, 3..120 chars)
+//   - contactNorm: string (required, immutable by non-admin, 3..120 chars)
+//   - used: bool (required; non-admin may only transition false -> true)
+//   - usedBy: string|null (optional, 1..128 chars; non-admin must set to request.auth.uid)
+//   - createdAt: timestamp (required, immutable by non-admin)
+//   - usedAt: timestamp|null (optional; non-admin must set to recent timestamp on claim)
+//
+// ===============================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+
+    // Check if the caller is signed in via Firebase Auth
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Check if the caller owns the document path keyed by {userId}
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Check if the caller owns the existing document via its uid field
+    function isDocOwner() {
+      return isAuthenticated() && request.auth.uid == resource.data.uid;
+    }
+
+    // Check if the caller is an administrator via server-managed admins/{uid} allowlist
+    // (admins/{uid} denies all client writes, so this cannot be self-assigned)
+    function isAdmin() {
+      return isAuthenticated() &&
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    // Check if the caller has active paid-chapter read access (Option B: pending or approved)
+    function hasActiveReaderAccess() {
+      return isAuthenticated() &&
+        exists(/databases/$(database)/documents/readers/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/readers/$(request.auth.uid)).data.status in ['pending', 'approved'];
+    }
+
+    // Verify uid field matches caller on create
+    function uidUnchanged() {
+      return !('uid' in request.resource.data) ||
+        request.resource.data.uid == request.auth.uid;
+    }
+
+    // Verify uid field is not modified on update
+    function uidNotModified() {
+      return !('uid' in request.resource.data) ||
+        request.resource.data.uid == resource.data.uid;
+    }
+
+    // Validate required fields exist in post-write document
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    // Enforce strict schema (no extraneous/undefined fields)
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    // Ensure immutable fields are neither added, modified, nor deleted on update
+    function areImmutableFieldsUnchanged(fields) {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(fields);
+    }
+
+    // Validate required string field length (UTF-8 code points)
+    function validStringLength(field, minLen, maxLen) {
+      return request.resource.data[field] is string &&
+        request.resource.data[field].size() >= minLen &&
+        request.resource.data[field].size() <= maxLen;
+    }
+
+    // Validate optional/nullable string field (omitted, null, or within length bounds)
+    function isValidNullableString(field, minLen, maxLen) {
+      return !(field in request.resource.data) ||
+        request.resource.data[field] == null ||
+        (request.resource.data[field] is string &&
+         request.resource.data[field].size() >= minLen &&
+         request.resource.data[field].size() <= maxLen);
+    }
+
+    // Validate optional/nullable timestamp field
+    function isValidNullableTimestamp(field) {
+      return !(field in request.resource.data) ||
+        request.resource.data[field] == null ||
+        request.resource.data[field] is timestamp;
+    }
+
+    // Validate timestamp is close to server request.time (+/- 10 min)
+    // Accepts serverTimestamp() and tolerates minor mobile clock skew while
+    // preventing backdating/future-dating abuse (e.g., burying fake orders)
+    function isNearRequestTime(time) {
+      return time is timestamp &&
+        time >= request.time - duration.value(10, 'm') &&
+        time <= request.time + duration.value(10, 'm');
+    }
+
+    // Validate raster image base64 data URL with O(1) prefix slicing (no regex on large strings)
+    // Allows webp/jpeg/jpg/png only; blocks SVG/HTML/JS injection and enforces size bounds
+    function isValidImageDataUrl(val, minLen, maxLen) {
+      return val is string &&
+        val.size() > minLen &&
+        val.size() < maxLen &&
+        (
+          val[0:23] in ['data:image/webp;base64,', 'data:image/jpeg;base64,'] ||
+          val[0:22] in ['data:image/png;base64,', 'data:image/jpg;base64,']
+        );
+    }
+
+    // Validate reclaim code format before using it in document path lookups (prevents path injection)
+    function isValidReclaimCode(code) {
+      return code is string &&
+        code.size() >= 4 &&
+        code.size() <= 32 &&
+        code.matches('^[A-Za-z0-9_-]+$');
+    }
+
+    // Verify that a reader's claimCode points to an unused admin-issued reclaim matching contactNorm.
+    // Hardening note: if the client creates readers/{uid} and marks reclaims/{claimCode} used
+    // in a single atomic writeBatch/transaction, you may also add:
+    //   && getAfter(/databases/$(database)/documents/reclaims/$(data.claimCode)).data.used == true
+    //   && getAfter(/databases/$(database)/documents/reclaims/$(data.claimCode)).data.usedBy == data.uid
+    function hasValidReclaim(data) {
+      return 'claimCode' in data &&
+        isValidReclaimCode(data.claimCode) &&
+        exists(/databases/$(database)/documents/reclaims/$(data.claimCode)) &&
+        get(/databases/$(database)/documents/reclaims/$(data.claimCode)).data.used == false &&
+        get(/databases/$(database)/documents/reclaims/$(data.claimCode)).data.contactNorm == data.contactNorm;
+    }
+
+    // ===============================================================
+    // Domain Validators (Called in BOTH create and update rules)
+    // ===============================================================
+
+    // Validate config/ebook document
+    function isValidEbookConfig(data) {
+      return hasOnlyAllowedFields([
+          'priceMmk', 'kpayNumber', 'kpayName', 'kpayNoteMy', 'kpayNoteEn',
+          'kpayQrDataUrl', 'bookTitleMy', 'bookTitleEn', 'updatedAt'
+        ]) &&
+        hasRequiredFields(['priceMmk', 'kpayNumber', 'kpayName']) &&
+        data.priceMmk is int && data.priceMmk >= 0 && data.priceMmk <= 10000000 &&
+        validStringLength('kpayNumber', 1, 40) &&
+        validStringLength('kpayName', 1, 80) &&
+        isValidNullableString('kpayNoteMy', 0, 1000) &&
+        isValidNullableString('kpayNoteEn', 0, 1000) &&
+        (!('kpayQrDataUrl' in data) || data.kpayQrDataUrl == null || data.kpayQrDataUrl == '' ||
+          isValidImageDataUrl(data.kpayQrDataUrl, 30, 350000)) &&
+        isValidNullableString('bookTitleMy', 0, 200) &&
+        isValidNullableString('bookTitleEn', 0, 200) &&
+        isValidNullableTimestamp('updatedAt');
+    }
+
+    // Validate books/{bookId}/meta/{docId} document (admin-only write)
+    function isValidBookMeta(data) {
+      return data.keys().size() > 0 &&
+        data.keys().size() <= 50 &&
+        isValidNullableString('title', 0, 300) &&
+        isValidNullableString('titleMy', 0, 300) &&
+        isValidNullableString('titleEn', 0, 300) &&
+        (!('chapters' in data) || (data.chapters is list && data.chapters.size() <= 200)) &&
+        isValidNullableTimestamp('updatedAt');
+    }
+
+    // Validate books/{bookId}/chapters/{chapterId} document (admin-only write)
+    function isValidChapter(data) {
+      return data.keys().size() > 0 &&
+        data.keys().size() <= 50 &&
+        (!('isFree' in data) || data.isFree is bool) &&
+        (!('order' in data) || (data.order is int && data.order >= 0 && data.order <= 500)) &&
+        isValidNullableTimestamp('updatedAt');
+    }
+
+    // Validate complete readers/{uid} schema on both create and update
+    function isValidReader(data, uid) {
+      return hasOnlyAllowedFields([
+          'uid', 'name', 'contact', 'contactType', 'contactNorm', 'orderId',
+          'status', 'activeSessionId', 'deviceLabel', 'lastChapter', 'lastPage',
+          'createdAt', 'updatedAt', 'lastSeenAt',
+          'claimCode', 'approvedAt', 'revokedAt', 'adminNote'
+        ]) &&
+        hasRequiredFields([
+          'uid', 'name', 'contact', 'contactType', 'contactNorm', 'orderId',
+          'status', 'activeSessionId', 'deviceLabel', 'lastChapter', 'lastPage',
+          'createdAt', 'updatedAt', 'lastSeenAt'
+        ]) &&
+        data.uid is string && data.uid == uid &&
+        validStringLength('name', 1, 40) &&
+        validStringLength('contact', 3, 120) &&
+        data.contactType in ['phone', 'email'] &&
+        validStringLength('contactNorm', 3, 120) &&
+        validStringLength('orderId', 3, 24) &&
+        data.status in ['pending', 'approved', 'reupload', 'revoked'] &&
+        validStringLength('activeSessionId', 1, 64) &&
+        validStringLength('deviceLabel', 0, 80) &&
+        validStringLength('lastChapter', 0, 8) &&
+        data.lastPage is int && data.lastPage >= 0 && data.lastPage <= 10000 &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp &&
+        data.lastSeenAt is timestamp &&
+        isValidNullableString('claimCode', 0, 32) &&
+        isValidNullableTimestamp('approvedAt') &&
+        isValidNullableTimestamp('revokedAt') &&
+        isValidNullableString('adminNote', 0, 1000);
+    }
+
+    // Normal KPay buy creation: status must be 'pending' with no admin-only fields
+    function isValidReaderPendingCreate(data) {
+      return data.status == 'pending' &&
+        !('adminNote' in data) &&
+        !('approvedAt' in data) &&
+        !('revokedAt' in data) &&
+        (!('claimCode' in data) || data.claimCode == null || data.claimCode == '');
+    }
+
+    // Admin-issued reclaim code creation: status 'approved' only with valid unused matching reclaim
+    function isValidReaderClaimCreate(data) {
+      return data.status == 'approved' &&
+        !('adminNote' in data) &&
+        !('revokedAt' in data) &&
+        (!('approvedAt' in data) || data.approvedAt == null || isNearRequestTime(data.approvedAt)) &&
+        hasValidReclaim(data);
+    }
+
+    // Full non-admin reader create validator
+    function validReaderCreate(uid) {
+      return uidUnchanged() &&
+        isValidReader(request.resource.data, uid) &&
+        isNearRequestTime(request.resource.data.createdAt) &&
+        isNearRequestTime(request.resource.data.updatedAt) &&
+        isNearRequestTime(request.resource.data.lastSeenAt) &&
+        (isValidReaderPendingCreate(request.resource.data) ||
+         isValidReaderClaimCreate(request.resource.data));
+    }
+
+    // Full non-admin reader self-update validator
+    function validReaderSelfUpdate(uid) {
+      return uidNotModified() &&
+        isDocOwner() &&
+        // Revoked accounts are permanently locked unless an admin intervenes
+        resource.data.status != 'revoked' &&
+        // Immutable & admin-managed fields can never be changed by the reader
+        areImmutableFieldsUnchanged([
+          'uid', 'orderId', 'contact', 'contactType', 'contactNorm',
+          'createdAt', 'claimCode', 'adminNote', 'approvedAt', 'revokedAt'
+        ]) &&
+        // Whitelist of keys a reader may modify
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'lastChapter', 'lastPage', 'activeSessionId', 'deviceLabel',
+          'lastSeenAt', 'updatedAt', 'name', 'status'
+        ]) &&
+        // Prevent status escalation: status unchanged, except 'reupload' -> 'pending' on slip resubmission
+        (
+          request.resource.data.status == resource.data.status ||
+          (resource.data.status == 'reupload' && request.resource.data.status == 'pending')
+        ) &&
+        // Re-validate entire post-update document schema (prevents Update Bypass & field deletion)
+        isValidReader(request.resource.data, uid) &&
+        // If updatedAt or lastSeenAt changed, enforce timestamp freshness
+        (request.resource.data.updatedAt == resource.data.updatedAt ||
+          isNearRequestTime(request.resource.data.updatedAt)) &&
+        (request.resource.data.lastSeenAt == resource.data.lastSeenAt ||
+          isNearRequestTime(request.resource.data.lastSeenAt));
+    }
+
+    // Validate complete receipts/{uid} schema on both create and update
+    function isValidReceipt(data, uid) {
+      return hasOnlyAllowedFields([
+          'uid', 'orderId', 'name', 'contact',
+          'amountMmk', 'imageDataUrl', 'uploadedAt', 'historyCount'
+        ]) &&
+        hasRequiredFields([
+          'uid', 'orderId', 'name', 'contact',
+          'amountMmk', 'imageDataUrl', 'uploadedAt'
+        ]) &&
+        data.uid is string && data.uid == uid &&
+        validStringLength('orderId', 3, 24) &&
+        validStringLength('name', 1, 40) &&
+        validStringLength('contact', 3, 120) &&
+        data.amountMmk is int && data.amountMmk >= 0 && data.amountMmk <= 10000000 &&
+        isValidImageDataUrl(data.imageDataUrl, 30, 200000) &&
+        data.uploadedAt is timestamp &&
+        (!('historyCount' in data) ||
+          (data.historyCount is int && data.historyCount >= 0 && data.historyCount <= 50));
+    }
+
+    // Check reader state permits submitting/re-uploading a receipt (and orderId matches if reader exists)
+    function canSubmitReceipt(uid) {
+      return !exists(/databases/$(database)/documents/readers/$(uid)) ||
+        (
+          get(/databases/$(database)/documents/readers/$(uid)).data.status in ['pending', 'reupload'] &&
+          request.resource.data.orderId == get(/databases/$(database)/documents/readers/$(uid)).data.orderId
+        );
+    }
+
+    // Validate complete reclaims/{code} schema on both create and update
+    function isValidReclaim(data, code) {
+      return hasOnlyAllowedFields([
+          'code', 'kind', 'name', 'contact', 'contactNorm',
+          'used', 'usedBy', 'createdAt', 'usedAt'
+        ]) &&
+        hasRequiredFields([
+          'code', 'kind', 'name', 'contact', 'contactNorm',
+          'used', 'createdAt'
+        ]) &&
+        isValidReclaimCode(data.code) &&
+        data.code == code &&
+        data.kind in ['manual', 'reset'] &&
+        validStringLength('name', 1, 40) &&
+        validStringLength('contact', 3, 120) &&
+        validStringLength('contactNorm', 3, 120) &&
+        data.used is bool &&
+        isValidNullableString('usedBy', 1, 128) &&
+        data.createdAt is timestamp &&
+        isValidNullableTimestamp('usedAt');
+    }
+
+    // ===============================================================
+    // Collection Rules
+    // ===============================================================
+
+    // 1. Admins allowlist — managed strictly in Firebase Console; non-enumerable
+    match /admins/{uid} {
+      allow get: if isOwner(uid);
+      allow list: if false;
+      allow write: if false;
+    }
+
+    // 2. Public storefront & KPay configuration — publicly readable, admin-writable
+    match /config/ebook {
+      allow read: if true;
+      allow create, update: if isAdmin() && isValidEbookConfig(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    // 3. Public book metadata / table of contents — publicly readable, admin-writable
+    match /books/{bookId}/meta/{docId} {
+      allow read: if true;
+      allow create, update: if isAdmin() &&
+        bookId.size() >= 1 && bookId.size() <= 64 &&
+        docId.size() >= 1 && docId.size() <= 64 &&
+        isValidBookMeta(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    // 4. Book chapters — free samples ('00', '01', or isFree == true) are public;
+    //    paid chapters require active reader ('pending' or 'approved') or admin.
+    //    Checked in read-cost order for Spark Free Tier efficiency.
+    match /books/{bookId}/chapters/{chapterId} {
+      allow get: if chapterId in ['00', '01'] ||
+        (resource != null && resource.data.get('isFree', false) == true) ||
+        hasActiveReaderAccess() ||
+        isAdmin();
+      allow list: if resource.data.isFree == true ||
+        hasActiveReaderAccess() ||
+        isAdmin();
+      allow create, update: if isAdmin() &&
+        bookId.size() >= 1 && bookId.size() <= 64 &&
+        chapterId.size() >= 1 && chapterId.size() <= 32 &&
+        isValidChapter(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    // 5. Reader profiles & access state (PII-bearing) — strictly owner get + admin full access
+    match /readers/{uid} {
+      allow get: if isOwner(uid) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if (isOwner(uid) && validReaderCreate(uid)) ||
+        (isAdmin() && isValidReader(request.resource.data, uid));
+      allow update: if (isOwner(uid) && validReaderSelfUpdate(uid)) ||
+        (isAdmin() && isValidReader(request.resource.data, uid));
+      allow delete: if isAdmin();
+    }
+
+    // 6. Compressed KPay payment receipts (PII-bearing) — owner get/submit + admin full access
+    match /receipts/{uid} {
+      allow get: if isOwner(uid) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if (isOwner(uid) &&
+          uidUnchanged() &&
+          isValidReceipt(request.resource.data, uid) &&
+          isNearRequestTime(request.resource.data.uploadedAt) &&
+          canSubmitReceipt(uid)) ||
+        (isAdmin() && isValidReceipt(request.resource.data, uid));
+      allow update: if (isOwner(uid) &&
+          uidNotModified() &&
+          isDocOwner() &&
+          isValidReceipt(request.resource.data, uid) &&
+          isNearRequestTime(request.resource.data.uploadedAt) &&
+          canSubmitReceipt(uid) &&
+          (!('historyCount' in resource.data) ||
+            ('historyCount' in request.resource.data &&
+             request.resource.data.historyCount >= resource.data.historyCount))) ||
+        (isAdmin() && isValidReceipt(request.resource.data, uid));
+      allow delete: if isAdmin();
+    }
+
+    // 7. Admin-issued 6-digit activation / PIN-reset codes — non-enumerable single-use claim
+    match /reclaims/{code} {
+      allow get: if (isAuthenticated() && resource != null && resource.data.used == false) ||
+        isAdmin();
+      allow list: if isAdmin();
+      allow create: if isAdmin() && isValidReclaim(request.resource.data, code);
+      allow update: if (isAuthenticated() &&
+          resource.data.used == false &&
+          request.resource.data.used == true &&
+          request.resource.data.usedBy == request.auth.uid &&
+          (!('usedAt' in request.resource.data) ||
+            request.resource.data.usedAt == null ||
+            isNearRequestTime(request.resource.data.usedAt)) &&
+          areImmutableFieldsUnchanged(['code', 'kind', 'name', 'contact', 'contactNorm', 'createdAt']) &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['used', 'usedBy', 'usedAt']) &&
+          isValidReclaim(request.resource.data, code)) ||
+        (isAdmin() && isValidReclaim(request.resource.data, code));
+      allow delete: if isAdmin();
+    }
+
+    // 8. Default deny-all fallback for any other collection or subcollection
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

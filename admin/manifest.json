@@ -1,0 +1,25 @@
+{
+  "name": "မာရာ Admin · Reality Check E-Book",
+  "short_name": "Maya Admin",
+  "description": "Private E-Book Admin Console for အမှန်မြင်ခြင်း (Reality Check) by မာရာ (Maya)",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#FAF5EB",
+  "theme_color": "#6E1F2A",
+  "icons": [
+    {
+      "src": "../img/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "../img/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

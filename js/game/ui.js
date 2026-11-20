@@ -2,12 +2,59 @@
 // labels pinned to 3D points, Maya's emote bubble, tips, letterbox and iris transitions.
 import { PLACES } from './config.js';
 import * as pages from './pages.js';
+import { getReaderName } from '../ebook/store.js';
 
 const $ = (id) => document.getElementById(id);
 export const lang = () => document.documentElement.getAttribute('data-lang') || 'my';
 export const tr = (o) => (o == null ? '' : typeof o === 'string' ? o : o[lang()] ?? o.my ?? o.en ?? '');
-const ICONS = { home: 'i-home', box: 'i-box', clapper: 'i-clapper', mug: 'i-mug', book: 'i-book', plane: 'i-plane' };
+const ICONS = { home: 'i-home', box: 'i-box', clapper: 'i-clapper', mug: 'i-mug', ebook: 'i-ebook', book: 'i-book', plane: 'i-plane' };
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+function currentReaderName(override) {
+  if (typeof override === 'string') return override.trim();
+  try { return (getReaderName?.() || '').trim(); } catch { return ''; }
+}
+
+function cleanUnnamed(text) {
+  return text
+    .replace(/\{name\}\s*ရေ[၊,!။]?\s*/g, '')
+    .replace(/\{name\}\s*ရှင့်[၊,!။]?\s*/g, '')
+    .replace(/,\s*\{name\}(?=[!?.။,\s]|$)/g, '')
+    .replace(/\{name\}\s*[,!]\s*/g, '')
+    .replace(/\s*\{name\}\s*/g, ' ')
+    .replace(/\s+([!?.,။၊])/g, '$1')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+
+/**
+ * Resolve a bilingual line ({ my, en, myNamed?, enNamed? } | string) using the reader's name
+ * when available. Falls back cleanly with zero `{name}` leftovers when no name is stored.
+ */
+export function withReaderName(line, opts = {}) {
+  if (line == null) return '';
+  const l = lang();
+  const name = opts.skipName ? '' : currentReaderName(opts.name);
+  if (name && typeof line === 'object') {
+    const named = l === 'en' ? (line.enNamed ?? line.myNamed) : (line.myNamed ?? line.enNamed);
+    if (named) return named.replace(/\{name\}/g, name);
+  }
+  const text = tr(line);
+  if (!text) return '';
+  if (text.includes('{name}')) {
+    return name ? text.replace(/\{name\}/g, name) : cleanUnnamed(text);
+  }
+  if (name && opts.greet && !text.includes(name)) {
+    if (l === 'en') {
+      if (/^Hello!/i.test(text)) return text.replace(/^Hello!/i, `Hello, ${name}!`);
+      if (/^Welcome back!/i.test(text)) return text.replace(/^Welcome back!/i, `Welcome back, ${name}!`);
+      return `Hey ${name}! ${text}`;
+    }
+    if (text.startsWith('မင်္ဂလာပါရှင့်!')) return `မင်္ဂလာပါ ${name} ရေ!${text.slice('မင်္ဂလာပါရှင့်!'.length)}`;
+    return `${name} ရေ၊ ${text}`;
+  }
+  return text;
+}
 
 // Split text into grapheme clusters so the typewriter never breaks a Burmese syllable's marks.
 const segmenter = typeof Intl !== 'undefined' && Intl.Segmenter ? new Intl.Segmenter('my', { granularity: 'grapheme' }) : null;
@@ -126,6 +173,7 @@ export function createUI(cb) {
       advance?.();
       await wait(0);
       if (token !== this.sayToken) return;
+      els.dialog.style.zIndex = opts.aboveSheet ? '9' : '';
       els.dialog.hidden = false;
       game.classList.add('talking');
       if (opts.face) {
@@ -135,7 +183,7 @@ export function createUI(cb) {
       }
       for (const line of lines) {
         if (token !== this.sayToken) return;
-        const text = tr(line);
+        const text = opts.raw ? tr(line) : withReaderName(line, { name: opts.readerName, greet: opts.greet, skipName: opts.skipName });
         opts.onLine?.(text);
         await typeLine(text, opts.onTick);
         if (token !== this.sayToken) return;
@@ -145,9 +193,9 @@ export function createUI(cb) {
         });
         advance = null;
       }
-      if (token === this.sayToken) { els.dialog.hidden = true; game.classList.remove('talking'); }
+      if (token === this.sayToken) { els.dialog.hidden = true; els.dialog.style.zIndex = ''; game.classList.remove('talking'); }
     },
-    hideDialog() { if (typing) typing.skip = true; advance?.(); els.dialog.hidden = true; game.classList.remove('talking'); },
+    hideDialog() { if (typing) typing.skip = true; advance?.(); els.dialog.hidden = true; els.dialog.style.zIndex = ''; game.classList.remove('talking'); },
     get dialogOpen() { return !els.dialog.hidden; },
 
     openSheet({ title, stationIds }) {
