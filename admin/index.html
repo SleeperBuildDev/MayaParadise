@@ -143,36 +143,39 @@
 <div id="app-shell" class="app-shell" hidden>
   <header class="topbar">
     <div class="topbar-inner">
-      <div class="brand-cluster">
-        <img class="brand-avatar" src="../img/logo.webp" alt="မာရာ" width="38" height="38">
-        <div class="brand-text">
-          <h1 class="brand-title">
-            <span lang="my">မာရာ E-Book Admin</span>
-            <span lang="en">Maya E-Book Admin</span>
-          </h1>
-          <div class="brand-meta">
-            <span id="hdr-mode-badge" class="badge badge-demo" style="padding:1px 8px;font-size:11px">
-              <span class="badge-dot"></span>
-              <span id="hdr-mode-text">DEMO</span>
-            </span>
-            <span id="hdr-admin-email" class="hide-sm"></span>
+      <div class="topbar-row1">
+        <div class="brand-cluster">
+          <img class="brand-avatar" src="../img/logo.webp" alt="မာရာ" width="36" height="36">
+          <div class="brand-text">
+            <h1 class="brand-title">
+              <span lang="my">မာရာ Admin</span>
+              <span lang="en">Maya Admin</span>
+            </h1>
           </div>
+        </div>
+
+        <div class="topbar-actions">
+          <div class="lang-toggle" role="group" aria-label="Language">
+            <button type="button" data-set-lang="my" aria-pressed="true">မြန်မာ</button>
+            <button type="button" data-set-lang="en" aria-pressed="false">EN</button>
+          </div>
+          <a class="btn btn-outline btn-sm hide-sm" href="../#ebook" target="_blank" rel="noopener">
+            <span lang="my">ဆိုင်ဖွင့်ကြည့်</span>
+            <span lang="en">Open Shop</span> ↗
+          </a>
+          <button id="btn-signout" type="button" class="btn btn-outline btn-sm">
+            <span lang="my">ထွက်မည်</span>
+            <span lang="en">Sign Out</span>
+          </button>
         </div>
       </div>
 
-      <div class="topbar-actions">
-        <div class="lang-toggle" role="group" aria-label="Language">
-          <button type="button" data-set-lang="my" aria-pressed="true">မြန်မာ</button>
-          <button type="button" data-set-lang="en" aria-pressed="false">EN</button>
-        </div>
-        <a class="btn btn-outline btn-sm hide-sm" href="../#ebook" target="_blank" rel="noopener">
-          <span lang="my">ဆိုင်ဖွင့်ကြည့်</span>
-          <span lang="en">Open Shop</span> ↗
-        </a>
-        <button id="btn-signout" type="button" class="btn btn-outline btn-sm">
-          <span lang="my">ထွက်မည်</span>
-          <span lang="en">Sign Out</span>
-        </button>
+      <div class="topbar-status">
+        <span id="hdr-mode-badge" class="badge badge-demo">
+          <span class="badge-dot"></span>
+          <span id="hdr-mode-text">DEMO</span>
+        </span>
+        <span id="hdr-admin-email" class="admin-email"></span>
       </div>
     </div>
   </header>
@@ -200,7 +203,7 @@
       <button type="button" class="tab-btn" role="tab" data-tab="payments" aria-selected="false">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Zm0 4H4V6h16Zm0 10H4v-6h16Zm-3-4h-4v2h4Z"/></svg>
         <span class="tab-label">
-          <span lang="my">ငွေလွှဲ &amp; ဈေးနှုန်း</span>
+          <span lang="my"><span class="label-full">ငွေလွှဲ &amp; ဈေးနှုန်း</span><span class="label-short">ငွေလွှဲ</span></span>
           <span lang="en">Payments</span>
         </span>
       </button>
@@ -406,14 +409,14 @@
             <label for="cfg-note-my">
               <span><span lang="my">ငွေလွှဲမှတ်ချက် (မြန်မာ)</span><span lang="en">Payment Note (Burmese)</span></span>
             </label>
-            <textarea id="cfg-note-my" class="textarea" rows="3" maxlength="1000" placeholder="ငွေလွှဲပြီးပါက ငွေလွှဲပြေစာ Screenshot ကို တင်ပေးပါရှင့်။"></textarea>
+            <textarea id="cfg-note-my" class="textarea textarea-my" rows="4" maxlength="1000" placeholder="ငွေလွှဲပြီးပါက ငွေလွှဲပြေစာ Screenshot ကို တင်ပေးပါရှင့်။"></textarea>
           </div>
 
           <div class="field">
             <label for="cfg-note-en">
               <span><span lang="my">ငွေလွှဲမှတ်ချက် (English)</span><span lang="en">Payment Note (English)</span></span>
             </label>
-            <textarea id="cfg-note-en" class="textarea" rows="3" maxlength="1000" placeholder="Transfer via KBZPay and upload your payment screenshot for instant access."></textarea>
+            <textarea id="cfg-note-en" class="textarea" rows="4" maxlength="1000" placeholder="Transfer via KBZPay and upload your payment screenshot for instant access."></textarea>
           </div>
 
           <div class="qr-manager">
@@ -443,7 +446,7 @@
             </div>
           </div>
 
-          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding-top:4px">
+          <div class="save-row">
             <span id="cfg-saved-at" class="hint" style="font-size:13px;color:var(--muted)"></span>
             <button id="btn-save-config" type="submit" class="btn btn-primary">
               <span lang="my">ငွေလွှဲဆက်တင် သိမ်းဆည်းမည်</span>
@@ -455,10 +458,15 @@
         <!-- Right column: Live Buyer Preview + Firebase Connection -->
         <div class="form-stack">
           <div class="buyer-preview">
-            <h3>
-              ✦ <span lang="my">ဝယ်ယူသူ မြင်ရမည့်ပုံစံ (Live Preview)</span>
-              <span lang="en">Buyer Checkout Preview</span>
-            </h3>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+              <h3 style="margin:0">
+                ✦ <span lang="my">ဝယ်ယူသူ မြင်ရမည့်ပုံစံ (Live Preview)</span>
+                <span lang="en">Buyer Checkout Preview</span>
+              </h3>
+              <a class="btn btn-outline btn-xs show-sm" href="../#ebook" target="_blank" rel="noopener">
+                <span lang="my">ဆိုင်ဖွင့်ကြည့်</span><span lang="en">View Shop</span> ↗
+              </a>
+            </div>
             <div style="font-size:13px;color:var(--muted)">
               <span lang="my">အမှန်မြင်ခြင်း (Reality Check) · E-Book</span>
               <span lang="en">Reality Check · Digital E-Book</span>

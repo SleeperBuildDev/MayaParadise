@@ -1141,31 +1141,31 @@ function renderBookTab() {
 
           let statusPill = '';
           if (uploaded) {
-            statusPill = `<span class="badge badge-approved" style="padding:1px 7px;font-size:11px">✓ ${escHtml(
-              t('တင်ပြီး', 'Uploaded')
+            statusPill = `<span class="badge badge-approved ch-pill">✓ ${escHtml(
+              t('တင်ပြီး', 'Done')
             )}</span>`;
           } else if (isFree) {
-            statusPill = `<span class="badge badge-gold" style="padding:1px 7px;font-size:11px">${escHtml(
-              t('အခမဲ့ပါပြီး', 'Free bundled')
+            statusPill = `<span class="badge badge-gold ch-pill">${escHtml(
+              t('အခမဲ့', 'Free')
             )}</span>`;
           } else {
-            statusPill = `<span class="badge badge-neutral" style="padding:1px 7px;font-size:11px">${escHtml(
-              t('မတင်ရသေး', 'Pending upload')
+            statusPill = `<span class="badge badge-neutral ch-pill">${escHtml(
+              t('မတင်ရသေး', 'Pending')
             )}</span>`;
           }
 
           return `
             <div class="chapter-card${uploaded ? ' uploaded' : ''}">
-              <div class="ch-status-icon" aria-hidden="true">${uploaded ? '✓' : num}</div>
-              <div class="ch-info">
-                <div class="ch-head">
+              <div class="ch-head">
+                <span class="ch-id">
+                  <span class="ch-status-icon" aria-hidden="true">${uploaded ? '✓' : num}</span>
                   <span class="ch-num">CH ${escHtml(num)}</span>
-                  ${statusPill}
-                </div>
-                <div class="ch-title">${escHtml(title)}</div>
-                <div class="ch-sub">
-                  ${escHtml(pageRange)}${st.pageCount ? ` · ${st.pageCount} ${escHtml(t('မျက်နှာ', 'pgs'))}` : ''}
-                </div>
+                </span>
+                ${statusPill}
+              </div>
+              <div class="ch-title">${escHtml(title)}</div>
+              <div class="ch-sub">
+                ${escHtml(pageRange)}${st.pageCount ? ` · ${st.pageCount} ${escHtml(t('မျက်နှာ', 'pgs'))}` : ''}
               </div>
             </div>
           `;
