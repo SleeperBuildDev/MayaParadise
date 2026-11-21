@@ -1,15 +1,14 @@
-// E-Book backend store for "Reality Check (အမှန်မြင်ခြင်း)" by Maya (မာရာ).
-// Supports TWO seamless modes:
-//   1. Firebase Spark (Free Tier — Auth + Firestore only, NO Storage, works in Myanmar without VPN)
-//      loaded lazily via modular v11 ESM ONLY when isFirebaseConfigured() is true.
-//      All Firestore writes strictly conform to tools/firebase/firestore.rules whitelists & serverTimestamp().
-//   2. Local Demo Mode (zero-config when FIREBASE_CONFIG.apiKey is empty):
-//      localStorage + IndexedDB + BroadcastChannel('wm-ebook-demo') for real-time sync
+// E-Book & Script Studio backend store for "Reality Check (အမှန်မြင်ခြင်း)" by Maya (မာရာ).
+// Supports TWO seamless modes (zero Google/Firebase CDN calls anywhere):
+//   1. Live Cloudflare Workers + D1 SQLite API (https://api.writermaya.com)
+//      100% No-VPN in Myanmar, $0 Cloudflare Free Tier, pure native fetch() + HS256 JWT.
+//   2. Local Demo Mode (`?demo=1` or empty API URL):
+//      localStorage + IndexedDB + BroadcastChannel('wm-ebook-demo') for real-time offline sync
 //      between the main site and /admin/.
 
 import {
   DEFAULT_EBOOK_CONFIG,
-  getActiveFirebaseConfig,
+  getApiBaseUrl,
   isFirebaseConfigured,
 } from './firebase-config.js';
 import {
@@ -18,12 +17,10 @@ import {
   getDemoPlaceholderChapter,
 } from './sample-data.js';
 
-const FB_VER = '11.6.0';
-const FB_BASE = `https://www.gstatic.com/firebasejs/${FB_VER}`;
-
 const NAME_CACHE_KEY = 'wm-reader-name';
-const SESSION_KEY = 'wm-ebook-session-id';
-const AUTH_SLOTS_KEY = 'wm-ebook-auth-slots';
+const READER_TOKEN_KEY = 'wm-reader-token';
+const ADMIN_TOKEN_KEY = 'wm-admin-token';
+const ADMIN_EMAIL_KEY = 'wm-admin-email';
 const DEMO_DB_KEY = 'wm-ebook-demo-db';
 const DEMO_SESSION_KEY = 'wm-ebook-demo-session';
 const DEMO_TAB_SESSION_KEY = 'wm-ebook-tab-session';
@@ -33,7 +30,10 @@ const LAST_CONSULT_KEY = 'wm-last-consult';
 const BROADCAST_NAME = 'wm-ebook-demo';
 const IDB_NAME = 'wm-ebook-demo-idb';
 const IDB_VERSION = 1;
-const MAX_AUTH_SLOTS = 5;
+
+const READER_HEARTBEAT_MS = 15_000;
+const ADMIN_POLL_MS = 8_000;
+const DEFAULT_TIMEOUT_MS = 20_000;
 
 // ---------- Myanmar-aware helpers & name sanitization ----------
 
@@ -91,7 +91,10 @@ function isImpersonatingMaya(raw) {
   if (core.includes('writermaya') || core.includes('msmaya') || core.includes('mayascreations')) {
     return true;
   }
-  if ((core === 'မာရာ' || core.startsWith('စာရေးဆရာမမာရာ') || core.endsWith('မာရာ')) && core.length <= 12) {
+  if (
+    (core === 'မာရာ' || core.startsWith('စာရေးဆရာမမာရာ') || core.endsWith('မာရာ')) &&
+    core.length <= 12
+  ) {
     return true;
   }
   return false;
@@ -146,7 +149,7 @@ function cacheReaderName(name) {
   }
 }
 
-function makeError(code, msgMy, msgEn) {
+function makeError(code, msgMy, msgEn, extra = {}) {
   const lang =
     typeof document !== 'undefined'
       ? document.documentElement.getAttribute('data-lang') || 'my'
@@ -155,6 +158,7 @@ function makeError(code, msgMy, msgEn) {
   err.code = code;
   err.msgMy = msgMy;
   err.msgEn = msgEn;
+  Object.assign(err, extra);
   return err;
 }
 
@@ -177,7 +181,49 @@ function detectDeviceLabel() {
   return `${os} · ${br}`.slice(0, 80);
 }
 
-// ---------- Crypto & Hashing (with pure-JS SHA-256 fallback for HTTP LAN testing) ----------
+// ---------- Token Storage Helpers ----------
+
+function getReaderToken() {
+  try {
+    return localStorage.getItem(READER_TOKEN_KEY) || '';
+  } catch {
+    return '';
+  }
+}
+
+function setReaderToken(token) {
+  try {
+    if (token) localStorage.setItem(READER_TOKEN_KEY, String(token));
+    else localStorage.removeItem(READER_TOKEN_KEY);
+  } catch {
+    // Ignore storage errors.
+  }
+}
+
+/** Synchronously return the stored Admin JWT (empty string in Demo Mode or when signed out). */
+export function getAdminAuthToken() {
+  if (!isFirebaseConfigured()) return '';
+  try {
+    return localStorage.getItem(ADMIN_TOKEN_KEY) || '';
+  } catch {
+    return '';
+  }
+}
+
+function setAdminAuthSession(token, email) {
+  try {
+    if (token) {
+      localStorage.setItem(ADMIN_TOKEN_KEY, String(token));
+      if (email) localStorage.setItem(ADMIN_EMAIL_KEY, String(email));
+    } else {
+      localStorage.removeItem(ADMIN_TOKEN_KEY);
+    }
+  } catch {
+    // Ignore storage errors.
+  }
+}
+
+// ---------- Crypto & Demo-Mode Generators ----------
 
 function randHex(bytes = 12) {
   const arr = new Uint8Array(bytes);
@@ -303,7 +349,7 @@ async function sha256Hex(str) {
   return sha256Fallback(str);
 }
 
-// ---------- Contact, PIN & Local Auth Slot Cache ----------
+// ---------- Validation & Normalization ----------
 
 function parseContact(raw) {
   const s = normalizeDigits(raw).trim();
@@ -354,37 +400,8 @@ function validatePin(rawPin) {
   return pin;
 }
 
-function pinToPassword(pin) {
-  return `WM_PIN_v1_${pin}`;
-}
-
-async function contactToAuthEmail(parsedContact, slot = 0) {
-  const suffix = slot > 0 ? `.s${slot}` : '';
-  if (parsedContact.kind === 'phone') {
-    return `p_${parsedContact.normalized}${suffix}@readers.writermaya.com`;
-  }
-  const hash20 = (await sha256Hex(parsedContact.normalized)).slice(0, 20);
-  return `e_${hash20}${suffix}@readers.writermaya.com`;
-}
-
-function getCachedAuthSlot(contactNorm) {
-  try {
-    const map = JSON.parse(localStorage.getItem(AUTH_SLOTS_KEY) || '{}');
-    const val = Number(map[contactNorm]);
-    return Number.isInteger(val) && val >= 0 && val < MAX_AUTH_SLOTS ? val : 0;
-  } catch {
-    return 0;
-  }
-}
-
-function setCachedAuthSlot(contactNorm, slot) {
-  try {
-    const map = JSON.parse(localStorage.getItem(AUTH_SLOTS_KEY) || '{}');
-    map[contactNorm] = slot;
-    localStorage.setItem(AUTH_SLOTS_KEY, JSON.stringify(map));
-  } catch {
-    // Ignore.
-  }
+function demoPinHashInput(contactNorm, pin) {
+  return `${contactNorm}:WM_PIN_v1_${pin}`;
 }
 
 function validateAndSanitizeName(raw) {
@@ -467,6 +484,172 @@ function normalizeReaderView(uid, raw) {
     approvedAt: toMillis(raw.approvedAt),
     revokedAt: toMillis(raw.revokedAt),
   };
+}
+
+// ---------- Cloudflare Workers API Fetch Client ----------
+
+const API_ERROR_COPY = {
+  ALREADY_EXISTS: [
+    'ဤဖုန်းနံပါတ် / Email ဖြင့် ဝယ်ယူထားပြီးသား ဖြစ်ပါသည်။ "ဝယ်ပြီးသား" မှ PIN ဖြင့် ဝင်ရောက်ပါရှင့်။',
+    'This phone/email already has an account. Please sign in with your PIN.',
+  ],
+  WRONG_CREDENTIALS: [
+    'ဖုန်းနံပါတ်/Email သို့မဟုတ် PIN မှားနေပါသည်။ ပြန်စစ်ပေးပါရှင့်။',
+    'Incorrect phone/email or PIN. Please check and try again.',
+  ],
+  REVOKED: [
+    'စာဖတ်ခွင့် ပိတ်သိမ်းထားပါသည်။ မာရာထံ ဆက်သွယ်ပေးပါရှင့်။',
+    'Reading access has been revoked. Please contact Maya.',
+  ],
+  OTHER_DEVICE: [
+    'အခြားဖုန်းတစ်လုံးမှ ဝင်ရောက်လိုက်သဖြင့် ဤစက်မှ အလိုအလျောက် ထွက်သွားပါပြီ။',
+    'Signed in on another device. This device has been signed out.',
+  ],
+  DELETED: [
+    'စာဖတ်သူအကောင့် ဖျက်သိမ်းခံထားရပါသည်။ မာရာထံ ဆက်သွယ်ပေးပါရှင့်။',
+    'Reader account no longer exists. Please contact Maya.',
+  ],
+  LOCKED: [
+    'ဤအခန်းကို ဖတ်ရှုရန် E-Book ဝယ်ယူရန် သို့မဟုတ် အကောင့်ဝင်ရန် လိုအပ်ပါသည်။',
+    'Please buy the E-Book or sign in to read this chapter.',
+  ],
+  CODE_NOT_FOUND: [
+    'ကုဒ်မမှန်ပါရှင့်။ မာရာပို့ပေးသော ၆ လုံးကုဒ်ကို ပြန်စစ်ပေးပါ။',
+    'Code not found. Please double-check the 6-digit code from Maya.',
+  ],
+  CODE_USED: [
+    'ဤကုဒ်ကို အသုံးပြုပြီးသား ဖြစ်ပါသည်။',
+    'This code has already been used.',
+  ],
+  CONTACT_MISMATCH: [
+    'ဤကုဒ်သည် သတ်မှတ်ထားသော ဖုန်းနံပါတ် / Email နှင့် မကိုက်ညီပါ။',
+    'This code is bound to a different phone number or email.',
+  ],
+  INVALID_CODE: [
+    'ဂဏန်း ၆ လုံးပါ ကုဒ်ကို မှန်ကန်စွာ ထည့်ပေးပါရှင့်။',
+    'Please enter a valid 6-digit activation or reset code.',
+  ],
+  INVALID_IMAGE: [
+    'ငွေလွှဲပြေစာပုံ မမှန်ပါ (သို့မဟုတ်) ဖိုင်အရွယ်အစား ကြီးနေပါသည်။',
+    'Please upload a valid compressed payment screenshot.',
+  ],
+  REUPLOAD_NOT_ALLOWED: [
+    'လက်ရှိအကောင့်အခြေအနေအရ ပြေစာပုံ ပြန်တင်၍ မရပါ။',
+    'Cannot re-upload payment slip for your current account status.',
+  ],
+  INVALID_SETUP_CODE: [
+    'Admin Setup Code မှားနေပါသည်။ ပြန်စစ်ပေးပါ။',
+    'Invalid Admin Setup Code. Please check and try again.',
+  ],
+  NOT_ADMIN: [
+    'ဤ Email သည် Admin ခွင့်ပြုစာရင်းတွင် မပါဝင်ပါ။',
+    'This email is not authorized as an admin.',
+  ],
+  ALREADY_SETUP: [
+    'ဤ Admin အကောင့်အတွက် Password သတ်မှတ်ပြီးသား ဖြစ်ပါသည်။ ပုံမှန်အတိုင်း ဝင်ရောက်ပါ။',
+    'Password is already set for this admin account. Please sign in normally.',
+  ],
+  NEEDS_SETUP: [
+    'ပထမဆုံးအကြိမ် ဝင်ရောက်ခြင်းဖြစ်ပါသည်။ Admin Setup Code ထည့်ပြီး Password အသစ် သတ်မှတ်ပေးပါ။',
+    'First-time setup required — enter your Admin Setup Code to create a password.',
+  ],
+  WEAK_PASSWORD: [
+    'Admin Password သည် အနည်းဆုံး စာလုံး ၈ လုံး ရှိရပါမည်။',
+    'Password must be at least 8 characters.',
+  ],
+  INVALID_CREDENTIALS: [
+    'Admin Email သို့မဟုတ် Password မှားနေပါသည်။',
+    'Invalid Admin email or password.',
+  ],
+  UNAUTHORIZED: [
+    'အကောင့်သက်တမ်းကုန်ဆုံးသွားပါပြီ။ ပြန်လည်ဝင်ရောက်ပေးပါ။',
+    'Session expired. Please sign in again.',
+  ],
+  PAYLOAD_TOO_LARGE: [
+    'တင်သောဖိုင် အရွယ်အစား ကြီးလွန်းနေပါသည်။',
+    'Uploaded payload is too large.',
+  ],
+};
+
+function makeApiError(status, data, fallbackCode = 'API_ERROR') {
+  const code = String(data?.code || fallbackCode);
+  const copy = API_ERROR_COPY[code];
+  const fallbackEn = data?.error || `Request failed (${status})`;
+  const msgMy = copy ? copy[0] : `အမှားအယွင်းဖြစ်ပွားပါသည် (${code})။ ထပ်စမ်းကြည့်ပါရှင့်။`;
+  const msgEn = copy ? copy[1] : fallbackEn;
+  return makeError(code, msgMy, msgEn, {
+    status,
+    data: data || null,
+    needsSetup: Boolean(data?.needsSetup || code === 'NEEDS_SETUP'),
+  });
+}
+
+async function apiFetch(
+  path,
+  { method = 'GET', body, token = '', timeoutMs = DEFAULT_TIMEOUT_MS, allowStatuses = [] } = {}
+) {
+  const base = getApiBaseUrl();
+  if (!base) {
+    throw makeError(
+      'NO_API_URL',
+      'API လိပ်စာ မသတ်မှတ်ရသေးပါ။',
+      'API base URL is not configured.'
+    );
+  }
+
+  const headers = {};
+  if (token) headers.Authorization = `Bearer ${token}`;
+  let payload;
+  if (body !== undefined) {
+    headers['Content-Type'] = 'application/json';
+    payload = JSON.stringify(body);
+  }
+
+  const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  const timer =
+    controller && timeoutMs > 0 ? setTimeout(() => controller.abort(), timeoutMs) : null;
+  timer?.unref?.();
+
+  let res;
+  try {
+    res = await fetch(`${base}${path}`, {
+      method,
+      headers,
+      body: payload,
+      signal: controller ? controller.signal : undefined,
+    });
+  } catch (err) {
+    if (err?.name === 'AbortError') {
+      throw makeError(
+        'TIMEOUT',
+        'ဆာဗာချိတ်ဆက်မှု ကြာမြင့်နေပါသည်။ အင်တာနက်စစ်ဆေးပြီး ထပ်စမ်းကြည့်ပါရှင့်။',
+        'Connection timed out. Please check your internet and try again.',
+        { networkError: true }
+      );
+    }
+    throw makeError(
+      'NETWORK_ERROR',
+      'အင်တာနက် ချိတ်ဆက်၍မရပါ။ လိုင်းစစ်ဆေးပြီး ထပ်စမ်းကြည့်ပါရှင့်။',
+      'Could not reach server. Please check your connection and try again.',
+      { networkError: true }
+    );
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+
+  let data = null;
+  try {
+    const txt = await res.text();
+    if (txt) data = JSON.parse(txt);
+  } catch {
+    data = null;
+  }
+
+  if (res.ok || allowStatuses.includes(res.status)) {
+    return { ok: res.ok, status: res.status, data };
+  }
+
+  throw makeApiError(res.status, data);
 }
 
 // ---------- Browser Image Compression (WebP <= 65 KB, max 720px) ----------
@@ -684,7 +867,9 @@ async function idbDelete(storeName, key) {
 async function idbGetAllKeys(storeName) {
   const db = await openDemoIdb();
   if (!db) {
-    return storeName === 'chapters' ? Array.from(memChapters.keys()) : Array.from(memReceipts.keys());
+    return storeName === 'chapters'
+      ? Array.from(memChapters.keys())
+      : Array.from(memReceipts.keys());
   }
   return new Promise((resolve) => {
     try {
@@ -701,8 +886,8 @@ async function idbGetAllKeys(storeName) {
 // ---------- Demo Mode localStorage DB + BroadcastChannel sync ----------
 
 let demoChannel = null;
-const adminReaderWatchers = new Set();
-const adminConsultWatchers = new Set();
+const demoReaderWatchers = new Set();
+const demoConsultWatchers = new Set();
 
 function createEmptyDemoDb() {
   return {
@@ -804,10 +989,12 @@ function sortReadersDesc(list) {
 }
 
 function notifyDemoAdminWatchers() {
-  if (!adminReaderWatchers.size) return;
+  if (!demoReaderWatchers.size) return;
   const db = readDemoDb();
-  const list = sortReadersDesc(Object.entries(db.readers).map(([uid, r]) => normalizeReaderView(uid, r)));
-  for (const cb of adminReaderWatchers) {
+  const list = sortReadersDesc(
+    Object.entries(db.readers).map(([uid, r]) => normalizeReaderView(uid, r))
+  );
+  for (const cb of demoReaderWatchers) {
     try {
       cb(list);
     } catch (e) {
@@ -819,7 +1006,7 @@ function notifyDemoAdminWatchers() {
 // ---------- Shared Store State ----------
 
 const state = {
-  mode: isFirebaseConfigured() ? 'firebase' : 'demo',
+  mode: isFirebaseConfigured() ? 'live' : 'demo',
   ready: false,
   signedIn: false,
   uid: null,
@@ -831,24 +1018,29 @@ const state = {
   config: { ...DEFAULT_EBOOK_CONFIG },
 };
 
-let localSessionId = '';
-try {
-  localSessionId = localStorage.getItem(SESSION_KEY) || '';
-} catch {
-  localSessionId = '';
-}
-
 const listeners = new Set();
 const chapterCache = new Map();
 let initPromise = null;
 let demoListenersBound = false;
+let visibilityBound = false;
 
-// Firebase handles (lazy, only populated when isFirebaseConfigured() === true)
-let fb = null;
-let fbAdminVerified = false;
-let fbAdminUid = null;
-let unsubReaderDoc = null;
-let unsubConfigDoc = null;
+// Live API session & polling handles
+let liveAdminVerified = false;
+let liveAdminEmail = '';
+let readerHeartbeatTimer = null;
+let readerHeartbeatInFlight = false;
+
+const liveReaderWatchers = new Set();
+let liveReaderPollTimer = null;
+let liveReaderPollInFlight = false;
+
+const liveConsultWatchers = new Set();
+let liveConsultPollTimer = null;
+let liveConsultPollInFlight = false;
+
+function isTabVisible() {
+  return typeof document === 'undefined' || !document.hidden;
+}
 
 function computeHasAccess(reader) {
   if (!reader) return false;
@@ -907,9 +1099,27 @@ function applyReaderRecord(reader, { kickedReason = null } = {}) {
       const clean = sanitizeName(reader.name);
       state.name = clean;
       cacheReaderName(clean);
+      if (reader.status === 'reupload') {
+        chapterCache.clear();
+      }
     }
   }
   emitState();
+}
+
+function readerChangedSignificantly(prev, next) {
+  if (!prev || !next) return true;
+  return (
+    prev.uid !== next.uid ||
+    prev.status !== next.status ||
+    prev.adminNote !== next.adminNote ||
+    prev.name !== next.name ||
+    prev.activeSessionId !== next.activeSessionId ||
+    prev.lastChapter !== next.lastChapter ||
+    prev.lastPage !== next.lastPage ||
+    prev.hasReceipt !== next.hasReceipt ||
+    prev.updatedAt !== next.updatedAt
+  );
 }
 
 export function getState() {
@@ -938,14 +1148,11 @@ function syncFromDemoDb() {
     const rec = db.readers[sess.uid];
     if (!rec) {
       clearThisTabDemoSessionOnly();
-      localSessionId = '';
       applyReaderRecord(null, { kickedReason: state.signedIn ? 'deleted' : null });
     } else if (rec.activeSessionId && sess.sessionId && rec.activeSessionId !== sess.sessionId) {
       clearThisTabDemoSessionOnly();
-      localSessionId = '';
       applyReaderRecord(null, { kickedReason: 'other-device' });
     } else {
-      localSessionId = sess.sessionId || rec.activeSessionId || '';
       applyReaderRecord(normalizeReaderView(sess.uid, rec));
     }
   } else if (state.signedIn) {
@@ -989,198 +1196,142 @@ function bindDemoSync() {
   });
 }
 
-// ---------- Lazy Firebase v11 Loader ----------
+// ---------- Live API Heartbeat & Visibility Sync ----------
 
-async function ensureFirebase() {
-  if (!isFirebaseConfigured()) return null;
-  if (fb) return fb;
-
-  const cfg = getActiveFirebaseConfig();
-  const [appMod, authMod, fsMod] = await Promise.all([
-    import(`${FB_BASE}/firebase-app.js`),
-    import(`${FB_BASE}/firebase-auth.js`),
-    import(`${FB_BASE}/firebase-firestore.js`),
-  ]);
-
-  const existing = appMod.getApps();
-  const app = existing.length ? existing[0] : appMod.initializeApp(cfg);
-  const auth = authMod.getAuth(app);
-  const db = fsMod.getFirestore(app);
-
-  fb = { app, auth, db, appMod, authMod, fsMod };
-  return fb;
-}
-
-function detachFirebaseReaderListener() {
-  if (unsubReaderDoc) {
-    try {
-      unsubReaderDoc();
-    } catch {
-      // Ignore.
-    }
-    unsubReaderDoc = null;
+function stopReaderHeartbeat() {
+  if (readerHeartbeatTimer) {
+    clearInterval(readerHeartbeatTimer);
+    readerHeartbeatTimer = null;
   }
 }
 
-async function attachFirebaseReaderListener(uid) {
-  detachFirebaseReaderListener();
-  const f = await ensureFirebase();
-  if (!f || !uid) return;
+function handleLiveReaderKick(code, data) {
+  setReaderToken('');
+  stopReaderHeartbeat();
+  if (code === 'OTHER_DEVICE') {
+    applyReaderRecord(null, { kickedReason: 'other-device' });
+  } else if (code === 'REVOKED') {
+    const rec = data?.reader ? normalizeReaderView(data.reader.uid, data.reader) : null;
+    applyReaderRecord(rec, { kickedReason: 'revoked' });
+  } else if (code === 'DELETED') {
+    applyReaderRecord(null, { kickedReason: 'deleted' });
+  } else {
+    applyReaderRecord(null);
+  }
+}
 
-  const { doc, onSnapshot } = f.fsMod;
-  const ref = doc(f.db, 'readers', uid);
+async function pollReaderMe({ forceEmit = false } = {}) {
+  if (!isFirebaseConfigured()) return;
+  const token = getReaderToken();
+  if (!token || readerHeartbeatInFlight) return;
 
-  return new Promise((resolve) => {
-    let firstDone = false;
-    const finish = () => {
-      if (!firstDone) {
-        firstDone = true;
-        resolve();
+  readerHeartbeatInFlight = true;
+  try {
+    const res = await apiFetch('/api/reader/me', {
+      token,
+      allowStatuses: [401, 403, 404],
+    });
+    if (res.ok && res.data?.reader) {
+      const next = normalizeReaderView(res.data.reader.uid, res.data.reader);
+      if (forceEmit || !state.signedIn || readerChangedSignificantly(state.reader, next)) {
+        applyReaderRecord(next);
       }
-    };
+      return;
+    }
+    const code = res.data?.code || (res.status === 404 ? 'DELETED' : 'UNAUTHORIZED');
+    handleLiveReaderKick(code, res.data);
+  } catch {
+    // Transient network error: keep reader signed in offline until next tick.
+  } finally {
+    readerHeartbeatInFlight = false;
+  }
+}
 
-    unsubReaderDoc = onSnapshot(
-      ref,
-      async (snap) => {
-        if (!snap.exists()) {
-          if (fbAdminVerified && fbAdminUid === uid) {
-            finish();
-            return;
-          }
-          const wasSignedIn = state.signedIn;
-          detachFirebaseReaderListener();
-          if (wasSignedIn) {
-            try {
-              await f.authMod.signOut(f.auth);
-            } catch {
-              // Ignore.
-            }
-            applyReaderRecord(null, { kickedReason: 'deleted' });
-          } else {
-            applyReaderRecord(null);
-          }
-          finish();
-          return;
-        }
+function startReaderHeartbeat() {
+  stopReaderHeartbeat();
+  if (!isFirebaseConfigured() || !getReaderToken()) return;
+  readerHeartbeatTimer = setInterval(() => {
+    if (!isTabVisible()) return;
+    if (!getReaderToken()) {
+      stopReaderHeartbeat();
+      return;
+    }
+    pollReaderMe();
+  }, READER_HEARTBEAT_MS);
+  readerHeartbeatTimer?.unref?.();
+}
 
-        const rec = normalizeReaderView(uid, snap.data());
-
-        // 1-active-device enforcement: if another device rotated activeSessionId, sign out live!
-        if (rec.activeSessionId && localSessionId && rec.activeSessionId !== localSessionId) {
-          detachFirebaseReaderListener();
-          localSessionId = '';
-          try {
-            localStorage.removeItem(SESSION_KEY);
-          } catch {
-            // Ignore.
-          }
-          try {
-            await f.authMod.signOut(f.auth);
-          } catch {
-            // Ignore.
-          }
-          applyReaderRecord(null, { kickedReason: 'other-device' });
-          finish();
-          return;
-        }
-
-        if (rec.activeSessionId && !localSessionId) {
-          localSessionId = rec.activeSessionId;
-          try {
-            localStorage.setItem(SESSION_KEY, localSessionId);
-          } catch {
-            // Ignore.
-          }
-        }
-
-        applyReaderRecord(rec);
-        finish();
-      },
-      (err) => {
-        console.warn('[ebook] reader snapshot error:', err?.message || err);
-        finish();
-      }
-    );
+function bindVisibilitySync() {
+  if (visibilityBound || typeof document === 'undefined' || !document.addEventListener) return;
+  visibilityBound = true;
+  document.addEventListener('visibilitychange', () => {
+    if (!isFirebaseConfigured() || !isTabVisible()) return;
+    if (getReaderToken()) pollReaderMe();
+    if (liveReaderWatchers.size && getAdminAuthToken()) refreshLiveAdminReaders();
+    if (liveConsultWatchers.size && getAdminAuthToken()) refreshLiveAdminConsultations();
   });
 }
 
-async function checkFirebaseAdminDoc(uid) {
-  const f = await ensureFirebase();
-  if (!f || !uid) return false;
+async function fetchLiveConfig() {
   try {
-    const snap = await f.fsMod.getDoc(f.fsMod.doc(f.db, 'admins', uid));
-    const ok = snap.exists();
-    fbAdminVerified = ok;
-    fbAdminUid = ok ? uid : null;
-    return ok;
+    const res = await apiFetch('/api/config');
+    if (res.ok && res.data?.config) {
+      state.config = mergeConfig(res.data.config);
+    }
   } catch {
-    fbAdminVerified = false;
-    fbAdminUid = null;
+    // Fallback gracefully to DEFAULT_EBOOK_CONFIG when offline.
+  }
+}
+
+async function verifyStoredAdminToken() {
+  const token = getAdminAuthToken();
+  if (!token) {
+    liveAdminVerified = false;
+    liveAdminEmail = '';
     return false;
   }
+  try {
+    const res = await apiFetch('/api/admin/me', {
+      token,
+      allowStatuses: [401, 403],
+    });
+    if (res.ok && res.data?.email) {
+      liveAdminVerified = true;
+      liveAdminEmail = res.data.email;
+      try {
+        localStorage.setItem(ADMIN_EMAIL_KEY, liveAdminEmail);
+      } catch {
+        // Ignore.
+      }
+      return true;
+    }
+    liveAdminVerified = false;
+    liveAdminEmail = '';
+    setAdminAuthSession('', '');
+    return false;
+  } catch {
+    // Transient offline state: preserve cached token so Maya isn't logged out by brief signal drops.
+    liveAdminVerified = Boolean(getAdminAuthToken());
+    return liveAdminVerified;
+  }
 }
 
-async function initFirebaseMode() {
-  state.mode = 'firebase';
-  const f = await ensureFirebase();
-  const { doc, onSnapshot, getDoc } = f.fsMod;
+async function initLiveMode() {
+  state.mode = 'live';
+  bindVisibilitySync();
 
-  if (!unsubConfigDoc) {
-    try {
-      const cfgSnap = await getDoc(doc(f.db, 'config', 'ebook'));
-      if (cfgSnap.exists()) {
-        state.config = mergeConfig(cfgSnap.data());
-      }
-    } catch {
-      // Fallback to DEFAULT_EBOOK_CONFIG.
-    }
-    unsubConfigDoc = onSnapshot(
-      doc(f.db, 'config', 'ebook'),
-      (snap) => {
-        if (snap.exists()) {
-          state.config = mergeConfig(snap.data());
-          emitState();
-        }
-      },
-      () => {
-        // Ignore transient offline errors.
-      }
+  const tasks = [fetchLiveConfig()];
+  if (getReaderToken()) {
+    tasks.push(
+      pollReaderMe({ forceEmit: true }).then(() => {
+        if (getReaderToken()) startReaderHeartbeat();
+      })
     );
   }
-
-  await new Promise((resolve) => {
-    let first = true;
-    f.authMod.onAuthStateChanged(f.auth, async (user) => {
-      if (!user) {
-        fbAdminVerified = false;
-        fbAdminUid = null;
-        detachFirebaseReaderListener();
-        if (state.signedIn) applyReaderRecord(null);
-        else emitState();
-        if (first) {
-          first = false;
-          resolve();
-        }
-        return;
-      }
-
-      const isReaderEmail = (user.email || '').endsWith('@readers.writermaya.com');
-      if (!isReaderEmail) {
-        await checkFirebaseAdminDoc(user.uid);
-        if (first) {
-          first = false;
-          resolve();
-        }
-        return;
-      }
-
-      await attachFirebaseReaderListener(user.uid);
-      if (first) {
-        first = false;
-        resolve();
-      }
-    });
-  });
+  if (getAdminAuthToken()) {
+    tasks.push(verifyStoredAdminToken());
+  }
+  await Promise.all(tasks);
 
   state.ready = true;
   emitState();
@@ -1188,8 +1339,8 @@ async function initFirebaseMode() {
 
 /**
  * Initialize store (idempotent). Safe to call multiple times from main site or /admin/.
- * In Demo Mode: zero external network requests.
- * In Firebase Mode: lazily imports Firebase v11 modular Auth + Firestore and binds live listeners.
+ * In Demo Mode (`?demo=1`): zero external network requests.
+ * In Live Mode: fetches live config, restores reader/admin JWT sessions, and binds visibility sync.
  */
 export async function initStore() {
   if (initPromise) return initPromise;
@@ -1197,7 +1348,7 @@ export async function initStore() {
   initPromise = (async () => {
     bindDemoSync();
     if (isFirebaseConfigured()) {
-      await initFirebaseMode();
+      await initLiveMode();
     } else {
       state.mode = 'demo';
       syncFromDemoDb();
@@ -1249,10 +1400,7 @@ export async function buyWithSlip({ name, contact, pin, slipFile, file, slipData
   }
 
   const now = Date.now();
-  const orderId = generateOrderId();
-  const newSessionId = generateSessionId();
   const deviceLabel = detectDeviceLabel();
-  const amountMmk = Math.max(0, Math.round(Number(state.config.priceMmk) || DEFAULT_EBOOK_CONFIG.priceMmk));
 
   // ---- DEMO MODE ----
   if (!isFirebaseConfigured()) {
@@ -1269,7 +1417,13 @@ export async function buyWithSlip({ name, contact, pin, slipFile, file, slipData
     }
 
     const uid = `demo_${randHex(8)}`;
-    const pinHash = await sha256Hex(`${parsedContact.normalized}:${pinToPassword(cleanPin)}`);
+    const orderId = generateOrderId();
+    const newSessionId = generateSessionId();
+    const amountMmk = Math.max(
+      0,
+      Math.round(Number(state.config.priceMmk) || DEFAULT_EBOOK_CONFIG.priceMmk)
+    );
+    const pinHash = await sha256Hex(demoPinHashInput(parsedContact.normalized, cleanPin));
     const readerRec = {
       uid,
       orderId,
@@ -1307,7 +1461,6 @@ export async function buyWithSlip({ name, contact, pin, slipFile, file, slipData
       historyCount: 1,
       uploadedAt: now,
     });
-    localSessionId = newSessionId;
     setDemoTabSession({ uid, sessionId: newSessionId });
     writeDemoDb(db, 'db-updated');
     applyReaderRecord(normalizeReaderView(uid, readerRec));
@@ -1315,124 +1468,49 @@ export async function buyWithSlip({ name, contact, pin, slipFile, file, slipData
     return snapshotState();
   }
 
-  // ---- FIREBASE MODE ----
-  const f = await ensureFirebase();
-  const { createUserWithEmailAndPassword, signInWithEmailAndPassword } = f.authMod;
-  const { doc, getDoc, setDoc, serverTimestamp } = f.fsMod;
+  // ---- LIVE CLOUDFLARE API MODE ----
+  const res = await apiFetch('/api/reader/register', {
+    method: 'POST',
+    body: {
+      name: cleanName,
+      contact: parsedContact.display,
+      pin: cleanPin,
+      imageDataUrl: receipt.dataUrl,
+      deviceLabel,
+    },
+  });
 
-  const authEmail = await contactToAuthEmail(parsedContact, 0);
-  const password = pinToPassword(cleanPin);
-
-  let userCred;
-  try {
-    userCred = await createUserWithEmailAndPassword(f.auth, authEmail, password);
-  } catch (err) {
-    if (err?.code === 'auth/email-already-in-use') {
-      try {
-        const tryCred = await signInWithEmailAndPassword(f.auth, authEmail, password);
-        const existingSnap = await getDoc(doc(f.db, 'readers', tryCred.user.uid));
-        if (existingSnap.exists()) {
-          await f.authMod.signOut(f.auth);
-          throw makeError(
-            'ALREADY_EXISTS',
-            'ဤဖုန်းနံပါတ် / Email ဖြင့် အကောင့်ရှိပြီးသား ဖြစ်ပါသည်။ "ပြန်ဝင်ဖတ်မယ်" မှ PIN ဖြင့် ဝင်ပေးပါရှင့်။',
-            'This phone/email is already registered. Please sign in with your PIN.'
-          );
-        }
-        userCred = tryCred;
-      } catch (inner) {
-        if (inner?.code === 'ALREADY_EXISTS') throw inner;
-        throw makeError(
-          'ALREADY_EXISTS',
-          'ဤဖုန်းနံပါတ် / Email ဖြင့် အကောင့်ရှိပြီးသား ဖြစ်ပါသည်။ "ပြန်ဝင်ဖတ်မယ်" မှ ဝင်ပေးပါ (PIN မေ့ပါက မာရာထံ Reset Code တောင်းနိုင်ပါသည်)။',
-          'This phone/email already has an account. Please sign in with your PIN (or request a PIN reset code from Maya).'
-        );
-      }
-    } else {
-      throw makeError(
-        err?.code || 'AUTH_ERROR',
-        'အကောင့်ဖွင့်ရာတွင် အမှားအယွင်းဖြစ်ပွားပါသည်။ အင်တာနက်စစ်ဆေးပြီး ထပ်စမ်းကြည့်ပါရှင့်။',
-        `Could not create reader account (${err?.code || 'network error'}). Please try again.`
-      );
-    }
+  const { token, reader } = res.data || {};
+  if (!token || !reader) {
+    throw makeError(
+      'API_ERROR',
+      'အကောင့်ဖွင့်ရာတွင် အမှားအယွင်းဖြစ်ပွားပါသည်။ ထပ်စမ်းကြည့်ပါရှင့်။',
+      'Unexpected server response during registration.'
+    );
   }
 
-  const uid = userCred.user.uid;
-  setCachedAuthSlot(parsedContact.normalized, 0);
-  localSessionId = newSessionId;
-  try {
-    localStorage.setItem(SESSION_KEY, newSessionId);
-  } catch {
-    // Ignore.
-  }
-
-  // Exact schema allowed by tools/firebase/firestore.rules (pending create: no adminNote/approvedAt/revokedAt/claimCode)
-  const ts = serverTimestamp();
-  const readerDoc = {
-    uid,
-    name: cleanName,
-    contact: parsedContact.display,
-    contactType: parsedContact.kind,
-    contactNorm: parsedContact.normalized,
-    orderId,
-    status: 'pending',
-    activeSessionId: newSessionId,
-    deviceLabel,
-    lastChapter: '01',
-    lastPage: 0,
-    createdAt: ts,
-    updatedAt: ts,
-    lastSeenAt: ts,
-  };
-
-  const receiptDoc = {
-    uid,
-    orderId,
-    name: cleanName,
-    contact: parsedContact.display,
-    amountMmk,
-    imageDataUrl: receipt.dataUrl,
-    uploadedAt: serverTimestamp(),
-    historyCount: 1,
-  };
-
-  await setDoc(doc(f.db, 'readers', uid), readerDoc);
-  await setDoc(doc(f.db, 'receipts', uid), receiptDoc);
-
-  await attachFirebaseReaderListener(uid);
-  applyReaderRecord(
-    normalizeReaderView(uid, {
-      ...readerDoc,
-      priceMmk: amountMmk,
-      hasReceipt: true,
-      createdAt: now,
-      updatedAt: now,
-      lastSeenAt: now,
-    })
-  );
+  setReaderToken(token);
+  applyReaderRecord(normalizeReaderView(reader.uid, reader));
+  startReaderHeartbeat();
   return snapshotState();
 }
 
 /**
  * Returning reader sign-in from any phone using Phone/Email + 4-6 digit PIN.
- * Rotates activeSessionId so any previous device is automatically signed out live!
- * Probes cached auth slot first, then slots 0..4 seamlessly (supports PIN-reset accounts across devices).
+ * Rotates activeSessionId on the server so any previous device is automatically signed out live!
  */
 export async function signInReader({ contact, pin } = {}) {
   await initStore();
 
   const parsedContact = parseContact(contact);
   const cleanPin = validatePin(pin);
-  const newSessionId = generateSessionId();
   const deviceLabel = detectDeviceLabel();
   const now = Date.now();
 
   // ---- DEMO MODE ----
   if (!isFirebaseConfigured()) {
     const db = readDemoDb();
-    const rec = Object.values(db.readers).find(
-      (r) => r.contactNorm === parsedContact.normalized
-    );
+    const rec = Object.values(db.readers).find((r) => r.contactNorm === parsedContact.normalized);
     if (!rec) {
       throw makeError(
         'NOT_FOUND',
@@ -1440,7 +1518,7 @@ export async function signInReader({ contact, pin } = {}) {
         'No account found for this phone number or email.'
       );
     }
-    const pinHash = await sha256Hex(`${parsedContact.normalized}:${pinToPassword(cleanPin)}`);
+    const pinHash = await sha256Hex(demoPinHashInput(parsedContact.normalized, cleanPin));
     if (rec.pinHash && rec.pinHash !== pinHash) {
       throw makeError(
         'WRONG_PIN',
@@ -1449,13 +1527,13 @@ export async function signInReader({ contact, pin } = {}) {
       );
     }
 
+    const newSessionId = generateSessionId();
     rec.activeSessionId = newSessionId;
     rec.deviceLabel = deviceLabel;
     rec.updatedAt = now;
     rec.lastSeenAt = now;
     db.readers[rec.uid] = rec;
 
-    localSessionId = newSessionId;
     setDemoTabSession({ uid: rec.uid, sessionId: newSessionId });
     writeDemoDb(db, 'db-updated');
     applyReaderRecord(normalizeReaderView(rec.uid, rec));
@@ -1463,42 +1541,32 @@ export async function signInReader({ contact, pin } = {}) {
     return snapshotState();
   }
 
-  // ---- FIREBASE MODE ----
-  const f = await ensureFirebase();
-  const { signInWithEmailAndPassword } = f.authMod;
-  const { doc, getDoc, updateDoc, serverTimestamp } = f.fsMod;
+  // ---- LIVE CLOUDFLARE API MODE ----
+  const res = await apiFetch('/api/reader/login', {
+    method: 'POST',
+    body: {
+      contact: parsedContact.display,
+      pin: cleanPin,
+      deviceLabel,
+    },
+    allowStatuses: [403],
+  });
 
-  const password = pinToPassword(cleanPin);
-  const cachedSlot = getCachedAuthSlot(parsedContact.normalized);
-  const slotOrder = [cachedSlot];
-  for (let s = 0; s < MAX_AUTH_SLOTS; s++) {
-    if (!slotOrder.includes(s)) slotOrder.push(s);
+  // Revoked reader: show revoked status card (with Maya's adminNote) without storing an active JWT.
+  if (res.status === 403 && res.data?.code === 'REVOKED' && res.data?.reader) {
+    setReaderToken('');
+    stopReaderHeartbeat();
+    applyReaderRecord(normalizeReaderView(res.data.reader.uid, res.data.reader), {
+      kickedReason: 'revoked',
+    });
+    return snapshotState();
+  }
+  if (!res.ok) {
+    throw makeApiError(res.status, res.data);
   }
 
-  let userCred = null;
-  let matchedSlot = 0;
-  let lastErr = null;
-
-  for (const slot of slotOrder) {
-    const authEmail = await contactToAuthEmail(parsedContact, slot);
-    try {
-      userCred = await signInWithEmailAndPassword(f.auth, authEmail, password);
-      matchedSlot = slot;
-      break;
-    } catch (err) {
-      lastErr = err;
-      if (err?.code === 'auth/too-many-requests') break;
-    }
-  }
-
-  if (!userCred) {
-    if (lastErr?.code === 'auth/too-many-requests') {
-      throw makeError(
-        'TOO_MANY',
-        'အကြိမ်များစွာ မှားယွင်းဝင်ရောက်ထားပါသည်။ ခဏစောင့်ပြီးမှ ထပ်စမ်းပါရှင့်။',
-        'Too many failed attempts. Please wait a few minutes and try again.'
-      );
-    }
+  const { token, reader } = res.data || {};
+  if (!token || !reader) {
     throw makeError(
       'WRONG_CREDENTIALS',
       'ဖုန်းနံပါတ်/Email သို့မဟုတ် PIN မှားနေပါသည်။ ပြန်စစ်ပေးပါရှင့်။',
@@ -1506,42 +1574,14 @@ export async function signInReader({ contact, pin } = {}) {
     );
   }
 
-  setCachedAuthSlot(parsedContact.normalized, matchedSlot);
-  const uid = userCred.user.uid;
-  const snap = await getDoc(doc(f.db, 'readers', uid));
-  if (!snap.exists()) {
-    await f.authMod.signOut(f.auth);
-    throw makeError(
-      'NOT_FOUND',
-      'စာဖတ်သူမှတ်တမ်း မတွေ့ပါရှင့်။ မာရာထံ ဆက်သွယ်ပေးပါနော်။',
-      'Reader profile not found. Please contact Maya.'
-    );
-  }
-
-  const data = snap.data();
-  localSessionId = newSessionId;
-  try {
-    localStorage.setItem(SESSION_KEY, newSessionId);
-  } catch {
-    // Ignore.
-  }
-
-  if (data.status !== 'revoked') {
-    const ts = serverTimestamp();
-    await updateDoc(doc(f.db, 'readers', uid), {
-      activeSessionId: newSessionId,
-      deviceLabel,
-      updatedAt: ts,
-      lastSeenAt: ts,
-    });
-  }
-
-  await attachFirebaseReaderListener(uid);
+  setReaderToken(token);
+  applyReaderRecord(normalizeReaderView(reader.uid, reader));
+  startReaderHeartbeat();
   return snapshotState();
 }
 
 /**
- * Look up a 6-digit admin-created code (Demo Mode preview; Firebase mode enforces auth-first on claim).
+ * Look up a 6-digit admin-created code (Demo Mode preview only; Live Mode validates on claim).
  */
 export async function lookupCode(rawCode) {
   await initStore();
@@ -1555,26 +1595,13 @@ export async function lookupCode(rawCode) {
     return { kind: rec.kind, name: rec.name || '', contact: rec.contact || '' };
   }
 
-  // Under firestore.rules, reclaims/{code} get requires isAuthenticated() — only query if already signed in.
-  const f = await ensureFirebase();
-  if (!f?.auth?.currentUser) return null;
-  try {
-    const snap = await f.fsMod.getDoc(f.fsMod.doc(f.db, 'reclaims', code));
-    if (!snap.exists()) return null;
-    const rec = snap.data();
-    if (rec.used) return null;
-    return { kind: rec.kind, name: rec.name || '', contact: rec.contact || '' };
-  } catch {
-    return null;
-  }
+  return null;
 }
 
 /**
  * Claim a 6-digit code created in Admin App:
  * - kind='manual': Activate a Messenger/Viber buyer with a chosen 4-6 digit PIN -> status='approved'.
- * - kind='reset' : Reset a forgotten PIN for an existing buyer -> allocates next auth slot + status='approved'.
- * Matches tools/firebase/firestore.rules: authenticates first, validates reclaims/{code}, creates readers/{uid}
- * with claimCode & status='approved', then marks reclaims/{code} used.
+ * - kind='reset' : Reset a forgotten PIN for an existing buyer -> overwrites PBKDF2 PIN hash + status='approved'.
  */
 export async function claimWithCode({ code, name, contact, pin } = {}) {
   await initStore();
@@ -1589,7 +1616,6 @@ export async function claimWithCode({ code, name, contact, pin } = {}) {
   }
   const cleanPin = validatePin(pin);
   const now = Date.now();
-  const newSessionId = generateSessionId();
   const deviceLabel = detectDeviceLabel();
 
   // ---- DEMO MODE ----
@@ -1620,7 +1646,8 @@ export async function claimWithCode({ code, name, contact, pin } = {}) {
       );
     }
     const cleanName = validateAndSanitizeName(name || reclaim.name);
-    const pinHash = await sha256Hex(`${parsedContact.normalized}:${pinToPassword(cleanPin)}`);
+    const pinHash = await sha256Hex(demoPinHashInput(parsedContact.normalized, cleanPin));
+    const newSessionId = generateSessionId();
 
     let targetRec =
       Object.values(db.readers).find((r) => r.contactNorm === parsedContact.normalized) || null;
@@ -1675,7 +1702,6 @@ export async function claimWithCode({ code, name, contact, pin } = {}) {
     reclaim.usedAt = now;
     db.reclaims[cleanCode] = reclaim;
 
-    localSessionId = newSessionId;
     setDemoTabSession({ uid: targetRec.uid, sessionId: newSessionId });
     writeDemoDb(db, 'db-updated');
     applyReaderRecord(normalizeReaderView(targetRec.uid, targetRec));
@@ -1683,152 +1709,33 @@ export async function claimWithCode({ code, name, contact, pin } = {}) {
     return snapshotState();
   }
 
-  // ---- FIREBASE MODE ----
-  // Per firestore.rules: authenticate first, then getDoc(reclaims/{code}), then create readers/{uid} + mark reclaim used.
+  // ---- LIVE CLOUDFLARE API MODE ----
   const parsedContact = parseContact(contact);
-  const f = await ensureFirebase();
-  const { createUserWithEmailAndPassword } = f.authMod;
-  const { doc, getDoc, writeBatch, serverTimestamp } = f.fsMod;
+  const cleanName = name && String(name).trim() ? validateAndSanitizeName(name) : '';
 
-  const password = pinToPassword(cleanPin);
-  let userCred = null;
-  let chosenSlot = 0;
+  const res = await apiFetch('/api/reader/claim', {
+    method: 'POST',
+    body: {
+      code: cleanCode,
+      name: cleanName,
+      contact: parsedContact.display,
+      pin: cleanPin,
+      deviceLabel,
+    },
+  });
 
-  // Allocate first free auth slot (0 for new manual buyers; 1..4 automatically for PIN resets).
-  for (let slot = 0; slot < MAX_AUTH_SLOTS; slot++) {
-    const authEmail = await contactToAuthEmail(parsedContact, slot);
-    try {
-      userCred = await createUserWithEmailAndPassword(f.auth, authEmail, password);
-      chosenSlot = slot;
-      break;
-    } catch (err) {
-      if (err?.code === 'auth/email-already-in-use') continue;
-      throw makeError(
-        err?.code || 'CLAIM_ERROR',
-        'ကုဒ်အတည်ပြုရာတွင် အမှားအယွင်းဖြစ်ပွားပါသည်။ ထပ်စမ်းကြည့်ပါရှင့်။',
-        `Could not activate account (${err?.code || 'error'}).`
-      );
-    }
-  }
-
-  if (!userCred) {
+  const { token, reader } = res.data || {};
+  if (!token || !reader) {
     throw makeError(
       'CLAIM_ERROR',
-      'အကောင့်အသစ် ဖွင့်၍မရပါ။ မာရာထံ ဆက်သွယ်ပေးပါရှင့်။',
-      'Could not allocate a fresh sign-in slot. Please contact Maya.'
+      'ကုဒ်အတည်ပြု၍ မရပါ။ ထပ်စမ်းကြည့်ပါရှင့်။',
+      'Could not complete code activation.'
     );
   }
 
-  const rollbackAuth = async () => {
-    try {
-      await userCred.user.delete();
-    } catch {
-      try {
-        await f.authMod.signOut(f.auth);
-      } catch {
-        // Ignore.
-      }
-    }
-  };
-
-  let reclaimSnap;
-  try {
-    reclaimSnap = await getDoc(doc(f.db, 'reclaims', cleanCode));
-  } catch (err) {
-    await rollbackAuth();
-    throw makeError(
-      'CODE_NOT_FOUND',
-      'ကုဒ်မမှန်ပါ (သို့မဟုတ်) အသုံးပြုပြီးသား ဖြစ်နေပါသည်။ မာရာထံမှ ကုဒ်ကို ပြန်စစ်ပေးပါရှင့်။',
-      'Code is invalid or already used. Please double-check the 6-digit code from Maya.'
-    );
-  }
-
-  if (!reclaimSnap.exists() || reclaimSnap.data().used === true) {
-    await rollbackAuth();
-    throw makeError(
-      'CODE_NOT_FOUND',
-      'ကုဒ်မမှန်ပါ (သို့မဟုတ်) အသုံးပြုပြီးသား ဖြစ်နေပါသည်။',
-      'Code not found or already used.'
-    );
-  }
-
-  const reclaim = reclaimSnap.data();
-  if (reclaim.contactNorm !== parsedContact.normalized) {
-    await rollbackAuth();
-    throw makeError(
-      'CONTACT_MISMATCH',
-      'ဤကုဒ်သည် သတ်မှတ်ထားသော ဖုန်းနံပါတ် / Email နှင့် မကိုက်ညီပါ။ မာရာပို့ပေးသော နံပါတ်အတိုင်း ထည့်ပေးပါရှင့်။',
-      'This code is bound to a different phone number or email. Enter the exact contact given to Maya.'
-    );
-  }
-
-  let cleanName;
-  try {
-    cleanName = validateAndSanitizeName(name || reclaim.name);
-  } catch (err) {
-    await rollbackAuth();
-    throw err;
-  }
-
-  const uid = userCred.user.uid;
-  const orderId = generateOrderId();
-  setCachedAuthSlot(parsedContact.normalized, chosenSlot);
-  localSessionId = newSessionId;
-  try {
-    localStorage.setItem(SESSION_KEY, newSessionId);
-  } catch {
-    // Ignore.
-  }
-
-  const ts = serverTimestamp();
-  const readerDoc = {
-    uid,
-    name: cleanName,
-    contact: parsedContact.display,
-    contactType: parsedContact.kind,
-    contactNorm: parsedContact.normalized,
-    orderId,
-    status: 'approved',
-    activeSessionId: newSessionId,
-    deviceLabel,
-    lastChapter: '01',
-    lastPage: 0,
-    claimCode: cleanCode,
-    createdAt: ts,
-    updatedAt: ts,
-    lastSeenAt: ts,
-    approvedAt: ts,
-  };
-
-  try {
-    const batch = writeBatch(f.db);
-    batch.set(doc(f.db, 'readers', uid), readerDoc);
-    batch.update(doc(f.db, 'reclaims', cleanCode), {
-      used: true,
-      usedBy: uid,
-      usedAt: serverTimestamp(),
-    });
-    await batch.commit();
-  } catch (err) {
-    await rollbackAuth();
-    throw makeError(
-      err?.code || 'CLAIM_COMMIT_ERROR',
-      'ကုဒ်အတည်ပြု၍ မရပါ။ ထပ်စမ်းကြည့်ပါ (သို့မဟုတ်) မာရာထံ ဆက်သွယ်ပါရှင့်။',
-      `Could not complete activation (${err?.code || 'permission error'}).`
-    );
-  }
-
-  await attachFirebaseReaderListener(uid);
-  applyReaderRecord(
-    normalizeReaderView(uid, {
-      ...readerDoc,
-      hasReceipt: false,
-      createdAt: now,
-      updatedAt: now,
-      lastSeenAt: now,
-      approvedAt: now,
-    })
-  );
+  setReaderToken(token);
+  applyReaderRecord(normalizeReaderView(reader.uid, reader));
+  startReaderHeartbeat();
   return snapshotState();
 }
 
@@ -1852,7 +1759,12 @@ export async function reuploadSlip(input) {
   let receipt = null;
   if (input && typeof input === 'object' && !(input instanceof Blob)) {
     if (typeof input.dataUrl === 'string' && input.dataUrl.startsWith('data:image/')) {
-      receipt = { dataUrl: input.dataUrl, bytes: dataUrlByteSize(input.dataUrl), width: 0, height: 0 };
+      receipt = {
+        dataUrl: input.dataUrl,
+        bytes: dataUrlByteSize(input.dataUrl),
+        width: 0,
+        height: 0,
+      };
     } else {
       receipt = await compressImageToWebP(input.slipFile || input.file, {
         maxDim: 720,
@@ -1865,8 +1777,12 @@ export async function reuploadSlip(input) {
 
   const now = Date.now();
   const uid = state.uid;
-  const amountMmk = Math.max(0, Math.round(Number(state.config.priceMmk) || DEFAULT_EBOOK_CONFIG.priceMmk));
+  const amountMmk = Math.max(
+    0,
+    Math.round(Number(state.config.priceMmk) || DEFAULT_EBOOK_CONFIG.priceMmk)
+  );
 
+  // ---- DEMO MODE ----
   if (!isFirebaseConfigured()) {
     const db = readDemoDb();
     const rec = db.readers[uid];
@@ -1899,59 +1815,37 @@ export async function reuploadSlip(input) {
     return snapshotState();
   }
 
-  const f = await ensureFirebase();
-  const { doc, getDoc, setDoc, updateDoc, serverTimestamp } = f.fsMod;
-
-  let prevHistory = 0;
-  try {
-    const prevSnap = await getDoc(doc(f.db, 'receipts', uid));
-    if (prevSnap.exists()) {
-      prevHistory = Number(prevSnap.data().historyCount) || 1;
-    }
-  } catch {
-    prevHistory = 1;
+  // ---- LIVE CLOUDFLARE API MODE ----
+  const token = getReaderToken();
+  if (!token) {
+    throw makeError('NOT_SIGNED_IN', 'အကောင့်ထဲ အရင်ဝင်ပေးပါရှင့်။', 'Please sign in first.');
   }
 
-  await setDoc(doc(f.db, 'receipts', uid), {
-    uid,
-    orderId: state.reader.orderId,
-    name: state.reader.name,
-    contact: state.reader.contact,
-    amountMmk,
-    imageDataUrl: receipt.dataUrl,
-    uploadedAt: serverTimestamp(),
-    historyCount: Math.min(50, prevHistory + 1),
+  const res = await apiFetch('/api/reader/reupload', {
+    method: 'POST',
+    token,
+    body: { imageDataUrl: receipt.dataUrl },
   });
 
-  // Note: Per firestore.rules, adminNote is immutable by readers — only transition status + timestamps!
-  const ts = serverTimestamp();
-  const readerUpdate = {
-    updatedAt: ts,
-    lastSeenAt: ts,
-  };
-  if (state.status === 'reupload') {
-    readerUpdate.status = 'pending';
+  if (res.data?.reader) {
+    applyReaderRecord(normalizeReaderView(res.data.reader.uid, res.data.reader));
+  } else {
+    applyReaderRecord({
+      ...state.reader,
+      status: 'pending',
+      hasReceipt: true,
+      updatedAt: now,
+      lastSeenAt: now,
+    });
   }
-  await updateDoc(doc(f.db, 'readers', uid), readerUpdate);
-
-  applyReaderRecord({
-    ...state.reader,
-    status: state.status === 'reupload' ? 'pending' : state.status,
-    hasReceipt: true,
-    updatedAt: now,
-    lastSeenAt: now,
-  });
   return snapshotState();
 }
 
 export async function signOutReader() {
-  localSessionId = '';
+  stopReaderHeartbeat();
   chapterCache.clear();
-  try {
-    localStorage.removeItem(SESSION_KEY);
-  } catch {
-    // Ignore.
-  }
+  const prevToken = getReaderToken();
+  setReaderToken('');
 
   if (!isFirebaseConfigured()) {
     setDemoTabSession(null);
@@ -1959,14 +1853,8 @@ export async function signOutReader() {
     return;
   }
 
-  detachFirebaseReaderListener();
-  const f = await ensureFirebase();
-  if (f) {
-    try {
-      await f.authMod.signOut(f.auth);
-    } catch {
-      // Ignore.
-    }
+  if (prevToken) {
+    apiFetch('/api/reader/logout', { method: 'POST', token: prevToken }).catch(() => {});
   }
   applyReaderRecord(null);
 }
@@ -2010,34 +1898,46 @@ export async function getChapter(num) {
     return getDemoPlaceholderChapter(chNum);
   }
 
-  // ---- FIREBASE MODE ----
-  const f = await ensureFirebase();
-  try {
-    const snap = await f.fsMod.getDoc(
-      f.fsMod.doc(f.db, 'books', 'reality-check', 'chapters', chNum)
-    );
-    if (snap.exists()) {
-      const ch = snap.data();
-      if (ch && Array.isArray(ch.pages) && ch.pages.length) {
-        chapterCache.set(chNum, ch);
-        return ch;
-      }
-    }
-    return { ...getDemoPlaceholderChapter(chNum), notUploadedYet: true };
-  } catch (err) {
-    if (err?.code === 'permission-denied') {
-      throw makeError(
-        'LOCKED',
-        'စာဖတ်ခွင့် မရှိပါ (သို့မဟုတ်) အခြားဖုန်းမှ ဝင်ရောက်သွားပါပြီ။',
-        'Access denied. Please sign in or check your account status.'
-      );
-    }
+  // ---- LIVE CLOUDFLARE API MODE ----
+  const token = getReaderToken();
+  if (!token) {
     throw makeError(
-      err?.code || 'FETCH_ERROR',
-      'အခန်းကို ဖွင့်၍မရပါ။ အင်တာနက်စစ်ဆေးပြီး ထပ်စမ်းကြည့်ပါရှင့်။',
-      'Could not load chapter. Please check your connection and try again.'
+      'LOCKED',
+      'ဤအခန်းကို ဖတ်ရှုရန် အကောင့်ဝင်ပေးပါရှင့်။',
+      'Please sign in to read this chapter.'
     );
   }
+
+  const res = await apiFetch(`/api/book/chapters/${encodeURIComponent(chNum)}`, {
+    token,
+    allowStatuses: [401, 403, 404],
+  });
+
+  if (res.ok && res.data?.chapter) {
+    const ch = res.data.chapter;
+    if (Array.isArray(ch.pages) && ch.pages.length) {
+      chapterCache.set(chNum, ch);
+      return ch;
+    }
+    return { ...getDemoPlaceholderChapter(chNum), notUploadedYet: true };
+  }
+
+  const code = res.data?.code || '';
+  if (res.status === 404 && code === 'NOT_FOUND') {
+    return { ...getDemoPlaceholderChapter(chNum), notUploadedYet: true };
+  }
+  if (code === 'OTHER_DEVICE' || code === 'REVOKED' || code === 'DELETED') {
+    handleLiveReaderKick(code, res.data);
+    throw makeApiError(res.status, res.data, code);
+  }
+  if (res.status === 403 && res.data?.status === 'reupload' && state.reader) {
+    applyReaderRecord({
+      ...state.reader,
+      status: 'reupload',
+      adminNote: res.data.adminNote || state.reader.adminNote || '',
+    });
+  }
+  throw makeApiError(res.status, res.data, 'LOCKED');
 }
 
 export async function saveProgress(chapter, page = 0) {
@@ -2080,21 +1980,180 @@ export async function saveProgress(chapter, page = 0) {
     return;
   }
 
+  const token = getReaderToken();
+  if (!token) return;
   try {
-    const f = await ensureFirebase();
-    const ts = f.fsMod.serverTimestamp();
-    await f.fsMod.updateDoc(f.fsMod.doc(f.db, 'readers', state.uid), {
-      lastChapter,
-      lastPage,
-      updatedAt: ts,
-      lastSeenAt: ts,
+    await apiFetch('/api/reader/progress', {
+      method: 'PATCH',
+      token,
+      body: { lastChapter, lastPage },
     });
   } catch {
     // Non-critical progress sync error; ignore silently.
   }
 }
 
-// ---------- Admin API (used exclusively by /admin/) ----------
+// ---------- Admin API (used by /admin/ & Android APK) ----------
+
+function stopLiveAdminPolls() {
+  if (liveReaderPollTimer) {
+    clearInterval(liveReaderPollTimer);
+    liveReaderPollTimer = null;
+  }
+  if (liveConsultPollTimer) {
+    clearInterval(liveConsultPollTimer);
+    liveConsultPollTimer = null;
+  }
+}
+
+function handleAdminAuthError(err) {
+  if (err?.status === 401 || err?.code === 'UNAUTHORIZED' || err?.code === 'NOT_ADMIN') {
+    liveAdminVerified = false;
+    liveAdminEmail = '';
+    setAdminAuthSession('', '');
+    stopLiveAdminPolls();
+  }
+}
+
+async function refreshLiveAdminReaders() {
+  if (!isFirebaseConfigured() || !liveReaderWatchers.size || liveReaderPollInFlight) return;
+  const token = getAdminAuthToken();
+  if (!token) return;
+
+  liveReaderPollInFlight = true;
+  try {
+    const res = await apiFetch('/api/admin/readers', { token });
+    const rawList = Array.isArray(res.data?.readers) ? res.data.readers : [];
+    const list = sortReadersDesc(rawList.map((r) => normalizeReaderView(r.uid, r)));
+    for (const cb of liveReaderWatchers) {
+      try {
+        cb(list);
+      } catch (e) {
+        console.error('[ebook] adminWatchReaders callback error:', e);
+      }
+    }
+  } catch (err) {
+    handleAdminAuthError(err);
+  } finally {
+    liveReaderPollInFlight = false;
+  }
+}
+
+async function refreshLiveAdminConsultations() {
+  if (!isFirebaseConfigured() || !liveConsultWatchers.size || liveConsultPollInFlight) return;
+  const token = getAdminAuthToken();
+  if (!token) return;
+
+  liveConsultPollInFlight = true;
+  try {
+    const res = await apiFetch('/api/admin/consultations', { token });
+    const rawList = Array.isArray(res.data?.consultations) ? res.data.consultations : [];
+    const list = sortConsultsDesc(rawList.map((b) => normalizeConsultView(b.bookingId, b)));
+    for (const cb of liveConsultWatchers) {
+      try {
+        cb(list);
+      } catch (e) {
+        console.error('[ebook] adminWatchConsultations callback error:', e);
+      }
+    }
+  } catch (err) {
+    handleAdminAuthError(err);
+  } finally {
+    liveConsultPollInFlight = false;
+  }
+}
+
+/**
+ * Check whether an admin email is whitelisted and whether first-time password setup is required.
+ * Returns { ok: true, allowed: boolean, needsSetup: boolean }.
+ */
+export async function adminCheckAuthState(email = '') {
+  const cleanEmail = String(email || '')
+    .toLowerCase()
+    .trim();
+  if (!isFirebaseConfigured()) {
+    return { ok: true, allowed: true, needsSetup: false };
+  }
+  if (!cleanEmail) {
+    return { ok: true, allowed: false, needsSetup: false };
+  }
+  const res = await apiFetch(`/api/admin/auth-state?email=${encodeURIComponent(cleanEmail)}`);
+  return {
+    ok: true,
+    allowed: Boolean(res.data?.allowed),
+    needsSetup: Boolean(res.data?.needsSetup),
+  };
+}
+
+/**
+ * First-time Admin password setup using the one-time Admin Setup Code.
+ * Stores Admin JWT in localStorage (`wm-admin-token` + `wm-admin-email`).
+ */
+export async function adminSetupPassword(email = '', setupCode = '', password = '') {
+  await initStore();
+
+  const cleanEmail = String(email || '')
+    .toLowerCase()
+    .trim();
+  const cleanCode = String(setupCode || '').trim();
+  const cleanPass = String(password || '');
+
+  if (!isFirebaseConfigured()) {
+    try {
+      localStorage.setItem(DEMO_ADMIN_KEY, '1');
+    } catch {
+      // Ignore.
+    }
+    return {
+      ok: true,
+      mode: 'demo',
+      email: cleanEmail || 'demo-admin@writermaya.com',
+      uid: 'demo-admin',
+      token: '',
+    };
+  }
+
+  if (!cleanEmail || !cleanCode || !cleanPass) {
+    throw makeError(
+      'INVALID_CREDENTIALS',
+      'Admin Email၊ Setup Code နှင့် Password အသစ်ကို ပြည့်စုံစွာ ထည့်ပေးပါ။',
+      'Please enter Admin email, Setup Code, and a new password.'
+    );
+  }
+  if (cleanPass.length < 8) {
+    throw makeError(
+      'WEAK_PASSWORD',
+      'Admin Password သည် အနည်းဆုံး စာလုံး ၈ လုံး ရှိရပါမည်။',
+      'Password must be at least 8 characters.'
+    );
+  }
+
+  const res = await apiFetch('/api/admin/setup-password', {
+    method: 'POST',
+    body: {
+      email: cleanEmail,
+      setupCode: cleanCode,
+      password: cleanPass,
+    },
+  });
+
+  const { token, email: verifiedEmail, role } = res.data || {};
+  if (!token) {
+    throw makeError('API_ERROR', 'Admin Setup မအောင်မြင်ပါ။', 'Admin password setup failed.');
+  }
+
+  liveAdminVerified = true;
+  liveAdminEmail = verifiedEmail || cleanEmail;
+  setAdminAuthSession(token, liveAdminEmail);
+  return {
+    ok: true,
+    mode: 'live',
+    email: liveAdminEmail,
+    uid: liveAdminEmail,
+    role: role || 'admin',
+    token,
+  };
+}
 
 export async function adminSignIn(email = '', password = '') {
   await initStore();
@@ -2105,10 +2164,18 @@ export async function adminSignIn(email = '', password = '') {
     } catch {
       // Ignore.
     }
-    return { ok: true, mode: 'demo', email: email || 'demo-admin@writermaya.com', uid: 'demo-admin' };
+    return {
+      ok: true,
+      mode: 'demo',
+      email: email || 'demo-admin@writermaya.com',
+      uid: 'demo-admin',
+      token: '',
+    };
   }
 
-  const cleanEmail = String(email || '').trim();
+  const cleanEmail = String(email || '')
+    .toLowerCase()
+    .trim();
   const cleanPass = String(password || '');
   if (!cleanEmail || !cleanPass) {
     throw makeError(
@@ -2118,29 +2185,31 @@ export async function adminSignIn(email = '', password = '') {
     );
   }
 
-  const f = await ensureFirebase();
-  let cred;
-  try {
-    cred = await f.authMod.signInWithEmailAndPassword(f.auth, cleanEmail, cleanPass);
-  } catch (err) {
+  const res = await apiFetch('/api/admin/login', {
+    method: 'POST',
+    body: { email: cleanEmail, password: cleanPass },
+  });
+
+  const { token, email: verifiedEmail, role } = res.data || {};
+  if (!token) {
     throw makeError(
-      err?.code || 'AUTH_ERROR',
+      'INVALID_CREDENTIALS',
       'Admin Email သို့မဟုတ် Password မှားနေပါသည်။',
       'Invalid Admin email or password.'
     );
   }
 
-  const isAdmin = await checkFirebaseAdminDoc(cred.user.uid);
-  if (!isAdmin) {
-    await f.authMod.signOut(f.auth);
-    throw makeError(
-      'NOT_ADMIN',
-      'ဤအကောင့်သည် Admin ခွင့်ပြုချက် (admins/{uid}) မရှိပါ။ FIREBASE-SETUP.md ကို စစ်ဆေးပါ။',
-      'This account is not listed in Firestore admins/{uid}. See FIREBASE-SETUP.md.'
-    );
-  }
-
-  return { ok: true, mode: 'firebase', email: cred.user.email, uid: cred.user.uid };
+  liveAdminVerified = true;
+  liveAdminEmail = verifiedEmail || cleanEmail;
+  setAdminAuthSession(token, liveAdminEmail);
+  return {
+    ok: true,
+    mode: 'live',
+    email: liveAdminEmail,
+    uid: liveAdminEmail,
+    role: role || 'admin',
+    token,
+  };
 }
 
 export async function adminSignOut() {
@@ -2153,16 +2222,10 @@ export async function adminSignOut() {
     return;
   }
 
-  fbAdminVerified = false;
-  fbAdminUid = null;
-  const f = await ensureFirebase();
-  if (f) {
-    try {
-      await f.authMod.signOut(f.auth);
-    } catch {
-      // Ignore.
-    }
-  }
+  liveAdminVerified = false;
+  liveAdminEmail = '';
+  setAdminAuthSession('', '');
+  stopLiveAdminPolls();
 }
 
 export function adminIsSignedIn() {
@@ -2173,11 +2236,12 @@ export function adminIsSignedIn() {
       return false;
     }
   }
-  return Boolean(fbAdminVerified && fb?.auth?.currentUser && fb.auth.currentUser.uid === fbAdminUid);
+  return Boolean(liveAdminVerified && getAdminAuthToken());
 }
 
 /**
  * Watch all readers in real time (sorted newest first).
+ * Live Mode: fetches immediately, polls every 8s while visible, and refreshes after admin mutations.
  * Returns an unsubscribe function.
  */
 export function adminWatchReaders(cb) {
@@ -2185,45 +2249,30 @@ export function adminWatchReaders(cb) {
 
   if (!isFirebaseConfigured()) {
     bindDemoSync();
-    adminReaderWatchers.add(cb);
+    demoReaderWatchers.add(cb);
     const db = readDemoDb();
     cb(sortReadersDesc(Object.entries(db.readers).map(([uid, r]) => normalizeReaderView(uid, r))));
-    return () => adminReaderWatchers.delete(cb);
+    return () => demoReaderWatchers.delete(cb);
   }
 
-  let unsub = () => {};
-  let cancelled = false;
+  bindVisibilitySync();
+  liveReaderWatchers.add(cb);
 
-  (async () => {
-    try {
-      await initStore();
-      if (cancelled) return;
-      const f = await ensureFirebase();
-      const { collection, onSnapshot } = f.fsMod;
-      unsub = onSnapshot(
-        collection(f.db, 'readers'),
-        (snap) => {
-          const list = [];
-          snap.forEach((d) => {
-            list.push(normalizeReaderView(d.id, d.data()));
-          });
-          cb(sortReadersDesc(list));
-        },
-        (err) => {
-          console.error('[ebook] adminWatchReaders error:', err);
-        }
-      );
-    } catch (err) {
-      console.error('[ebook] adminWatchReaders init error:', err);
-    }
-  })();
+  if (!liveReaderPollTimer) {
+    liveReaderPollTimer = setInterval(() => {
+      if (!isTabVisible()) return;
+      refreshLiveAdminReaders();
+    }, ADMIN_POLL_MS);
+    liveReaderPollTimer?.unref?.();
+  }
+
+  refreshLiveAdminReaders();
 
   return () => {
-    cancelled = true;
-    try {
-      unsub();
-    } catch {
-      // Ignore.
+    liveReaderWatchers.delete(cb);
+    if (!liveReaderWatchers.size && liveReaderPollTimer) {
+      clearInterval(liveReaderPollTimer);
+      liveReaderPollTimer = null;
     }
   };
 }
@@ -2244,13 +2293,16 @@ export async function adminGetReceipt(uid) {
     };
   }
 
-  const f = await ensureFirebase();
-  const snap = await f.fsMod.getDoc(f.fsMod.doc(f.db, 'receipts', uid));
-  if (!snap.exists()) return null;
-  const raw = snap.data();
+  const token = getAdminAuthToken();
+  const res = await apiFetch(`/api/admin/receipts/${encodeURIComponent(uid)}`, {
+    token,
+    allowStatuses: [404],
+  });
+  if (res.status === 404 || !res.data?.receipt) return null;
+  const raw = res.data.receipt;
   const img = raw.imageDataUrl || raw.dataUrl || '';
   return {
-    uid,
+    uid: raw.uid || uid,
     orderId: raw.orderId || '',
     name: raw.name || '',
     contact: raw.contact || '',
@@ -2287,18 +2339,16 @@ export async function adminUpdateReaderStatus(uid, status, note = '') {
     return normalizeReaderView(uid, db.readers[uid]);
   }
 
-  const f = await ensureFirebase();
-  const ts = f.fsMod.serverTimestamp();
-  const patch = {
-    status,
-    adminNote: cleanNote || null,
-    updatedAt: ts,
-  };
-  if (status === 'approved') patch.approvedAt = ts;
-  if (status === 'revoked') patch.revokedAt = ts;
-
-  await f.fsMod.updateDoc(f.fsMod.doc(f.db, 'readers', uid), patch);
-  return { uid, status, adminNote: cleanNote, updatedAt: now };
+  const token = getAdminAuthToken();
+  const res = await apiFetch(`/api/admin/readers/${encodeURIComponent(uid)}`, {
+    method: 'PATCH',
+    token,
+    body: { status, adminNote: cleanNote },
+  });
+  await refreshLiveAdminReaders();
+  return res.data?.reader
+    ? normalizeReaderView(uid, res.data.reader)
+    : { uid, status, adminNote: cleanNote, updatedAt: now };
 }
 
 export async function adminDeleteReader(uid) {
@@ -2314,12 +2364,12 @@ export async function adminDeleteReader(uid) {
     return;
   }
 
-  const f = await ensureFirebase();
-  const { doc, deleteDoc } = f.fsMod;
-  await Promise.all([
-    deleteDoc(doc(f.db, 'readers', uid)),
-    deleteDoc(doc(f.db, 'receipts', uid)).catch(() => {}),
-  ]);
+  const token = getAdminAuthToken();
+  await apiFetch(`/api/admin/readers/${encodeURIComponent(uid)}`, {
+    method: 'DELETE',
+    token,
+  });
+  await refreshLiveAdminReaders();
 }
 
 export async function adminCreateCode({ kind = 'manual', name = '', contact = '', note = '' } = {}) {
@@ -2327,10 +2377,11 @@ export async function adminCreateCode({ kind = 'manual', name = '', contact = ''
   const cleanKind = kind === 'reset' ? 'reset' : 'manual';
   const parsed = parseContact(contact);
   const safeName = (sanitizeName(name) || String(name || '').trim() || parsed.display).slice(0, 40);
-  const code = generateSixDigitCode();
+  const cleanNote = String(note || '').trim();
   const now = Date.now();
 
   if (!isFirebaseConfigured()) {
+    const code = generateSixDigitCode();
     const record = {
       code,
       kind: cleanKind,
@@ -2345,27 +2396,33 @@ export async function adminCreateCode({ kind = 'manual', name = '', contact = ''
     const db = readDemoDb();
     db.reclaims[code] = record;
     writeDemoDb(db, 'db-updated');
-    return { ...record, note: String(note || '').trim() };
+    return { ...record, note: cleanNote };
   }
 
-  const f = await ensureFirebase();
-  // Exact 9 allowed keys in tools/firebase/firestore.rules reclaims/{code}
-  const firestoreDoc = {
-    code,
-    kind: cleanKind,
-    name: safeName,
-    contact: parsed.display,
-    contactNorm: parsed.normalized,
-    used: false,
-    usedBy: null,
-    createdAt: f.fsMod.serverTimestamp(),
-    usedAt: null,
-  };
-  await f.fsMod.setDoc(f.fsMod.doc(f.db, 'reclaims', code), firestoreDoc);
+  const token = getAdminAuthToken();
+  const res = await apiFetch('/api/admin/reclaims', {
+    method: 'POST',
+    token,
+    body: {
+      kind: cleanKind,
+      name: safeName,
+      contact: parsed.display,
+      note: cleanNote,
+    },
+  });
+
+  const rec = res.data?.reclaim || {};
   return {
-    ...firestoreDoc,
-    createdAt: now,
-    note: String(note || '').trim(),
+    code: rec.code || '',
+    kind: rec.kind || cleanKind,
+    name: rec.name || safeName,
+    contact: rec.contact || parsed.display,
+    contactNorm: rec.contactNorm || parsed.normalized,
+    used: Boolean(rec.used),
+    usedBy: rec.usedBy || null,
+    createdAt: toMillis(rec.createdAt) || now,
+    usedAt: rec.usedAt ? toMillis(rec.usedAt) : null,
+    note: rec.note != null ? rec.note : cleanNote,
   };
 }
 
@@ -2374,30 +2431,8 @@ export async function adminSaveConfig(cfg = {}) {
   const merged = mergeConfig({ ...state.config, ...cfg });
   const qrVal = typeof cfg.kpayQrDataUrl === 'string' ? cfg.kpayQrDataUrl : merged.kpayQrDataUrl;
 
-  if (!isFirebaseConfigured()) {
-    const payload = {
-      priceMmk: merged.priceMmk,
-      kpayNumber: merged.kpayNumber,
-      kpayName: merged.kpayName,
-      kpayNoteMy: merged.kpayNoteMy,
-      kpayNoteEn: merged.kpayNoteEn,
-      kpayQrDataUrl: qrVal || '',
-      bookTitleMy: BOOK_META.titleMy,
-      bookTitleEn: BOOK_META.titleEn,
-      updatedAt: Date.now(),
-    };
-    const db = readDemoDb();
-    db.config = payload;
-    state.config = mergeConfig(payload);
-    writeDemoDb(db, 'db-updated');
-    emitState();
-    return { ...state.config };
-  }
-
-  const f = await ensureFirebase();
-  // Exact 9 allowed keys in tools/firebase/firestore.rules config/ebook
-  const firestoreDoc = {
-    priceMmk: Math.max(0, Math.min(10000000, Math.round(Number(merged.priceMmk) || 0))),
+  const payload = {
+    priceMmk: Math.max(0, Math.min(10_000_000, Math.round(Number(merged.priceMmk) || 0))),
     kpayNumber: merged.kpayNumber.slice(0, 40),
     kpayName: merged.kpayName.slice(0, 80),
     kpayNoteMy: merged.kpayNoteMy.slice(0, 1000),
@@ -2405,17 +2440,31 @@ export async function adminSaveConfig(cfg = {}) {
     kpayQrDataUrl: qrVal || '',
     bookTitleMy: BOOK_META.titleMy,
     bookTitleEn: BOOK_META.titleEn,
-    updatedAt: f.fsMod.serverTimestamp(),
   };
-  await f.fsMod.setDoc(f.fsMod.doc(f.db, 'config', 'ebook'), firestoreDoc);
-  state.config = mergeConfig(firestoreDoc);
+
+  if (!isFirebaseConfigured()) {
+    const db = readDemoDb();
+    db.config = { ...payload, updatedAt: Date.now() };
+    state.config = mergeConfig(db.config);
+    writeDemoDb(db, 'db-updated');
+    emitState();
+    return { ...state.config };
+  }
+
+  const token = getAdminAuthToken();
+  const res = await apiFetch('/api/admin/config', {
+    method: 'PUT',
+    token,
+    body: payload,
+  });
+  state.config = mergeConfig(res.data?.config || payload);
   emitState();
   return { ...state.config };
 }
 
 /**
- * Import compiled reality-check-book.json into protected Firestore (or Demo Mode IndexedDB).
- * Writes to books/reality-check/chapters/{00..23} and books/reality-check/meta/toc matching firestore.rules.
+ * Import compiled reality-check-book.json into Cloudflare D1 (or Demo Mode IndexedDB).
+ * Uploads in small 2-chapter chunks for reliable progress & fast Myanmar mobile transfers.
  */
 export async function adminImportBookJson(bookInput, onProgress) {
   await initStore();
@@ -2427,7 +2476,12 @@ export async function adminImportBookJson(bookInput, onProgress) {
     bookObj = JSON.parse(bookInput);
   }
 
-  if (!bookObj || typeof bookObj !== 'object' || !bookObj.chapters || typeof bookObj.chapters !== 'object') {
+  if (
+    !bookObj ||
+    typeof bookObj !== 'object' ||
+    !bookObj.chapters ||
+    typeof bookObj.chapters !== 'object'
+  ) {
     throw makeError(
       'INVALID_BOOK_JSON',
       'reality-check-book.json ဖိုင်ပုံစံ မမှန်ပါ (meta နှင့် chapters ပါဝင်ရမည်)။',
@@ -2491,48 +2545,43 @@ export async function adminImportBookJson(bookInput, onProgress) {
     return { uploaded: uploadedNums.length, total, chapters: uploadedNums };
   }
 
-  const f = await ensureFirebase();
-  const { doc, setDoc, serverTimestamp } = f.fsMod;
-
-  let done = 0;
-  for (const [num, ch] of entries) {
-    const order = parseInt(num, 10);
-    const isFree = num === '00' || num === '01';
-    const cleanCh = {
-      ...ch,
-      num,
-      order,
-      isFree,
-      updatedAt: serverTimestamp(),
-    };
-    await setDoc(doc(f.db, 'books', 'reality-check', 'chapters', num), cleanCh);
-    uploadedChapters[num] = {
-      num,
-      titleMy: cleanCh.titleMy || '',
-      titleEn: cleanCh.titleEn || '',
-      pageCount: Array.isArray(cleanCh.pages) ? cleanCh.pages.length : 0,
-      updatedAt: now,
-    };
-    uploadedNums.push(num);
-    done += 1;
-    report(done, num, cleanCh);
-  }
-
+  // ---- LIVE CLOUDFLARE API MODE (chunked 2 chapters per call) ----
+  const token = getAdminAuthToken();
   const metaSrc = bookObj.meta || BOOK_META;
-  await setDoc(doc(f.db, 'books', 'reality-check', 'meta', 'toc'), {
+  const metaPayload = {
     id: 'reality-check',
     title: `${metaSrc.titleMy || BOOK_META.titleMy} (${metaSrc.titleEn || BOOK_META.titleEn})`,
     titleMy: metaSrc.titleMy || BOOK_META.titleMy,
     titleEn: metaSrc.titleEn || BOOK_META.titleEn,
-    authorMy: metaSrc.authorMy || BOOK_META.authorMy,
-    authorEn: metaSrc.authorEn || BOOK_META.authorEn,
-    publisherMy: metaSrc.publisherMy || BOOK_META.publisherMy,
-    totalPages: Number(metaSrc.totalPages) || 112,
     chapters: Array.isArray(metaSrc.chapters) ? metaSrc.chapters : BOOK_META.chapters,
-    uploadedChapters,
-    totalUploaded: uploadedNums.length,
-    updatedAt: serverTimestamp(),
-  });
+  };
+
+  const CHUNK_SIZE = 2;
+  let done = 0;
+
+  for (let i = 0; i < entries.length; i += CHUNK_SIZE) {
+    const slice = entries.slice(i, i + CHUNK_SIZE);
+    const chaptersChunk = slice.map(([num, ch]) => ({
+      ...ch,
+      num,
+      order: parseInt(num, 10),
+      isFree: num === '00' || num === '01',
+    }));
+
+    const body = i === 0 ? { meta: metaPayload, chapters: chaptersChunk } : { chapters: chaptersChunk };
+    await apiFetch('/api/admin/book/import', {
+      method: 'POST',
+      token,
+      body,
+      timeoutMs: 45_000,
+    });
+
+    for (const cleanCh of chaptersChunk) {
+      uploadedNums.push(cleanCh.num);
+      done += 1;
+      report(done, cleanCh.num, cleanCh);
+    }
+  }
 
   chapterCache.clear();
   return { uploaded: uploadedNums.length, total, chapters: uploadedNums };
@@ -2572,25 +2621,26 @@ export async function adminGetBookStatus() {
       totalChapters: 24,
       uploadedCount: uploadedNums.length,
       uploadedNums,
+      uploadedIds: uploadedNums,
       chapters: chaptersMap,
     };
   }
 
-  const f = await ensureFirebase();
-  let remoteMap = {};
+  const token = getAdminAuthToken();
+  let remoteChapters = {};
   try {
-    const snap = await f.fsMod.getDoc(f.fsMod.doc(f.db, 'books', 'reality-check', 'meta', 'toc'));
-    if (snap.exists() && snap.data().uploadedChapters) {
-      remoteMap = snap.data().uploadedChapters;
+    const res = await apiFetch('/api/admin/book/status', { token });
+    if (res.ok && res.data?.chapters) {
+      remoteChapters = res.data.chapters;
     }
-  } catch {
-    // Ignore read error before upload.
+  } catch (err) {
+    handleAdminAuthError(err);
   }
 
   for (const num of allNums) {
     const metaCh = BOOK_META?.chapters?.find((c) => c.num === num);
-    const info = remoteMap[num];
-    const isUploaded = Boolean(info);
+    const info = remoteChapters[num];
+    const isUploaded = Boolean(info && info.uploaded !== false);
     const isBundledFree = num === '00' || num === '01';
     if (isUploaded) uploadedNums.push(num);
     chaptersMap[num] = {
@@ -2600,22 +2650,24 @@ export async function adminGetBookStatus() {
       isFree: isBundledFree,
       uploaded: isUploaded,
       available: isUploaded || isBundledFree,
-      source: isUploaded ? 'firestore' : isBundledFree ? 'bundled' : 'missing',
+      source: isUploaded ? 'd1' : isBundledFree ? 'bundled' : 'missing',
       pageCount: info?.pageCount || 0,
+      bytes: Number(info?.bytes) || 0,
       updatedAt: toMillis(info?.updatedAt),
     };
   }
 
   return {
-    mode: 'firebase',
+    mode: 'live',
     totalChapters: 24,
     uploadedCount: uploadedNums.length,
     uploadedNums,
+    uploadedIds: uploadedNums,
     chapters: chaptersMap,
   };
 }
 
-// ---------- Script Studio Consultation Bookings (`consultations/{bookingId}`) ----------
+// ---------- Script Studio Consultation Bookings ----------
 
 const CONSULT_CHANNELS = new Set(['telegram', 'messenger', 'viber', 'phone']);
 const CONSULT_TOPICS = {
@@ -2655,7 +2707,10 @@ function cleanTextField(raw, maxLen) {
   if (typeof s.normalize === 'function') s = s.normalize('NFC');
   s = s
     .replace(/<[^>]*>/g, '')
-    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F\u200B-\u200F\u202A-\u202E\u2066-\u2069\uFEFF]/g, '')
+    .replace(
+      /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F\u200B-\u200F\u202A-\u202E\u2066-\u2069\uFEFF]/g,
+      ''
+    )
     .trim();
   if (s.length <= maxLen) return s;
   const parts = splitGraphemes(s);
@@ -2695,12 +2750,12 @@ function sortConsultsDesc(list) {
 }
 
 function notifyDemoConsultWatchers() {
-  if (!adminConsultWatchers.size) return;
+  if (!demoConsultWatchers.size) return;
   const db = readDemoDb();
   const list = sortConsultsDesc(
     Object.entries(db.consultations || {}).map(([id, rec]) => normalizeConsultView(id, rec))
   );
-  for (const cb of adminConsultWatchers) {
+  for (const cb of demoConsultWatchers) {
     try {
       cb(list);
     } catch (e) {
@@ -2711,20 +2766,15 @@ function notifyDemoConsultWatchers() {
 
 /**
  * Submit a Script Studio Consultation / Business System booking.
- * Works WITHOUT Firebase Auth sign-in on Live Firestore Spark (strictly matching consultations/{bookingId}
- * schema & serverTimestamp()) OR in Local Demo Mode with real-time BroadcastChannel sync to /admin/.
+ * Public endpoint (NO sign-in required) on Live Cloudflare API OR Local Demo Mode.
  */
 export async function submitConsultation(payload = {}) {
   const cleanName = cleanTextField(payload.name, 60);
   if (cleanName.length < 1) {
-    throw makeError(
-      'INVALID_NAME',
-      'သင့်အမည်ကို ထည့်ပေးပါရှင့်။',
-      'Please enter your name.'
-    );
+    throw makeError('INVALID_NAME', 'သင့်အမည်ကို ထည့်ပေးပါရှင့်။', 'Please enter your name.');
   }
 
-  let cleanContact = cleanTextField(normalizeDigits(payload.contact || ''), 120);
+  const cleanContact = cleanTextField(normalizeDigits(payload.contact || ''), 120);
   if (cleanContact.length < 3) {
     throw makeError(
       'INVALID_CONTACT',
@@ -2737,7 +2787,8 @@ export async function submitConsultation(payload = {}) {
   const topic = Object.prototype.hasOwnProperty.call(CONSULT_TOPICS, payload.topic)
     ? payload.topic
     : 'consultation';
-  const topicLabel = cleanTextField(payload.topicLabel || CONSULT_TOPICS[topic], 120) || CONSULT_TOPICS[topic];
+  const topicLabel =
+    cleanTextField(payload.topicLabel || CONSULT_TOPICS[topic], 120) || CONSULT_TOPICS[topic];
   const businessName = cleanTextField(payload.businessName, 100);
   const preferredTime = cleanTextField(payload.preferredTime, 100);
   const notes = cleanTextField(payload.notes, 1200);
@@ -2748,10 +2799,10 @@ export async function submitConsultation(payload = {}) {
         ? 'en'
         : 'my';
 
-  const bookingId = generateBookingId();
+  let bookingId = generateBookingId();
   const now = Date.now();
 
-  const bookingView = {
+  let bookingView = {
     bookingId,
     name: cleanName,
     contact: cleanContact,
@@ -2775,26 +2826,28 @@ export async function submitConsultation(payload = {}) {
     writeDemoDb(db, 'consult-updated');
     notifyDemoConsultWatchers();
   } else {
-    const f = await ensureFirebase();
-    const { doc, setDoc, serverTimestamp } = f.fsMod;
-    const ts = serverTimestamp();
-    const firestoreDoc = {
-      bookingId,
-      name: cleanName,
-      contact: cleanContact,
-      channel,
-      topic,
-      topicLabel,
-      businessName,
-      preferredTime,
-      notes,
-      lang,
-      status: 'new',
-      adminNote: '',
-      createdAt: ts,
-      updatedAt: ts,
-    };
-    await setDoc(doc(f.db, 'consultations', bookingId), firestoreDoc);
+    const res = await apiFetch('/api/consultations', {
+      method: 'POST',
+      body: {
+        bookingId,
+        name: cleanName,
+        contact: cleanContact,
+        channel,
+        topic,
+        topicLabel,
+        businessName,
+        preferredTime,
+        notes,
+        lang,
+      },
+    });
+    if (res.data?.booking) {
+      bookingId = res.data.bookingId || res.data.booking.bookingId || bookingId;
+      bookingView = normalizeConsultView(bookingId, res.data.booking);
+    }
+    if (liveConsultWatchers.size && getAdminAuthToken()) {
+      refreshLiveAdminConsultations();
+    }
   }
 
   // Remember visitor's name so Maya greets them warmly across the site.
@@ -2829,6 +2882,7 @@ export function getLastConsultation() {
 
 /**
  * Watch all Script Studio consultation bookings in real time (sorted newest first).
+ * Live Mode: fetches immediately, polls every 8s while visible, and refreshes after admin mutations.
  * Returns an unsubscribe function.
  */
 export function adminWatchConsultations(callback) {
@@ -2836,48 +2890,33 @@ export function adminWatchConsultations(callback) {
 
   if (!isFirebaseConfigured()) {
     bindDemoSync();
-    adminConsultWatchers.add(callback);
+    demoConsultWatchers.add(callback);
     const db = readDemoDb();
     const list = sortConsultsDesc(
       Object.entries(db.consultations || {}).map(([id, rec]) => normalizeConsultView(id, rec))
     );
     callback(list);
-    return () => adminConsultWatchers.delete(callback);
+    return () => demoConsultWatchers.delete(callback);
   }
 
-  let unsub = () => {};
-  let cancelled = false;
+  bindVisibilitySync();
+  liveConsultWatchers.add(callback);
 
-  (async () => {
-    try {
-      await initStore();
-      if (cancelled) return;
-      const f = await ensureFirebase();
-      const { collection, onSnapshot } = f.fsMod;
-      unsub = onSnapshot(
-        collection(f.db, 'consultations'),
-        (snap) => {
-          const list = [];
-          snap.forEach((d) => {
-            list.push(normalizeConsultView(d.id, d.data()));
-          });
-          callback(sortConsultsDesc(list));
-        },
-        (err) => {
-          console.error('[ebook] adminWatchConsultations error:', err);
-        }
-      );
-    } catch (err) {
-      console.error('[ebook] adminWatchConsultations init error:', err);
-    }
-  })();
+  if (!liveConsultPollTimer) {
+    liveConsultPollTimer = setInterval(() => {
+      if (!isTabVisible()) return;
+      refreshLiveAdminConsultations();
+    }, ADMIN_POLL_MS);
+    liveConsultPollTimer?.unref?.();
+  }
+
+  refreshLiveAdminConsultations();
 
   return () => {
-    cancelled = true;
-    try {
-      unsub();
-    } catch {
-      // Ignore.
+    liveConsultWatchers.delete(callback);
+    if (!liveConsultWatchers.size && liveConsultPollTimer) {
+      clearInterval(liveConsultPollTimer);
+      liveConsultPollTimer = null;
     }
   };
 }
@@ -2905,13 +2944,16 @@ export async function adminUpdateConsultationStatus(bookingId, status, adminNote
     return normalizeConsultView(id, db.consultations[id]);
   }
 
-  const f = await ensureFirebase();
-  await f.fsMod.updateDoc(f.fsMod.doc(f.db, 'consultations', id), {
-    status,
-    adminNote: cleanNote,
-    updatedAt: f.fsMod.serverTimestamp(),
+  const token = getAdminAuthToken();
+  const res = await apiFetch(`/api/admin/consultations/${encodeURIComponent(id)}`, {
+    method: 'PATCH',
+    token,
+    body: { status, adminNote: cleanNote },
   });
-  return { bookingId: id, status, adminNote: cleanNote, updatedAt: now };
+  await refreshLiveAdminConsultations();
+  return res.data?.booking
+    ? normalizeConsultView(id, res.data.booking)
+    : { bookingId: id, status, adminNote: cleanNote, updatedAt: now };
 }
 
 export async function adminDeleteConsultation(bookingId) {
@@ -2927,6 +2969,10 @@ export async function adminDeleteConsultation(bookingId) {
     return;
   }
 
-  const f = await ensureFirebase();
-  await f.fsMod.deleteDoc(f.fsMod.doc(f.db, 'consultations', id));
+  const token = getAdminAuthToken();
+  await apiFetch(`/api/admin/consultations/${encodeURIComponent(id)}`, {
+    method: 'DELETE',
+    token,
+  });
+  await refreshLiveAdminConsultations();
 }

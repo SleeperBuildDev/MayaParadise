@@ -45,43 +45,86 @@
       </p>
     </div>
 
-    <!-- Live Firebase Sign-In Box -->
-    <div id="auth-firebase-box" class="auth-mode-box" hidden>
+    <!-- Live Cloudflare D1 Sign-In & First-Time Setup Box -->
+    <div id="auth-live-box" class="auth-mode-box" hidden>
       <div class="auth-mode-head">
         <span class="badge badge-live">
           <span class="badge-dot"></span>
-          <span lang="my">Firebase ချိတ်ဆက်ပြီး (Live)</span>
-          <span lang="en">Firebase Connected (Live)</span>
+          <span lang="my">Cloudflare D1 · VPN မလို (Live)</span>
+          <span lang="en">Cloudflare D1 · No VPN (Live)</span>
         </span>
-        <span id="auth-fb-project" class="mono" style="font-size:12px;color:var(--muted)"></span>
+        <span id="auth-api-host" class="mono" style="font-size:12px;color:var(--muted)">api.writermaya.com</span>
       </div>
-      <form id="login-form" class="auth-form" autocomplete="on">
+      <form id="login-form" class="auth-form" autocomplete="on" novalidate>
         <div class="field">
           <label for="login-email">
             <span lang="my">Admin အီးမေးလ်</span>
             <span lang="en">Admin Email</span>
           </label>
-          <input id="login-email" class="input" type="email" required autocomplete="username" placeholder="maya@example.com">
+          <input id="login-email" class="input" type="email" required autocomplete="username" placeholder="ms.maya.official@gmail.com">
         </div>
-        <div class="field">
+
+        <!-- Standard Password Field -->
+        <div id="login-pw-group" class="field">
           <label for="login-password">
             <span lang="my">စကားဝှက် (Password)</span>
             <span lang="en">Password</span>
           </label>
           <div class="pw-wrap">
-            <input id="login-password" class="input" type="password" required autocomplete="current-password" placeholder="••••••••">
+            <input id="login-password" class="input" type="password" autocomplete="current-password" placeholder="••••••••">
             <button type="button" id="btn-toggle-pw" class="pw-toggle" aria-label="Show password" title="Show/Hide">👁</button>
           </div>
         </div>
+
+        <!-- 1-Step First-Time Admin Password Setup Fields -->
+        <div id="setup-fields-group" class="setup-fields-box" hidden>
+          <div class="setup-banner">
+            <strong>
+              ✨ <span lang="my">ပထမဆုံးအကြိမ် စကားဝှက်သတ်မှတ်ရန်</span>
+              <span lang="en">First-Time Password Setup</span>
+            </strong>
+            <p>
+              <span lang="my">Admin Setup Code ကိုထည့်ပြီး သင့်ကိုယ်ပိုင် စကားဝှက်အသစ် (အနည်းဆုံး စာလုံး ၈ လုံး) သတ်မှတ်လိုက်ပါ။</span>
+              <span lang="en">Enter your Admin Setup Code and choose a new password (min 8 characters).</span>
+            </p>
+          </div>
+          <div class="field">
+            <label for="setup-code">
+              <span lang="my">Admin Setup Code</span>
+              <span lang="en">Admin Setup Code</span>
+            </label>
+            <input id="setup-code" class="input mono" type="text" autocomplete="one-time-code" spellcheck="false" placeholder="ADMIN_SETUP_CODE">
+          </div>
+          <div class="field">
+            <label for="setup-password">
+              <span lang="my">စကားဝှက်အသစ် (အနည်းဆုံး ၈ လုံး)</span>
+              <span lang="en">Choose New Password (min 8 chars)</span>
+            </label>
+            <div class="pw-wrap">
+              <input id="setup-password" class="input" type="password" minlength="8" autocomplete="new-password" placeholder="••••••••">
+              <button type="button" id="btn-toggle-setup-pw" class="pw-toggle" aria-label="Show new password" title="Show/Hide">👁</button>
+            </div>
+          </div>
+          <div class="field">
+            <label for="setup-password-confirm">
+              <span lang="my">စကားဝှက်အသစ် ထပ်မံအတည်ပြုပါ</span>
+              <span lang="en">Confirm New Password</span>
+            </label>
+            <input id="setup-password-confirm" class="input" type="password" minlength="8" autocomplete="new-password" placeholder="••••••••">
+          </div>
+        </div>
+
         <div id="auth-error" class="alert alert-danger" hidden></div>
-        <button id="btn-firebase-signin" type="submit" class="btn btn-primary btn-block">
-          <span lang="my">Admin အကောင့်ဖြင့် ဝင်မည်</span>
-          <span lang="en">Sign In as Admin</span>
+
+        <button id="btn-live-signin" type="submit" class="btn btn-primary btn-block">
+          <span id="btn-live-signin-text">Admin အကောင့်ဖြင့် ဝင်မည်</span>
         </button>
+
+        <button id="btn-toggle-setup-mode" type="button" class="auth-mode-switch-link"></button>
       </form>
       <p class="auth-mode-desc" style="font-size:12.5px">
-        <span lang="my">Firestore ရှိ <code class="mono">admins/{uid}</code> ထဲတွင် စာရင်းသွင်းထားသော Admin အကောင့်ဖြင့်သာ ဝင်ရောက်နိုင်ပါသည်။</span>
-        <span lang="en">Only accounts registered under Firestore <code class="mono">admins/{uid}</code> can sign in.</span>
+        <span lang="my">ခွင့်ပြုထားသော Admin အကောင့်များ (Cloudflare D1) ဖြင့်သာ ဝင်ရောက်နိုင်ပါသည်။ VPN မလိုဘဲ မြန်မာနိုင်ငံမှ တိုက်ရိုက်အသုံးပြုနိုင်ပါသည်။</span>
+        <span lang="en">Only whitelisted admin accounts on Cloudflare D1 can sign in. Works directly in Myanmar with no VPN.</span>
       </p>
     </div>
 
@@ -95,44 +138,47 @@
         </span>
       </div>
       <p class="auth-mode-desc">
-        <span lang="my">Firebase Config မထည့်ရသေးသဖြင့် ဤ Browser အတွင်းရှိ မာရာ့ဝဘ်ဆိုဒ်နှင့် တိုက်ရိုက်ချိတ်ဆက် စမ်းသပ်နိုင်ပါသည်။</span>
-        <span lang="en">Firebase is not configured yet. Test approvals, KPay settings, and book imports synced live with the main site in this browser.</span>
+        <span lang="my">ဤ Browser အတွင်းရှိ မာရာ့ဝဘ်ဆိုဒ် (<code class="mono">?demo=1</code>) နှင့် တိုက်ရိုက်ချိတ်ဆက် စမ်းသပ်နိုင်ပါသည်။</span>
+        <span lang="en">Offline Demo Mode (<code class="mono">?demo=1</code>). Test approvals, bookings, KPay settings &amp; book imports locally in this browser.</span>
       </p>
       <button id="btn-demo-enter" type="button" class="btn btn-primary btn-block">
         <span lang="my">စမ်းသပ် Admin ထဲ ချက်ချင်းဝင်မည်</span>
         <span lang="en">Enter Demo Admin</span>
       </button>
+      <a class="btn btn-outline btn-sm btn-block" href="./">
+        <span lang="my">Live API (api.writermaya.com) သို့ ပြန်သွားမည်</span>
+        <span lang="en">Switch to Live API (api.writermaya.com)</span>
+      </a>
     </div>
 
-    <!-- Expandable Connect Firebase Panel -->
-    <details id="auth-fb-panel" class="fb-connect">
+    <!-- Expandable API Endpoint Settings Panel -->
+    <details id="auth-api-panel" class="fb-connect">
       <summary>
         <span>
-          <span lang="my">⚙ Firebase Config ချိတ်ဆက် / စမ်းသပ်ရန်</span>
-          <span lang="en">⚙ Connect / Test Firebase Config</span>
+          <span lang="my">⚙ API Endpoint (api.writermaya.com)</span>
+          <span lang="en">⚙ API Endpoint (api.writermaya.com)</span>
         </span>
       </summary>
       <div class="fb-connect-body">
         <p class="auth-mode-desc" style="font-size:12.5px">
-          <span lang="my">Firebase Console မှ <code class="mono">firebaseConfig</code> JSON (သို့မဟုတ် JS Object) ကို ကူးထည့်ပြီး ဤ Browser တွင် ချက်ချင်းစမ်းသပ်နိုင်ပါသည်။</span>
-          <span lang="en">Paste your Firebase Console <code class="mono">firebaseConfig</code> JSON (or JS object) to connect in this browser.</span>
+          <span lang="my">ပုံမှန်အားဖြင့် <code class="mono">https://api.writermaya.com</code> (Cloudflare D1 · VPN မလို) နှင့် ချိတ်ဆက်ထားပါသည်။ စမ်းသပ်ရန် အခြား URL ပြောင်းလဲနိုင်ပါသည်။</span>
+          <span lang="en">Connected to <code class="mono">https://api.writermaya.com</code> (Cloudflare D1 · No VPN). Override for local testing if needed.</span>
         </p>
-        <textarea id="auth-fb-json" class="textarea mono" rows="6" spellcheck="false" placeholder='{
-  "apiKey": "...",
-  "authDomain": "...",
-  "projectId": "...",
-  "appId": "..."
-}'></textarea>
-        <div id="auth-fb-msg" class="alert" hidden></div>
+        <input id="auth-api-url" class="input mono" type="url" spellcheck="false" placeholder="https://api.writermaya.com">
+        <div id="auth-api-msg" class="alert" hidden></div>
         <div class="fb-connect-actions">
-          <button id="btn-auth-fb-save" type="button" class="btn btn-gold btn-sm">
-            <span lang="my">Firebase ချိတ်ဆက်မည်</span>
-            <span lang="en">Save &amp; Connect</span>
+          <button id="btn-auth-api-save" type="button" class="btn btn-gold btn-sm">
+            <span lang="my">API Endpoint သိမ်းမည်</span>
+            <span lang="en">Save Endpoint</span>
           </button>
-          <button id="btn-auth-fb-clear" type="button" class="btn btn-outline btn-sm" hidden>
-            <span lang="my">စမ်းသပ်မုဒ်သို့ ပြန်သွားမည်</span>
-            <span lang="en">Reset to Demo Mode</span>
+          <button id="btn-auth-api-clear" type="button" class="btn btn-outline btn-sm" hidden>
+            <span lang="my">မူလ URL သို့ပြန်သွား</span>
+            <span lang="en">Reset Default</span>
           </button>
+          <a class="btn btn-ghost btn-sm" href="?demo=1">
+            <span lang="my">Demo Mode ဖွင့်ရန်</span>
+            <span lang="en">Open Demo Mode</span>
+          </a>
         </div>
       </div>
     </details>
@@ -258,9 +304,9 @@
         <span lang="my">ဤ Browser ရှိ E-Book ဆိုင်နှင့် တိုက်ရိုက်ချိတ်ဆက်နေပါသည်။</span>
         <span lang="en">Changes sync live with the main site in this browser.</span>
       </div>
-      <button id="btn-jump-fb" type="button" class="btn btn-outline btn-xs">
-        <span lang="my">Firebase ချိတ်ရန်</span>
-        <span lang="en">Connect Firebase</span>
+      <button id="btn-jump-api" type="button" class="btn btn-outline btn-xs">
+        <span lang="my">Live API ချိတ်ရန်</span>
+        <span lang="en">API Settings</span>
       </button>
     </div>
 
@@ -706,7 +752,7 @@
           </div>
         </form>
 
-        <!-- Right column: Live Buyer Preview + Firebase Connection -->
+        <!-- Right column: Live Buyer Preview + API Endpoint Status -->
         <div class="form-stack">
           <div class="buyer-preview">
             <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:8px">
@@ -731,36 +777,46 @@
             </div>
           </div>
 
-          <div class="panel form-stack" id="settings-fb-card">
+          <div class="panel form-stack" id="settings-api-card">
             <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
               <strong style="color:var(--maroon)">
-                <span lang="my">Firebase ချိတ်ဆက်မှု</span>
-                <span lang="en">Firebase Connection</span>
+                <span lang="my">API Endpoint · Cloudflare D1</span>
+                <span lang="en">API Endpoint · Cloudflare D1</span>
               </strong>
-              <span id="settings-fb-badge" class="badge badge-demo">DEMO</span>
+              <span id="settings-api-badge" class="badge badge-live">LIVE</span>
             </div>
-            <p class="section-sub" style="margin:0;font-size:13px">
-              <span lang="my">ဤ Browser တွင် စမ်းသပ်ရန် Firebase Config JSON ထည့်သွင်းခြင်း သို့မဟုတ် Demo Mode သို့ ပြန်ပြောင်းခြင်း ပြုလုပ်နိုင်ပါသည်။</span>
-              <span lang="en">Test a Firebase Config JSON in this browser or reset back to Local Demo Mode.</span>
-            </p>
-            <textarea id="settings-fb-json" class="textarea mono" rows="5" spellcheck="false" placeholder='{"apiKey":"...","authDomain":"...","projectId":"...","appId":"..."}'></textarea>
-            <div id="settings-fb-msg" class="alert" hidden></div>
+            <div class="meta-strip">
+              <span>🌐 <strong id="settings-api-active-url">https://api.writermaya.com</strong></span>
+              <span>⚡ <span lang="my">VPN မလို (No VPN)</span><span lang="en">No VPN Required</span></span>
+            </div>
+            <div class="field">
+              <label for="settings-api-url">
+                <span lang="my">API Server URL (ပုံမှန်အတိုင်းထားနိုင်သည်)</span>
+                <span lang="en">API Server URL (optional override)</span>
+              </label>
+              <input id="settings-api-url" class="input mono" type="url" spellcheck="false" placeholder="https://api.writermaya.com">
+            </div>
+            <div id="settings-api-msg" class="alert" hidden></div>
             <div class="fb-connect-actions">
-              <button id="btn-settings-fb-save" type="button" class="btn btn-gold btn-sm">
+              <button id="btn-settings-api-save" type="button" class="btn btn-gold btn-sm">
                 <span lang="my">သိမ်းပြီး ပြန်ချိတ်မည်</span>
                 <span lang="en">Save &amp; Reconnect</span>
               </button>
-              <button id="btn-settings-fb-clear" type="button" class="btn btn-outline btn-sm" hidden>
-                <span lang="my">Demo Mode သို့ပြန်သွား</span>
-                <span lang="en">Reset to Demo</span>
+              <button id="btn-settings-api-clear" type="button" class="btn btn-outline btn-sm" hidden>
+                <span lang="my">မူလ URL သို့ပြန်သွား</span>
+                <span lang="en">Reset Default</span>
               </button>
+              <a id="link-toggle-demo" class="btn btn-ghost btn-sm" href="?demo=1">
+                <span lang="my">Demo Mode ဖွင့်ရန်</span>
+                <span lang="en">Open Demo Mode</span>
+              </a>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ==================== TAB 4: BOOK CHAPTERS ==================== -->
+    <!-- ==================== TAB 5: BOOK CHAPTERS ==================== -->
     <section id="tab-book" role="tabpanel" hidden>
       <div class="section-head">
         <div>
@@ -787,7 +843,7 @@
         </h3>
         <p>
           <span lang="my">စာအုပ်အပြည့်အစုံ JSON ဖိုင်ကို ရွေးချယ်ပါ သို့မဟုတ် ဒီနေရာသို့ ဆွဲထည့်ပါ။ အခန်း 00 မှ 23 အထိ လုံခြုံစွာ သိမ်းဆည်းပေးပါမည်။</span>
-          <span lang="en">Select or drop your private compiled JSON file to import chapters 00–23 directly to Firestore (or Demo IndexedDB).</span>
+          <span lang="en">Select or drop your private compiled JSON file to import chapters 00–23 directly to Cloudflare D1 (or Demo IndexedDB).</span>
         </p>
         <div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap">
           <label class="btn btn-primary" for="book-json-file">

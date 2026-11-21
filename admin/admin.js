@@ -1,8 +1,9 @@
 // Maya (မာရာ) · Reality Check Hidden Admin PWA Controller
-// Imports all backend logic strictly from ../js/ebook/store.js and ../js/ebook/firebase-config.js.
+// Connected to No-VPN Cloudflare Workers + D1 API (https://api.writermaya.com).
 
 import {
-  FIREBASE_CONFIG,
+  API_BASE_URL,
+  getApiBaseUrl,
   isFirebaseConfigured,
   getActiveFirebaseConfig,
   setLocalFirebaseConfig,
@@ -13,6 +14,9 @@ import {
   getConfig,
   onReaderChange,
   compressImageToWebP,
+  adminCheckAuthState,
+  adminSetupPassword,
+  getAdminAuthToken,
   adminSignIn,
   adminSignOut,
   adminIsSignedIn,
@@ -68,6 +72,10 @@ let queuedOpenUid = '';
 let queuedOpenBookingId = '';
 let nativeActivating = false;
 let lastCtaSignature = '';
+let authSetupMode = false;
+let authCheckSeq = 0;
+let authEmailCheckTimer = null;
+let autoSyncedNativeToken = '';
 let nativeStatus = {
   nativeApp: false,
   notificationPermission: false,
@@ -269,10 +277,39 @@ async function copyText(text, successMy, successEn) {
   }
 }
 
-function hasLocalFbOverride() {
-  const hardcoded = Boolean(FIREBASE_CONFIG?.apiKey && FIREBASE_CONFIG?.projectId);
-  if (hardcoded) return false;
-  return isFirebaseConfigured();
+function hasLocalApiOverride() {
+  try {
+    return Boolean(localStorage.getItem('wm-api-base-url'));
+  } catch {
+    return false;
+  }
+}
+
+function getEffectiveApiBaseUrl() {
+  return getApiBaseUrl() || API_BASE_URL || 'https://api.writermaya.com';
+}
+
+function syncNativeAdminAuth({ email = '', token = '', password = '' } = {}) {
+  if (!hasNativeBridge()) return false;
+  const cleanEmail = String(email || getCachedAdminEmail() || '').trim();
+  const cleanToken = String(token || getAdminAuthToken() || '').trim();
+  const apiUrl = getEffectiveApiBaseUrl();
+  try {
+    window.MayaAndroid.setLanguage?.(lang);
+    if (cleanToken && typeof window.MayaAndroid.syncAdminToken === 'function') {
+      window.MayaAndroid.syncAdminToken(cleanEmail, cleanToken, apiUrl);
+      autoSyncedNativeToken = cleanToken;
+      return true;
+    }
+    if (typeof window.MayaAndroid.syncAdminLogin === 'function') {
+      window.MayaAndroid.syncAdminLogin(cleanEmail, cleanToken || password || '', apiUrl);
+      if (cleanToken) autoSyncedNativeToken = cleanToken;
+      return true;
+    }
+  } catch (err) {
+    console.warn('[admin] native auth sync warning:', err);
+  }
+  return false;
 }
 
 // ---------- Language Switching ----------
@@ -310,6 +347,7 @@ function applyLang(nextLang, { persist = true } = {}) {
   if (manualNote) manualNote.placeholder = t('Messenger KPay ငွေလွှဲပြီး', 'Paid via Messenger KPay');
 
   renderModeBadges();
+  renderAuthSetupUi();
   renderNewPaymentBanner();
   renderPendingAlertsCta(true);
   renderPendingTab();
@@ -383,7 +421,7 @@ function applyNativeStatus(raw) {
   if (nativeStatus.nativeEmail) {
     setCachedAdminEmail(nativeStatus.nativeEmail);
     if (!adminSessionInfo) {
-      adminSessionInfo = { ok: true, mode: 'firebase', email: nativeStatus.nativeEmail };
+      adminSessionInfo = { ok: true, mode: 'live', email: nativeStatus.nativeEmail };
     } else if (!adminSessionInfo.email) {
       adminSessionInfo.email = nativeStatus.nativeEmail;
     }
@@ -773,7 +811,8 @@ function isBatteryTipDismissed() {
 function submitNativeActivation(email, password, errEl) {
   const cleanEmail = String(email || '').trim();
   const cleanPass = String(password || '');
-  if (!cleanEmail || !cleanPass) {
+  const existingToken = getAdminAuthToken();
+  if (!cleanEmail || (!cleanPass && !existingToken)) {
     if (errEl) {
       errEl.textContent = t(
         'Admin အီးမေးလ်နှင့် စကားဝှက် နှစ်ခုလုံး ထည့်ပေးပါ။',
@@ -789,12 +828,14 @@ function submitNativeActivation(email, password, errEl) {
   renderPendingAlertsCta(true);
   renderAlertsSettingsCard();
   try {
+    const apiUrl = getEffectiveApiBaseUrl();
     window.MayaAndroid.setLanguage?.(lang);
-    window.MayaAndroid.syncAdminLogin?.(
-      cleanEmail,
-      cleanPass,
-      JSON.stringify(getActiveFirebaseConfig())
-    );
+    if (existingToken && typeof window.MayaAndroid.syncAdminToken === 'function') {
+      window.MayaAndroid.syncAdminToken(cleanEmail, existingToken, apiUrl);
+      autoSyncedNativeToken = existingToken;
+    } else {
+      window.MayaAndroid.syncAdminLogin?.(cleanEmail, cleanPass || existingToken, apiUrl);
+    }
   } catch (err) {
     nativeActivating = false;
     if (errEl) {
@@ -1070,16 +1111,64 @@ if (typeof window !== 'undefined') {
 }
 
 // ---------- Auth Gate & Mode ----------
+function renderAuthSetupUi() {
+  const pwGroup = $('login-pw-group');
+  const setupGroup = $('setup-fields-group');
+  const submitText = $('btn-live-signin-text');
+  const toggleBtn = $('btn-toggle-setup-mode');
+  if (pwGroup) pwGroup.hidden = authSetupMode;
+  if (setupGroup) setupGroup.hidden = !authSetupMode;
+  if (submitText) {
+    submitText.textContent = authSetupMode
+      ? t('စကားဝှက်သတ်မှတ်ပြီး ဝင်မည်', 'Set Password & Sign In')
+      : t('Admin အကောင့်ဖြင့် ဝင်မည်', 'Sign In as Admin');
+  }
+  if (toggleBtn) {
+    toggleBtn.textContent = authSetupMode
+      ? t('စကားဝှက် သတ်မှတ်ပြီးသားလား? ပုံမှန်ဝင်မည်', 'Already have a password? Sign in normally')
+      : t('ပထမဆုံးအကြိမ်လား? Setup Code ဖြင့် စကားဝှက်သတ်မှတ်ရန်', 'First time here? Set up password with Setup Code');
+  }
+}
+
+function setAuthSetupMode(enabled, { focusSetup = false } = {}) {
+  authSetupMode = Boolean(enabled);
+  renderAuthSetupUi();
+  if (authSetupMode && focusSetup) {
+    setTimeout(() => $('setup-code')?.focus(), 40);
+  }
+}
+
+async function checkEmailSetupState(rawEmail) {
+  if (!isFirebaseConfigured()) return;
+  const email = String(rawEmail || '').trim().toLowerCase();
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return;
+
+  const seq = ++authCheckSeq;
+  try {
+    const res = await adminCheckAuthState(email);
+    if (seq !== authCheckSeq) return;
+    if (res?.allowed && res?.needsSetup) {
+      setAuthSetupMode(true);
+    } else if (res?.allowed && !res?.needsSetup && authSetupMode) {
+      setAuthSetupMode(false);
+    }
+  } catch {
+    // Ignore transient offline check errors.
+  }
+}
+
 function renderModeBadges() {
   const live = isFirebaseConfigured();
   const cfg = getActiveFirebaseConfig();
-  const localOverride = hasLocalFbOverride();
+  const host = cfg?.projectId || 'api.writermaya.com';
+  const apiUrl = getEffectiveApiBaseUrl();
+  const localOverride = hasLocalApiOverride();
 
   // Auth screen boxes
-  $('auth-firebase-box').hidden = !live;
+  $('auth-live-box').hidden = !live;
   $('auth-demo-box').hidden = live;
-  $('auth-fb-project').textContent = live && cfg?.projectId ? cfg.projectId : '';
-  $('btn-auth-fb-clear').hidden = !localOverride;
+  $('auth-api-host').textContent = live ? host : '';
+  $('btn-auth-api-clear').hidden = !localOverride;
 
   // Shell header badge
   const hdrBadge = $('hdr-mode-badge');
@@ -1087,20 +1176,30 @@ function renderModeBadges() {
   if (hdrBadge && hdrText) {
     hdrBadge.className = `badge ${live ? 'badge-live' : 'badge-demo'}`;
     hdrText.textContent = live
-      ? `LIVE · ${cfg?.projectId || 'Firebase'}`
+      ? `LIVE · ${host}`
       : t('စမ်းသပ်မုဒ် (DEMO)', 'DEMO MODE');
   }
   $('demo-ribbon').hidden = live;
 
-  // Settings Firebase card
-  const setBadge = $('settings-fb-badge');
+  // Settings API Endpoint card
+  const setBadge = $('settings-api-badge');
   if (setBadge) {
     setBadge.className = `badge ${live ? 'badge-live' : 'badge-demo'}`;
     setBadge.textContent = live
-      ? `LIVE · ${cfg?.projectId || 'Firebase'}`
+      ? `LIVE · ${host}`
       : t('စမ်းသပ်မုဒ် (DEMO)', 'DEMO');
   }
-  $('btn-settings-fb-clear').hidden = !localOverride;
+  if ($('settings-api-active-url')) {
+    $('settings-api-active-url').textContent = live ? apiUrl : t('Local Browser Demo (?demo=1)', 'Local Browser Demo (?demo=1)');
+  }
+  $('btn-settings-api-clear').hidden = !localOverride;
+  const toggleDemoLink = $('link-toggle-demo');
+  if (toggleDemoLink) {
+    toggleDemoLink.href = live ? '?demo=1' : './';
+    toggleDemoLink.textContent = live
+      ? t('Demo Mode ဖွင့်ရန်', 'Open Demo Mode')
+      : t('Live API သို့ ပြန်သွားရန်', 'Switch to Live API');
+  }
 
   const emailEl = $('hdr-admin-email');
   if (emailEl) {
@@ -1109,37 +1208,22 @@ function renderModeBadges() {
   }
 }
 
-function prefillFirebaseTextareas() {
-  const cfg = getActiveFirebaseConfig();
-  const formatted =
-    cfg && cfg.apiKey
-      ? JSON.stringify(
-          {
-            apiKey: cfg.apiKey,
-            authDomain: cfg.authDomain,
-            projectId: cfg.projectId,
-            storageBucket: cfg.storageBucket,
-            messagingSenderId: cfg.messagingSenderId,
-            appId: cfg.appId,
-          },
-          null,
-          2
-        )
-      : '';
-  if ($('auth-fb-json')) $('auth-fb-json').value = formatted;
-  if ($('settings-fb-json')) $('settings-fb-json').value = formatted;
+function prefillApiEndpointInputs() {
+  const url = getEffectiveApiBaseUrl();
+  if ($('auth-api-url')) $('auth-api-url').value = url;
+  if ($('settings-api-url')) $('settings-api-url').value = url;
 }
 
-function handleSaveFirebaseConfig(textareaId, msgId) {
-  const raw = ($(textareaId)?.value || '').trim();
+function handleSaveApiEndpoint(inputId, msgId) {
+  const raw = ($(inputId)?.value || '').trim();
   const msgEl = $(msgId);
   if (!raw) {
     if (msgEl) {
       msgEl.hidden = false;
       msgEl.className = 'alert alert-danger';
       msgEl.textContent = t(
-        'Firebase Config JSON ကို အရင်ကူးထည့်ပေးပါ။',
-        'Please paste your Firebase Config JSON first.'
+        'API Endpoint URL (ဥပမာ https://api.writermaya.com) ထည့်ပေးပါ။',
+        'Please enter a valid API Endpoint URL (e.g. https://api.writermaya.com).'
       );
     }
     return;
@@ -1151,8 +1235,8 @@ function handleSaveFirebaseConfig(textareaId, msgId) {
       msgEl.hidden = false;
       msgEl.className = 'alert alert-danger';
       msgEl.textContent = t(
-        'Config ပုံစံ မမှန်ပါ (apiKey နှင့် projectId ပါဝင်ရမည်)။',
-        'Invalid Firebase config (apiKey and projectId are required).'
+        'URL ပုံစံ မမှန်ပါ (https://... သို့မဟုတ် http://localhost:... ဖြစ်ရမည်)။',
+        'Invalid URL format (must be https://... or http://localhost:...).'
       );
     }
     return;
@@ -1162,17 +1246,24 @@ function handleSaveFirebaseConfig(textareaId, msgId) {
     msgEl.hidden = false;
     msgEl.className = 'alert alert-ok';
     msgEl.textContent = t(
-      `Firebase (${saved.projectId}) သိမ်းဆည်းပြီးပါပြီ။ ပြန်လည်ဖွင့်နေပါသည်...`,
-      `Saved Firebase (${saved.projectId}). Reloading...`
+      `API Endpoint (${saved.projectId}) သိမ်းဆည်းပြီးပါပြီ။ ပြန်လည်ဖွင့်နေပါသည်...`,
+      `Saved API Endpoint (${saved.projectId}). Reloading...`
     );
   }
-  setTimeout(() => window.location.reload(), 450);
+  setTimeout(() => {
+    window.location.href = './';
+  }, 420);
 }
 
-function handleClearFirebaseConfig() {
+function handleClearApiEndpoint() {
   setLocalFirebaseConfig(null);
-  showToast(t('Demo Mode သို့ ပြန်ပြောင်းနေပါသည်...', 'Switching back to Demo Mode...'), 'ok');
-  setTimeout(() => window.location.reload(), 350);
+  showToast(
+    t('မူလ api.writermaya.com သို့ ပြန်ပြောင်းနေပါသည်...', 'Resetting to api.writermaya.com...'),
+    'ok'
+  );
+  setTimeout(() => {
+    window.location.href = './';
+  }, 350);
 }
 
 async function enterAdminShell(sessionInfo = null) {
@@ -1184,8 +1275,19 @@ async function enterAdminShell(sessionInfo = null) {
   $('app-shell').hidden = false;
 
   readNativeStatus();
+
+  // Auto-activate 24/7 native phone alerts seamlessly if admin JWT is already present!
+  if (hasNativeBridge() && isFirebaseConfigured()) {
+    const tok = getAdminAuthToken();
+    const em = getCachedAdminEmail();
+    if (tok && em && autoSyncedNativeToken !== tok && (!nativeStatus.nativeSignedIn || nativeStatus.nativeEmail !== em)) {
+      syncNativeAdminAuth({ email: em, token: tok });
+      readNativeStatus();
+    }
+  }
+
   renderModeBadges();
-  prefillFirebaseTextareas();
+  prefillApiEndpointInputs();
   renderPendingAlertsCta(true);
   renderAlertsSettingsCard();
 
@@ -1328,14 +1430,16 @@ function exitAdminShell() {
   seenBookingKeys.clear();
   queuedOpenUid = '';
   queuedOpenBookingId = '';
+  autoSyncedNativeToken = '';
   dismissPaymentBanner();
   stopTitleFlash();
   document.title = BASE_DOC_TITLE;
   $('app-shell').hidden = true;
   $('auth-screen').hidden = false;
   $('auth-error').hidden = true;
+  setAuthSetupMode(false);
   renderModeBadges();
-  prefillFirebaseTextareas();
+  prefillApiEndpointInputs();
 }
 
 // ---------- Navigation Tabs ----------
@@ -2430,8 +2534,9 @@ function renderBookTab() {
   }
   if (targetEl) {
     const live = isFirebaseConfigured();
+    const host = getActiveFirebaseConfig()?.projectId || 'api.writermaya.com';
     targetEl.textContent = live
-      ? t('သိမ်းဆည်းနေရာ: Firestore (books/reality-check)', 'Target: Protected Firestore')
+      ? t(`သိမ်းဆည်းနေရာ: Cloudflare D1 (${host})`, `Target: Cloudflare D1 (${host})`)
       : t('သိမ်းဆည်းနေရာ: Demo IndexedDB (Local Browser)', 'Target: Demo IndexedDB (Local Browser)');
   }
 
@@ -2782,41 +2887,133 @@ function bindEvents() {
     btn.addEventListener('click', () => applyLang(btn.dataset.setLang));
   });
 
-  // Password show/hide
+  // Password show/hide toggles
   $('btn-toggle-pw').addEventListener('click', () => {
     const inp = $('login-password');
     const isPw = inp.type === 'password';
     inp.type = isPw ? 'text' : 'password';
   });
+  $('btn-toggle-setup-pw').addEventListener('click', () => {
+    const inp = $('setup-password');
+    const isPw = inp.type === 'password';
+    inp.type = isPw ? 'text' : 'password';
+  });
 
-  // Firebase Email/Password sign-in
+  // Manual toggle between First-Time Setup and Normal Sign-In
+  $('btn-toggle-setup-mode').addEventListener('click', () => {
+    $('auth-error').hidden = true;
+    setAuthSetupMode(!authSetupMode, { focusSetup: true });
+  });
+
+  // Auto-detect first-time admin password setup as admin enters email
+  const emailInput = $('login-email');
+  emailInput.addEventListener('blur', () => {
+    checkEmailSetupState(emailInput.value);
+  });
+  emailInput.addEventListener('input', () => {
+    if (authEmailCheckTimer) clearTimeout(authEmailCheckTimer);
+    const val = emailInput.value.trim();
+    if (val.includes('@') && val.includes('.')) {
+      authEmailCheckTimer = setTimeout(() => checkEmailSetupState(val), 450);
+    }
+  });
+
+  // Cloudflare D1 Admin Sign-In & First-Time Password Setup
   $('login-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const errEl = $('auth-error');
-    const btn = $('btn-firebase-signin');
+    const btn = $('btn-live-signin');
     errEl.hidden = true;
     btn.disabled = true;
     try {
-      const email = $('login-email').value.trim();
-      const pass = $('login-password').value;
-      const res = await adminSignIn(email, pass);
-      setCachedAdminEmail(email);
-      if (hasNativeBridge()) {
-        try {
-          window.MayaAndroid.setLanguage?.(lang);
-          window.MayaAndroid.syncAdminLogin?.(
-            email,
-            pass,
-            JSON.stringify(getActiveFirebaseConfig())
-          );
-        } catch (bridgeErr) {
-          console.warn('[admin] syncAdminLogin warning:', bridgeErr);
-        }
+      const email = $('login-email').value.trim().toLowerCase();
+      if (!email) {
+        throw {
+          msgMy: 'Admin အီးမေးလ် ထည့်ပေးပါ။',
+          msgEn: 'Please enter your Admin email.',
+        };
       }
+
+      if (authSetupMode) {
+        const setupCode = $('setup-code').value.trim();
+        const newPass = $('setup-password').value;
+        const confirmPass = $('setup-password-confirm').value;
+        if (!setupCode) {
+          throw {
+            msgMy: 'Admin Setup Code ထည့်ပေးပါ။',
+            msgEn: 'Please enter your Admin Setup Code.',
+          };
+        }
+        if (newPass.length < 8) {
+          throw {
+            msgMy: 'စကားဝှက်သည် အနည်းဆုံး စာလုံး ၈ လုံး ရှိရပါမည်။',
+            msgEn: 'Password must be at least 8 characters.',
+          };
+        }
+        if (newPass !== confirmPass) {
+          throw {
+            msgMy: 'စကားဝှက် နှစ်ခု မတူညီပါ။ ပြန်စစ်ပေးပါ။',
+            msgEn: 'Passwords do not match. Please check again.',
+          };
+        }
+
+        const res = await adminSetupPassword(email, setupCode, newPass);
+        setCachedAdminEmail(res.email || email);
+        syncNativeAdminAuth({
+          email: res.email || email,
+          token: res.token || getAdminAuthToken(),
+          password: newPass,
+        });
+        $('setup-code').value = '';
+        $('setup-password').value = '';
+        $('setup-password-confirm').value = '';
+        setAuthSetupMode(false);
+        await enterAdminShell(res);
+        showToast(
+          t('✓ Admin စကားဝှက်သတ်မှတ်ပြီး ဝင်ရောက်ပြီးပါပြီ!', '✓ Admin password created & signed in!'),
+          'ok'
+        );
+        return;
+      }
+
+      const pass = $('login-password').value;
+      if (!pass) {
+        // Check if this email actually needs first-time setup!
+        const st = await adminCheckAuthState(email).catch(() => null);
+        if (st?.allowed && st?.needsSetup) {
+          setAuthSetupMode(true, { focusSetup: true });
+          errEl.textContent = t(
+            'ပထမဆုံးအကြိမ် ဝင်ရောက်ခြင်းဖြစ်ပါသည်။ Setup Code ထည့်ပြီး စကားဝှက်အသစ် သတ်မှတ်ပေးပါ။',
+            'First-time setup required — enter your Setup Code to create a password.'
+          );
+          errEl.hidden = false;
+          return;
+        }
+        throw {
+          msgMy: 'စကားဝှက် (Password) ထည့်ပေးပါ။',
+          msgEn: 'Please enter your password.',
+        };
+      }
+
+      const res = await adminSignIn(email, pass);
+      setCachedAdminEmail(res.email || email);
+      syncNativeAdminAuth({
+        email: res.email || email,
+        token: res.token || getAdminAuthToken(),
+        password: pass,
+      });
       $('login-password').value = '';
       await enterAdminShell(res);
       showToast(t('Admin အကောင့် ဝင်ရောက်ပြီးပါပြီ ✓', 'Signed in to Admin Console ✓'), 'ok');
     } catch (err) {
+      if (err?.code === 'NEEDS_SETUP' || err?.needsSetup) {
+        const typedPw = $('login-password').value;
+        $('login-password').value = '';
+        setAuthSetupMode(true, { focusSetup: true });
+        if (typedPw && typedPw.length >= 8 && $('setup-password')) {
+          $('setup-password').value = typedPw;
+        }
+      }
       errEl.textContent = errMsg(err, 'ဝင်ရောက်၍ မရပါ', 'Sign in failed');
       errEl.hidden = false;
     } finally {
@@ -2844,6 +3041,7 @@ function bindEvents() {
     await adminSignOut();
     setCachedAdminEmail('');
     adminSessionInfo = null;
+    autoSyncedNativeToken = '';
     if (hasNativeBridge()) {
       try {
         window.MayaAndroid.syncAdminLogout?.();
@@ -2855,18 +3053,18 @@ function bindEvents() {
     showToast(t('ထွက်ပြီးပါပြီ', 'Signed out'));
   });
 
-  // Connect Firebase config (Auth Gate + Payment Settings)
-  $('btn-auth-fb-save').addEventListener('click', () =>
-    handleSaveFirebaseConfig('auth-fb-json', 'auth-fb-msg')
+  // API Endpoint override (Auth Gate + Settings)
+  $('btn-auth-api-save').addEventListener('click', () =>
+    handleSaveApiEndpoint('auth-api-url', 'auth-api-msg')
   );
-  $('btn-auth-fb-clear').addEventListener('click', handleClearFirebaseConfig);
-  $('btn-settings-fb-save').addEventListener('click', () =>
-    handleSaveFirebaseConfig('settings-fb-json', 'settings-fb-msg')
+  $('btn-auth-api-clear').addEventListener('click', handleClearApiEndpoint);
+  $('btn-settings-api-save').addEventListener('click', () =>
+    handleSaveApiEndpoint('settings-api-url', 'settings-api-msg')
   );
-  $('btn-settings-fb-clear').addEventListener('click', handleClearFirebaseConfig);
-  $('btn-jump-fb').addEventListener('click', () => {
+  $('btn-settings-api-clear').addEventListener('click', handleClearApiEndpoint);
+  $('btn-jump-api').addEventListener('click', () => {
     switchTab('payments');
-    setTimeout(() => $('settings-fb-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 80);
+    setTimeout(() => $('settings-api-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 80);
   });
 
   // Tab navigation
@@ -3459,9 +3657,15 @@ async function boot() {
 
   bindEvents();
   readNativeStatus();
+  renderAuthSetupUi();
   renderModeBadges();
-  prefillFirebaseTextareas();
+  prefillApiEndpointInputs();
   renderAlertsSettingsCard();
+
+  const cachedEmail = getCachedAdminEmail();
+  if (cachedEmail && $('login-email') && !$('login-email').value) {
+    $('login-email').value = cachedEmail;
+  }
 
   try {
     await initStore();
