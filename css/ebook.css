@@ -1147,9 +1147,9 @@ body.eb-reader-open {
   display: grid;
   place-items: center;
   padding: 20px;
-  background: rgba(24, 16, 12, .88);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  background: rgba(24, 16, 12, .93);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 .eb-rd-overlay-card {
   width: min(390px, 100%);

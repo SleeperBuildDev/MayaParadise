@@ -66,9 +66,14 @@ export const SCALE = {
   driveSpeed: 8, // m/s cruise
 };
 
+export const IS_MOBILE = typeof navigator !== 'undefined' && (
+  /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || '')
+  || (/Macintosh/i.test(navigator.userAgent || '') && (navigator.maxTouchPoints || 0) > 1)
+);
+
 // Quality tiers (chosen in boot.js, adjusted by the frame-time governor).
 export const TIERS = {
-  low: { pixelRatio: 1.0, fps: 30, outlines: 'actors', particles: 0.5, antialias: false },
-  mid: { pixelRatio: 1.5, fps: 60, outlines: 'all', particles: 1, antialias: true },
-  high: { pixelRatio: 2.0, fps: 60, outlines: 'all', particles: 1, antialias: true },
+  low: { pixelRatio: 1.0, pixelRatioMobile: 1.0, fps: 30, fpsMobile: 30, outlines: 'actors', particles: 0.5, antialias: false },
+  mid: { pixelRatio: 1.5, pixelRatioMobile: 1.25, fps: 60, fpsMobile: 60, outlines: 'all', particles: 0.85, antialias: true },
+  high: { pixelRatio: 2.0, pixelRatioMobile: 1.5, fps: 60, fpsMobile: 60, outlines: 'all', particles: 1, antialias: true },
 };

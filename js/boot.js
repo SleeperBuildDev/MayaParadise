@@ -22,18 +22,18 @@ function pickTier(info) {
   const forced = params.get('tier') || safeGet('mw-tier');
   if (['low', 'mid', 'high'].includes(forced)) return forced;
   const r = info.renderer;
-  const mem = navigator.deviceMemory || 4; // (Safari does not report it: 4)
-  const mobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
-  // owner, 2026-11-16: nearly every phone plays on high graphics; only the very old ones step down.
-  // Every iPhone / iPad (iPadOS says "Macintosh" but has touch) runs high; the game lowers its own pixel ratio if a phone struggles,
-  // and a crash on the last run (mw-running) still forces low (below).
-  const apple = /iPhone|iPad|iPod/i.test(navigator.userAgent) || (/Macintosh/i.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
-  if (apple) return 'high';
+  const mem = Number(navigator.deviceMemory) || 0;
+  const ua = navigator.userAgent || '';
+  const apple = /iPhone|iPad|iPod/i.test(ua) || (/Macintosh/i.test(ua) && (navigator.maxTouchPoints || 0) > 1);
+  const mobile = /Android|iPhone|iPad|iPod|Mobile/i.test(ua) || apple;
   if (/SwiftShader|llvmpipe|Software/i.test(r)) return 'low';
-  // very old phone GPUs (Mali-4xx / T6xx-T7xx / G31 / G51 / G52, PowerVR GE8xxx, Adreno 3xx / 50x) or 2 GB or less of memory
-  if (/Mali-4|Mali-T[67]|Mali-G(31|51|52)|PowerVR (Rogue )?GE8|Adreno \(TM\) (3\d\d|50\d)|Adreno (3\d\d|50\d)/i.test(r) || mem <= 2) return mobile ? 'low' : 'mid';
-  // older middle phones (Adreno 51x-54x) or 3 GB of memory: middle graphics
-  if (mobile && (mem <= 3 || /Adreno \(TM\) 5[1-4]\d|Adreno 5[1-4]\d/i.test(r))) return 'mid';
+  // Every iPhone / iPad runs 'high' (still capped by mobile 60fps / 1.5 DPR / 1024 shadow limits in config & shadows).
+  if (apple) return 'high';
+  // Very old phone GPUs (Mali-4xx / T6xx-T7xx / G31 / G51 / G52, PowerVR GE8xxx, Adreno 3xx / 50x) or <= 2 GB RAM.
+  if (/Mali-4|Mali-T[67]|Mali-G(31|51|52)(?!\d)|PowerVR (Rogue )?GE8|Adreno (?:\(TM\) )?(3\d\d|50\d)(?!\d)/i.test(r) || (mem > 0 && mem <= 2)) return mobile ? 'low' : 'mid';
+  // Mid-range mobile Androids: <= 4 GB RAM or mid-range GPUs (Adreno 5xx/61x-64x, Mali-G57/G68/G76/G77, PowerVR/IMG).
+  if (mobile && ((mem > 0 && mem <= 4) || /Adreno (?:\(TM\) )?(5\d\d|6[1-4]\d)(?!\d)|Mali-G(57|68|76|77)(?!\d)|PowerVR|\bIMG\b/i.test(r))) return 'mid';
+  // Flagship Androids (Adreno 650+/7xx/8xx, Mali-G78/G710/G715/G720/Immortalis) and desktop.
   return 'high';
 }
 

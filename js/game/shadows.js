@@ -6,12 +6,18 @@
 //  - markShadows() decides who casts / receives: opaque lit solids cast and receive; outlines,
 //    unlit glows/signs, transparent and tiny bits do not. userData.shadow overrides it.
 import * as THREE from './three.js';
+import { IS_MOBILE } from './config.js';
 import { nightWarp } from './nightshadow.js';
 
 /** Shadow-map sizes per tier (world follows the camera; rooms are static). */
 export const SHADOW_MAP = {
   world: { low: 1024, mid: 2048, high: 2048 },
   room: { low: 1024, mid: 1024, high: 2048 },
+};
+/** Mobile shadow-map caps (keeps GPU bandwidth & heat low on phones while staying crisp). */
+export const SHADOW_MAP_MOBILE = {
+  world: { low: 512, mid: 1024, high: 1024 },
+  room: { low: 512, mid: 1024, high: 1024 },
 };
 /** PCF softness (shadow.radius, in texels) per tier. */
 const SOFTNESS = { low: 1, mid: 2.5, high: 3 };
@@ -20,7 +26,8 @@ const SOFTNESS = { low: 1, mid: 2.5, high: 3 };
 export function enableShadows(renderer, tier = 'mid') {
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFShadowMap; // filtered + soft in r186 (PCFSoft was folded into it)
-  renderer.shadowMap.autoUpdate = true;
+  renderer.shadowMap.autoUpdate = !IS_MOBILE;
+  if (IS_MOBILE) renderer.shadowMap.needsUpdate = true;
   return true;
 }
 
@@ -135,11 +142,13 @@ export function setupSceneShadows(scene, opts = {}) {
   scene.traverse((o) => { if (!sun && o.isDirectionalLight) sun = o; });
   if (!sun) return null;
   const maxTex = 4096;
-  const size = Math.min(maxTex, opts.mapSize || SHADOW_MAP[kind]?.[tier] || 1024);
+  const mapTable = IS_MOBILE ? SHADOW_MAP_MOBILE : SHADOW_MAP;
+  const size = Math.min(maxTex, opts.mapSize || mapTable[kind]?.[tier] || 1024);
   sun.castShadow = true;
   sun.shadow.mapSize.set(size, size);
-  sun.shadow.radius = SOFTNESS[tier] ?? 2;
-  sun.shadow.blurSamples = 8;
+  const soft = SOFTNESS[tier] ?? 2;
+  sun.shadow.radius = IS_MOBILE ? Math.min(soft, 2) : soft;
+  sun.shadow.blurSamples = IS_MOBILE ? 4 : 8;
   if (!sun.target.parent) scene.add(sun.target);
   const cam = sun.shadow.camera;
 

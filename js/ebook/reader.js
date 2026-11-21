@@ -647,7 +647,7 @@ function renderPageToCanvas(canvas, layout, pageIdx, themeKey, chapter, stateSna
   if (!canvas || !layout) return;
   const theme = THEMES[themeKey] || THEMES.cream;
   const { layoutW: w, layoutH: h, padX, contentW, fs } = layout;
-  const dpr = Math.min(window.devicePixelRatio || 1, 3);
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
   sizeBufferCanvas(canvas, w, h, dpr);
 
   const ctx = canvas.getContext('2d');
@@ -823,7 +823,7 @@ function renderPageToCanvas(canvas, layout, pageIdx, themeKey, chapter, stateSna
 
 function renderSpecialPageToCanvas(canvas, w, h, themeKey, kind, meta = {}) {
   const theme = THEMES[themeKey] || THEMES.cream;
-  const dpr = Math.min(window.devicePixelRatio || 1, 3);
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
   sizeBufferCanvas(canvas, w, h, dpr);
 
   const ctx = canvas.getContext('2d');
@@ -1080,7 +1080,7 @@ function drawSpineGutter(ctx, h, theme) {
 
 function compositeRestingFrame(displayCanvas, pageBuf, w, h, themeKey) {
   const theme = THEMES[themeKey] || THEMES.cream;
-  const dpr = Math.min(window.devicePixelRatio || 1, 3);
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
   const fullW = w + BLEED_X * 2;
   const fullH = h + BLEED_Y * 2;
   sizeBufferCanvas(displayCanvas, fullW, fullH, dpr);
@@ -1113,7 +1113,7 @@ function compositeRestingFrame(displayCanvas, pageBuf, w, h, themeKey) {
  */
 function compositeCurlFrame(displayCanvas, frontBuf, underBuf, w, h, themeKey, anchor, pRaw) {
   const theme = THEMES[themeKey] || THEMES.cream;
-  const dpr = Math.min(window.devicePixelRatio || 1, 3);
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
   const fullW = w + BLEED_X * 2;
   const fullH = h + BLEED_Y * 2;
   sizeBufferCanvas(displayCanvas, fullW, fullH, dpr);
@@ -2028,9 +2028,17 @@ export async function openEbookReader(opts = {}) {
     };
     animState = anim;
 
+    const minFrameStep = 1000 / 60 - 2.2;
+    let lastDrawTs = 0;
+
     const step = (now) => {
       if (destroyed || curtainOn || gateActive || animState !== anim) return;
       const rawT = duration <= 0 ? 1 : clamp((now - startTs) / duration, 0, 1);
+      if (rawT < 1 && lastDrawTs && now - lastDrawTs < minFrameStep) {
+        anim.rafId = requestAnimationFrame(step);
+        return;
+      }
+      lastDrawTs = now;
       const pt = evalPoint(rawT);
       compositeCurlFrame(els.canvas, frontBuf, underBuf, w, h, prefs.theme, anchor, pt);
 

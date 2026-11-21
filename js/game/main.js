@@ -1,6 +1,6 @@
 // The game director: world (driving) <-> rooms (walking), cinematics, stations, UI and history.
 import * as THREE from './three.js';
-import { PLACES, SCALE, TIERS } from './config.js';
+import { PLACES, SCALE, TIERS, IS_MOBILE } from './config.js';
 import { setOutlineResolution, fontsReady } from './toon.js';
 import { createInput } from './input.js';
 import { createCameraRig } from './camera.js?v=6'; // ?v= makes phones fetch the new copy
@@ -106,6 +106,16 @@ class Game {
     this.prevSpeed = 0;
     this.frameTimes = [];
     this.pixelRatio = 1;
+    this.maxPixelRatio = 1;
+    this.sheetDirty = 2;
+    this.sheetAnimUntil = 0;
+    this.forceShadow = true;
+    this.shadowTick = 0;
+    this.governorFps = 0;
+    this.renderCount = 0;
+    this.shadowCount = 0;
+    this.targetFps = 60;
+    this._isIdle = false;
     this.ignorePop = 0;
     this.worldWalk = null;
     this.ebookOpen = false;
@@ -127,9 +137,10 @@ class Game {
 
     const canvas = document.getElementById('scene');
     const cfg = TIERS[this.tier];
-    this.renderer = new THREE.WebGLRenderer({ canvas, antialias: cfg.antialias, powerPreference: 'high-performance' });
+    this.renderer = new THREE.WebGLRenderer({ canvas, antialias: cfg.antialias, powerPreference: IS_MOBILE ? 'default' : 'high-performance' });
     this.renderer.toneMapping = THREE.NeutralToneMapping;
-    this.pixelRatio = Math.min(window.devicePixelRatio || 1, cfg.pixelRatio);
+    this.maxPixelRatio = Math.min(window.devicePixelRatio || 1, IS_MOBILE ? (cfg.pixelRatioMobile ?? cfg.pixelRatio) : cfg.pixelRatio);
+    this.pixelRatio = this.maxPixelRatio;
     this.renderer.setPixelRatio(this.pixelRatio);
     this.camera = new THREE.PerspectiveCamera(45, 1, 0.1, 400);
     this.rig = createCameraRig(this.camera);
@@ -156,7 +167,7 @@ class Game {
     }
     this.maya = m.createMaya({ outfit: 'writer', onEvent: (type, data) => this.onMayaEvent(type, data) });
     this.car = c.createCar({});
-    this.fx = f.createFX({ density: this.tier === 'low' ? 0.5 : 1 });
+    this.fx = f.createFX({ density: cfg.particles ?? (this.tier === 'low' ? 0.5 : 1) });
     this.audio = a.createAudio({ ctx: this.opts.audioCtx || null });
     if (this.opts.audioCtx) call(this.audio, 'unlock');
     // a background song for the time of day (muted with the sound button; ?music=0 turns it off)
@@ -340,9 +351,16 @@ class Game {
       this.openConsultWithTopic(topic);
     });
     document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible' && this.lastOrderAt && performance.now() - this.lastOrderAt < 10 * 60 * 1000) {
-        this.lastOrderAt = 0;
-        setTimeout(() => this.react('kiss', 'kiss', LINES.welcomeBack), 400);
+      if (document.visibilityState === 'visible') {
+        this.lastInput = performance.now();
+        this.lastFrameTs = 0;
+        this.sheetDirty = 2;
+        this.forceShadow = true;
+        this.frameTimes.length = 0;
+        if (this.lastOrderAt && performance.now() - this.lastOrderAt < 10 * 60 * 1000) {
+          this.lastOrderAt = 0;
+          setTimeout(() => this.react('kiss', 'kiss', LINES.welcomeBack), 400);
+        }
       }
       if (document.visibilityState === 'hidden') call(this.audio, 'engine', 0);
     });
@@ -368,6 +386,22 @@ class Game {
     setOutlineResolution(v.x, v.y);
     this.viewW = w;
     this.viewH = h;
+    this.sheetDirty = 2;
+    this.forceShadow = true;
+  }
+
+  /** True while driving, walking, in a cutscene, celebrating, or recently interacted (used by sw-register on mobile). */
+  isActive() {
+    if (this.ebookOpen || document.hidden) return false;
+    const now = performance.now();
+    if (this.ui?.sheetOpen) return this.busy || now <= this.sheetAnimUntil;
+    if (this.busy || !!this.rig?.cinematic || !!this.worldWalk || this.revealT !== null) return true;
+    const stickHeld = this.input ? this.input.stick().lengthSq() > 0.001 : false;
+    if (stickHeld) return true;
+    if (this.mode === 'world' && (this.world?.drive?.isAuto || Math.abs(this.prevSpeed || 0) > 0.08)) return true;
+    if (this.mode === 'room' && (this.walker?.moving || !!this.letterReader?.open)) return true;
+    if (this.story?.footActive && Math.abs(this.prevSpeed || 0) > 0.08) return true;
+    return now - this.lastInput < 3000;
   }
 
   placeById(id) { return PLACES.find((p) => p.id === id); }
@@ -380,13 +414,29 @@ class Game {
 
   // ------------------------------------------------------------------ frame loop
   frame(ts) {
-    if (this.ebookOpen) return;
-    // low tier: 30 fps is smoother than a stuttering 60 and keeps older phones cool
-    const cap = TIERS[this.tier]?.fps || 60;
-    if (cap < 55) {
-      if (ts - (this.lastFrameTs || 0) < 1000 / cap - 4) return;
-      this.lastFrameTs = ts;
-    }
+    if (this.ebookOpen || document.hidden) return;
+    const now = typeof ts === 'number' && ts > 0 ? ts : performance.now();
+    // Sheet-open 0 FPS sleep: once settled and no celebration emote is playing, stop WebGL rendering completely.
+    if (this.ui.sheetOpen && !this.busy && this.sheetDirty <= 0 && now > this.sheetAnimUntil) return;
+
+    // Real FPS cap: locks 120Hz phones to 60 FPS active / 30 FPS dialog-or-sheet / 20 FPS idle (keeps SoC cool).
+    const stickHeld = this.input ? this.input.stick().lengthSq() > 0.001 : false;
+    const moving = stickHeld || this.busy || !!this.rig?.cinematic || !!this.worldWalk || this.revealT !== null
+      || (this.mode === 'world' && (this.world?.drive?.isAuto || Math.abs(this.prevSpeed || 0) > 0.08))
+      || (this.mode === 'room' && (this.walker?.moving || !!this.letterReader?.open))
+      || (this.story?.footActive && Math.abs(this.prevSpeed || 0) > 0.08);
+    const idle = !moving && !this.ui.sheetOpen && !this.ui.dialogOpen && (now - this.lastInput > 2500);
+    const tierFps = IS_MOBILE ? (TIERS[this.tier]?.fpsMobile || TIERS[this.tier]?.fps || 60) : (TIERS[this.tier]?.fps || 60);
+    const activeFps = this.governorFps ? Math.min(tierFps, this.governorFps) : tierFps;
+    const targetFps = this.ui.sheetOpen ? 30 : idle ? (IS_MOBILE ? 20 : 30) : (this.ui.dialogOpen && IS_MOBILE ? Math.min(activeFps, 30) : activeFps);
+    this.targetFps = targetFps;
+    this._isIdle = idle;
+
+    const minStep = 1000 / targetFps - 2.2;
+    if (this.lastFrameTs && (now - this.lastFrameTs) < minStep) return;
+    this.lastFrameTs = now;
+    if (this.ui.sheetOpen && this.sheetDirty > 0) this.sheetDirty--;
+
     this.timer.update(ts);
     const dt = Math.min(this.timer.getDelta(), 1 / 20);
     const t = this.timer.getElapsed();
@@ -397,7 +447,22 @@ class Game {
     this.rig.update(dt);
     // world: the sun's shadow covers exactly what the camera sees (texel-snapped); rooms: fitted once
     if (this.mode === 'world') this.nightShadow?.update(dt, t); else this.nightShadow?.sleep();
-    if (this.mode === 'world') this.worldShadow?.fitCamera?.(this.camera);
+
+    // Smart mobile shadow updates: half-rate (30Hz) while moving, ~4Hz while idle, instant on forceShadow.
+    if (this.shadowsOn && IS_MOBILE) {
+      if (this.forceShadow) {
+        this.renderer.shadowMap.needsUpdate = true;
+        this.forceShadow = false;
+        this.shadowTick = 0;
+      } else if (!idle) {
+        if ((++this.shadowTick & 1) === 0) this.renderer.shadowMap.needsUpdate = true;
+      } else if (++this.shadowTick >= 5) {
+        this.renderer.shadowMap.needsUpdate = true;
+        this.shadowTick = 0;
+      }
+    }
+    if (this.mode === 'world' && (!IS_MOBILE || this.renderer.shadowMap.needsUpdate)) this.worldShadow?.fitCamera?.(this.camera);
+
     if (this.heroLight && this.mode === 'world') {
       const p = this.mayaOut() ? this.maya.root.getWorldPosition(this.tmp2) : this.car.root.position;
       this.heroLight.position.set(p.x, this.car.root.position.y, p.z);
@@ -409,9 +474,9 @@ class Game {
     this.barks?.update(dt);
     this.music?.update(!!this.ui.dialogOpen);
     this.governor(dt);
-    // While the info sheet is up, the 3D above it is a backdrop: draw every other frame to save battery.
     this.frameN = (this.frameN || 0) + 1;
-    if (this.ui.sheetOpen && (this.frameN & 1)) return;
+    if (this.shadowsOn && (this.renderer.shadowMap.autoUpdate || this.renderer.shadowMap.needsUpdate)) this.shadowCount++;
+    this.renderCount++;
     this.renderer.render(this.scene, this.camera);
     this.idleCheck();
   }
@@ -559,6 +624,8 @@ class Game {
       this.heroLight.visible = true; // keep the light in the scene so shaders never recompile
     }
     d.grade(this.gradeEl, { indoor: this.mode === 'room', cinematic: this.rig?.cinematic ? 1 : 0 });
+    this.sheetDirty = 2;
+    this.forceShadow = true;
   }
 
   updateOverlay() {
@@ -656,6 +723,9 @@ class Game {
   async react(emote, face, lines, { closeUp = false } = {}) {
     if (this.reacting) return;
     this.reacting = true;
+    this.sheetAnimUntil = Math.max(this.sheetAnimUntil, performance.now() + 2600);
+    this.sheetDirty = 2;
+    this.forceShadow = true;
     call(this.maya, 'setFace', face, 2.2);
     const fc = call(this.maya, 'faceCanvas', face);
     if (fc) this.ui.showBubble(fc, 1800);
@@ -836,11 +906,15 @@ class Game {
     this.ui.setWhere(tr(room.placeName || this.placeById(room.id).name)); // placeName: a story room
     this.ui.setDockCurrent(room.id);
     this.setRoomLabels();
+    this.sheetDirty = 2;
+    this.forceShadow = true;
   }
 
   async enterPlace(id, { fast = false, push = true } = {}) {
     if (this.busy) return;
     this.busy = true;
+    this.sheetDirty = 2;
+    this.forceShadow = true;
     this.ui.hideCard();
     this.ui.hideTip();
     this.ui.cinema(true);
@@ -890,6 +964,8 @@ class Game {
   async exitRoom({ push = true } = {}) {
     if (this.busy || this.mode !== 'room') return;
     this.busy = true;
+    this.sheetDirty = 2;
+    this.forceShadow = true;
     if (this.ui.sheetOpen) this.closeSheet(false);
     this.ui.hideDialog();
     this.ui.cinema(true);
@@ -1121,7 +1197,10 @@ class Game {
       this.fx.burst('sparkle', this.tmp.set(mp.x, 1.75, mp.z), { count: 5, spread: 0.45, up: 0.4, size: 0.7 });
     }
     // while the info sheet covers the lower half, keep Maya and the station in the top half
-    if (this.mode === 'room') this.rig.orbitShot(mp, { dist: 3.9, height: 1.25, azimuth: az, lookHeight: 0.25, dur: 0.6 });
+    if (this.mode === 'room') {
+      this.rig.orbitShot(mp, { dist: 3.9, height: 1.25, azimuth: az, lookHeight: 0.25, dur: 0.6 });
+      this.sheetAnimUntil = Math.max(this.sheetAnimUntil, performance.now() + 950);
+    }
     this.openSheetFor([s.id], tr(STATION_LABELS[s.id]) || pages.stationTitle(s.id), s.id);
   }
 
@@ -1149,6 +1228,8 @@ class Game {
     this.unmountConsultStation();
     window.MayaSite?.prepareLinks(document);
     this.ui.openSheet({ title, stationIds: ids });
+    this.sheetDirty = 2;
+    this.forceShadow = true;
     call(this.audio, 'play', 'page');
     if (replaceHistory) history.replaceState({ mw: 'sheet' }, '', `#${hashId}`);
     else history.pushState({ mw: 'sheet' }, '', `#${hashId}`);
@@ -1169,6 +1250,11 @@ class Game {
     this.unmountEbookStations();
     this.unmountConsultStation();
     this.ui.closeSheet();
+    this.lastInput = performance.now();
+    this.lastFrameTs = 0;
+    this.sheetDirty = 2;
+    this.forceShadow = true;
+    this.frameTimes.length = 0;
     this.rig.release();
     this.faceTarget = null;
     call(this.audio, 'play', 'page');
@@ -1235,6 +1321,9 @@ class Game {
   onConsultBooked(detail) {
     const name = (detail?.name || '').trim();
     this.lastOrderAt = performance.now();
+    this.sheetAnimUntil = Math.max(this.sheetAnimUntil, performance.now() + 2600);
+    this.sheetDirty = 2;
+    this.forceShadow = true;
     call(this.audio, 'play', 'cheer');
     call(this.maya, 'setFace', 'star', 3.0);
     call(this.maya, 'emote', 'cheer');
@@ -1281,6 +1370,9 @@ class Game {
 
   onEbookReaderSignedIn(reader) {
     const name = typeof reader === 'string' ? reader.trim() : (reader?.name || '').trim();
+    this.sheetAnimUntil = Math.max(this.sheetAnimUntil, performance.now() + 2600);
+    this.sheetDirty = 2;
+    this.forceShadow = true;
     call(this.audio, 'play', 'sparkle');
     call(this.maya, 'setFace', 'happy', 3.0);
     call(this.maya, 'emote', 'cheer');
@@ -1321,6 +1413,10 @@ class Game {
         this.renderer.domElement.style.pointerEvents = '';
         this.input.reset();
         this.lastInput = performance.now();
+        this.lastFrameTs = 0;
+        this.sheetDirty = 2;
+        this.forceShadow = true;
+        this.frameTimes.length = 0;
         if (this.readerPushed) {
           this.readerPushed = false;
           this.ignorePop++;
@@ -1339,12 +1435,19 @@ class Game {
     } catch (err) {
       this.ebookOpen = false;
       this.renderer.domElement.style.pointerEvents = '';
+      this.lastInput = performance.now();
+      this.lastFrameTs = 0;
+      this.sheetDirty = 2;
+      this.forceShadow = true;
       console.error('ebook reader', err);
     }
   }
 
   onOrder() {
     this.lastOrderAt = performance.now();
+    this.sheetAnimUntil = Math.max(this.sheetAnimUntil, performance.now() + 2600);
+    this.sheetDirty = 2;
+    this.forceShadow = true;
     call(this.audio, 'play', 'cheer');
     const p = this.maya.root.getWorldPosition(new THREE.Vector3());
     this.fx.burst('heart', p.setY(p.y + 1.4), { count: 10 });
@@ -1368,17 +1471,22 @@ class Game {
 
   // ------------------------------------------------------------------ quality governor
   governor(dt) {
-    if (this.ui.sheetOpen || this.busy) return;
+    if (this._isIdle || this.ui.sheetOpen || this.busy || this.ui.dialogOpen || this.targetFps < 55) return;
     this.frameTimes.push(dt);
     if (this.frameTimes.length < 90) return;
     const avg = this.frameTimes.reduce((a, b) => a + b, 0) / this.frameTimes.length;
     this.frameTimes.length = 0;
-    if (avg > 0.024 && this.pixelRatio > 0.75) {
-      this.pixelRatio = Math.max(0.75, this.pixelRatio - 0.25);
-      this.renderer.setPixelRatio(this.pixelRatio);
-      this.resize();
-    } else if (avg < 0.0135 && this.pixelRatio < Math.min(window.devicePixelRatio || 1, TIERS[this.tier].pixelRatio)) {
-      this.pixelRatio = Math.min(TIERS[this.tier].pixelRatio, this.pixelRatio + 0.25);
+    const minPr = IS_MOBILE ? 0.85 : 0.75;
+    if (avg > 0.025) {
+      if (this.pixelRatio > minPr + 1e-4) {
+        this.pixelRatio = Math.max(minPr, this.pixelRatio - 0.25);
+        this.renderer.setPixelRatio(this.pixelRatio);
+        this.resize();
+      } else if (IS_MOBILE && avg > 0.028) {
+        this.governorFps = 30;
+      }
+    } else if (avg < 0.015 && this.pixelRatio < this.maxPixelRatio - 1e-4) {
+      this.pixelRatio = Math.min(this.maxPixelRatio, this.pixelRatio + 0.25);
       this.renderer.setPixelRatio(this.pixelRatio);
       this.resize();
     }

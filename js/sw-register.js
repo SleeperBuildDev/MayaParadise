@@ -7,6 +7,8 @@
 const sw = navigator.serviceWorker;
 const live = window.__LIVE === true && !new URLSearchParams(location.search).has('nosw');
 const BUILD = String(window.__BUILD || 'live');
+const mobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || '')
+  || (/Macintosh/i.test(navigator.userAgent || '') && (navigator.maxTouchPoints || 0) > 1);
 
 async function removeAll() {
   try {
@@ -38,6 +40,8 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 function busy() {
   if (!window.__mwGame) return true;
   if (performance.now() - lastNet < 2500) return true;
+  // On mobile, pause background precaching during active driving/walking unless warmNow was triggered.
+  if (mobile && !warmNow && window.__mwGame?.isActive?.()) return true;
   // (the town loader still bringing towns in: its own downloads go first)
   try { const tl = window.__townLoader; if (tl && (tl.busy?.() || tl.waiting?.())) return true; } catch { /* no loader */ }
   return false;
@@ -94,19 +98,22 @@ async function warmLoop() {
   filling = true;
   let fails = 0;
   const t0 = performance.now();
-  // ~5 s after the website is up (or at once when the switch shows or is touched)
-  while (!warmNow && performance.now() - t0 < 5000 && !window.__modeSwitch?.shown) await nap(500);
+  // ~5 s on desktop (~15 s on mobile so initial 3D play stays cool), or at once when the switch is tapped (warmNow).
+  const initialWait = mobile ? 15000 : 5000;
+  while (!warmNow && performance.now() - t0 < initialWait && (mobile || !window.__modeSwitch?.shown)) await nap(500);
   for (;;) {
     // (the page's own network quiet for 2.5 s; no idle-callback wait: the downloads run in the worker, not here)
     while (!warmNow && busy()) await nap(700);
     if (!navigator.onLine) { await nap(15000); continue; }
     const fast = !/3g/.test(navigator.connection?.effectiveType || '');
-    const r = await ask({ type: 'fill', n: warmNow ? 12 : fast ? 8 : 4, par: warmNow ? 6 : fast ? 4 : 2, save: saveInfo() });
+    const batchN = warmNow ? 12 : mobile ? 3 : fast ? 8 : 4;
+    const batchPar = warmNow ? 6 : mobile ? 2 : fast ? 4 : 2;
+    const r = await ask({ type: 'fill', n: batchN, par: batchPar, save: saveInfo() });
     warmLog.push([Math.round(performance.now()), r ? r.got : -1, r ? r.left : -1]);
     if (!r || r.error) { if (++fails > 8) break; await nap(10000); continue; }
     fails = 0;
     if (r.full || !(r.left > 0)) break;
-    if (!warmNow) await nap(r.got ? 300 : 20000);
+    if (!warmNow) await nap(r.got ? (mobile ? 2500 : 300) : 20000);
   }
   filling = false;
 }
