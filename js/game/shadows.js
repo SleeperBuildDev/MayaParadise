@@ -16,8 +16,8 @@ export const SHADOW_MAP = {
 };
 /** Mobile shadow-map caps (keeps GPU bandwidth & heat low on phones while staying crisp). */
 export const SHADOW_MAP_MOBILE = {
-  world: { low: 512, mid: 1024, high: 1024 },
-  room: { low: 512, mid: 1024, high: 1024 },
+  world: { low: 1024, mid: 1024, high: 1536 },
+  room: { low: 1024, mid: 1024, high: 1024 },
 };
 /** PCF softness (shadow.radius, in texels) per tier. */
 const SOFTNESS = { low: 1, mid: 2.5, high: 3 };
@@ -26,8 +26,7 @@ const SOFTNESS = { low: 1, mid: 2.5, high: 3 };
 export function enableShadows(renderer, tier = 'mid') {
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFShadowMap; // filtered + soft in r186 (PCFSoft was folded into it)
-  renderer.shadowMap.autoUpdate = !IS_MOBILE;
-  if (IS_MOBILE) renderer.shadowMap.needsUpdate = true;
+  renderer.shadowMap.autoUpdate = true;
   return true;
 }
 
@@ -208,7 +207,7 @@ export function setupSceneShadows(scene, opts = {}) {
       // biases tuned for voxel faces: normal offset ~1.5 texels kills acne on faces at grazing
       // sun angles; a tiny depth bias avoids peter-panning under thin blocks.
       const texel = Math.max(tx, ty);
-      sun.shadow.normalBias = IS_MOBILE ? Math.min(texel * 1.35, 0.032) : texel * 1.5;
+      sun.shadow.normalBias = texel * 1.5;
       sun.shadow.bias = -0.00025;
       ctl.texel = texel;
     }

@@ -109,8 +109,6 @@ class Game {
     this.maxPixelRatio = 1;
     this.sheetDirty = 2;
     this.sheetAnimUntil = 0;
-    this.forceShadow = true;
-    this.shadowTick = 0;
     this.governorFps = 0;
     this.renderCount = 0;
     this.shadowCount = 0;
@@ -355,7 +353,6 @@ class Game {
         this.lastInput = performance.now();
         this.lastFrameTs = 0;
         this.sheetDirty = 2;
-        this.forceShadow = true;
         this.frameTimes.length = 0;
         if (this.lastOrderAt && performance.now() - this.lastOrderAt < 10 * 60 * 1000) {
           this.lastOrderAt = 0;
@@ -387,7 +384,6 @@ class Game {
     this.viewW = w;
     this.viewH = h;
     this.sheetDirty = 2;
-    this.forceShadow = true;
   }
 
   /** True while driving, walking, in a cutscene, celebrating, or recently interacted (used by sw-register on mobile). */
@@ -447,19 +443,7 @@ class Game {
     this.rig.update(dt);
     // world: the sun's shadow covers exactly what the camera sees (texel-snapped); rooms: fitted once
     if (this.mode === 'world') this.nightShadow?.update(dt, t); else this.nightShadow?.sleep();
-
-    // Smart mobile shadow updates: every frame while active (zero self-shadow lag on Maya), ~4Hz while idle, instant on forceShadow.
-    if (this.shadowsOn && IS_MOBILE) {
-      if (this.forceShadow || !idle) {
-        this.renderer.shadowMap.needsUpdate = true;
-        this.forceShadow = false;
-        this.shadowTick = 0;
-      } else if (++this.shadowTick >= 5) {
-        this.renderer.shadowMap.needsUpdate = true;
-        this.shadowTick = 0;
-      }
-    }
-    if (this.mode === 'world' && (!IS_MOBILE || this.renderer.shadowMap.needsUpdate)) this.worldShadow?.fitCamera?.(this.camera);
+    if (this.mode === 'world') this.worldShadow?.fitCamera?.(this.camera);
 
     if (this.heroLight && this.mode === 'world') {
       const p = this.mayaOut() ? this.maya.root.getWorldPosition(this.tmp2) : this.car.root.position;
@@ -473,7 +457,7 @@ class Game {
     this.music?.update(!!this.ui.dialogOpen);
     this.governor(dt);
     this.frameN = (this.frameN || 0) + 1;
-    if (this.shadowsOn && (this.renderer.shadowMap.autoUpdate || this.renderer.shadowMap.needsUpdate)) this.shadowCount++;
+    if (this.shadowsOn) this.shadowCount++;
     this.renderCount++;
     this.renderer.render(this.scene, this.camera);
     this.idleCheck();
@@ -623,7 +607,6 @@ class Game {
     }
     d.grade(this.gradeEl, { indoor: this.mode === 'room', cinematic: this.rig?.cinematic ? 1 : 0 });
     this.sheetDirty = 2;
-    this.forceShadow = true;
   }
 
   updateOverlay() {
@@ -723,7 +706,6 @@ class Game {
     this.reacting = true;
     this.sheetAnimUntil = Math.max(this.sheetAnimUntil, performance.now() + 2600);
     this.sheetDirty = 2;
-    this.forceShadow = true;
     call(this.maya, 'setFace', face, 2.2);
     const fc = call(this.maya, 'faceCanvas', face);
     if (fc) this.ui.showBubble(fc, 1800);
@@ -905,14 +887,12 @@ class Game {
     this.ui.setDockCurrent(room.id);
     this.setRoomLabels();
     this.sheetDirty = 2;
-    this.forceShadow = true;
   }
 
   async enterPlace(id, { fast = false, push = true } = {}) {
     if (this.busy) return;
     this.busy = true;
     this.sheetDirty = 2;
-    this.forceShadow = true;
     this.ui.hideCard();
     this.ui.hideTip();
     this.ui.cinema(true);
@@ -963,7 +943,6 @@ class Game {
     if (this.busy || this.mode !== 'room') return;
     this.busy = true;
     this.sheetDirty = 2;
-    this.forceShadow = true;
     if (this.ui.sheetOpen) this.closeSheet(false);
     this.ui.hideDialog();
     this.ui.cinema(true);
@@ -1227,7 +1206,6 @@ class Game {
     window.MayaSite?.prepareLinks(document);
     this.ui.openSheet({ title, stationIds: ids });
     this.sheetDirty = 2;
-    this.forceShadow = true;
     call(this.audio, 'play', 'page');
     if (replaceHistory) history.replaceState({ mw: 'sheet' }, '', `#${hashId}`);
     else history.pushState({ mw: 'sheet' }, '', `#${hashId}`);
@@ -1251,7 +1229,6 @@ class Game {
     this.lastInput = performance.now();
     this.lastFrameTs = 0;
     this.sheetDirty = 2;
-    this.forceShadow = true;
     this.frameTimes.length = 0;
     this.rig.release();
     this.faceTarget = null;
@@ -1321,7 +1298,6 @@ class Game {
     this.lastOrderAt = performance.now();
     this.sheetAnimUntil = Math.max(this.sheetAnimUntil, performance.now() + 2600);
     this.sheetDirty = 2;
-    this.forceShadow = true;
     call(this.audio, 'play', 'cheer');
     call(this.maya, 'setFace', 'star', 3.0);
     call(this.maya, 'emote', 'cheer');
@@ -1370,7 +1346,6 @@ class Game {
     const name = typeof reader === 'string' ? reader.trim() : (reader?.name || '').trim();
     this.sheetAnimUntil = Math.max(this.sheetAnimUntil, performance.now() + 2600);
     this.sheetDirty = 2;
-    this.forceShadow = true;
     call(this.audio, 'play', 'sparkle');
     call(this.maya, 'setFace', 'happy', 3.0);
     call(this.maya, 'emote', 'cheer');
@@ -1413,7 +1388,6 @@ class Game {
         this.lastInput = performance.now();
         this.lastFrameTs = 0;
         this.sheetDirty = 2;
-        this.forceShadow = true;
         this.frameTimes.length = 0;
         if (this.readerPushed) {
           this.readerPushed = false;
@@ -1436,7 +1410,6 @@ class Game {
       this.lastInput = performance.now();
       this.lastFrameTs = 0;
       this.sheetDirty = 2;
-      this.forceShadow = true;
       console.error('ebook reader', err);
     }
   }
@@ -1445,7 +1418,6 @@ class Game {
     this.lastOrderAt = performance.now();
     this.sheetAnimUntil = Math.max(this.sheetAnimUntil, performance.now() + 2600);
     this.sheetDirty = 2;
-    this.forceShadow = true;
     call(this.audio, 'play', 'cheer');
     const p = this.maya.root.getWorldPosition(new THREE.Vector3());
     this.fx.burst('heart', p.setY(p.y + 1.4), { count: 10 });
