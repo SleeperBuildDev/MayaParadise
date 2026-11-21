@@ -38,13 +38,13 @@ for (const m of tplMsgs) {
 }
 
 const scriptMsgs = [
-  'မင်္ဂလာပါ မာရာ၊ The Short Script (50,000 Ks) လေး အပ်ချင်လို့ပါရှင့်။',
-  'မင်္ဂလာပါ မာရာ၊ The Standard Script (၃ မိနစ် — 60,000 Ks) လေး အပ်ချင်လို့ပါရှင့်။',
-  'မင်္ဂလာပါ မာရာ၊ Long Form Script (၆ မိနစ် — 120,000 Ks) လေး အပ်ချင်လို့ပါရှင့်။',
-  'မင်္ဂလာပါ မာရာ၊ Business System (Lite Package — 150,000 Ks) လေး စိတ်ဝင်စားလို့ပါရှင့်။',
-  'မင်္ဂလာပါ မာရာ၊ Business System (Standard Package — 300,000 Ks) လေး စိတ်ဝင်စားလို့ပါရှင့်။',
-  'မင်္ဂလာပါ မာရာ၊ Business System (Plus Package — 400,000 Ks) လေး စိတ်ဝင်စားလို့ပါရှင့်။',
-  'မင်္ဂလာပါ မာရာ၊ Customized Script Package လေး သီးသန့် စီစဥ်ချင်လို့ပါရှင့်။',
+  'မင်္ဂလာပါ မာရာ၊ The Short Script (50,000 Ks) လေး အပ်ချင်လို့ပါ။',
+  'မင်္ဂလာပါ မာရာ၊ The Standard Script (၃ မိနစ် — 60,000 Ks) လေး အပ်ချင်လို့ပါ။',
+  'မင်္ဂလာပါ မာရာ၊ Long Form Script (၆ မိနစ် — 120,000 Ks) လေး အပ်ချင်လို့ပါ။',
+  'မင်္ဂလာပါ မာရာ၊ Business System (Lite Package — 150,000 Ks) လေး စိတ်ဝင်စားလို့ပါ။',
+  'မင်္ဂလာပါ မာရာ၊ Business System (Standard Package — 300,000 Ks) လေး စိတ်ဝင်စားလို့ပါ။',
+  'မင်္ဂလာပါ မာရာ၊ Business System (Plus Package — 400,000 Ks) လေး စိတ်ဝင်စားလို့ပါ။',
+  'မင်္ဂလာပါ မာရာ၊ Customized Script Package လေး သီးသန့် စီစဥ်ချင်လို့ပါ။',
 ];
 for (const m of scriptMsgs) {
   const tg = new RegExp(`href="https://t\\.me/Ms_MayaOfficial"[^>]*data-msg="${esc(m)}"`);
@@ -55,8 +55,14 @@ for (const m of scriptMsgs) {
   ok(vb.test(html), `Viber script link: ${m}`);
 }
 
-// Post Office Viber has pre-typed message
-ok(/id="ct-viber"[\s\S]*?data-viber="959762137278"[^>]*data-msg="မင်္ဂလာပါ မာရာ၊ writermaya\.com ကနေ ဆက်သွယ်တာပါရှင့်။"/.test(html), 'Post Office Viber pre-typed link');
+// Post Office Viber has pre-typed gender-neutral message
+ok(/id="ct-viber"[\s\S]*?data-viber="959762137278"[^>]*data-msg="မင်္ဂလာပါ မာရာ၊ writermaya\.com ကနေ ဆက်သွယ်တာပါ။"/.test(html), 'Post Office Viber pre-typed link');
+
+// All customer-sent pre-typed messages (data-msg & data-dur-msg) must be 100% gender-neutral Burmese
+const GENDERED_RE = /ရှင့်|(?<!လုပ်ငန်း)ရှင်|ခင်ဗျာ|ဗျာ|ကျွန်တော်|ကျွန်မ/;
+const customerMsgs = [...html.matchAll(/data-(?:dur-)?msg="([^"]*)"/g)].map((m) => m[1]);
+const genderedHits = customerMsgs.filter((m) => GENDERED_RE.test(m));
+ok(customerMsgs.length > 0 && genderedHits.length === 0, `all ${customerMsgs.length} customer pre-typed messages are gender-neutral${genderedHits.length ? ' (found: ' + genderedHits.join(' | ') + ')' : ''}`);
 
 // 3. Profiles & no legacy Google Form
 ok(!has('forms.gle'), 'legacy Google Form removed from index.html');

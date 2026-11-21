@@ -269,7 +269,7 @@ function resolveContractTopicLabel(topicId) {
 
 function buildPretypedBookingMessage(b) {
   const lines = [
-    `မင်္ဂလာပါ မာရာ၊ writermaya.com မှာ ဘွတ်ကင်တင်ထားပါတယ်ရှင့်။`,
+    `မင်္ဂလာပါ မာရာ၊ writermaya.com မှာ ဘွတ်ကင်တင်ပြီးပါပြီ။`,
     `Booking ID: ${b.bookingId}`,
     `အမည်: ${b.name}`,
     `အကြောင်းအရာ: ${b.topicLabel}`,
