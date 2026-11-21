@@ -581,7 +581,7 @@ if (flags.core) {
   const j = JSON.parse(readFileSync(resolve(flags.core), 'utf8'));
   const urls = (Array.isArray(j) ? j : j.core || []).map((s) => String(s).replace(/^\.?\//, ''));
   core = urls.map((u) => u.split('?')[0]).filter(exists);
-  for (const extra of ['css/ebook.css', 'js/ebook/store.js', 'js/ebook/firebase-config.js', 'js/ebook/sample-data.js']) {
+  for (const extra of ['css/ebook.css', 'css/consult.css', 'js/ebook/store.js', 'js/ebook/firebase-config.js', 'js/ebook/sample-data.js']) {
     if (exists(extra) && !core.includes(extra)) core.push(extra);
   }
   coreSource = 'from ' + flags.core;

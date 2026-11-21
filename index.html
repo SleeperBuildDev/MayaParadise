@@ -33,6 +33,7 @@
 <link rel="preload" href="fonts/noto-sans-myanmar-700.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="css/site.css">
 <link rel="stylesheet" href="css/ebook.css">
+<link rel="stylesheet" href="css/consult.css">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -67,10 +68,12 @@
         { "@type": "Offer", "name": "Script Writing Templates For Short Videos", "image": "https://writermaya.com/img/tpl-short.webp", "price": "50000", "priceCurrency": "MMK" },
         { "@type": "Offer", "name": "Script Writing Templates For Creators", "image": "https://writermaya.com/img/tpl-creator.webp", "price": "50000", "priceCurrency": "MMK" },
         { "@type": "Offer", "name": "Script Writing Templates For Business Use", "image": "https://writermaya.com/img/tpl-business.webp", "price": "80000", "priceCurrency": "MMK" },
-        { "@type": "Offer", "name": "The Short Script (1-2 mins)", "price": "50000", "priceCurrency": "MMK" },
-        { "@type": "Offer", "name": "Script Writing Basic Package", "price": "280000", "priceCurrency": "MMK" },
-        { "@type": "Offer", "name": "Script Writing Advanced Package", "price": "750000", "priceCurrency": "MMK" },
-        { "@type": "Offer", "name": "Script Writing Master Package", "price": "1500000", "priceCurrency": "MMK" }
+        { "@type": "Offer", "name": "The Short Script (30s–1.5+ min)", "price": "50000", "priceCurrency": "MMK" },
+        { "@type": "Offer", "name": "The Standard Script (3–5 min, per 1.5 min)", "price": "30000", "priceCurrency": "MMK" },
+        { "@type": "Offer", "name": "Long Form Script (6+ min, per 1.5 min)", "price": "30000", "priceCurrency": "MMK" },
+        { "@type": "Offer", "name": "Business Script & Posting System – Lite", "price": "150000", "priceCurrency": "MMK" },
+        { "@type": "Offer", "name": "Business Script & Posting System – Standard", "price": "300000", "priceCurrency": "MMK" },
+        { "@type": "Offer", "name": "Business Script & Posting System – Plus", "price": "400000", "priceCurrency": "MMK" }
       ]
     }
   ]
@@ -152,13 +155,13 @@
       <li><a href="#tpl-short">Script Writing Templates For Short Videos</a><b>50,000 Ks</b></li>
       <li><a href="#tpl-creator">Script Writing Templates For Creators</a><b>50,000 Ks</b></li>
       <li><a href="#tpl-business">Script Writing Templates For Business Use</a><b>80,000 Ks</b></li>
-      <li><a href="#scr-short">The Short Script <small>(<span lang="my">၁–၂ မိနစ်</span><span lang="en">1–2 mins</span>)</small></a><b>50,000 MMK / Script</b></li>
-      <li><a href="#scr-standard">The Standard Script <small>(<span lang="my">၃–၅ မိနစ်</span><span lang="en">3–5 mins</span>)</small></a><b>30,000 MMK / <span lang="my">မိနစ်</span><span lang="en">min</span></b></li>
-      <li><a href="#scr-long">Long Form Script <small>(<span lang="my">၆ မိနစ်အထက်</span><span lang="en">6 mins +</span>)</small></a><b>20,000 MMK / <span lang="my">မိနစ်</span><span lang="en">min</span></b></li>
-      <li><a href="#scr-bundles">Script Basic · Advanced · Master</a><b>280,000 · 750,000 · 1,500,000 MMK</b></li>
+      <li><a href="#scr-short">The Short Script <small>(<span lang="my">၃၀ စက္ကန့် – ၁.၅+ မိနစ်</span><span lang="en">30s – 1.5+ min</span>)</small></a><b>50,000 Ks</b></li>
+      <li><a href="#scr-standard">The Standard Script <small>(<span lang="my">၃ – ၅ မိနစ်</span><span lang="en">3–5 mins</span>)</small></a><b>30,000 Ks / <span lang="my">၁.၅ မိနစ်</span><span lang="en">1.5 min</span></b></li>
+      <li><a href="#scr-long">Long Form Script <small>(<span lang="my">၆ မိနစ်အထက်</span><span lang="en">6+ mins</span>)</small></a><b>30,000 Ks / <span lang="my">၁.၅ မိနစ်</span><span lang="en">1.5 min</span></b></li>
+      <li><a href="#scr-bundles">Business System (Lite · Standard · Plus)</a><b>150,000 · 300,000 · 400,000 Ks</b></li>
       <li><a href="#eb-preview"><span lang="my">“အမှန်မြင်ခြင်း” E-Book — အခန်း (၁) မြည်းစမ်းဖတ်ရန်</span><span lang="en">Reality Check E-Book — Free Chapter 1</span></a><b><span lang="my">အခမဲ့</span><span lang="en">Free</span></b></li>
       <li><a href="#eb-buy"><span lang="my">“အမှန်မြင်ခြင်း” E-Book — အခန်း ၂၃ ခန်း အပြည့်အစုံ</span><span lang="en">Reality Check E-Book — Full 23 Chapters</span></a><b data-eb-price>15,000 MMK</b></li>
-      <li><a href="#scr-consult">Script Writing Consultation</a><b><span lang="my">Google Form ဖြင့် ဘွတ်ကင်</span><span lang="en">Book via Google Form</span></b></li>
+      <li><a href="#scr-consult">Script Writing Consultation</a><b><span lang="my">Website မှာ တိုက်ရိုက် ဘွတ်ကင်</span><span lang="en">Book directly on site</span></b></li>
     </ul>
   </section>
 
@@ -194,7 +197,7 @@
       <h3><span lang="my">Order တင်နည်း</span><span lang="en">How ordering works</span></h3>
       <ol class="steps">
         <li><span lang="my">ကြိုက်နှစ်သက်တဲ့ ဝန်ဆောင်မှုကို ရွေးပါ။</span><span lang="en">Choose a service.</span></li>
-        <li><span lang="my">Telegram (သို့) Messenger ခလုတ်ကို နှိပ်ပါ — ပို့ရမယ့်စာကို အသင့်ရေးပေးထားပါတယ်။</span><span lang="en">Tap Telegram or Messenger — your message is already written.</span></li>
+        <li><span lang="my">Telegram၊ Messenger (သို့) Viber ခလုတ်ကို နှိပ်ပါ — ပို့ရမယ့်စာကို အသင့်ရေးပေးထားပါတယ်။</span><span lang="en">Tap Telegram, Messenger or Viber — your message is already written.</span></li>
         <li><span lang="my">မာရာက ငွေပေးချေမှုနဲ့ အသေးစိတ်ကို ပြန်ဖြေပေးပါမယ်။</span><span lang="en">Maya replies with the payment details.</span></li>
         <li><span lang="my">သင့်အတွက် စိတ်တိုင်းကျ ရေးပေးပါမယ်ရှင့်။</span><span lang="en">She writes it for you.</span></li>
       </ol>
@@ -245,71 +248,152 @@
   </section>
 
   <!-- 3. SCRIPTS -->
-  <section id="scripts" class="place" data-place="scripts" data-from="50,000 MMK">
+  <section id="scripts" class="place" data-place="scripts" data-from="50,000 Ks">
     <h2><span lang="my">Script စတူဒီယို</span><span lang="en">Script Studio</span></h2>
-    <p class="lead"><span lang="my">Script ရေးပေးခြင်း ဝန်ဆောင်မှု (Script Writing Service)</span><span lang="en">Script Writing Service</span></p>
+    <p class="lead"><span lang="my">Script ရေးပေးခြင်း ဝန်ဆောင်မှုနှင့် Business Script &amp; Posting System များ</span><span lang="en">Script Writing Service &amp; Business Script Systems</span></p>
 
     <article class="station product" id="scr-short" data-station="scr-short">
       <h3>The Short Script</h3>
-      <p><span lang="my">၁ – ၂ မိနစ်ကြာ Video အတွက် Script</span><span lang="en">For a 1–2 minute video</span></p>
-      <p class="price">50,000 MMK <small>/ Script</small></p>
-      <div class="actions">
-        <a class="btn tg order" href="https://t.me/Ms_Mayaofficial" data-msg="Hi, Script Writing Service လေးအပ်ချင်လို့ပါ" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-plane"/></svg><span lang="my">Telegram မှ အပ်မယ်</span><span lang="en">Order on Telegram</span></a>
-        <a class="btn ms order" href="https://m.me/MsMayaofficial" data-msg="Hi, Script Writing Service လေးအပ်ချင်လို့ပါ" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-chat"/></svg><span lang="my">Messenger မှ အပ်မယ်</span><span lang="en">Order on Messenger</span></a>
+      <p><span lang="my">စက္ကန့် ၃၀ မှ ၁ မိနစ်ခွဲကျော်အထိ ကြာသော Video များ (TikTok · Reels · Shorts) အတွက် Hook ကောင်းကောင်းနဲ့ ထိရောက်တဲ့ Script။</span><span lang="en">For 30 sec – 1.5+ min videos (TikTok · Reels · Shorts) — crisp hooks and scroll-stopping flow.</span></p>
+      <p class="price">50,000 Ks <small>/ Script</small></p>
+      <div class="actions tri">
+        <a class="btn tg order" href="https://t.me/Ms_MayaOfficial" data-msg="မင်္ဂလာပါ မာရာ၊ The Short Script (50,000 Ks) လေး အပ်ချင်လို့ပါရှင့်။" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-plane"/></svg><span lang="my">Telegram</span><span lang="en">Telegram</span></a>
+        <a class="btn ms order" href="https://m.me/MsMayaofficial" data-msg="မင်္ဂလာပါ မာရာ၊ The Short Script (50,000 Ks) လေး အပ်ချင်လို့ပါရှင့်။" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-chat"/></svg><span lang="my">Messenger</span><span lang="en">Messenger</span></a>
+        <a class="btn vb order" href="https://msng.link/vi/959762137278" data-viber="959762137278" data-msg="မင်္ဂလာပါ မာရာ၊ The Short Script (50,000 Ks) လေး အပ်ချင်လို့ပါရှင့်။" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-phone"/></svg><span lang="my">Viber</span><span lang="en">Viber</span></a>
       </div>
+      <p class="custom-note"><span lang="my">✦ Script အများကြီး စုအပ်ချင်ရင် <button type="button" class="link-btn" data-consult-topic="custom_package">Customized Package သီးသန့် စီစဥ်ပေးပါတယ် →</button></span><span lang="en">✦ Need a multi-script plan? <button type="button" class="link-btn" data-consult-topic="custom_package">Request a Customized Package →</button></span></p>
     </article>
 
     <article class="station product" id="scr-standard" data-station="scr-standard">
       <h3>The Standard Script</h3>
-      <p><span lang="my">၃ – ၅ မိနစ်ကြာ Video အတွက် Script</span><span lang="en">For a 3–5 minute video</span></p>
-      <p class="price">30,000 MMK <small>/ <span lang="my">မိနစ်</span><span lang="en">min</span></small></p>
-      <div class="actions">
-        <a class="btn tg order" href="https://t.me/Ms_Mayaofficial" data-msg="Hi, Script Writing Service လေးအပ်ချင်လို့ပါ" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-plane"/></svg><span lang="my">Telegram မှ အပ်မယ်</span><span lang="en">Order on Telegram</span></a>
-        <a class="btn ms order" href="https://m.me/MsMayaofficial" data-msg="Hi, Script Writing Service လေးအပ်ချင်လို့ပါ" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-chat"/></svg><span lang="my">Messenger မှ အပ်မယ်</span><span lang="en">Order on Messenger</span></a>
+      <p><span lang="my">၃ – ၅ မိနစ်ကြာ Video အတွက် အချက်အလက်စုံလင်ပြီး ကြည့်ရှုသူ စိတ်ဝင်စားစေမယ့် Script။</span><span lang="en">For 3–5 minute videos — structured storytelling that holds attention start to finish.</span></p>
+      <p class="price">30,000 Ks <small>/ <span lang="my">၁.၅ မိနစ်</span><span lang="en">1.5 min</span></small></p>
+      <div class="dur-box">
+        <p class="dur-label"><span lang="my">ကြာချိန်ရွေးပြီး ခန့်မှန်းဈေး ကြည့်ပါ</span><span lang="en">Pick a length to estimate &amp; prefill your chat</span></p>
+        <div class="dur-picker" role="group" aria-label="Standard Script ကြာချိန် / Duration">
+          <button type="button" class="dur-pill" aria-pressed="true" data-dur-price="60,000 Ks" data-dur-label-my="၃ မိနစ်" data-dur-label-en="3m" data-dur-msg="မင်္ဂလာပါ မာရာ၊ The Standard Script (၃ မိနစ် — 60,000 Ks) လေး အပ်ချင်လို့ပါရှင့်။"><span class="dur-t"><span lang="my">၃ မိနစ်</span><span lang="en">3m</span></span><span class="dur-p">60,000 Ks</span></button>
+          <button type="button" class="dur-pill" aria-pressed="false" data-dur-price="90,000 Ks" data-dur-label-my="၄.၅ မိနစ်" data-dur-label-en="4.5m" data-dur-msg="မင်္ဂလာပါ မာရာ၊ The Standard Script (၄.၅ မိနစ် — 90,000 Ks) လေး အပ်ချင်လို့ပါရှင့်။"><span class="dur-t"><span lang="my">၄.၅ မိနစ်</span><span lang="en">4.5m</span></span><span class="dur-p">90,000 Ks</span></button>
+          <button type="button" class="dur-pill" aria-pressed="false" data-dur-price="120,000 Ks" data-dur-label-my="၆ မိနစ်" data-dur-label-en="6m" data-dur-msg="မင်္ဂလာပါ မာရာ၊ The Standard Script (၆ မိနစ် — 120,000 Ks) လေး အပ်ချင်လို့ပါရှင့်။"><span class="dur-t"><span lang="my">၆ မိနစ်</span><span lang="en">6m</span></span><span class="dur-p">120,000 Ks</span></button>
+        </div>
+        <div class="dur-readout"><span><span lang="my">ခန့်မှန်းကျသင့်ငွေ (<span data-est-my>၃ မိနစ်</span>)</span><span lang="en">Estimated (<span data-est-en>3m</span>)</span></span><b data-est-total>60,000 Ks</b></div>
       </div>
+      <div class="actions tri">
+        <a class="btn tg order" href="https://t.me/Ms_MayaOfficial" data-msg="မင်္ဂလာပါ မာရာ၊ The Standard Script (၃ မိနစ် — 60,000 Ks) လေး အပ်ချင်လို့ပါရှင့်။" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-plane"/></svg><span lang="my">Telegram</span><span lang="en">Telegram</span></a>
+        <a class="btn ms order" href="https://m.me/MsMayaofficial" data-msg="မင်္ဂလာပါ မာရာ၊ The Standard Script (၃ မိနစ် — 60,000 Ks) လေး အပ်ချင်လို့ပါရှင့်။" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-chat"/></svg><span lang="my">Messenger</span><span lang="en">Messenger</span></a>
+        <a class="btn vb order" href="https://msng.link/vi/959762137278" data-viber="959762137278" data-msg="မင်္ဂလာပါ မာရာ၊ The Standard Script (၃ မိနစ် — 60,000 Ks) လေး အပ်ချင်လို့ပါရှင့်။" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-phone"/></svg><span lang="my">Viber</span><span lang="en">Viber</span></a>
+      </div>
+      <p class="custom-note"><span lang="my">✦ Script အများကြီး စုအပ်ချင်ရင် <button type="button" class="link-btn" data-consult-topic="custom_package">Customized Package Form မှာ တောင်းဆိုမယ် →</button></span><span lang="en">✦ Ordering a series? <button type="button" class="link-btn" data-consult-topic="custom_package">Request Customized Package in Form →</button></span></p>
     </article>
 
     <article class="station product" id="scr-long" data-station="scr-long">
       <h3>Long Form Script</h3>
-      <p><span lang="my">၆ မိနစ်နှင့်အထက် ကြာသော Video အတွက် Script</span><span lang="en">For videos of 6 minutes or more</span></p>
-      <p class="price">20,000 MMK <small>/ <span lang="my">မိနစ်</span><span lang="en">min</span></small></p>
-      <div class="actions">
-        <a class="btn tg order" href="https://t.me/Ms_Mayaofficial" data-msg="Hi, Script Writing Service လေးအပ်ချင်လို့ပါ" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-plane"/></svg><span lang="my">Telegram မှ အပ်မယ်</span><span lang="en">Order on Telegram</span></a>
-        <a class="btn ms order" href="https://m.me/MsMayaofficial" data-msg="Hi, Script Writing Service လေးအပ်ချင်လို့ပါ" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-chat"/></svg><span lang="my">Messenger မှ အပ်မယ်</span><span lang="en">Order on Messenger</span></a>
+      <p><span lang="my">၆ မိနစ်နှင့်အထက် ကြာသော YouTube / Documentary / Brand Story Video များအတွက် နက်နက်ရှိုင်းရှိုင်း ရေးပေးတဲ့ Script။</span><span lang="en">For 6+ minute YouTube, documentary, or brand story videos — same transparent 1.5-min rate.</span></p>
+      <p class="price">30,000 Ks <small>/ <span lang="my">၁.၅ မိနစ်</span><span lang="en">1.5 min</span></small></p>
+      <div class="dur-box">
+        <p class="dur-label"><span lang="my">ကြာချိန်ရွေးပြီး ခန့်မှန်းဈေး ကြည့်ပါ</span><span lang="en">Pick a length to estimate &amp; prefill your chat</span></p>
+        <div class="dur-picker" role="group" aria-label="Long Form Script ကြာချိန် / Duration">
+          <button type="button" class="dur-pill" aria-pressed="true" data-dur-price="120,000 Ks" data-dur-label-my="၆ မိနစ်" data-dur-label-en="6m" data-dur-msg="မင်္ဂလာပါ မာရာ၊ Long Form Script (၆ မိနစ် — 120,000 Ks) လေး အပ်ချင်လို့ပါရှင့်။"><span class="dur-t"><span lang="my">၆ မိနစ်</span><span lang="en">6m</span></span><span class="dur-p">120,000 Ks</span></button>
+          <button type="button" class="dur-pill" aria-pressed="false" data-dur-price="150,000 Ks" data-dur-label-my="၇.၅ မိနစ်" data-dur-label-en="7.5m" data-dur-msg="မင်္ဂလာပါ မာရာ၊ Long Form Script (၇.၅ မိနစ် — 150,000 Ks) လေး အပ်ချင်လို့ပါရှင့်။"><span class="dur-t"><span lang="my">၇.၅ မိနစ်</span><span lang="en">7.5m</span></span><span class="dur-p">150,000 Ks</span></button>
+          <button type="button" class="dur-pill" aria-pressed="false" data-dur-price="180,000 Ks" data-dur-label-my="၉ မိနစ်" data-dur-label-en="9m" data-dur-msg="မင်္ဂလာပါ မာရာ၊ Long Form Script (၉ မိနစ် — 180,000 Ks) လေး အပ်ချင်လို့ပါရှင့်။"><span class="dur-t"><span lang="my">၉ မိနစ်</span><span lang="en">9m</span></span><span class="dur-p">180,000 Ks</span></button>
+          <button type="button" class="dur-pill" aria-pressed="false" data-dur-price="240,000 Ks" data-dur-label-my="၁၂ မိနစ်" data-dur-label-en="12m" data-dur-msg="မင်္ဂလာပါ မာရာ၊ Long Form Script (၁၂ မိနစ် — 240,000 Ks) လေး အပ်ချင်လို့ပါရှင့်။"><span class="dur-t"><span lang="my">၁၂ မိနစ်</span><span lang="en">12m</span></span><span class="dur-p">240,000 Ks</span></button>
+        </div>
+        <div class="dur-readout"><span><span lang="my">ခန့်မှန်းကျသင့်ငွေ (<span data-est-my>၆ မိနစ်</span>)</span><span lang="en">Estimated (<span data-est-en>6m</span>)</span></span><b data-est-total>120,000 Ks</b></div>
       </div>
+      <div class="actions tri">
+        <a class="btn tg order" href="https://t.me/Ms_MayaOfficial" data-msg="မင်္ဂလာပါ မာရာ၊ Long Form Script (၆ မိနစ် — 120,000 Ks) လေး အပ်ချင်လို့ပါရှင့်။" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-plane"/></svg><span lang="my">Telegram</span><span lang="en">Telegram</span></a>
+        <a class="btn ms order" href="https://m.me/MsMayaofficial" data-msg="မင်္ဂလာပါ မာရာ၊ Long Form Script (၆ မိနစ် — 120,000 Ks) လေး အပ်ချင်လို့ပါရှင့်။" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-chat"/></svg><span lang="my">Messenger</span><span lang="en">Messenger</span></a>
+        <a class="btn vb order" href="https://msng.link/vi/959762137278" data-viber="959762137278" data-msg="မင်္ဂလာပါ မာရာ၊ Long Form Script (၆ မိနစ် — 120,000 Ks) လေး အပ်ချင်လို့ပါရှင့်။" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-phone"/></svg><span lang="my">Viber</span><span lang="en">Viber</span></a>
+      </div>
+      <p class="custom-note"><span lang="my">✦ လစဉ် / အပုဒ်များစွာ စုအပ်ချင်ရင် <button type="button" class="link-btn" data-consult-topic="custom_package">Customized Package Form မှာ တောင်းဆိုမယ် →</button></span><span lang="en">✦ Planning ongoing episodes? <button type="button" class="link-btn" data-consult-topic="custom_package">Request Customized Package in Form →</button></span></p>
     </article>
 
     <article class="station product" id="scr-bundles" data-station="scr-bundles">
-      <h3><span lang="my">အစုလိုက် Package များ (ပိုသက်သာ)</span><span lang="en">Bundles (save more)</span></h3>
-      <div class="bundles">
-        <div class="bundle">
-          <h4>Basic</h4>
-          <ul><li><span lang="my">Short Script ၃ ပုဒ်</span><span lang="en">3 Short Scripts</span></li><li><span lang="my">Standard Script ၁ ပုဒ်</span><span lang="en">1 Standard Script</span></li></ul>
-          <p class="price">280,000 MMK</p><p class="save"><span lang="my">20,000 MMK သက်သာ</span><span lang="en">Save 20,000 MMK</span></p>
-          <a class="btn tg order" href="https://t.me/Ms_Mayaofficial" data-msg="Hi, Script Writing Service (Basic Package) လေးအပ်ချင်လို့ပါ" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-plane"/></svg><span lang="my">Basic အပ်မယ်</span><span lang="en">Order Basic</span></a>
+      <h3><span lang="my">Business Script &amp; Posting System များ</span><span lang="en">Business Script &amp; Posting System</span></h3>
+      <p class="tagline"><span lang="my">သင်တန်းတက်စရာ မလိုဘဲ သင့်လုပ်ငန်းအတွက် ထိရောက်တဲ့ Script တွေနဲ့ တင်ပုံတင်နည်း System ကို တစ်ခါတည်း ရယူနိုင်ပါပြီ။</span><span lang="en">Effective scripts and a ready-to-run posting system for your business — without taking a course.</span></p>
+      <div class="bundles sys-cards">
+        <div class="bundle sys-card">
+          <h4>Lite</h4>
+          <p class="sys-sub"><span lang="my">ကိုယ်တိုင် စရေးကြည့်ချင်သူ</span><span lang="en">For owners ready to start writing</span></p>
+          <div class="sys-price-wrap"><p class="sys-old"><s>200,000 Ks</s></p><p class="price">150,000 Ks</p></div>
+          <p class="save"><span lang="my">50,000 Ks သက်သာ</span><span lang="en">Save 50,000 Ks</span></p>
+          <ul class="sys-list">
+            <li><span lang="my">သင့်လုပ်ငန်းအသံနဲ့ ကိုက်ညီတဲ့ Custom AI Prompt</span><span lang="en">Custom business-tone AI Prompt</span></li>
+            <li><span lang="my">၁ လစာ Posting System အပြည့်အစုံ</span><span lang="en">1-month Posting System</span></li>
+            <li><span lang="my">လက်ဆောင် Script Template (၁) ခု</span><span lang="en">1 bonus Script Template</span></li>
+          </ul>
+          <div class="sys-actions">
+            <div class="sys-app-row">
+              <a class="btn tg order" href="https://t.me/Ms_MayaOfficial" data-msg="မင်္ဂလာပါ မာရာ၊ Business System (Lite Package — 150,000 Ks) လေး စိတ်ဝင်စားလို့ပါရှင့်။" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-plane"/></svg>Telegram</a>
+              <a class="btn ms order" href="https://m.me/MsMayaofficial" data-msg="မင်္ဂလာပါ မာရာ၊ Business System (Lite Package — 150,000 Ks) လေး စိတ်ဝင်စားလို့ပါရှင့်။" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-chat"/></svg>Messenger</a>
+              <a class="btn vb order" href="https://msng.link/vi/959762137278" data-viber="959762137278" data-msg="မင်္ဂလာပါ မာရာ၊ Business System (Lite Package — 150,000 Ks) လေး စိတ်ဝင်စားလို့ပါရှင့်။" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-phone"/></svg>Viber</a>
+            </div>
+            <button type="button" class="btn sys-form" data-consult-topic="system_lite"><span lang="my">Form မှာ ဘွတ်ကင်တင်မယ်</span><span lang="en">Book in Form</span></button>
+          </div>
         </div>
-        <div class="bundle">
-          <h4>Advanced</h4>
-          <ul><li><span lang="my">Short Script ၄ ပုဒ်</span><span lang="en">4 Short Scripts</span></li><li><span lang="my">Standard Script ၄ ပုဒ်</span><span lang="en">4 Standard Scripts</span></li></ul>
-          <p class="price">750,000 MMK</p><p class="save"><span lang="my">50,000 MMK သက်သာ</span><span lang="en">Save 50,000 MMK</span></p>
-          <a class="btn tg order" href="https://t.me/Ms_Mayaofficial" data-msg="Hi, Script Writing Service (Advanced Package) လေးအပ်ချင်လို့ပါ" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-plane"/></svg><span lang="my">Advanced အပ်မယ်</span><span lang="en">Order Advanced</span></a>
+
+        <div class="bundle sys-card featured sys-popular">
+          <span class="sys-badge"><span lang="my">★ လူအများဆုံး ရွေးတာ</span><span lang="en">★ Most Popular</span></span>
+          <h4>Standard</h4>
+          <p class="sys-sub"><span lang="my">ရေးပြီး စစ်ပေးမယ့်သူ လိုချင်သူ</span><span lang="en">Want Maya reviewing &amp; refining with you</span></p>
+          <div class="sys-price-wrap"><p class="sys-old"><s>380,000 Ks</s></p><p class="price">300,000 Ks</p></div>
+          <p class="save"><span lang="my">80,000 Ks သက်သာ</span><span lang="en">Save 80,000 Ks</span></p>
+          <ul class="sys-list">
+            <li><span lang="my">Lite ထဲက အချက်အားလုံး ပါဝင်</span><span lang="en">Everything included in Lite</span></li>
+            <li><span lang="my">မာရာနဲ့ အတူတူ Script (၁) ပုဒ် တွဲရေးပေးခြင်း</span><span lang="en">Co-write 1 Script with Maya</span></li>
+            <li><span lang="my">၁ လအတွင်း Feedback စစ်ပေးခြင်း (၄) ကြိမ်</span><span lang="en">4 Feedback rounds / 1 month</span></li>
+          </ul>
+          <div class="sys-actions">
+            <div class="sys-app-row">
+              <a class="btn tg order" href="https://t.me/Ms_MayaOfficial" data-msg="မင်္ဂလာပါ မာရာ၊ Business System (Standard Package — 300,000 Ks) လေး စိတ်ဝင်စားလို့ပါရှင့်။" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-plane"/></svg>Telegram</a>
+              <a class="btn ms order" href="https://m.me/MsMayaofficial" data-msg="မင်္ဂလာပါ မာရာ၊ Business System (Standard Package — 300,000 Ks) လေး စိတ်ဝင်စားလို့ပါရှင့်။" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-chat"/></svg>Messenger</a>
+              <a class="btn vb order" href="https://msng.link/vi/959762137278" data-viber="959762137278" data-msg="မင်္ဂလာပါ မာရာ၊ Business System (Standard Package — 300,000 Ks) လေး စိတ်ဝင်စားလို့ပါရှင့်။" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-phone"/></svg>Viber</a>
+            </div>
+            <button type="button" class="btn sys-form" data-consult-topic="system_standard"><span lang="my">Form မှာ ဘွတ်ကင်တင်မယ်</span><span lang="en">Book in Form</span></button>
+          </div>
         </div>
-        <div class="bundle featured">
-          <h4>Master</h4>
-          <ul><li><span lang="my">Short Script ၁၅ ပုဒ် + Long Script ၃ ပုဒ်</span><span lang="en">15 Short Scripts + 3 Long Scripts</span></li><li class="or"><span lang="my">(သို့မဟုတ်)</span><span lang="en">(or)</span></li><li><span lang="my">Standard Script ၁၅ ပုဒ် + Long Script ၁ ပုဒ်</span><span lang="en">15 Standard Scripts + 1 Long Script</span></li></ul>
-          <p class="price">1,500,000 MMK</p><p class="save"><span lang="my">120,000 MMK သက်သာ</span><span lang="en">Save 120,000 MMK</span></p>
-          <a class="btn tg order" href="https://t.me/Ms_Mayaofficial" data-msg="Hi, Script Writing Service (Master Package) လေးအပ်ချင်လို့ပါ" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-plane"/></svg><span lang="my">Master အပ်မယ်</span><span lang="en">Order Master</span></a>
+
+        <div class="bundle sys-card">
+          <h4>Plus</h4>
+          <p class="sys-sub"><span lang="my">၂ လလုံး အနားက ကူညီပေးစေချင်သူ</span><span lang="en">2 full months of close guidance</span></p>
+          <div class="sys-price-wrap"><p class="sys-old"><s>500,000 Ks</s></p><p class="price">400,000 Ks</p></div>
+          <p class="save"><span lang="my">100,000 Ks သက်သာ</span><span lang="en">Save 100,000 Ks</span></p>
+          <ul class="sys-list">
+            <li><span lang="my">Lite ထဲက အချက်အားလုံး ပါဝင်</span><span lang="en">Everything included in Lite</span></li>
+            <li><span lang="my">မာရာနဲ့ အတူတူ Script (၂) ပုဒ် တွဲရေးပေးခြင်း</span><span lang="en">Co-write 2 Scripts with Maya</span></li>
+            <li><span lang="my">၂ လအတွင်း Feedback စစ်ပေးခြင်း (၈) ကြိမ်</span><span lang="en">8 Feedback rounds / 2 months</span></li>
+          </ul>
+          <div class="sys-actions">
+            <div class="sys-app-row">
+              <a class="btn tg order" href="https://t.me/Ms_MayaOfficial" data-msg="မင်္ဂလာပါ မာရာ၊ Business System (Plus Package — 400,000 Ks) လေး စိတ်ဝင်စားလို့ပါရှင့်။" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-plane"/></svg>Telegram</a>
+              <a class="btn ms order" href="https://m.me/MsMayaofficial" data-msg="မင်္ဂလာပါ မာရာ၊ Business System (Plus Package — 400,000 Ks) လေး စိတ်ဝင်စားလို့ပါရှင့်။" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-chat"/></svg>Messenger</a>
+              <a class="btn vb order" href="https://msng.link/vi/959762137278" data-viber="959762137278" data-msg="မင်္ဂလာပါ မာရာ၊ Business System (Plus Package — 400,000 Ks) လေး စိတ်ဝင်စားလို့ပါရှင့်။" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-phone"/></svg>Viber</a>
+            </div>
+            <button type="button" class="btn sys-form" data-consult-topic="system_plus"><span lang="my">Form မှာ ဘွတ်ကင်တင်မယ်</span><span lang="en">Book in Form</span></button>
+          </div>
         </div>
       </div>
-      <div class="actions"><a class="btn ms order" href="https://m.me/MsMayaofficial" data-msg="Hi, Script Writing Service လေးအပ်ချင်လို့ပါ" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-chat"/></svg><span lang="my">Messenger မှ အပ်မယ်</span><span lang="en">Order on Messenger</span></a></div>
+
+      <div class="custom-callout">
+        <h4><span lang="my">✦ Customized Script Package</span><span lang="en">✦ Customized Script Package</span></h4>
+        <p><span lang="my">Script Package နဲ့ မရသေးပါဘူး — သင့်လုပ်ငန်းအတွက် Script အရေအတွက်အလိုက် သီးသန့်လိုချင်ရင် Customized Package စီစဥ်ပေးပါမယ်ရှင့်။</span><span lang="en">Need a custom bundle of scripts instead? Tell Maya your goals and she will tailor a Customized Script Package for you.</span></p>
+        <div class="actions tri">
+          <a class="btn tg order" href="https://t.me/Ms_MayaOfficial" data-msg="မင်္ဂလာပါ မာရာ၊ Customized Script Package လေး သီးသန့် စီစဥ်ချင်လို့ပါရှင့်။" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-plane"/></svg><span lang="my">Telegram</span><span lang="en">Telegram</span></a>
+          <a class="btn ms order" href="https://m.me/MsMayaofficial" data-msg="မင်္ဂလာပါ မာရာ၊ Customized Script Package လေး သီးသန့် စီစဥ်ချင်လို့ပါရှင့်။" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-chat"/></svg><span lang="my">Messenger</span><span lang="en">Messenger</span></a>
+          <a class="btn vb order" href="https://msng.link/vi/959762137278" data-viber="959762137278" data-msg="မင်္ဂလာပါ မာရာ၊ Customized Script Package လေး သီးသန့် စီစဥ်ချင်လို့ပါရှင့်။" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-phone"/></svg><span lang="my">Viber</span><span lang="en">Viber</span></a>
+          <button type="button" class="btn gold" data-consult-topic="custom_package"><span lang="my">Custom Package Form</span><span lang="en">Custom Package Form</span></button>
+        </div>
+      </div>
     </article>
 
     <article class="station" id="scr-consult" data-station="scr-consult">
-      <h3>Maya's Script Writing Consultation</h3>
-      <p><span lang="my">Script ရေးသားခြင်းအတွက် မာရာနဲ့ တိုက်ရိုက် ဆွေးနွေးတိုင်ပင်ချင်ရင် Google Form မှာ အချက်အလက်များ ဖြည့်ပြီး Order တင်နိုင်ပါတယ်။</span><span lang="en">To consult Maya directly about your script, fill in the Google Form to book.</span></p>
-      <div class="actions">
-        <a class="btn gold" href="https://forms.gle/5mXRhK4jtoYuCW5u8" target="_blank" rel="noopener" data-track="form"><span lang="my">Book Now — Google Form ဖြည့်မယ်</span><span lang="en">Book now — Google Form</span></a>
-        <a class="btn tg order" href="https://t.me/Ms_MayaOfficial" data-msg="Hi, Script Writing Consultation အကြောင်း မေးချင်လို့ပါ" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-plane"/></svg><span lang="my">Telegram မှာ မေးမယ်</span><span lang="en">Ask on Telegram</span></a>
+      <h3><span lang="my">မာရာ့ Script Consultation &amp; ဘွတ်ကင်</span><span lang="en">Maya's Script Consultation &amp; Booking</span></h3>
+      <p><span lang="my">Script ရေးသားခြင်းနှင့် Business System အတွက် မာရာနဲ့ တိုက်ရိုက် ဆွေးနွေးတိုင်ပင်ရန် အောက်မှာ အလွယ်တကူ ဘွတ်ကင်တင်နိုင်ပါပြီရှင့်။</span><span lang="en">Book a direct script consultation or request a Business System package right here on the website.</span></p>
+      <div class="consult-mount" data-consult-station="scr-consult">
+        <div class="actions tri">
+          <a class="btn tg order" href="https://t.me/Ms_MayaOfficial" data-msg="မင်္ဂလာပါ မာရာ၊ Script Writing Consultation အတွက် ဘွတ်ကင်တင်ချင်လို့ပါရှင့်။" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-plane"/></svg><span lang="my">Telegram မှာ မေးမယ်</span><span lang="en">Ask on Telegram</span></a>
+          <a class="btn ms order" href="https://m.me/MsMayaofficial" data-msg="မင်္ဂလာပါ မာရာ၊ Script Writing Consultation အတွက် ဘွတ်ကင်တင်ချင်လို့ပါရှင့်။" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-chat"/></svg><span lang="my">Messenger မှာ မေးမယ်</span><span lang="en">Ask on Messenger</span></a>
+          <a class="btn vb order" href="https://msng.link/vi/959762137278" data-viber="959762137278" data-msg="မင်္ဂလာပါ မာရာ၊ Script Writing Consultation အတွက် ဘွတ်ကင်တင်ချင်လို့ပါရှင့်။" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-phone"/></svg><span lang="my">Viber မှာ မေးမယ်</span><span lang="en">Ask on Viber</span></a>
+        </div>
       </div>
     </article>
   </section>
@@ -458,7 +542,7 @@
       <h3>Viber</h3>
       <p class="phone">+95 9 762 137 278</p>
       <div class="actions">
-        <a class="btn vb" href="https://msng.link/vi/959762137278" data-viber="959762137278" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-phone"/></svg><span lang="my">Viber မှာ စာပို့မယ်</span><span lang="en">Message on Viber</span></a>
+        <a class="btn vb order" href="https://msng.link/vi/959762137278" data-viber="959762137278" data-msg="မင်္ဂလာပါ မာရာ၊ writermaya.com ကနေ ဆက်သွယ်တာပါရှင့်။" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-phone"/></svg><span lang="my">Viber မှာ စာပို့မယ်</span><span lang="en">Message on Viber</span></a>
         <button class="btn ghost copy" type="button" data-copy="+959762137278"><svg aria-hidden="true"><use href="#i-copy"/></svg><span lang="my">နံပါတ် ကူးယူမယ်</span><span lang="en">Copy number</span></button>
       </div>
     </article>
@@ -533,15 +617,54 @@
 <script type="module" src="js/sw-register.js"></script>
 <script type="module">
 const EBOOK_HASH = /^#(content|ebook|eb-(preview|buy|read|chapters))$/;
+const CONSULT_HASH = /^#(scripts|scr-(short|standard|long|bundles|consult))$/;
 const sec = document.getElementById('content');
+const consultSec = document.getElementById('scr-consult');
 let mounted = false;
 let mounting = false;
 let cleanups = [];
+let consultMounted = false;
+let consultMounting = false;
+let consultCleanups = [];
+let consultModCache = null;
 
 function unmountClassicEbook() {
   for (const fn of cleanups) { try { fn(); } catch {} }
   cleanups = [];
   mounted = false;
+}
+
+function unmountClassicConsult() {
+  for (const fn of consultCleanups) { try { fn(); } catch {} }
+  consultCleanups = [];
+  consultMounted = false;
+}
+
+function unmountAllClassic() {
+  unmountClassicEbook();
+  unmountClassicConsult();
+}
+
+async function mountClassicConsult(initialTopic) {
+  if (!consultSec || document.body.classList.contains('playing')) return;
+  if (consultMounted) {
+    if (initialTopic) consultModCache?.selectConsultTopic?.(initialTopic);
+    return;
+  }
+  if (consultMounting) return;
+  consultMounting = true;
+  try {
+    const mod = consultModCache || (consultModCache = await import('./js/ebook/consult-ui.js'));
+    if (document.body.classList.contains('playing')) { consultMounting = false; return; }
+    const target = consultSec.querySelector('.consult-mount') || consultSec;
+    const fn = mod.mountConsultStation(target, { initialTopic: initialTopic || undefined });
+    if (typeof fn === 'function') consultCleanups.push(fn);
+    consultMounted = true;
+  } catch (err) {
+    console.warn('classic consult mount', err);
+  } finally {
+    consultMounting = false;
+  }
 }
 
 async function mountClassicEbook() {
@@ -603,9 +726,11 @@ async function mountClassicEbook() {
   }
 }
 
+if (sec || consultSec) {
+  document.addEventListener('mw:play', unmountAllClassic);
+  document.getElementById('play')?.addEventListener('click', unmountAllClassic);
+}
 if (sec) {
-  document.addEventListener('mw:play', unmountClassicEbook);
-  document.getElementById('play')?.addEventListener('click', unmountClassicEbook);
   if (EBOOK_HASH.test(location.hash)) mountClassicEbook();
   window.addEventListener('hashchange', () => {
     if (EBOOK_HASH.test(location.hash)) mountClassicEbook();
@@ -624,6 +749,41 @@ if (sec) {
     io.observe(sec);
   } else {
     mountClassicEbook();
+  }
+}
+if (consultSec) {
+  if (CONSULT_HASH.test(location.hash)) mountClassicConsult();
+  window.addEventListener('hashchange', () => {
+    if (CONSULT_HASH.test(location.hash)) mountClassicConsult();
+  });
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest('a[href]');
+    if (a && CONSULT_HASH.test(a.getAttribute('href') || '')) mountClassicConsult();
+  });
+  document.addEventListener('mw:consult-select', (e) => {
+    if (document.body.classList.contains('playing')) return;
+    const topic = e.detail && e.detail.topic;
+    consultSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    mountClassicConsult(topic);
+  });
+  document.addEventListener('mw:consult-booked', (e) => {
+    if (document.body.classList.contains('playing')) return;
+    const name = e.detail && e.detail.name ? String(e.detail.name).trim() : '';
+    window.MayaSite?.toast(
+      name ? `${name} ရေ! ဘွတ်ကင်တင်ပေးလို့ ကျေးဇူးပါရှင့် — မာရာ မကြာခင် ဆက်သွယ်ပေးမယ်နော်!` : 'ဘွတ်ကင်တင်ပေးလို့ ကျေးဇူးပါရှင့် — မာရာ မကြာခင် ဆက်သွယ်ပေးမယ်နော်!',
+      name ? `Thank you, ${name}! Maya will reach out soon!` : 'Booking confirmed! Maya will reach out soon!'
+    );
+  });
+  if ('IntersectionObserver' in window) {
+    const cio = new IntersectionObserver((entries) => {
+      if (entries.some((en) => en.isIntersecting)) {
+        cio.disconnect();
+        mountClassicConsult();
+      }
+    }, { rootMargin: '320px 0px' });
+    cio.observe(consultSec);
+  } else {
+    mountClassicConsult();
   }
 }
 </script>

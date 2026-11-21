@@ -38,10 +38,22 @@
     return base + '?text=' + encodeURIComponent(msg);
   }
   function prepareLinks(scope) {
-    var links = (scope || document).querySelectorAll('a.order[data-msg]');
-    for (var i = 0; i < links.length; i++) links[i].href = withText(links[i].getAttribute('href'), links[i].getAttribute('data-msg'));
-    var vib = (scope || document).querySelectorAll('a[data-viber]');
-    if (isMobile) for (var j = 0; j < vib.length; j++) vib[j].href = 'viber://chat?number=%2B' + vib[j].getAttribute('data-viber');
+    var rootScope = scope || document;
+    var links = rootScope.querySelectorAll('a.order[data-msg]');
+    for (var i = 0; i < links.length; i++) {
+      if (links[i].hasAttribute('data-viber')) continue;
+      links[i].href = withText(links[i].getAttribute('href'), links[i].getAttribute('data-msg'));
+    }
+    var vib = rootScope.querySelectorAll('a[data-viber]');
+    for (var j = 0; j < vib.length; j++) {
+      var num = vib[j].getAttribute('data-viber');
+      var msg = vib[j].getAttribute('data-msg');
+      if (isMobile) {
+        vib[j].href = 'viber://chat?number=%2B' + num + (msg ? '&draft=' + encodeURIComponent(msg) : '');
+      } else {
+        vib[j].href = 'https://msng.link/vi/' + num;
+      }
+    }
   }
   prepareLinks(document);
 
@@ -74,11 +86,48 @@
   }
 
   document.addEventListener('click', function (e) {
+    var pill = e.target.closest('.dur-pill[data-dur-msg]');
+    if (pill) {
+      var picker = pill.closest('.dur-picker');
+      if (picker) {
+        var all = picker.querySelectorAll('.dur-pill');
+        for (var k = 0; k < all.length; k++) all[k].setAttribute('aria-pressed', String(all[k] === pill));
+      }
+      var card = pill.closest('.station');
+      if (card) {
+        var est = card.querySelector('[data-est-total]');
+        if (est) {
+          est.textContent = pill.getAttribute('data-dur-price') || '';
+          est.classList.remove('pop');
+          void est.offsetWidth;
+          est.classList.add('pop');
+        }
+        var estMy = card.querySelector('[data-est-my]');
+        if (estMy) estMy.textContent = pill.getAttribute('data-dur-label-my') || '';
+        var estEn = card.querySelector('[data-est-en]');
+        if (estEn) estEn.textContent = pill.getAttribute('data-dur-label-en') || '';
+        var durMsg = pill.getAttribute('data-dur-msg');
+        var orderLinks = card.querySelectorAll('a.order[data-msg]');
+        for (var m = 0; m < orderLinks.length; m++) orderLinks[m].setAttribute('data-msg', durMsg);
+        prepareLinks(card);
+      }
+      return;
+    }
+    var topicBtn = e.target.closest('[data-consult-topic]');
+    if (topicBtn) {
+      e.preventDefault();
+      document.dispatchEvent(new CustomEvent('mw:consult-select', { detail: { topic: topicBtn.getAttribute('data-consult-topic') } }));
+      return;
+    }
     var a = e.target.closest('a.order[data-msg]');
     if (a) {
-      copyText(a.getAttribute('data-msg'));
+      var msg = a.getAttribute('data-msg');
+      copyText(msg);
+      var ch = (a.classList.contains('vb') || a.hasAttribute('data-viber'))
+        ? 'viber'
+        : a.classList.contains('tg') ? 'telegram' : 'messenger';
       toast('စာကို ကူးယူထားပြီးပါပြီ — မပေါ်ရင် Paste လုပ်ပေးပါနော်', 'Message copied — paste it if it is missing');
-      document.dispatchEvent(new CustomEvent('mw:order', { detail: { channel: a.classList.contains('tg') ? 'telegram' : 'messenger', msg: a.getAttribute('data-msg') } }));
+      document.dispatchEvent(new CustomEvent('mw:order', { detail: { channel: ch, msg: msg } }));
       return;
     }
     var c = e.target.closest('[data-copy]');

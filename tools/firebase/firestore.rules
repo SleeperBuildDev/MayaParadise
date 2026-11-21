@@ -86,6 +86,24 @@ rules_version = '2';
 //   - createdAt: timestamp (required, immutable by non-admin)
 //   - usedAt: timestamp|null (optional; non-admin must set to recent timestamp on claim)
 //
+// Collection: consultations
+// Document ID: {bookingId} (matches ^SC-[0-9]{6}-[A-Z0-9]{4,6}$, 14..16 chars; PII-bearing — admin read/update/delete only, public create)
+// Fields:
+//   - bookingId: string (required, immutable on update, must equal document {bookingId})
+//   - name: string (required, 1..60 chars) - client display name
+//   - contact: string (required, 3..120 chars) - Telegram/Messenger/Viber handle or phone
+//   - channel: string (required, 'telegram' | 'messenger' | 'viber' | 'phone') - preferred contact channel
+//   - topic: string (required, 'system_lite' | 'system_standard' | 'system_plus' | 'script_short' | 'script_standard' | 'script_long' | 'custom_package' | 'consultation')
+//   - topicLabel: string (required, 1..120 chars) - human-readable topic label
+//   - businessName: string (required, 0..100 chars) - business or channel name (may be empty)
+//   - preferredTime: string (required, 0..100 chars) - preferred consultation time (may be empty)
+//   - notes: string (required, 0..1200 chars) - client brief/notes (may be empty)
+//   - lang: string (required, 'my' | 'en') - UI language used on submission
+//   - status: string (required, 'new' | 'contacted' | 'confirmed' | 'done' | 'cancelled'; must be 'new' on create)
+//   - adminNote: string|null (optional, 0..1000 chars; must be omitted or '' on public create)
+//   - createdAt: timestamp (required, immutable on update; must equal request.time on create)
+//   - updatedAt: timestamp (required; must equal request.time on create)
+//
 // ===============================================================
 
 service cloud.firestore {
@@ -201,6 +219,14 @@ service cloud.firestore {
         code.size() >= 4 &&
         code.size() <= 32 &&
         code.matches('^[A-Za-z0-9_-]+$');
+    }
+
+    // Validate consultation booking ID format (SC-YYMMDD-XXXX..XXXXXX, 14..16 chars)
+    function isValidBookingId(id) {
+      return id is string &&
+        id.size() >= 14 &&
+        id.size() <= 16 &&
+        id.matches('^SC-[0-9]{6}-[A-Z0-9]{4,6}$');
     }
 
     // Verify that a reader's claimCode points to an unused admin-issued reclaim matching contactNorm.
@@ -403,6 +429,52 @@ service cloud.firestore {
         isValidNullableTimestamp('usedAt');
     }
 
+    // Validate complete consultations/{bookingId} schema on both create and update
+    function isValidConsultation(data, bookingId) {
+      return isValidBookingId(bookingId) &&
+        hasOnlyAllowedFields([
+          'bookingId', 'name', 'contact', 'channel', 'topic', 'topicLabel',
+          'businessName', 'preferredTime', 'notes', 'lang', 'status',
+          'adminNote', 'createdAt', 'updatedAt'
+        ]) &&
+        hasRequiredFields([
+          'bookingId', 'name', 'contact', 'channel', 'topic', 'topicLabel',
+          'businessName', 'preferredTime', 'notes', 'lang', 'status',
+          'createdAt', 'updatedAt'
+        ]) &&
+        data.bookingId is string && data.bookingId == bookingId &&
+        validStringLength('name', 1, 60) &&
+        validStringLength('contact', 3, 120) &&
+        data.channel is string &&
+        data.channel in ['telegram', 'messenger', 'viber', 'phone'] &&
+        data.topic is string &&
+        data.topic in [
+          'system_lite', 'system_standard', 'system_plus',
+          'script_short', 'script_standard', 'script_long',
+          'custom_package', 'consultation'
+        ] &&
+        validStringLength('topicLabel', 1, 120) &&
+        validStringLength('businessName', 0, 100) &&
+        validStringLength('preferredTime', 0, 100) &&
+        validStringLength('notes', 0, 1200) &&
+        data.lang is string &&
+        data.lang in ['my', 'en'] &&
+        data.status is string &&
+        data.status in ['new', 'contacted', 'confirmed', 'done', 'cancelled'] &&
+        isValidNullableString('adminNote', 0, 1000) &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    // Validate public consultation booking creation (exact serverTimestamp, status 'new', empty/absent adminNote)
+    function isValidConsultationCreate(data, bookingId) {
+      return isValidConsultation(data, bookingId) &&
+        data.status == 'new' &&
+        (!('adminNote' in data) || data.adminNote == '') &&
+        data.createdAt == request.time &&
+        data.updatedAt == request.time;
+    }
+
     // ===============================================================
     // Collection Rules
     // ===============================================================
@@ -503,7 +575,17 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
-    // 8. Default deny-all fallback for any other collection or subcollection
+    // 8. Script & service consultation bookings (PII-bearing) — public create only, strictly admin read/update/delete
+    match /consultations/{bookingId} {
+      allow get, list: if isAdmin();
+      allow create: if isValidConsultationCreate(request.resource.data, bookingId);
+      allow update: if isAdmin() &&
+        areImmutableFieldsUnchanged(['bookingId', 'createdAt']) &&
+        isValidConsultation(request.resource.data, bookingId);
+      allow delete: if isAdmin();
+    }
+
+    // 9. Default deny-all fallback for any other collection or subcollection
     match /{document=**} {
       allow read, write: if false;
     }

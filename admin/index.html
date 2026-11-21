@@ -191,10 +191,19 @@
         <span id="badge-pending" class="tab-pill" hidden>0</span>
       </button>
 
+      <button type="button" class="tab-btn" role="tab" data-tab="bookings" aria-selected="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 3h-1V1h-2v2H8V1H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2Zm0 16H5V9h14Zm0-12H5V5h14ZM7 11h5v5H7Z"/></svg>
+        <span class="tab-label">
+          <span lang="my">ဘွတ်ကင်</span>
+          <span lang="en">Bookings</span>
+        </span>
+        <span id="badge-bookings" class="tab-pill" hidden>0</span>
+      </button>
+
       <button type="button" class="tab-btn" role="tab" data-tab="readers" aria-selected="false">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3Zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3Zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5Zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5Z"/></svg>
         <span class="tab-label">
-          <span lang="my">စာဖတ်သူများ</span>
+          <span lang="my"><span class="label-full">စာဖတ်သူများ</span><span class="label-short">စာဖတ်သူ</span></span>
           <span lang="en">Readers</span>
         </span>
         <span id="badge-readers" class="tab-pill">0</span>
@@ -211,7 +220,7 @@
       <button type="button" class="tab-btn" role="tab" data-tab="book" aria-selected="false">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2ZM9 4h2v5l-1-.75L9 9Zm9 16H6V4h1v9l3-2.25L13 13V4h5Z"/></svg>
         <span class="tab-label">
-          <span lang="my">စာအုပ်ဖိုင်</span>
+          <span lang="my"><span class="label-full">စာအုပ်ဖိုင်</span><span class="label-short">စာအုပ်</span></span>
           <span lang="en">Book</span>
         </span>
         <span id="badge-book" class="tab-pill">0/24</span>
@@ -220,10 +229,10 @@
   </div>
 
   <main class="main-content">
-    <!-- Live In-App New Payment Alert Banner -->
+    <!-- Live In-App New Payment / Booking Alert Banner -->
     <div id="new-payment-banner" class="payment-alert-banner" role="alert" aria-live="assertive" hidden>
       <div class="pab-info">
-        <span class="pab-icon" aria-hidden="true">💰</span>
+        <span id="pab-icon" class="pab-icon" aria-hidden="true">💰</span>
         <div class="pab-text">
           <strong id="pab-title"></strong>
           <span id="pab-sub"></span>
@@ -292,7 +301,77 @@
       </div>
     </section>
 
-    <!-- ==================== TAB 2: ALL READERS ==================== -->
+    <!-- ==================== TAB 2: CONSULTATION BOOKINGS ==================== -->
+    <section id="panel-bookings" role="tabpanel" hidden>
+      <div class="section-head">
+        <div>
+          <h2>
+            <span lang="my">ဘွတ်ကင် နှင့် တိုင်ပင်ဆွေးနွေးမှုများ</span>
+            <span lang="en">Consultation Bookings</span>
+          </h2>
+          <p class="section-sub">
+            <span lang="my">Script Studio နှင့် Business System ဘွတ်ကင်တင်ထားသူများကို စစ်ဆေးဆက်သွယ်ပါ</span>
+            <span lang="en">Manage Script Studio &amp; Business System consultation requests</span>
+          </p>
+        </div>
+        <div class="section-actions">
+          <button id="btn-export-bookings-csv" type="button" class="btn btn-outline btn-sm">
+            ↓ <span lang="my">CSV ထုတ်မည်</span><span lang="en">Export CSV</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="toolbar-row">
+          <div class="search-wrap">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19Zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14Z"/></svg>
+            <input id="booking-search" class="input" type="search" autocomplete="off" placeholder="အမည်၊ လုပ်ငန်း၊ ဖုန်း/Telegram၊ Booking ID ရှာရန်...">
+            <button id="btn-booking-search-clear" type="button" class="search-clear" hidden aria-label="Clear search">×</button>
+          </div>
+        </div>
+        <div id="booking-status-filters" class="filter-pills" role="group" aria-label="Filter bookings by status">
+          <button type="button" class="pill-filter" data-bfilter="all" aria-pressed="true">
+            <span lang="my">အားလုံး</span><span lang="en">All</span>
+            <span class="pill-count" data-bcount="all">0</span>
+          </button>
+          <button type="button" class="pill-filter" data-bfilter="new" aria-pressed="false">
+            <span lang="my">အသစ်</span><span lang="en">New</span>
+            <span class="pill-count" data-bcount="new">0</span>
+          </button>
+          <button type="button" class="pill-filter" data-bfilter="contacted" aria-pressed="false">
+            <span lang="my">ဆက်သွယ်ပြီး</span><span lang="en">Contacted</span>
+            <span class="pill-count" data-bcount="contacted">0</span>
+          </button>
+          <button type="button" class="pill-filter" data-bfilter="confirmed" aria-pressed="false">
+            <span lang="my">အတည်ပြုပြီး</span><span lang="en">Confirmed</span>
+            <span class="pill-count" data-bcount="confirmed">0</span>
+          </button>
+          <button type="button" class="pill-filter" data-bfilter="done" aria-pressed="false">
+            <span lang="my">ပြီးဆုံး</span><span lang="en">Done</span>
+            <span class="pill-count" data-bcount="done">0</span>
+          </button>
+          <button type="button" class="pill-filter" data-bfilter="cancelled" aria-pressed="false">
+            <span lang="my">ပယ်ဖျက်ပြီး</span><span lang="en">Cancelled</span>
+            <span class="pill-count" data-bcount="cancelled">0</span>
+          </button>
+        </div>
+      </div>
+
+      <div id="bookings-list" class="bookings-list"></div>
+      <div id="bookings-empty" class="empty-state" hidden>
+        <div class="empty-icon" style="background:var(--gold-soft);color:var(--gold-text)">📋</div>
+        <h3>
+          <span lang="my">ဘွတ်ကင်စာရင်း မရှိသေးပါ</span>
+          <span lang="en">No consultation bookings yet</span>
+        </h3>
+        <p>
+          <span lang="my">Script Studio ဖောင်မှ ဘွတ်ကင်အသစ်တင်လာပါက ဤနေရာတွင် ချက်ချင်းပေါ်လာပါမည်။</span>
+          <span lang="en">New Script Studio &amp; Business System bookings will appear here in real time.</span>
+        </p>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 3: ALL READERS ==================== -->
     <section id="tab-readers" role="tabpanel" hidden>
       <div class="section-head">
         <div>
@@ -411,8 +490,8 @@
               <span lang="en">Phone Alerts &amp; Sound</span>
             </h3>
             <p class="section-sub" style="margin:2px 0 0;font-size:13px">
-              <span lang="my">KPay ငွေလွှဲအသစ်ဝင်တိုင်း ချက်ချင်းသိပြီး မြန်မြန်စစ်ဆေးနိုင်ရန်</span>
-              <span lang="en">Never miss a new KPay payment so you can verify slips fast</span>
+              <span lang="my">KPay ငွေလွှဲအသစ် နှင့် ဘွတ်ကင်အသစ်ဝင်တိုင်း ချက်ချင်းသိပြီး မြန်မြန်စစ်ဆေးနိုင်ရန်</span>
+              <span lang="en">Instant alerts for new KPay payments &amp; consultation bookings</span>
             </p>
           </div>
           <span id="alerts-mode-pill" class="badge badge-neutral">...</span>
@@ -448,12 +527,12 @@
           <label class="toggle-row" for="chk-native-monitor">
             <div class="toggle-copy">
               <strong>
-                <span lang="my">၂၄ နာရီ ငွေလွှဲစောင့်ကြည့်စနစ်</span>
-                <span lang="en">24/7 Live Payment Monitor</span>
+                <span lang="my">၂၄ နာရီ ငွေလွှဲ &amp; ဘွတ်ကင် စောင့်ကြည့်စနစ်</span>
+                <span lang="en">24/7 Live Payment &amp; Booking Monitor</span>
               </strong>
               <span>
-                <span lang="my">App ပိတ်ထား / ဖုန်းလော့ခ်ချထားချိန်တွင်ပင် ချက်ချင်းအသံမြည်မည်</span>
-                <span lang="en">Watches Firestore live even when the app is closed or phone is locked</span>
+                <span lang="my">KPay ငွေလွှဲအသစ်နှင့် ဘွတ်ကင်အသစ်ဝင်တိုင်း App ပိတ်ထားချိန်တွင်ပင် ချက်ချင်းအသံမြည်မည်</span>
+                <span lang="en">Alerts on new KPay payments &amp; consultation bookings even when closed or locked</span>
               </span>
             </div>
             <input id="chk-native-monitor" class="switch-input" type="checkbox">

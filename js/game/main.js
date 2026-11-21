@@ -113,6 +113,9 @@ class Game {
     this.ebookReaderMod = null;
     this.ebookSheetToken = 0;
     this.readerPushed = false;
+    this.consultCleanups = [];
+    this.consultSheetToken = 0;
+    this.pendingConsultTopic = null;
   }
 
   // ------------------------------------------------------------------ setup
@@ -329,6 +332,13 @@ class Game {
       this.ui.setWhere(this.mode === 'room' ? tr(this.room.placeName || this.placeById(this.room.id).name) : tr({ my: 'မာရာ့ စာအုပ်ကမ္ဘာ', en: "Maya's Book World" }));
     });
     document.addEventListener('mw:order', () => this.onOrder());
+    document.addEventListener('mw:consult-booked', (e) => this.onConsultBooked(e.detail));
+    document.addEventListener('mw:consult-select', (e) => {
+      if (!document.body.classList.contains('playing')) return;
+      const topic = e.detail?.topic;
+      if (!topic) return;
+      this.openConsultWithTopic(topic);
+    });
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible' && this.lastOrderAt && performance.now() - this.lastOrderAt < 10 * 60 * 1000) {
         this.lastOrderAt = 0;
@@ -1133,22 +1143,31 @@ class Game {
     this.openSheetFor(ids, tr(this.placeById(this.room.id).name), this.room.id + '-all');
   }
 
-  openSheetFor(ids, title, hashId) {
+  openSheetFor(ids, title, hashId, { replaceHistory = false } = {}) {
     this.ui.hideDialog();
     this.unmountEbookStations();
+    this.unmountConsultStation();
     window.MayaSite?.prepareLinks(document);
     this.ui.openSheet({ title, stationIds: ids });
     call(this.audio, 'play', 'page');
-    history.pushState({ mw: 'sheet' }, '', `#${hashId}`);
+    if (replaceHistory) history.replaceState({ mw: 'sheet' }, '', `#${hashId}`);
+    else history.pushState({ mw: 'sheet' }, '', `#${hashId}`);
     this.sheetPushed = true;
     const ebIds = ids.filter((id) => EBOOK_STATIONS.has(id));
     if (ebIds.length) this.mountEbookStations(ebIds);
+    if (ids.includes('scr-consult')) {
+      const topic = this.pendingConsultTopic;
+      this.pendingConsultTopic = null;
+      this.mountConsultStation(topic);
+    }
   }
 
   closeSheet(viaUI) {
     if (!this.ui.sheetOpen) return;
     this.ebookSheetToken++;
+    this.consultSheetToken++;
     this.unmountEbookStations();
+    this.unmountConsultStation();
     this.ui.closeSheet();
     this.rig.release();
     this.faceTarget = null;
@@ -1162,6 +1181,78 @@ class Game {
     if (!this.ebookCleanups?.length) return;
     for (const fn of this.ebookCleanups) { try { fn(); } catch { /* ignore */ } }
     this.ebookCleanups.length = 0;
+  }
+
+  unmountConsultStation() {
+    if (!this.consultCleanups?.length) return;
+    for (const fn of this.consultCleanups) { try { fn(); } catch { /* ignore */ } }
+    this.consultCleanups.length = 0;
+  }
+
+  async mountConsultStation(initialTopic = null) {
+    const token = ++this.consultSheetToken;
+    try {
+      const mod = await import('../ebook/consult-ui.js');
+      if (!this.ui.sheetOpen || token !== this.consultSheetToken) return;
+      const body = this.ui.els.sheetBody;
+      const art = body.querySelector('[data-station="scr-consult"]');
+      const target = art?.querySelector('.consult-mount') || art;
+      if (!target) return;
+      const topic = this.pendingConsultTopic || initialTopic || undefined;
+      this.pendingConsultTopic = null;
+      const cleanup = mod.mountConsultStation(target, { initialTopic: topic });
+      if (typeof cleanup === 'function') this.consultCleanups.push(cleanup);
+    } catch (err) {
+      console.error('consult mount', err);
+    }
+  }
+
+  openConsultWithTopic(topic) {
+    const body = this.ui.els.sheetBody;
+    const existing = this.ui.sheetOpen ? body.querySelector('[data-station="scr-consult"]') : null;
+    if (existing) {
+      this.pendingConsultTopic = topic;
+      existing.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      import('../ebook/consult-ui.js').then((mod) => {
+        if (this.ui.sheetOpen && this.pendingConsultTopic === topic) {
+          this.pendingConsultTopic = null;
+          mod.selectConsultTopic?.(topic);
+        }
+      }).catch(() => {});
+      return;
+    }
+    this.pendingConsultTopic = topic;
+    const wasPushed = this.sheetPushed;
+    if (this.ui.sheetOpen) this.closeSheet(false);
+    this.openSheetFor(
+      ['scr-consult'],
+      tr(STATION_LABELS['scr-consult']) || pages.stationTitle('scr-consult'),
+      'scr-consult',
+      { replaceHistory: wasPushed }
+    );
+  }
+
+  onConsultBooked(detail) {
+    const name = (detail?.name || '').trim();
+    this.lastOrderAt = performance.now();
+    call(this.audio, 'play', 'cheer');
+    call(this.maya, 'setFace', 'star', 3.0);
+    call(this.maya, 'emote', 'cheer');
+    const head = this.maya.getHeadTop
+      ? this.maya.getHeadTop(this.tmp)
+      : this.maya.root.getWorldPosition(this.tmp).add(new THREE.Vector3(0, 1.4, 0));
+    this.fx.burst('heart', head, { count: 10, spread: 0.55, up: 0.65 });
+    this.fx.burst('sparkle', head, { count: 10, spread: 0.55, up: 0.65 });
+    const fc = call(this.maya, 'faceCanvas', 'heart');
+    if (fc) this.ui.showBubble(fc, 2400);
+    if (this.ebookOpen) return;
+    call(this.maya, 'talk', 2.6);
+    this.ui.say(LINES.consultBooked, {
+      face: fc,
+      readerName: name || undefined,
+      aboveSheet: this.ui.sheetOpen,
+      onTick: () => call(this.audio, 'play', 'type'),
+    });
   }
 
   async mountEbookStations(ebIds) {
@@ -1299,6 +1390,7 @@ class Game {
     call(this.audio, 'engine', 0);
     if (this.ebookOpen) { this.ebookOpen = false; this.ebookReaderMod?.closeEbookReader?.(); }
     this.unmountEbookStations();
+    this.unmountConsultStation();
     this.ui.closeSheet();
     document.getElementById('game').hidden = true;
     document.body.classList.remove('playing');

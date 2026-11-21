@@ -100,6 +100,12 @@ export const LINES = {
       en: 'Welcome, {name}! You can start reading Reality Check right now!',
     },
   ],
+  consultBooked: [
+    {
+      my: '{name} ရေ! ဘွတ်ကင်တင်ပေးလို့ ကျေးဇူးအများကြီး တင်ပါတယ်ရှင့် — မာရာ မကြာခင် ပြန်ဆက်သွယ်ပေးမယ်နော်!',
+      en: 'Thank you for booking, {name}! Maya will reach out to you very soon!',
+    },
+  ],
   ebookStations: {
     'eb-preview': {
       my: 'အခန်း (၁) ကို အခမဲ့ မြည်းစမ်းဖတ်ကြည့်လို့ ရပါတယ်ရှင့်',
@@ -160,10 +166,10 @@ export const STATION_LABELS = {
   'tpl-creator': { my: 'Creators · 50,000', en: 'Creators · 50,000' },
   'tpl-business': { my: 'Business · 80,000', en: 'Business · 80,000' },
   'scr-short': { my: 'Short Script · 50,000', en: 'Short Script · 50,000' },
-  'scr-standard': { my: 'Standard · 30,000/မိနစ်', en: 'Standard · 30,000/min' },
-  'scr-long': { my: 'Long Form · 20,000/မိနစ်', en: 'Long Form · 20,000/min' },
-  'scr-bundles': { my: 'Package များ', en: 'Bundles' },
-  'scr-consult': { my: 'Consultation ဘွတ်ကင်', en: 'Book a consultation' },
+  'scr-standard': { my: 'Standard · 30,000/၁.၅မိနစ်', en: 'Standard · 30,000/1.5m' },
+  'scr-long': { my: 'Long Form · 30,000/၁.၅မိနစ်', en: 'Long Form · 30,000/1.5m' },
+  'scr-bundles': { my: 'Business System · 150k+', en: 'Business System · 150k+' },
+  'scr-consult': { my: 'ဘွတ်ကင်တင်ရန်', en: 'Book Consultation' },
   'eb-preview': { my: 'အခမဲ့ မြည်းစမ်းဖတ်ရန် · အခန်း ၁', en: 'Free Preview · Ch. 1' },
   'eb-buy': { my: 'E-Book ဝယ်ယူရန် · ချက်ချင်းဖတ်', en: 'Buy E-Book · Instant' },
   'eb-read': { my: 'စာအုပ်ဖတ်ရန် · ဝင်မယ်', en: 'Read E-Book · Sign In' },

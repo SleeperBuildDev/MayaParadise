@@ -29,6 +29,7 @@ const DEMO_SESSION_KEY = 'wm-ebook-demo-session';
 const DEMO_TAB_SESSION_KEY = 'wm-ebook-tab-session';
 const DEMO_ADMIN_KEY = 'wm-ebook-demo-admin';
 const PROGRESS_CACHE_KEY = 'wm-eb-progress';
+const LAST_CONSULT_KEY = 'wm-last-consult';
 const BROADCAST_NAME = 'wm-ebook-demo';
 const IDB_NAME = 'wm-ebook-demo-idb';
 const IDB_VERSION = 1;
@@ -701,12 +702,14 @@ async function idbGetAllKeys(storeName) {
 
 let demoChannel = null;
 const adminReaderWatchers = new Set();
+const adminConsultWatchers = new Set();
 
 function createEmptyDemoDb() {
   return {
     config: { ...DEFAULT_EBOOK_CONFIG },
     readers: {},
     reclaims: {},
+    consultations: {},
     bookMeta: null,
     uploadedChapters: {},
   };
@@ -723,6 +726,10 @@ function readDemoDb() {
       config: mergeConfig(parsed.config),
       readers: parsed.readers && typeof parsed.readers === 'object' ? parsed.readers : {},
       reclaims: parsed.reclaims && typeof parsed.reclaims === 'object' ? parsed.reclaims : {},
+      consultations:
+        parsed.consultations && typeof parsed.consultations === 'object'
+          ? parsed.consultations
+          : {},
       uploadedChapters:
         parsed.uploadedChapters && typeof parsed.uploadedChapters === 'object'
           ? parsed.uploadedChapters
@@ -948,6 +955,7 @@ function syncFromDemoDb() {
   }
 
   notifyDemoAdminWatchers();
+  notifyDemoConsultWatchers();
 }
 
 function handleDemoMessage(ev) {
@@ -2605,4 +2613,320 @@ export async function adminGetBookStatus() {
     uploadedNums,
     chapters: chaptersMap,
   };
+}
+
+// ---------- Script Studio Consultation Bookings (`consultations/{bookingId}`) ----------
+
+const CONSULT_CHANNELS = new Set(['telegram', 'messenger', 'viber', 'phone']);
+const CONSULT_TOPICS = {
+  consultation: '1-on-1 Script Consultation',
+  system_lite: 'Business System — Lite (150,000 Ks)',
+  system_standard: 'Business System — Standard (300,000 Ks)',
+  system_plus: 'Business System — Plus (400,000 Ks)',
+  script_short: 'Short Script (50,000 Ks)',
+  script_standard: 'Standard Script (30,000 Ks / 1.5m)',
+  script_long: 'Long Form Script (30,000 Ks / 1.5m)',
+  custom_package: 'Customized Script Package',
+};
+const CONSULT_STATUSES = new Set(['new', 'contacted', 'confirmed', 'done', 'cancelled']);
+const BOOKING_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+
+function generateBookingId() {
+  const d = new Date();
+  const yy = String(d.getFullYear()).slice(-2);
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  const bytes = new Uint8Array(4);
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    crypto.getRandomValues(bytes);
+  } else {
+    for (let i = 0; i < 4; i++) bytes[i] = Math.floor(Math.random() * 256);
+  }
+  let code = '';
+  for (let i = 0; i < 4; i++) {
+    code += BOOKING_ALPHABET[bytes[i] % BOOKING_ALPHABET.length];
+  }
+  return `SC-${yy}${mm}${dd}-${code}`;
+}
+
+function cleanTextField(raw, maxLen) {
+  if (raw == null) return '';
+  let s = String(raw);
+  if (typeof s.normalize === 'function') s = s.normalize('NFC');
+  s = s
+    .replace(/<[^>]*>/g, '')
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F\u200B-\u200F\u202A-\u202E\u2066-\u2069\uFEFF]/g, '')
+    .trim();
+  if (s.length <= maxLen) return s;
+  const parts = splitGraphemes(s);
+  let out = '';
+  for (const g of parts) {
+    if (out.length + g.length > maxLen) break;
+    out += g;
+  }
+  return out.trim();
+}
+
+function normalizeConsultView(id, raw) {
+  const bookingId = raw.bookingId || id;
+  const topic = Object.prototype.hasOwnProperty.call(CONSULT_TOPICS, raw.topic)
+    ? raw.topic
+    : 'consultation';
+  return {
+    bookingId,
+    name: String(raw.name || ''),
+    contact: String(raw.contact || ''),
+    channel: CONSULT_CHANNELS.has(raw.channel) ? raw.channel : 'telegram',
+    topic,
+    topicLabel: String(raw.topicLabel || CONSULT_TOPICS[topic]),
+    businessName: String(raw.businessName || ''),
+    preferredTime: String(raw.preferredTime || ''),
+    notes: String(raw.notes || ''),
+    lang: raw.lang === 'en' ? 'en' : 'my',
+    status: CONSULT_STATUSES.has(raw.status) ? raw.status : 'new',
+    adminNote: String(raw.adminNote || ''),
+    createdAt: toMillis(raw.createdAt),
+    updatedAt: toMillis(raw.updatedAt),
+  };
+}
+
+function sortConsultsDesc(list) {
+  return list.slice().sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+}
+
+function notifyDemoConsultWatchers() {
+  if (!adminConsultWatchers.size) return;
+  const db = readDemoDb();
+  const list = sortConsultsDesc(
+    Object.entries(db.consultations || {}).map(([id, rec]) => normalizeConsultView(id, rec))
+  );
+  for (const cb of adminConsultWatchers) {
+    try {
+      cb(list);
+    } catch (e) {
+      console.error('[ebook] adminWatchConsultations callback error:', e);
+    }
+  }
+}
+
+/**
+ * Submit a Script Studio Consultation / Business System booking.
+ * Works WITHOUT Firebase Auth sign-in on Live Firestore Spark (strictly matching consultations/{bookingId}
+ * schema & serverTimestamp()) OR in Local Demo Mode with real-time BroadcastChannel sync to /admin/.
+ */
+export async function submitConsultation(payload = {}) {
+  const cleanName = cleanTextField(payload.name, 60);
+  if (cleanName.length < 1) {
+    throw makeError(
+      'INVALID_NAME',
+      'သင့်အမည်ကို ထည့်ပေးပါရှင့်။',
+      'Please enter your name.'
+    );
+  }
+
+  let cleanContact = cleanTextField(normalizeDigits(payload.contact || ''), 120);
+  if (cleanContact.length < 3) {
+    throw makeError(
+      'INVALID_CONTACT',
+      'ဆက်သွယ်ရန် ဖုန်းနံပါတ် / Telegram / Viber ကို ထည့်ပေးပါရှင့်။',
+      'Please enter your phone number, Telegram handle, or Viber.'
+    );
+  }
+
+  const channel = CONSULT_CHANNELS.has(payload.channel) ? payload.channel : 'telegram';
+  const topic = Object.prototype.hasOwnProperty.call(CONSULT_TOPICS, payload.topic)
+    ? payload.topic
+    : 'consultation';
+  const topicLabel = cleanTextField(payload.topicLabel || CONSULT_TOPICS[topic], 120) || CONSULT_TOPICS[topic];
+  const businessName = cleanTextField(payload.businessName, 100);
+  const preferredTime = cleanTextField(payload.preferredTime, 100);
+  const notes = cleanTextField(payload.notes, 1200);
+  const lang =
+    payload.lang === 'en' || payload.lang === 'my'
+      ? payload.lang
+      : typeof document !== 'undefined' && document.documentElement.getAttribute('data-lang') === 'en'
+        ? 'en'
+        : 'my';
+
+  const bookingId = generateBookingId();
+  const now = Date.now();
+
+  const bookingView = {
+    bookingId,
+    name: cleanName,
+    contact: cleanContact,
+    channel,
+    topic,
+    topicLabel,
+    businessName,
+    preferredTime,
+    notes,
+    lang,
+    status: 'new',
+    adminNote: '',
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  if (!isFirebaseConfigured()) {
+    bindDemoSync();
+    const db = readDemoDb();
+    db.consultations[bookingId] = bookingView;
+    writeDemoDb(db, 'consult-updated');
+    notifyDemoConsultWatchers();
+  } else {
+    const f = await ensureFirebase();
+    const { doc, setDoc, serverTimestamp } = f.fsMod;
+    const ts = serverTimestamp();
+    const firestoreDoc = {
+      bookingId,
+      name: cleanName,
+      contact: cleanContact,
+      channel,
+      topic,
+      topicLabel,
+      businessName,
+      preferredTime,
+      notes,
+      lang,
+      status: 'new',
+      adminNote: '',
+      createdAt: ts,
+      updatedAt: ts,
+    };
+    await setDoc(doc(f.db, 'consultations', bookingId), firestoreDoc);
+  }
+
+  // Remember visitor's name so Maya greets them warmly across the site.
+  const greetingName = sanitizeName(cleanName);
+  if (greetingName) {
+    cacheReaderName(greetingName);
+    state.name = greetingName;
+    emitState();
+  }
+
+  try {
+    localStorage.setItem(LAST_CONSULT_KEY, JSON.stringify(bookingView));
+  } catch {
+    // Ignore storage errors.
+  }
+
+  return { ok: true, bookingId, booking: { ...bookingView } };
+}
+
+/** Read latest cached consultation ticket from localStorage (or null). */
+export function getLastConsultation() {
+  try {
+    const raw = localStorage.getItem(LAST_CONSULT_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object' || !parsed.bookingId) return null;
+    return normalizeConsultView(parsed.bookingId, parsed);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Watch all Script Studio consultation bookings in real time (sorted newest first).
+ * Returns an unsubscribe function.
+ */
+export function adminWatchConsultations(callback) {
+  if (typeof callback !== 'function') return () => {};
+
+  if (!isFirebaseConfigured()) {
+    bindDemoSync();
+    adminConsultWatchers.add(callback);
+    const db = readDemoDb();
+    const list = sortConsultsDesc(
+      Object.entries(db.consultations || {}).map(([id, rec]) => normalizeConsultView(id, rec))
+    );
+    callback(list);
+    return () => adminConsultWatchers.delete(callback);
+  }
+
+  let unsub = () => {};
+  let cancelled = false;
+
+  (async () => {
+    try {
+      await initStore();
+      if (cancelled) return;
+      const f = await ensureFirebase();
+      const { collection, onSnapshot } = f.fsMod;
+      unsub = onSnapshot(
+        collection(f.db, 'consultations'),
+        (snap) => {
+          const list = [];
+          snap.forEach((d) => {
+            list.push(normalizeConsultView(d.id, d.data()));
+          });
+          callback(sortConsultsDesc(list));
+        },
+        (err) => {
+          console.error('[ebook] adminWatchConsultations error:', err);
+        }
+      );
+    } catch (err) {
+      console.error('[ebook] adminWatchConsultations init error:', err);
+    }
+  })();
+
+  return () => {
+    cancelled = true;
+    try {
+      unsub();
+    } catch {
+      // Ignore.
+    }
+  };
+}
+
+export async function adminUpdateConsultationStatus(bookingId, status, adminNote = '') {
+  await initStore();
+  const id = String(bookingId || '').trim();
+  if (!id) throw makeError('INVALID_ID', 'Booking ID မမှန်ပါ။', 'Invalid booking ID.');
+  if (!CONSULT_STATUSES.has(status)) {
+    throw makeError('INVALID_STATUS', 'အခြေအနေ မမှန်ပါ။', `Invalid consultation status: ${status}`);
+  }
+  const cleanNote = cleanTextField(adminNote, 1000);
+  const now = Date.now();
+
+  if (!isFirebaseConfigured()) {
+    const db = readDemoDb();
+    if (!db.consultations[id]) {
+      throw makeError('NOT_FOUND', 'ဘွတ်ကင် မတွေ့ပါ။', 'Booking not found.');
+    }
+    db.consultations[id].status = status;
+    db.consultations[id].adminNote = cleanNote;
+    db.consultations[id].updatedAt = now;
+    writeDemoDb(db, 'consult-updated');
+    notifyDemoConsultWatchers();
+    return normalizeConsultView(id, db.consultations[id]);
+  }
+
+  const f = await ensureFirebase();
+  await f.fsMod.updateDoc(f.fsMod.doc(f.db, 'consultations', id), {
+    status,
+    adminNote: cleanNote,
+    updatedAt: f.fsMod.serverTimestamp(),
+  });
+  return { bookingId: id, status, adminNote: cleanNote, updatedAt: now };
+}
+
+export async function adminDeleteConsultation(bookingId) {
+  await initStore();
+  const id = String(bookingId || '').trim();
+  if (!id) return;
+
+  if (!isFirebaseConfigured()) {
+    const db = readDemoDb();
+    delete db.consultations[id];
+    writeDemoDb(db, 'consult-updated');
+    notifyDemoConsultWatchers();
+    return;
+  }
+
+  const f = await ensureFirebase();
+  await f.fsMod.deleteDoc(f.fsMod.doc(f.db, 'consultations', id));
 }

@@ -1,7 +1,7 @@
 // Script Studio (Script စတူဒီယို): a small film / writing studio.
 //   - three giant script books standing in clouds on a little stage: thin "The Short Script"
 //     (scr-short), medium "The Standard Script" (scr-standard), thick "Long Form Script" (scr-long);
-//   - a gift-box shelf with the Basic / Advanced / Master bundles (scr-bundles);
+//   - a gift-box shelf with the Lite / Standard / Plus Business System packages (scr-bundles);
 //   - a white flower arch with two facing chairs for consultations (scr-consult, "Book Now");
 //   - film-set props: director's chair, clapperboard, camera on a tripod, spotlights, script pages.
 //
@@ -498,40 +498,40 @@ const BOOKS = [
   {
     key: 'short', id: 'scr-short', x: -2.12, w: 1.16, h: 1.44, d: 0.2, tilt: 0.05, open: 1.0, seed: 1,
     cover: '#D3A05E', spine: '#B17E45',
-    art: { bg: '#D3A05E', edge: '#BC8A4E', frame: PALETTE.maroon, ink: PALETTE.ink, lines: ['THE', 'SHORT', 'SCRIPT'], sizes: [26, 60, 44], band: '၁-၂ မိနစ်', bandBg: PALETTE.maroon, bandInk: PALETTE.paper },
+    art: { bg: '#D3A05E', edge: '#BC8A4E', frame: PALETTE.maroon, ink: PALETTE.ink, lines: ['THE', 'SHORT', 'SCRIPT'], sizes: [26, 60, 44], band: '၃၀စက္ကန့်-၁.၅မိနစ်+', bandSize: 21, bandBg: PALETTE.maroon, bandInk: PALETTE.paper },
   },
   {
     key: 'standard', id: 'scr-standard', x: 0, w: 1.26, h: 1.58, d: 0.44, tilt: 0, open: 0.95, seed: 2,
     cover: PALETTE.maroon, spine: PALETTE.maroonDeep,
-    art: { bg: PALETTE.maroon, edge: '#5E1823', frame: PALETTE.gold, ink: '#F0D58E', lines: ['THE', 'STANDARD', 'SCRIPT'], sizes: [26, 46, 46], band: '၃-၅ မိနစ်', bandBg: PALETTE.gold, bandInk: PALETTE.maroonDeep },
+    art: { bg: PALETTE.maroon, edge: '#5E1823', frame: PALETTE.gold, ink: '#F0D58E', lines: ['THE', 'STANDARD', 'SCRIPT'], sizes: [26, 46, 46], band: '၃-၅ မိနစ် · 30k', bandSize: 24, bandBg: PALETTE.gold, bandInk: PALETTE.maroonDeep },
   },
   {
     key: 'long', id: 'scr-long', x: 2.1, w: 1.34, h: 1.74, d: 0.76, tilt: -0.03, open: 0.85, seed: 3,
     cover: '#7A4A2B', spine: '#5A341D',
-    art: { bg: '#7A4A2B', edge: '#673D22', frame: PALETTE.gold, ink: '#F6E6C4', lines: ['LONG', 'FORM', 'SCRIPT'], sizes: [46, 46, 44], band: '၆ မိနစ်နဲ့အထက်', bandBg: PALETTE.cream, bandInk: '#5A341D' },
+    art: { bg: '#7A4A2B', edge: '#673D22', frame: PALETTE.gold, ink: '#F6E6C4', lines: ['LONG', 'FORM', 'SCRIPT'], sizes: [46, 46, 44], band: '၆+ မိနစ် · 30k', bandSize: 25, bandBg: PALETTE.cream, bandInk: '#5A341D' },
   },
 ];
 
 const STATIONS = [
   {
     id: 'scr-short', x: -1.98, z: -1.55, look: { x: -2.12, z: BOOK_FRONT }, emote: 'write', face: 'focus', labelY: 2.2,
-    line: { my: 'တိုတိုလေးနဲ့ ထိထိမိမိ ရေးပေးမယ်နော်', en: "Short and to the point. I'll write it for you!" },
+    line: { my: 'စက္ကန့် ၃၀ ကနေ ၁.၅ မိနစ်ကျော် Short Script တစ်ပုဒ်ကို 50,000 Ks ပါရှင့်', en: 'Short scripts (30s–1.5+ min) are 50,000 Ks each!' },
   },
   {
     id: 'scr-standard', x: 0, z: -1.55, look: { x: 0, z: BOOK_FRONT }, emote: 'nod', face: 'happy', labelY: 2.35,
-    line: { my: '၃ မိနစ်ကနေ ၅ မိနစ်၊ အနေတော်လေးပါရှင့်', en: 'Three to five minutes: just the right length.' },
+    line: { my: '၃–၅ မိနစ် Standard Script တွေက ၁.၅ မိနစ်ကို 30,000 Ks နှုန်းပါရှင့်', en: '3–5 min Standard Scripts are 30,000 Ks per 1.5 minutes!' },
   },
   {
     id: 'scr-long', x: 1.98, z: -1.55, look: { x: 2.1, z: BOOK_FRONT }, emote: 'thumbsUp', face: 'star', labelY: 2.45,
-    line: { my: '၆ မိနစ်နဲ့အထက် Long Form တွေလည်း ရေးပေးတယ်နော်', en: 'I write Long Form scripts of six minutes and more, too!' },
+    line: { my: '၆ မိနစ်နဲ့အထက် Long Form တွေလည်း ၁.၅ မိနစ်ကို 30,000 Ks နှုန်းတူတူပါပဲနော်', en: '6+ min Long Form scripts use the same friendly 30,000 Ks per 1.5 min rate!' },
   },
   {
     id: 'scr-bundles', x: -2.36, z: 2.5, look: { x: -2.36, z: 1.3 }, emote: 'cheer', face: 'star', labelY: 2.0,
-    line: { my: 'Package နဲ့ယူရင် ပိုသက်သာတယ်ရှင့်', en: 'Take a package and save more!' },
+    line: { my: 'သင်တန်းတက်စရာမလိုဘဲ လုပ်ငန်းသုံး Script & Posting System — Lite, Standard, Plus ရွေးလို့ရပါတယ်ရှင့်', en: 'No course needed — pick Lite, Standard, or Plus Business Script & Posting System!' },
   },
   {
     id: 'scr-consult', x: 2.44, z: 2.62, look: { x: 2.44, z: 1.36 }, emote: 'think', face: 'think', labelY: 2.65,
-    line: { my: 'Script အကြောင်း အတူတူ တိုင်ပင်ကြရအောင်ရှင့်', en: "Let's plan your script together." },
+    line: { my: 'ဒီဝက်ဘ်ဆိုက်မှာပဲ တိုက်ရိုက် ဘွတ်ကင်တင်ပြီး မာရာနဲ့ တိုင်ပင်လို့ရပါတယ်ရှင့်', en: "Book directly right here on the website and let's plan with Maya!" },
   },
 ];
 
@@ -546,9 +546,9 @@ function drawScriptsAtlas(A) {
     consultSign: [440, 150],
     clapFace: [240, 170],
     page: [160, 200],
-    tagBasic: [200, 76],
-    tagAdvanced: [200, 76],
-    tagMaster: [200, 76],
+    tagLite: [200, 76],
+    tagStandard: [200, 76],
+    tagPlus: [200, 76],
     chairName: [200, 80],
     sparkle: [96, 96],
     bulb: [64, 64],
@@ -594,8 +594,10 @@ function drawScriptsAtlas(A) {
     const r = R.bundleSign;
     fillRound(g, r.x + 3, r.y + 3, r.w - 6, r.h - 6, 22, PALETTE.paper);
     strokeRound(g, r.x + 5, r.y + 5, r.w - 10, r.h - 10, 20, PALETTE.goldDeep, 6);
-    A.text(r.x + 20, r.y + 6, r.w - 40, 74, [{ text: 'Script Package', size: 46, font: FONT_SERIF, weight: 600, color: PALETTE.maroon }]);
-    A.text(r.x + 20, r.y + 68, r.w - 40, 60, [{ text: 'စုဝယ်ရင် ပိုသက်သာ', size: 32, color: PALETTE.goldDeep }]);
+    A.text(r.x + 34, r.y + 6, r.w - 68, 72, [{ text: 'Business System', size: 44, font: FONT_SERIF, weight: 600, color: PALETTE.maroon }]);
+    A.text(r.x + 24, r.y + 68, r.w - 48, 60, [{ text: 'လုပ်ငန်းသုံး System', size: 30, color: PALETTE.goldDeep }]);
+    drawSparkle(g, r.x + 28, r.y + r.h / 2, 10, PALETTE.gold);
+    drawSparkle(g, r.x + r.w - 28, r.y + r.h / 2, 10, PALETTE.gold);
   }
   // Consultation sign.
   {
@@ -623,12 +625,18 @@ function drawScriptsAtlas(A) {
   }
   // Script page (floor pages, the inside of the books).
   drawScriptPage(A, R.page);
-  // Gift tags.
-  for (const [k, label] of [['tagBasic', 'Basic'], ['tagAdvanced', 'Advanced'], ['tagMaster', 'Master']]) {
+  // Gift tags (Lite, Standard [Most Popular with gold sparkle accents], Plus).
+  for (const [k, label, featured] of [['tagLite', 'Lite', false], ['tagStandard', 'Standard', true], ['tagPlus', 'Plus', false]]) {
     const r = R[k];
-    fillRound(g, r.x + 3, r.y + 3, r.w - 6, r.h - 6, 16, PALETTE.paper);
-    strokeRound(g, r.x + 4, r.y + 4, r.w - 8, r.h - 8, 14, PALETTE.gold, 5);
-    A.text(r.x + 10, r.y + 2, r.w - 20, r.h - 4, [{ text: label, size: 40, font: FONT_SERIF, weight: 600, color: PALETTE.maroon }]);
+    fillRound(g, r.x + 3, r.y + 3, r.w - 6, r.h - 6, 16, featured ? PALETTE.maroon : PALETTE.paper);
+    strokeRound(g, r.x + 4, r.y + 4, r.w - 8, r.h - 8, 14, PALETTE.gold, featured ? 6 : 5);
+    if (featured) {
+      A.text(r.x + 12, r.y + 2, r.w - 24, r.h - 4, [{ text: label, size: 32, font: FONT_SERIF, weight: 600, color: '#FFF4D2' }]);
+      drawSparkle(g, r.x + 22, r.y + r.h / 2, 10, PALETTE.gold, '#FFF8DF');
+      drawSparkle(g, r.x + r.w - 22, r.y + r.h / 2, 10, PALETTE.gold, '#FFF8DF');
+    } else {
+      A.text(r.x + 10, r.y + 2, r.w - 20, r.h - 4, [{ text: label, size: 40, font: FONT_SERIF, weight: 600, color: PALETTE.maroon }]);
+    }
   }
   // Director's chair name (her Burmese pen name).
   A.text(R.chairName.x, R.chairName.y, 200, 80, [{ text: 'မာရာ', size: 44, color: '#F0D58E' }]);
@@ -673,8 +681,9 @@ function drawCover(A, r, o) {
   g.fillRect(x + w * 0.26, cy - 1.5, w * 0.17, 3);
   g.fillRect(x + w * 0.66, cy - 1.5, w * 0.17, 3);
   drawSparkle(g, x + w * 0.545, cy, 13, o.frame);
-  fillRound(g, x + w * 0.17, y + h * 0.745, w * 0.74, h * 0.145, 14, o.bandBg);
-  A.text(x + w * 0.17, y + h * 0.745, w * 0.74, h * 0.145, [{ text: o.band, size: o.band.length > 10 ? 27 : 34 }], o.bandInk);
+  fillRound(g, x + w * 0.155, y + h * 0.745, w * 0.745, h * 0.145, 14, o.bandBg);
+  const bandSize = o.bandSize ?? (o.band.length > 16 ? 21 : o.band.length > 10 ? 25 : 34);
+  A.text(x + w * 0.125, y + h * 0.745, w * 0.805, h * 0.145, [{ text: o.band, size: bandSize }], o.bandInk);
 }
 
 /** "Now showing" film poster: film-strip edges, a spotlight on an open script, five stars. */
@@ -1047,9 +1056,9 @@ function buildClapper(S, rig, R) {
 }
 
 const GIFTS = [
-  { key: 'Basic', s: 0.32, x: -2.86, body: PALETTE.paper, ribbon: PALETTE.gold, knot: PALETTE.goldDeep },
-  { key: 'Advanced', s: 0.4, x: -2.36, body: PALETTE.gold, ribbon: PALETTE.maroon, knot: PALETTE.maroonDeep },
-  { key: 'Master', s: 0.48, x: -1.86, body: PALETTE.maroon, ribbon: PALETTE.gold, knot: PALETTE.goldDeep },
+  { key: 'Lite', s: 0.32, x: -2.86, body: PALETTE.paper, ribbon: PALETTE.gold, knot: PALETTE.goldDeep },
+  { key: 'Standard', s: 0.4, x: -2.36, body: PALETTE.gold, ribbon: PALETTE.maroon, knot: PALETTE.maroonDeep },
+  { key: 'Plus', s: 0.48, x: -1.86, body: PALETTE.maroon, ribbon: PALETTE.gold, knot: PALETTE.goldDeep },
 ];
 
 function buildBundles(S, rig, R) {
@@ -1093,7 +1102,7 @@ function buildBundles(S, rig, R) {
     lid.box(-0.07 * k, hl + 0.06 * k, 0, 0.13 * k, 0.085 * k, 0.06 * k, gft.ribbon, { rz: 0.55 });
     lid.box(0.07 * k, hl + 0.06 * k, 0, 0.13 * k, 0.085 * k, 0.06 * k, gft.ribbon, { rz: -0.55 });
     lid.box(0, hl + 0.035 * k, 0, 0.06 * k, 0.06 * k, 0.07 * k, gft.knot);
-    if (i === 2) lid.quad(R.sparkle, 0, hl + 0.3, 0, 0.22, 0.22);
+    if (i === 1) lid.quad(R.sparkle, 0, hl + 0.3, 0, 0.22, 0.22);
     const sparks = [];
     for (let j = 0; j < 2; j++) {
       const sp = rig.part({ name: `giftSpark${i}${j}`, parent: box, position: [(j - 0.5) * s * 0.4, hb, s * 0.25] });

@@ -1,0 +1,1113 @@
+/* Maya's Script Atelier — All-Out Luxury Editorial Consultation Booking Form.
+   Royal Maroon (#6E1F2A), Brushed Antique Gold (#C9A24A), Warm Cream Parchment (#FAF5EB).
+   Phone-first (360px–430px zero overflow) & desktop classic view. */
+
+.consult-mount,
+.cs-shell,
+.cs-shell * {
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+/* ---------- Outer Double-Hairline Editorial Frame ---------- */
+.cs-shell {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  padding: 20px 15px 18px;
+  border-radius: 20px;
+  background:
+    radial-gradient(120% 85% at 50% 0%, #FFFDF7 0%, #FAF4E6 56%, #F2E7CF 100%);
+  border: 1.5px solid var(--gold, #C9A24A);
+  box-shadow:
+    0 12px 30px rgba(74, 20, 28, .12),
+    0 2px 6px rgba(42, 33, 24, .08),
+    inset 0 1px 0 rgba(255, 255, 255, .9);
+  color: var(--ink, #2A2118);
+  font-family: var(--font-my, "Noto Sans Myanmar", system-ui, sans-serif);
+  overflow: hidden;
+}
+html[data-lang="en"] .cs-shell {
+  font-family: var(--font-sans, system-ui, sans-serif);
+}
+
+/* Inner hairline gold frame */
+.cs-shell::before {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border-radius: 15px;
+  border: 1px solid rgba(201, 162, 74, .44);
+  pointer-events: none;
+}
+
+/* 4 Animated Corner Sparkles */
+.cs-corner {
+  position: absolute;
+  z-index: 1;
+  font-size: 11px;
+  line-height: 1;
+  color: var(--gold, #C9A24A);
+  pointer-events: none;
+  animation: csTwinkle 3.6s ease-in-out infinite;
+}
+.cs-c-tl { top: 10px; left: 11px; animation-delay: 0s; }
+.cs-c-tr { top: 10px; right: 11px; animation-delay: .9s; }
+.cs-c-bl { bottom: 10px; left: 11px; animation-delay: 1.8s; }
+.cs-c-br { bottom: 10px; right: 11px; animation-delay: 2.7s; }
+
+@keyframes csTwinkle {
+  0%, 100% { opacity: .45; transform: scale(.86) rotate(0deg); }
+  50% { opacity: 1; transform: scale(1.18) rotate(22deg); }
+}
+
+/* ---------- Header & Floating Quill Illustration ---------- */
+.cs-header {
+  position: relative;
+  text-align: center;
+  margin-bottom: 12px;
+}
+.cs-quill-svg {
+  display: block;
+  width: 118px;
+  height: 42px;
+  margin: 0 auto 2px;
+  overflow: visible;
+}
+.cs-nib-group {
+  transform-origin: 60px 24px;
+  animation: csQuillFloat 3.4s ease-in-out infinite;
+}
+.cs-flourish-path {
+  stroke-dasharray: 130;
+  stroke-dashoffset: 0;
+  animation: csFlourishDraw 1.2s cubic-bezier(.22, 1, .36, 1) both;
+}
+@keyframes csQuillFloat {
+  0%, 100% { transform: translateY(0px) rotate(-2deg); }
+  50% { transform: translateY(-3.5px) rotate(3deg); }
+}
+@keyframes csFlourishDraw {
+  from { stroke-dashoffset: 130; opacity: .2; }
+  to { stroke-dashoffset: 0; opacity: 1; }
+}
+
+.cs-eyebrow {
+  margin: 0;
+  font: 700 11px/1.2 var(--font-sans, system-ui, sans-serif);
+  letter-spacing: .16em;
+  color: var(--gold-deep, #A47A2C);
+  text-transform: uppercase;
+}
+.cs-heading {
+  margin: 3px 0 0;
+  font-size: 19px;
+  line-height: 1.5;
+  font-weight: 700;
+  color: var(--maroon, #6E1F2A);
+}
+html[data-lang="en"] .cs-heading {
+  font: 700 24px/1.2 var(--font-serif, Georgia, serif);
+}
+
+/* ---------- Collapsible Latest Booking Pill ---------- */
+.cs-last-banner {
+  margin: 0 0 12px;
+  border-radius: 12px;
+  background: rgba(110, 31, 42, .06);
+  border: 1px solid rgba(201, 162, 74, .65);
+  overflow: hidden;
+}
+.cs-last-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px 6px 10px;
+}
+.cs-last-toggle {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 0;
+  background: transparent;
+  padding: 4px 0;
+  text-align: left;
+  font-size: 12.5px;
+  color: var(--ink, #2A2118);
+  cursor: pointer;
+}
+.cs-last-dot {
+  color: var(--gold-deep, #A47A2C);
+  flex: none;
+}
+.cs-last-text {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cs-last-text strong {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: var(--maroon, #6E1F2A);
+  font-size: 12px;
+}
+.cs-last-chev {
+  color: var(--muted, #5B4A36);
+  font-size: 12px;
+}
+.cs-last-view-btn {
+  flex: none;
+  padding: 5px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--gold-deep, #A47A2C);
+  background: #fff;
+  color: var(--maroon, #6E1F2A);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.cs-last-detail {
+  padding: 0 12px 9px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 12.5px;
+  color: var(--muted, #5B4A36);
+  border-top: 1px dashed rgba(201, 162, 74, .45);
+  padding-top: 7px;
+}
+
+/* ---------- 3-Step Animated Gold Ink Progress Bar ---------- */
+.cs-stepper {
+  position: relative;
+  margin: 4px 0 16px;
+  padding: 0 4px;
+}
+.cs-step-track {
+  position: absolute;
+  top: 14px;
+  left: 16%;
+  right: 16%;
+  height: 3px;
+  border-radius: 99px;
+  background: rgba(201, 162, 74, .28);
+  overflow: hidden;
+}
+.cs-step-fill {
+  width: 100%;
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, #6E1F2A 0%, #C9A24A 55%, #E3C16E 100%);
+  transform-origin: left center;
+  transition: transform .48s cubic-bezier(.22, 1, .36, 1);
+}
+.cs-step-nodes {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+}
+.cs-step-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: default;
+  color: var(--muted, #5B4A36);
+}
+.cs-step-node:not(:disabled) {
+  cursor: pointer;
+}
+.cs-step-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #FAF5EB;
+  border: 2px solid rgba(201, 162, 74, .55);
+  font: 700 12px/1 var(--font-sans, system-ui, sans-serif);
+  color: var(--gold-text, #7A5A1F);
+  transition: transform .3s cubic-bezier(.34, 1.56, .64, 1), background .25s, border-color .25s, color .25s;
+}
+.cs-step-node.is-active .cs-step-dot {
+  background: var(--maroon, #6E1F2A);
+  border-color: var(--gold, #C9A24A);
+  color: #FFF7E6;
+  transform: scale(1.1);
+  box-shadow: 0 0 0 4px rgba(201, 162, 74, .28);
+}
+.cs-step-node.is-done .cs-step-dot {
+  background: var(--gold-deep, #A47A2C);
+  border-color: var(--gold-deep, #A47A2C);
+  color: #fff;
+}
+.cs-step-lbl {
+  font-size: 11.5px;
+  font-weight: 700;
+  line-height: 1.3;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+.cs-step-node.is-active .cs-step-lbl {
+  color: var(--maroon, #6E1F2A);
+}
+
+/* ---------- Step Panes & Spring Transitions ---------- */
+.cs-pane {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.cs-anim-forward {
+  animation: csSlideFwd .36s cubic-bezier(.22, 1, .36, 1) both;
+}
+.cs-anim-back {
+  animation: csSlideBack .34s cubic-bezier(.22, 1, .36, 1) both;
+}
+@keyframes csSlideFwd {
+  from { opacity: 0; transform: translateX(18px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes csSlideBack {
+  from { opacity: 0; transform: translateX(-18px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.cs-step-intro {
+  margin: 0;
+  text-align: center;
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--muted, #5B4A36);
+}
+
+/* ---------- Step 1: 7 Interactive Topic Tiles ---------- */
+.cs-topics {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.cs-tile {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  padding: 11px 12px;
+  border-radius: 15px;
+  border: 1.5px solid var(--line, #D8C9A6);
+  background: rgba(255, 253, 248, .92);
+  text-align: left;
+  cursor: pointer;
+  transition: transform .2s cubic-bezier(.34, 1.56, .64, 1), border-color .2s, box-shadow .2s, background .2s;
+  animation: csCardIn .42s cubic-bezier(.22, 1, .36, 1) both;
+  animation-delay: calc(var(--i, 0) * 42ms);
+}
+@keyframes csCardIn {
+  from { opacity: 0; transform: translateY(12px) scale(.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.cs-tile:hover {
+  border-color: var(--gold, #C9A24A);
+  transform: translateY(-1px);
+  box-shadow: 0 5px 14px rgba(110, 31, 42, .09);
+}
+.cs-tile:active {
+  transform: scale(.985);
+}
+
+/* Featured Standard System subtle gold shimmer tint */
+.cs-tile.is-featured {
+  background: linear-gradient(135deg, #FFFDF5 0%, #FDF2D6 100%);
+  border-color: rgba(201, 162, 74, .85);
+}
+
+.cs-tile.is-selected {
+  border-color: var(--maroon, #6E1F2A);
+  background: linear-gradient(135deg, #FFFDF9 0%, #FCEFE0 100%);
+  box-shadow:
+    0 0 0 2px rgba(110, 31, 42, .16),
+    0 8px 20px rgba(110, 31, 42, .14);
+}
+.cs-tile.is-pulsing {
+  animation: csTilePulse .65s ease;
+}
+@keyframes csTilePulse {
+  0% { box-shadow: 0 0 0 0 rgba(201, 162, 74, .65); }
+  60% { box-shadow: 0 0 0 8px rgba(201, 162, 74, 0); }
+  100% { box-shadow: 0 0 0 2px rgba(110, 31, 42, .16), 0 8px 20px rgba(110, 31, 42, .14); }
+}
+
+.cs-tile-ico {
+  flex: none;
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(145deg, #F5EBD6, #EADAB8);
+  border: 1px solid rgba(201, 162, 74, .55);
+  color: var(--maroon, #6E1F2A);
+  transition: background .2s, color .2s, transform .25s cubic-bezier(.34, 1.56, .64, 1);
+}
+.cs-tile-ico svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+.cs-tile.is-selected .cs-tile-ico {
+  background: linear-gradient(145deg, #7E2431, #591620);
+  border-color: var(--gold, #C9A24A);
+  color: #FAE6B1;
+  transform: scale(1.06);
+}
+
+.cs-tile-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.cs-tile-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+}
+.cs-tile-title {
+  font-size: 14.5px;
+  line-height: 1.45;
+  font-weight: 700;
+  color: var(--ink, #2A2118);
+}
+.cs-tile.is-selected .cs-tile-title {
+  color: var(--maroon, #6E1F2A);
+}
+.cs-tile-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 700;
+  line-height: 1.5;
+  background: rgba(201, 162, 74, .2);
+  color: var(--gold-text, #7A5A1F);
+}
+.cs-tile.is-featured .cs-tile-badge {
+  background: var(--maroon, #6E1F2A);
+  color: #FCE9B6;
+}
+.cs-tile-sub {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted, #5B4A36);
+}
+.cs-tile-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-top: 2px;
+}
+.cs-tile-strike {
+  font: 600 12px/1 var(--font-sans, system-ui, sans-serif);
+  color: #9A8870;
+}
+.cs-tile-price {
+  font: 700 13.5px/1.3 var(--font-sans, system-ui, sans-serif);
+  color: var(--maroon, #6E1F2A);
+  font-variant-numeric: tabular-nums;
+}
+.cs-tone-free .cs-tile-price {
+  color: #1F6B3F;
+  font-family: inherit;
+}
+.cs-tone-custom .cs-tile-price {
+  color: var(--gold-text, #7A5A1F);
+  font-family: inherit;
+}
+
+/* Animated Gold Checkmark Stamp Pop-In */
+.cs-tile-check {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  border: 1.5px solid var(--line, #D8C9A6);
+  background: transparent;
+  color: transparent;
+  font-size: 13px;
+  font-weight: 900;
+  transition: border-color .2s, background .2s;
+}
+.cs-tile.is-selected .cs-tile-check {
+  border-color: var(--gold, #C9A24A);
+  background: linear-gradient(135deg, #C9A24A, #9B7022);
+  color: #fff;
+  animation: csStampPop .34s cubic-bezier(.34, 1.8, .64, 1) both;
+}
+@keyframes csStampPop {
+  0% { transform: scale(.35) rotate(-25deg); opacity: 0; }
+  70% { transform: scale(1.18) rotate(4deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+/* ---------- Live Dynamic Maya Helper Quote ---------- */
+.cs-maya-quote {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 11px 12px;
+  border-radius: 14px;
+  background: rgba(255, 252, 244, .92);
+  border: 1px solid rgba(201, 162, 74, .6);
+  border-left: 3.5px solid var(--maroon, #6E1F2A);
+}
+.cs-maya-quote.is-swapping .cs-quote-text {
+  animation: csQuoteFade .32s ease both;
+}
+@keyframes csQuoteFade {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.cs-quote-avatar {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid var(--gold, #C9A24A);
+  box-shadow: 0 2px 6px rgba(74, 20, 28, .18);
+}
+.cs-quote-body {
+  flex: 1;
+}
+.cs-quote-name {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--gold-text, #7A5A1F);
+}
+.cs-quote-text {
+  margin: 2px 0 0;
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--ink, #2A2118);
+}
+
+/* ---------- Step 2: Selected Pill, Floating-Label Inputs & Channels ---------- */
+.cs-selected-pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 11px;
+  border-radius: 13px;
+  background: linear-gradient(135deg, rgba(110, 31, 42, .08), rgba(201, 162, 74, .14));
+  border: 1px solid rgba(201, 162, 74, .65);
+}
+.cs-sel-ico {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  background: var(--maroon, #6E1F2A);
+  color: #FAE6B1;
+}
+.cs-sel-ico svg {
+  width: 17px;
+  height: 17px;
+  fill: currentColor;
+}
+.cs-sel-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.cs-sel-info strong {
+  font-size: 13.5px;
+  line-height: 1.4;
+  color: var(--maroon, #6E1F2A);
+}
+.cs-sel-info small {
+  font-size: 12px;
+  color: var(--muted, #5B4A36);
+}
+.cs-sel-change {
+  flex: none;
+  padding: 6px 10px;
+  border-radius: 9px;
+  border: 1px solid var(--gold-deep, #A47A2C);
+  background: #fff;
+  color: var(--maroon, #6E1F2A);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Floating-Label Inputs with Animated Gold Underline Draw + Valid Check Bloom */
+.cs-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+.cs-float {
+  position: relative;
+  display: block;
+  border-radius: 13px;
+  background: #FFFFFF;
+  border: 1.5px solid var(--line, #D8C9A6);
+  transition: border-color .2s, box-shadow .2s;
+  overflow: hidden;
+}
+.cs-float:focus-within {
+  border-color: var(--gold-deep, #A47A2C);
+  box-shadow: 0 4px 14px rgba(164, 122, 44, .14);
+}
+.cs-float.is-invalid {
+  border-color: #C2353E;
+  box-shadow: 0 0 0 3px rgba(194, 53, 62, .12);
+}
+.cs-float input {
+  width: 100%;
+  min-height: 54px;
+  padding: 22px 36px 8px 13px;
+  border: 0;
+  background: transparent;
+  color: var(--ink, #2A2118);
+  font: 600 15.5px/1.35 var(--font-my, system-ui, sans-serif);
+  outline: none;
+}
+.cs-float-lbl {
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  transform-origin: left center;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted, #5B4A36);
+  pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: calc(100% - 46px);
+  transition: transform .22s cubic-bezier(.22, 1, .36, 1), top .22s cubic-bezier(.22, 1, .36, 1), color .2s, font-size .2s;
+}
+.cs-float-lbl b {
+  color: #B92630;
+}
+.cs-float input:focus + .cs-float-lbl,
+.cs-float input:not(:placeholder-shown) + .cs-float-lbl {
+  top: 13px;
+  transform: translateY(-50%) scale(.82);
+  color: var(--gold-text, #7A5A1F);
+  font-weight: 700;
+}
+
+/* Animated centered brushed-gold underline draw */
+.cs-underline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2.5px;
+  background: linear-gradient(90deg, #6E1F2A 0%, #C9A24A 50%, #6E1F2A 100%);
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform .32s cubic-bezier(.22, 1, .36, 1);
+}
+.cs-float:focus-within .cs-underline {
+  transform: scaleX(1);
+}
+
+/* Valid check bloom */
+.cs-valid-dot {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #237A4B;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 900;
+  transform: translateY(-50%) scale(0);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform .28s cubic-bezier(.34, 1.8, .64, 1), opacity .2s;
+}
+.cs-float.is-valid .cs-valid-dot {
+  transform: translateY(-50%) scale(1);
+  opacity: 1;
+}
+
+/* Shake on invalid submit */
+.is-shake {
+  animation: csShake .4s cubic-bezier(.36, .07, .19, .97) both;
+}
+@keyframes csShake {
+  10%, 90% { transform: translateX(-2px); }
+  20%, 80% { transform: translateX(4px); }
+  30%, 50%, 70% { transform: translateX(-5px); }
+  40%, 60% { transform: translateX(5px); }
+}
+
+/* Groups: Preferred Channel & Time Chips */
+.cs-group {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.cs-group-lbl {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink, #2A2118);
+}
+
+.cs-channels {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+@media (min-width: 520px) {
+  .cs-channels {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+.cs-ch-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 42px;
+  padding: 6px 8px;
+  border-radius: 12px;
+  border: 1.5px solid var(--line, #D8C9A6);
+  background: #FFFCF6;
+  color: var(--ink, #2A2118);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform .16s cubic-bezier(.34, 1.56, .64, 1), background .2s, border-color .2s, color .2s, box-shadow .2s;
+}
+.cs-ch-pill svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+  flex: none;
+}
+.cs-ch-pill.is-active {
+  background: linear-gradient(135deg, #7A2330, #591620);
+  border-color: var(--gold, #C9A24A);
+  color: #FFF7E6;
+  box-shadow: 0 4px 12px rgba(110, 31, 42, .24);
+  transform: translateY(-1px);
+}
+
+.cs-times {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.cs-time-chip {
+  flex: 1 1 auto;
+  min-height: 36px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1.5px solid var(--line, #D8C9A6);
+  background: #FFFCF6;
+  color: var(--muted, #5B4A36);
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .18s, border-color .18s, color .18s;
+}
+.cs-time-chip.is-active {
+  background: #FFF1CC;
+  border-color: var(--gold-deep, #A47A2C);
+  color: var(--maroon, #6E1F2A);
+}
+.cs-time-custom,
+.cs-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1.5px solid var(--line, #D8C9A6);
+  background: #fff;
+  color: var(--ink, #2A2118);
+  font: 500 14.5px/1.55 var(--font-my, system-ui, sans-serif);
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+}
+.cs-time-custom:focus,
+.cs-textarea:focus {
+  border-color: var(--gold-deep, #A47A2C);
+  box-shadow: 0 0 0 3px rgba(201, 162, 74, .18);
+}
+.cs-textarea {
+  resize: vertical;
+  min-height: 82px;
+}
+
+.cs-error {
+  margin: 0;
+  padding: 9px 12px;
+  border-radius: 11px;
+  background: #FDECEC;
+  border: 1px solid #E3959B;
+  color: #9A1E28;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+/* ---------- Buttons & Animated Gold Sheen ---------- */
+.cs-step2-actions {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+.cs-btn-back {
+  flex: 0 0 auto;
+  min-height: 50px;
+  padding: 0 14px;
+  border-radius: 14px;
+  border: 1.5px solid var(--line, #D8C9A6);
+  background: #FFFCF6;
+  color: var(--muted, #5B4A36);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.cs-btn-primary {
+  position: relative;
+  overflow: hidden;
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 52px;
+  padding: 10px 18px;
+  border-radius: 14px;
+  border: 1.5px solid rgba(229, 198, 120, .75);
+  background: linear-gradient(135deg, #7E2431 0%, #6E1F2A 55%, #53141D 100%);
+  color: #FFF8EA;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.4;
+  cursor: pointer;
+  box-shadow:
+    0 8px 20px rgba(110, 31, 42, .28),
+    inset 0 -3px 0 rgba(0, 0, 0, .2);
+  transition: transform .14s, opacity .18s;
+}
+.cs-btn-primary:active:not(:disabled) {
+  transform: translateY(1px) scale(.99);
+}
+.cs-btn-primary:disabled {
+  opacity: .8;
+  cursor: progress;
+}
+.cs-sheen::after {
+  content: "";
+  position: absolute;
+  top: -20%;
+  bottom: -20%;
+  left: -45%;
+  width: 36%;
+  background: linear-gradient(90deg, transparent, rgba(255, 240, 200, .38), transparent);
+  transform: skewX(-24deg);
+  animation: csSheen 3.6s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes csSheen {
+  0%, 62% { left: -45%; }
+  100% { left: 135%; }
+}
+
+.cs-quill-spin {
+  display: inline-block;
+  font-size: 17px;
+  animation: csQuillWrite .7s ease-in-out infinite alternate;
+}
+@keyframes csQuillWrite {
+  from { transform: rotate(-18deg) translateY(0); }
+  to { transform: rotate(18deg) translateY(-3px); }
+}
+
+/* ---------- Step 3: Celebratory Wax-Sealed Studio Ticket ---------- */
+.cs-ticket {
+  position: relative;
+  border-radius: 18px;
+  background: #FFFCF4;
+  border: 1.5px solid var(--gold, #C9A24A);
+  box-shadow: 0 12px 28px rgba(74, 20, 28, .14);
+  overflow: hidden;
+}
+.cs-ticket-top {
+  position: relative;
+  padding: 18px 16px 14px;
+  text-align: center;
+  background:
+    radial-gradient(90% 80% at 50% 0%, #FFF8E3 0%, #FAF0D8 100%);
+}
+.cs-seal-stage {
+  position: relative;
+  width: 82px;
+  height: 82px;
+  margin: 0 auto 6px;
+  display: grid;
+  place-items: center;
+}
+.cs-seal-wrap {
+  position: relative;
+  z-index: 2;
+  width: 78px;
+  height: 78px;
+  filter: drop-shadow(0 6px 12px rgba(74, 20, 28, .32));
+}
+.cs-seal-wrap.is-stamping {
+  animation: csSealStamp .68s cubic-bezier(.22, 1.45, .42, 1) both;
+}
+@keyframes csSealStamp {
+  0% { transform: scale(2.15) rotate(-18deg); opacity: 0; }
+  58% { transform: scale(.88) rotate(5deg); opacity: 1; }
+  80% { transform: scale(1.06) rotate(-2deg); }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+.cs-seal-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* 24-particle celebratory sparkle burst */
+.cs-burst-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+.cs-spark {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  line-height: 1;
+  font-weight: 700;
+  opacity: 0;
+  animation: csSparkBurst 1.35s cubic-bezier(.16, 1, .3, 1) var(--delay, 0ms) forwards;
+}
+.cs-spark-gold { color: #C9A24A; }
+.cs-spark-maroon { color: #8A2635; }
+@keyframes csSparkBurst {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(.4) rotate(0deg);
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--tx, 0px)), calc(-50% + var(--ty, 0px))) scale(1.1) rotate(var(--rot, 120deg));
+  }
+}
+
+.cs-ticket-eyebrow {
+  margin: 0;
+  font: 700 10.5px/1.2 var(--font-sans, system-ui, sans-serif);
+  letter-spacing: .16em;
+  color: var(--gold-deep, #A47A2C);
+}
+.cs-ticket-title {
+  margin: 4px 0 3px;
+  font-size: 19px;
+  line-height: 1.45;
+  color: var(--maroon, #6E1F2A);
+}
+.cs-ticket-sub {
+  margin: 0 auto 10px;
+  max-width: 34ch;
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--muted, #5B4A36);
+}
+
+.cs-ticket-id-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  padding: 5px 7px 5px 11px;
+  border-radius: 11px;
+  background: #fff;
+  border: 1.5px solid var(--gold, #C9A24A);
+}
+.cs-ticket-id-lbl {
+  font: 700 10px/1 var(--font-sans, system-ui, sans-serif);
+  letter-spacing: .08em;
+  color: var(--gold-text, #7A5A1F);
+}
+.cs-ticket-id {
+  font: 700 14.5px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: var(--maroon, #6E1F2A);
+  letter-spacing: .04em;
+}
+.cs-copy-id {
+  padding: 5px 9px;
+  border-radius: 7px;
+  border: 1px solid var(--gold-deep, #A47A2C);
+  background: #FAF3E2;
+  color: var(--maroon, #6E1F2A);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Perforated Ticket Divider */
+.cs-ticket-perf {
+  position: relative;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  background: #FFFCF4;
+}
+.cs-perf-line {
+  width: 100%;
+  border-top: 2px dashed rgba(201, 162, 74, .65);
+  margin: 0 12px;
+}
+.cs-notch {
+  position: absolute;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #F4EBD7;
+  border: 1.5px solid var(--gold, #C9A24A);
+  transform: translateY(-50%);
+}
+.cs-notch-l { left: -10px; }
+.cs-notch-r { right: -10px; }
+
+.cs-ticket-bottom {
+  padding: 10px 15px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+.cs-ticket-rows {
+  margin: 0;
+}
+.cs-ticket-rows div {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px dashed var(--line, #D8C9A6);
+  font-size: 13.5px;
+  line-height: 1.55;
+}
+.cs-ticket-rows div:last-child {
+  border-bottom: 0;
+}
+.cs-ticket-rows dt {
+  color: var(--muted, #5B4A36);
+  flex: none;
+}
+.cs-ticket-rows dd {
+  margin: 0;
+  text-align: right;
+  font-weight: 700;
+  color: var(--ink, #2A2118);
+  overflow-wrap: anywhere;
+}
+
+.cs-chat-hint {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--muted, #5B4A36);
+  text-align: center;
+}
+.cs-chat-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+}
+.cs-chat-btn {
+  flex: initial !important;
+  min-height: 44px !important;
+  padding: 6px 6px !important;
+  font-size: 13px !important;
+  border-radius: 12px !important;
+  gap: 5px !important;
+}
+.cs-chat-btn svg {
+  width: 16px !important;
+  height: 16px !important;
+}
+
+.cs-book-another {
+  align-self: center;
+  border: 0;
+  background: transparent;
+  padding: 6px 12px;
+  color: var(--maroon, #6E1F2A);
+  font-size: 13.5px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  cursor: pointer;
+}
+
+.cs-toast {
+  position: fixed;
+  left: 50%;
+  top: calc(18px + env(safe-area-inset-top, 0px));
+  transform: translateX(-50%);
+  z-index: 9900;
+  max-width: calc(100% - 28px);
+  padding: 10px 18px;
+  border-radius: 12px;
+  background: #236B42;
+  color: #fff;
+  font-weight: 700;
+  font-size: 14.5px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .28);
+}
+
+/* ---------- Reduced Motion Respect ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .cs-corner,
+  .cs-nib-group,
+  .cs-flourish-path,
+  .cs-tile,
+  .cs-tile-check,
+  .cs-pane,
+  .cs-sheen::after,
+  .cs-quill-spin,
+  .cs-seal-wrap,
+  .cs-spark {
+    animation: none !important;
+    transition: none !important;
+  }
+}

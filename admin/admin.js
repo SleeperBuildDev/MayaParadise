@@ -24,6 +24,9 @@ import {
   adminSaveConfig,
   adminImportBookJson,
   adminGetBookStatus,
+  adminWatchConsultations,
+  adminUpdateConsultationStatus,
+  adminDeleteConsultation,
 } from '../js/ebook/store.js';
 
 const LANG_KEY = 'wm-admin-lang';
@@ -39,23 +42,30 @@ let activeTab = 'pending';
 let statusFilter = 'all';
 let searchQuery = '';
 let allReaders = [];
+let bookingFilter = 'all';
+let bookingSearchQuery = '';
+let allConsultations = [];
 let currentConfig = null;
 let pendingQrDataUrl = '';
 let pendingQrBytes = 0;
 let bookStatus = null;
 let unsubReaders = null;
+let unsubConsultations = null;
 let unsubStore = null;
 let adminSessionInfo = null;
 
-// Live payment notification & Android bridge state
+// Live payment & booking notification + Android bridge state
 let webSoundEnabled = true;
 let audioCtx = null;
 let readersInitialized = false;
+let consultationsInitialized = false;
 const seenPendingKeys = new Set();
+const seenBookingKeys = new Set();
 let bannerPayment = null;
 let titleFlashTimer = null;
 let titleFlashPhase = false;
 let queuedOpenUid = '';
+let queuedOpenBookingId = '';
 let nativeActivating = false;
 let lastCtaSignature = '';
 let nativeStatus = {
@@ -69,6 +79,7 @@ let nativeStatus = {
   alarmMode: false,
   repeatMinutes: 3,
   pendingCount: 0,
+  newBookingsCount: 0,
   sdkInt: 0,
   manufacturer: '',
   lastError: '',
@@ -286,6 +297,13 @@ function applyLang(nextLang, { persist = true } = {}) {
       'Search name, phone/email, Order ID...'
     );
   }
+  const bookingSearchInput = $('booking-search');
+  if (bookingSearchInput) {
+    bookingSearchInput.placeholder = t(
+      'အမည်၊ လုပ်ငန်း၊ ဖုန်း/Telegram၊ Booking ID ရှာရန်...',
+      'Search name, business, contact, Booking ID...'
+    );
+  }
   const manualName = $('manual-name');
   if (manualName) manualName.placeholder = t('ဥပမာ - မဆုမြတ်', 'e.g. Su Myat');
   const manualNote = $('manual-note');
@@ -295,6 +313,7 @@ function applyLang(nextLang, { persist = true } = {}) {
   renderNewPaymentBanner();
   renderPendingAlertsCta(true);
   renderPendingTab();
+  renderBookingsTab();
   renderReadersTab();
   renderAlertsSettingsCard();
   renderPaymentPreview();
@@ -444,9 +463,16 @@ function playPaymentChime() {
   }
 }
 
-function updateStaticDocTitle(pendingCount) {
+function getAttentionCount() {
+  const pendingCount = allReaders.filter((r) => r.status === 'pending').length;
+  const newBookings = allConsultations.filter((b) => b.status === 'new').length;
+  return pendingCount + newBookings;
+}
+
+function updateStaticDocTitle(overrideCount = null) {
   if (titleFlashTimer) return;
-  document.title = pendingCount > 0 ? `(${pendingCount}) 💰 Maya Admin` : BASE_DOC_TITLE;
+  const count = overrideCount != null ? Number(overrideCount) || 0 : getAttentionCount();
+  document.title = count > 0 ? `(${count}) 💰 Maya Admin` : BASE_DOC_TITLE;
 }
 
 function stopTitleFlash() {
@@ -454,20 +480,26 @@ function stopTitleFlash() {
     clearInterval(titleFlashTimer);
     titleFlashTimer = null;
   }
-  const pendingCount = allReaders.filter((r) => r.status === 'pending').length;
-  document.title = pendingCount > 0 ? `(${pendingCount}) 💰 Maya Admin` : BASE_DOC_TITLE;
+  const count = getAttentionCount();
+  document.title = count > 0 ? `(${count}) 💰 Maya Admin` : BASE_DOC_TITLE;
 }
 
-function startTitleFlash(pendingCount) {
+function startTitleFlash(totalCount, kind = 'payment') {
   if (titleFlashTimer) clearInterval(titleFlashTimer);
-  const count = Math.max(1, Number(pendingCount) || 1);
+  const count = Math.max(1, Number(totalCount) || 1);
   titleFlashPhase = false;
-  document.title = `(${count}) 💰 Maya Admin`;
+  document.title = kind === 'booking' ? `(${count}) 📋 Maya Admin` : `(${count}) 💰 Maya Admin`;
   titleFlashTimer = setInterval(() => {
     titleFlashPhase = !titleFlashPhase;
-    document.title = titleFlashPhase
-      ? t(`💰 ငွေလွှဲအသစ် (${count}) · မာရာ Admin`, `💰 New KPay (${count}) · Maya Admin`)
-      : `(${count}) 💰 Maya Admin`;
+    if (kind === 'booking') {
+      document.title = titleFlashPhase
+        ? t(`📋 ဘွတ်ကင်အသစ် (${count}) · မာရာ Admin`, `📋 New Booking (${count}) · Maya Admin`)
+        : `(${count}) 📋 Maya Admin`;
+    } else {
+      document.title = titleFlashPhase
+        ? t(`💰 ငွေလွှဲအသစ် (${count}) · မာရာ Admin`, `💰 New KPay (${count}) · Maya Admin`)
+        : `(${count}) 💰 Maya Admin`;
+    }
   }, 1200);
 }
 
@@ -478,11 +510,33 @@ function renderNewPaymentBanner() {
     banner.hidden = true;
     return;
   }
-  const name = bannerPayment.name || t('ဝယ်ယူသူအသစ်', 'New Buyer');
+  const iconEl = $('pab-icon');
+  const checkBtn = $('btn-banner-check');
   const extra =
     bannerPayment.extraCount > 0
       ? t(` (+${bannerPayment.extraCount} ဦးထပ်ဝင်)`, ` (+${bannerPayment.extraCount} more)`)
       : '';
+
+  if (bannerPayment.kind === 'booking') {
+    const name = bannerPayment.name || t('ဖောက်သည်အသစ်', 'New Client');
+    const topic = bannerPayment.topicLabel || t('ဘွတ်ကင်', 'Booking');
+    if (iconEl) iconEl.textContent = '📋';
+    $('pab-title').textContent = t(
+      `ဘွတ်ကင်အသစ် — ${name} · ${topic}${extra}`,
+      `New Booking — ${name} · ${topic}${extra}`
+    );
+    const parts = [bannerPayment.bookingId, bannerPayment.contact].filter(Boolean);
+    $('pab-sub').textContent =
+      parts.join(' · ') || t('ဘွတ်ကင်အသေးစိတ် ကြည့်ရှုရန် နှိပ်ပါ', 'Tap to inspect this consultation booking');
+    if (checkBtn) {
+      checkBtn.textContent = t('ဘွတ်ကင်ကြည့်မည်', 'View Booking');
+    }
+    banner.hidden = false;
+    return;
+  }
+
+  const name = bannerPayment.name || t('ဝယ်ယူသူအသစ်', 'New Buyer');
+  if (iconEl) iconEl.textContent = '💰';
   $('pab-title').textContent = t(
     `ငွေလွှဲအသစ်ရောက်ပါပြီ — ${name}${extra}`,
     `New KPay Payment — ${name}${extra}`
@@ -490,6 +544,9 @@ function renderNewPaymentBanner() {
   const parts = [bannerPayment.orderId, bannerPayment.contact].filter(Boolean);
   $('pab-sub').textContent =
     parts.join(' · ') || t('KPay Slip ကို ချက်ချင်းစစ်ဆေးနိုင်ပါသည်', 'Tap to inspect the KPay slip now');
+  if (checkBtn) {
+    checkBtn.textContent = t('Slip အခုစစ်မည်', 'Check Slip Now');
+  }
   banner.hidden = false;
 }
 
@@ -524,10 +581,50 @@ function openPaymentByUid(uid) {
   }, 80);
 }
 
-function handleNewPaymentsArrived(freshList, totalPendingCount) {
+function openBookingById(bookingId) {
+  const targetId = String(bookingId || '').trim();
+  dismissPaymentBanner();
+  switchTab('bookings');
+  if (!targetId) return;
+
+  const item = allConsultations.find((b) => b.bookingId === targetId);
+  if (!item) {
+    queuedOpenBookingId = targetId;
+    return;
+  }
+  queuedOpenBookingId = '';
+
+  // Ensure card isn't hidden by an active filter/search
+  if (bookingFilter !== 'all' && item.status !== bookingFilter) {
+    bookingFilter = 'all';
+    document.querySelectorAll('#booking-status-filters .pill-filter').forEach((b) => {
+      b.setAttribute('aria-pressed', b.dataset.bfilter === 'all' ? 'true' : 'false');
+    });
+  }
+  if (bookingSearchQuery) {
+    bookingSearchQuery = '';
+    if ($('booking-search')) $('booking-search').value = '';
+    if ($('btn-booking-search-clear')) $('btn-booking-search-clear').hidden = true;
+  }
+  renderBookingsTab();
+
+  setTimeout(() => {
+    const card = $('bookings-list')?.querySelector(
+      `.booking-card[data-booking-id="${CSS.escape(targetId)}"]`
+    );
+    if (card) {
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      card.classList.add('highlight-pulse');
+      setTimeout(() => card.classList.remove('highlight-pulse'), 2600);
+    }
+  }, 80);
+}
+
+function handleNewPaymentsArrived(freshList, totalAttentionCount) {
   if (!freshList || !freshList.length) return;
   const latest = freshList[0];
   bannerPayment = {
+    kind: 'payment',
     uid: latest.uid,
     name: latest.name || '',
     contact: latest.contact || '',
@@ -535,7 +632,7 @@ function handleNewPaymentsArrived(freshList, totalPendingCount) {
     extraCount: freshList.length - 1,
   };
   renderNewPaymentBanner();
-  startTitleFlash(totalPendingCount);
+  startTitleFlash(totalAttentionCount, 'payment');
 
   if (hasNativeBridge()) {
     readNativeStatus();
@@ -586,6 +683,77 @@ function handleNewPaymentsArrived(freshList, totalPendingCount) {
           // Ignore.
         }
         openPaymentByUid(latest.uid);
+        n.close();
+      };
+    } catch {
+      // Ignore browser notification errors.
+    }
+  }
+}
+
+function handleNewBookingsArrived(freshList, totalAttentionCount) {
+  if (!freshList || !freshList.length) return;
+  const latest = freshList[0];
+  bannerPayment = {
+    kind: 'booking',
+    bookingId: latest.bookingId || '',
+    name: latest.name || '',
+    contact: latest.contact || '',
+    topicLabel: latest.topicLabel || '',
+    extraCount: freshList.length - 1,
+  };
+  renderNewPaymentBanner();
+  startTitleFlash(totalAttentionCount, 'booking');
+
+  if (hasNativeBridge()) {
+    readNativeStatus();
+    if (!nativeStatus.monitorRunning) {
+      try {
+        window.MayaAndroid.notifyBookingFromWeb?.(
+          latest.bookingId || '',
+          latest.name || '',
+          latest.contact || '',
+          latest.topicLabel || '',
+          lang
+        );
+      } catch {
+        // Ignore bridge error.
+      }
+      playPaymentChime();
+    }
+    return;
+  }
+
+  // Web Browser mode
+  if (webSoundEnabled) playPaymentChime();
+  try {
+    navigator.vibrate?.([300, 120, 300]);
+  } catch {
+    // Ignore vibrate error.
+  }
+  if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+    try {
+      const title = t(
+        `📋 ဘွတ်ကင်အသစ် — ${latest.name || 'ဖောက်သည်'}`,
+        `📋 New Booking — ${latest.name || 'Client'}`
+      );
+      const body = t(
+        `${latest.topicLabel || ''} · ${latest.contact || ''} — ဘွတ်ကင်ကြည့်ရန် နှိပ်ပါ။`,
+        `${latest.topicLabel || ''} · ${latest.contact || ''} — Tap to view booking.`
+      );
+      const n = new Notification(title, {
+        body,
+        icon: '../img/icon-192.png',
+        tag: `maya-booking-${latest.bookingId}`,
+        requireInteraction: true,
+      });
+      n.onclick = () => {
+        try {
+          window.focus();
+        } catch {
+          // Ignore.
+        }
+        openBookingById(latest.bookingId);
         n.close();
       };
     } catch {
@@ -896,6 +1064,9 @@ if (typeof window !== 'undefined') {
   window.__mayaOpenPayment = (uid) => {
     openPaymentByUid(uid);
   };
+  window.__mayaOpenBooking = (bookingId) => {
+    openBookingById(bookingId);
+  };
 }
 
 // ---------- Auth Gate & Mode ----------
@@ -1045,14 +1216,18 @@ async function enterAdminShell(sessionInfo = null) {
       const fresh = currentPending.filter((r) => !seenPendingKeys.has(pendingKey(r)));
       for (const r of currentPending) seenPendingKeys.add(pendingKey(r));
       if (fresh.length > 0) {
-        handleNewPaymentsArrived(fresh, currentPending.length);
+        handleNewPaymentsArrived(fresh, getAttentionCount());
       } else {
-        updateStaticDocTitle(currentPending.length);
+        updateStaticDocTitle();
       }
-      if (bannerPayment && !currentPending.some((r) => r.uid === bannerPayment.uid)) {
+      if (
+        bannerPayment &&
+        bannerPayment.kind === 'payment' &&
+        !currentPending.some((r) => r.uid === bannerPayment.uid)
+      ) {
         dismissPaymentBanner();
       }
-      if (currentPending.length === 0) {
+      if (getAttentionCount() === 0) {
         stopTitleFlash();
       }
     }
@@ -1076,6 +1251,57 @@ async function enterAdminShell(sessionInfo = null) {
     }
   });
 
+  // Start real-time consultations watcher with live new-booking alerts
+  consultationsInitialized = false;
+  seenBookingKeys.clear();
+  if (unsubConsultations) unsubConsultations();
+  unsubConsultations = adminWatchConsultations((list) => {
+    allConsultations = Array.isArray(list) ? list : [];
+    const currentNew = allConsultations.filter((b) => b.status === 'new');
+    const bookingKey = (b) => `${b.bookingId}:${toMs(b.updatedAt) || toMs(b.createdAt) || 0}`;
+
+    if (!consultationsInitialized) {
+      for (const b of currentNew) seenBookingKeys.add(bookingKey(b));
+      consultationsInitialized = true;
+      updateStaticDocTitle();
+    } else {
+      const fresh = currentNew.filter((b) => !seenBookingKeys.has(bookingKey(b)));
+      for (const b of currentNew) seenBookingKeys.add(bookingKey(b));
+      if (fresh.length > 0) {
+        handleNewBookingsArrived(fresh, getAttentionCount());
+      } else {
+        updateStaticDocTitle();
+      }
+      if (
+        bannerPayment &&
+        bannerPayment.kind === 'booking' &&
+        !currentNew.some((b) => b.bookingId === bannerPayment.bookingId)
+      ) {
+        dismissPaymentBanner();
+      }
+      if (getAttentionCount() === 0) {
+        stopTitleFlash();
+      }
+    }
+
+    renderBadges();
+    renderBookingsTab();
+
+    // Handle booking notification tap cold-start or buffered bookingId
+    let openBid = queuedOpenBookingId;
+    if (!openBid && hasNativeBridge()) {
+      try {
+        openBid = String(window.MayaAndroid.consumePendingOpenBookingId?.() || '').trim();
+      } catch {
+        openBid = '';
+      }
+    }
+    if (openBid && allConsultations.some((b) => b.bookingId === openBid)) {
+      queuedOpenBookingId = '';
+      openBookingById(openBid);
+    }
+  });
+
   // Load book chapter status
   await refreshBookStatus();
 }
@@ -1085,15 +1311,23 @@ function exitAdminShell() {
     unsubReaders();
     unsubReaders = null;
   }
+  if (unsubConsultations) {
+    unsubConsultations();
+    unsubConsultations = null;
+  }
   if (unsubStore) {
     unsubStore();
     unsubStore = null;
   }
   allReaders = [];
+  allConsultations = [];
   receiptCache.clear();
   readersInitialized = false;
+  consultationsInitialized = false;
   seenPendingKeys.clear();
+  seenBookingKeys.clear();
   queuedOpenUid = '';
+  queuedOpenBookingId = '';
   dismissPaymentBanner();
   stopTitleFlash();
   document.title = BASE_DOC_TITLE;
@@ -1105,13 +1339,22 @@ function exitAdminShell() {
 }
 
 // ---------- Navigation Tabs ----------
+const TAB_PANEL_IDS = {
+  pending: 'tab-pending',
+  bookings: 'panel-bookings',
+  readers: 'tab-readers',
+  payments: 'tab-payments',
+  book: 'tab-book',
+};
+
 function switchTab(tabName) {
+  if (!TAB_PANEL_IDS[tabName]) return;
   activeTab = tabName;
   document.querySelectorAll('.tab-btn[data-tab]').forEach((btn) => {
     btn.setAttribute('aria-selected', btn.dataset.tab === tabName ? 'true' : 'false');
   });
-  ['pending', 'readers', 'payments', 'book'].forEach((name) => {
-    const panel = $(`tab-${name}`);
+  Object.entries(TAB_PANEL_IDS).forEach(([name, panelId]) => {
+    const panel = $(panelId);
     if (panel) panel.hidden = name !== tabName;
   });
   if (tabName === 'book') {
@@ -1123,6 +1366,8 @@ function switchTab(tabName) {
   } else if (tabName === 'pending') {
     readNativeStatus();
     renderPendingAlertsCta();
+  } else if (tabName === 'bookings') {
+    renderBookingsTab();
   }
 }
 
@@ -1134,10 +1379,405 @@ function renderBadges() {
     pBadge.hidden = pendingCount === 0;
     pBadge.classList.toggle('tab-pill-alert', pendingCount > 0);
   }
+  const newBookingsCount = allConsultations.filter((b) => b.status === 'new').length;
+  const bBadge = $('badge-bookings');
+  if (bBadge) {
+    bBadge.textContent = String(newBookingsCount);
+    bBadge.hidden = newBookingsCount === 0;
+    bBadge.classList.toggle('tab-pill-alert', newBookingsCount > 0);
+  }
   const rBadge = $('badge-readers');
   if (rBadge) {
     rBadge.textContent = String(allReaders.length);
   }
+}
+
+// ---------- TAB 2: CONSULTATION BOOKINGS ----------
+function bookingStatusLabel(status) {
+  switch (status) {
+    case 'contacted':
+      return t('ဆက်သွယ်ပြီး', 'Contacted');
+    case 'confirmed':
+      return t('အတည်ပြုပြီး', 'Confirmed');
+    case 'done':
+      return t('ပြီးဆုံး', 'Done');
+    case 'cancelled':
+      return t('ပယ်ဖျက်ပြီး', 'Cancelled');
+    case 'new':
+    default:
+      return t('အသစ်', 'New');
+  }
+}
+
+function bookingStatusBadgeClass(status) {
+  switch (status) {
+    case 'contacted':
+      return 'badge-contacted';
+    case 'confirmed':
+      return 'badge-confirmed';
+    case 'done':
+      return 'badge-done';
+    case 'cancelled':
+      return 'badge-cancelled';
+    case 'new':
+    default:
+      return 'badge-new';
+  }
+}
+
+function bookingTopicClass(topic) {
+  switch (topic) {
+    case 'system_standard':
+      return 'topic-system-std';
+    case 'system_lite':
+    case 'system_plus':
+      return 'topic-system';
+    case 'script_short':
+    case 'script_standard':
+    case 'script_long':
+      return 'topic-script';
+    case 'custom_package':
+      return 'topic-custom';
+    case 'consultation':
+    default:
+      return 'topic-consult';
+  }
+}
+
+function channelLabel(ch) {
+  switch (ch) {
+    case 'telegram':
+      return 'Telegram';
+    case 'messenger':
+      return 'Messenger';
+    case 'viber':
+      return 'Viber';
+    case 'phone':
+      return t('ဖုန်း', 'Phone');
+    default:
+      return ch || '—';
+  }
+}
+
+function normalizePhoneForTel(raw) {
+  const s = String(raw || '').trim();
+  const digits = s.replace(/[^\d+]/g, '');
+  const pure = digits.replace(/^\+/, '');
+  if (pure.length < 7 || pure.length > 15 || !/^\d+$/.test(pure)) return '';
+  return digits.startsWith('+') ? digits : pure;
+}
+
+function toInternationalMmDigits(tel) {
+  const pure = tel.replace(/^\+/, '');
+  if (pure.startsWith('95')) return pure;
+  if (pure.startsWith('09') && pure.length >= 9) return '95' + pure.slice(1);
+  return pure;
+}
+
+function buildQuickContactLink(channel, contact) {
+  const raw = String(contact || '').trim();
+  if (!raw) return null;
+
+  const tel = normalizePhoneForTel(raw);
+  const tgMatch = raw.match(/(?:https?:\/\/)?(?:t\.me|telegram\.me)\/([A-Za-z0-9_]{3,40})/i);
+  const atMatch = raw.match(/^@([A-Za-z0-9_]{3,40})$/);
+
+  if (channel === 'telegram' || tgMatch || atMatch) {
+    const handle = tgMatch ? tgMatch[1] : atMatch ? atMatch[1] : !tel && /^[A-Za-z][A-Za-z0-9_]{3,32}$/.test(raw) ? raw : '';
+    if (handle) {
+      return {
+        href: `https://t.me/${encodeURIComponent(handle)}`,
+        label: `✈ Telegram ↗`,
+        cls: 'ch-telegram',
+        external: true,
+      };
+    }
+  }
+
+  if (channel === 'messenger') {
+    const mMatch = raw.match(/(?:https?:\/\/)?(?:m\.me|fb\.com)\/([A-Za-z0-9._-]{3,60})/i);
+    if (mMatch) {
+      return {
+        href: `https://m.me/${encodeURIComponent(mMatch[1])}`,
+        label: `💬 Messenger ↗`,
+        cls: 'ch-messenger',
+        external: true,
+      };
+    }
+  }
+
+  if (channel === 'viber' && tel) {
+    const intl = toInternationalMmDigits(tel);
+    return {
+      href: `viber://chat?number=%2B${encodeURIComponent(intl)}`,
+      label: `💜 Viber ↗`,
+      cls: 'ch-viber',
+      external: true,
+    };
+  }
+
+  if (tel) {
+    return {
+      href: `tel:${tel}`,
+      label: `📞 ${t('ဖုန်းခေါ်', 'Call')}`,
+      cls: 'ch-phone',
+      external: false,
+    };
+  }
+
+  return null;
+}
+
+function getFilteredBookings() {
+  const q = bookingSearchQuery.trim().toLowerCase();
+  return allConsultations.filter((b) => {
+    if (bookingFilter !== 'all' && b.status !== bookingFilter) return false;
+    if (!q) return true;
+    const hay = `${b.bookingId || ''} ${b.name || ''} ${b.businessName || ''} ${b.contact || ''} ${b.topicLabel || ''} ${b.preferredTime || ''} ${b.notes || ''} ${b.adminNote || ''}`.toLowerCase();
+    return hay.includes(q);
+  });
+}
+
+function renderBookingsTab() {
+  const counts = { all: allConsultations.length, new: 0, contacted: 0, confirmed: 0, done: 0, cancelled: 0 };
+  for (const b of allConsultations) {
+    if (b.status in counts) counts[b.status] += 1;
+    else counts.new += 1;
+  }
+  document.querySelectorAll('#booking-status-filters [data-bcount]').forEach((el) => {
+    const key = el.dataset.bcount;
+    if (key in counts) el.textContent = String(counts[key]);
+  });
+
+  const listEl = $('bookings-list');
+  const emptyEl = $('bookings-empty');
+  if (!listEl || !emptyEl) return;
+
+  const filtered = getFilteredBookings();
+  if (!filtered.length) {
+    listEl.innerHTML = '';
+    emptyEl.hidden = false;
+    return;
+  }
+  emptyEl.hidden = true;
+
+  // Preserve typed inline admin notes across live updates
+  const savedNotes = new Map();
+  listEl.querySelectorAll('input[data-bnote-id]').forEach((inp) => {
+    if (inp.value) savedNotes.set(inp.dataset.bnoteId, inp.value);
+  });
+
+  listEl.innerHTML = filtered
+    .map((b) => {
+      const id = b.bookingId || '';
+      const idAttr = escHtml(id);
+      const status = b.status || 'new';
+      const noteVal = escHtml(savedNotes.get(id) ?? b.adminNote ?? '');
+      const quick = buildQuickContactLink(b.channel, b.contact);
+      const quickHtml = quick
+        ? `<a class="quick-chat-btn ${quick.cls}" href="${escHtml(quick.href)}"${
+            quick.external ? ' target="_blank" rel="noopener noreferrer"' : ''
+          }>${escHtml(quick.label)}</a>`
+        : '';
+
+      return `
+        <article class="booking-card status-${escHtml(status)}" data-booking-id="${idAttr}">
+          <div class="booking-head">
+            <div class="booking-id-group">
+              <button type="button" class="copy-chip mono" data-copy-booking="${idAttr}" title="${escHtml(t('Booking ID ကူးယူရန်', 'Copy Booking ID'))}">
+                <span>${idAttr}</span>
+                <span style="opacity:.6">⧉</span>
+              </button>
+              <span class="badge ${bookingStatusBadgeClass(status)}">
+                <span class="badge-dot"></span>
+                ${escHtml(bookingStatusLabel(status))}
+              </span>
+            </div>
+            <span class="booking-time">${escHtml(fmtTime(b.createdAt))}</span>
+          </div>
+
+          <div class="booking-topic-row">
+            <span class="topic-badge ${bookingTopicClass(b.topic)}">
+              ✦ ${escHtml(b.topicLabel || b.topic || t('တိုင်ပင်ဆွေးနွေးမှု', 'Consultation'))}
+            </span>
+          </div>
+
+          <div class="booking-client">
+            <h3>${escHtml(b.name || t('အမည်မသိ', 'Unnamed'))}</h3>
+            ${
+              b.businessName
+                ? `<div class="booking-biz">🏢 ${escHtml(b.businessName)}</div>`
+                : ''
+            }
+          </div>
+
+          <div class="booking-contact-row">
+            <span class="badge badge-neutral">${escHtml(channelLabel(b.channel))}</span>
+            <button type="button" class="copy-chip" data-copy="${escHtml(b.contact || '')}" title="${escHtml(t('ကူးယူရန်', 'Copy contact'))}">
+              <span>${escHtml(b.contact || '—')}</span>
+              <span style="opacity:.6">⧉</span>
+            </button>
+            ${quickHtml}
+          </div>
+
+          ${
+            b.preferredTime
+              ? `<div class="meta-strip"><span>🕒 ${escHtml(t('အဆင်ပြေချိန်', 'Preferred Time'))}: <strong>${escHtml(b.preferredTime)}</strong></span></div>`
+              : ''
+          }
+
+          ${
+            b.notes
+              ? `<div class="booking-notes">${escHtml(b.notes)}</div>`
+              : ''
+          }
+
+          <div class="pending-note-row">
+            <input type="text" class="input booking-note-input" data-bnote-id="${idAttr}" value="${noteVal}" maxlength="1000"
+              placeholder="${escHtml(t('Admin မှတ်ချက် (ဥပမာ - Telegram မှာ စကားပြောပြီး / ဈေးနှုန်းပို့ပြီး)', 'Admin note (e.g. Messaged on Telegram, quote sent...)'))}">
+          </div>
+
+          <div class="booking-actions">
+            ${
+              status !== 'contacted'
+                ? `<button type="button" class="btn btn-contacted btn-xs" data-booking-act="contacted" data-booking-id="${idAttr}">
+                    💬 ${escHtml(t('ဆက်သွယ်ပြီး', 'Contacted'))}
+                   </button>`
+                : ''
+            }
+            ${
+              status !== 'confirmed'
+                ? `<button type="button" class="btn btn-gold btn-xs" data-booking-act="confirmed" data-booking-id="${idAttr}">
+                    ✓ ${escHtml(t('အတည်ပြု', 'Confirm'))}
+                   </button>`
+                : ''
+            }
+            ${
+              status !== 'done'
+                ? `<button type="button" class="btn btn-ok btn-xs" data-booking-act="done" data-booking-id="${idAttr}">
+                    ✔ ${escHtml(t('ပြီးဆုံး', 'Done'))}
+                   </button>`
+                : ''
+            }
+            ${
+              status !== 'cancelled'
+                ? `<button type="button" class="btn btn-danger-soft btn-xs" data-booking-act="cancelled" data-booking-id="${idAttr}">
+                    ✕ ${escHtml(t('ပယ်ဖျက်', 'Cancel'))}
+                   </button>`
+                : ''
+            }
+            <button type="button" class="btn btn-ghost btn-xs" style="margin-left:auto;color:var(--danger)" data-booking-act="delete" data-booking-id="${idAttr}">
+              🗑 ${escHtml(t('ဖျက်မည်', 'Delete'))}
+            </button>
+          </div>
+        </article>
+      `;
+    })
+    .join('');
+}
+
+async function runBookingStatusChange(bookingId, nextStatus, note = '') {
+  const item = allConsultations.find((b) => b.bookingId === bookingId);
+  try {
+    await adminUpdateConsultationStatus(bookingId, nextStatus, String(note || '').trim().slice(0, 1000));
+    showToast(
+      t(
+        `${item?.name || bookingId} — ${bookingStatusLabel(nextStatus)} ပြောင်းပြီးပါပြီ ✓`,
+        `${item?.name || bookingId} marked ${bookingStatusLabel(nextStatus)} ✓`
+      ),
+      nextStatus === 'cancelled' ? 'danger' : 'ok'
+    );
+  } catch (err) {
+    showToast(errMsg(err, 'ဘွတ်ကင်အခြေအနေ ပြောင်း၍မရပါ', 'Could not update booking status'), 'danger');
+  }
+}
+
+function exportBookingsCsv() {
+  const rows = getFilteredBookings();
+  if (!rows.length) {
+    showToast(t('ထုတ်ယူရန် ဘွတ်ကင်စာရင်း မရှိပါ', 'No bookings to export'), 'danger');
+    return;
+  }
+
+  const csvCell = (val) => {
+    let s = String(val ?? '');
+    if (/^[=@\t\r]/.test(s)) s = `'${s}`;
+    return `"${s.replace(/"/g, '""')}"`;
+  };
+
+  const header = [
+    'Booking ID',
+    'Status',
+    'Topic',
+    'Topic Label',
+    'Name',
+    'Business / Channel',
+    'Channel',
+    'Contact',
+    'Preferred Time',
+    'Notes',
+    'Admin Note',
+    'Language',
+    'Created At',
+    'Updated At',
+  ];
+
+  const lines = [header.map(csvCell).join(',')];
+  for (const b of rows) {
+    const createdMs = toMs(b.createdAt);
+    const updatedMs = toMs(b.updatedAt);
+    lines.push(
+      [
+        b.bookingId || '',
+        b.status || 'new',
+        b.topic || '',
+        b.topicLabel || '',
+        b.name || '',
+        b.businessName || '',
+        b.channel || '',
+        b.contact || '',
+        b.preferredTime || '',
+        b.notes || '',
+        b.adminNote || '',
+        b.lang || 'my',
+        createdMs ? new Date(createdMs).toISOString() : '',
+        updatedMs ? new Date(updatedMs).toISOString() : '',
+      ]
+        .map(csvCell)
+        .join(',')
+    );
+  }
+
+  const stamp = new Date().toISOString().slice(0, 10);
+  const filename = `maya-bookings-${stamp}.csv`;
+  const csvText = '\uFEFF' + lines.join('\r\n');
+
+  if (typeof window !== 'undefined' && typeof window.MayaAndroid?.shareCsv === 'function') {
+    try {
+      window.MayaAndroid.shareCsv(filename, csvText);
+      showToast(
+        t(`ဘွတ်ကင် ${rows.length} ခု CSV မျှဝေပြီးပါပြီ ✓`, `Shared ${rows.length} bookings CSV ✓`),
+        'ok'
+      );
+      return;
+    } catch {
+      // Fallback to browser download below.
+    }
+  }
+
+  const blob = new Blob([csvText], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  showToast(
+    t(`ဘွတ်ကင် ${rows.length} ခု CSV ထုတ်ယူပြီးပါပြီ ✓`, `Exported ${rows.length} bookings to CSV ✓`),
+    'ok'
+  );
 }
 
 // ---------- Receipt Loading & Cache ----------
@@ -2531,12 +3171,93 @@ function bindEvents() {
     }
   });
 
-  // Live payment alert banner actions
+  // Live payment / booking alert banner actions
   $('btn-banner-check').addEventListener('click', () => {
-    const uid = bannerPayment?.uid || '';
-    openPaymentByUid(uid);
+    if (bannerPayment?.kind === 'booking') {
+      openBookingById(bannerPayment.bookingId || '');
+    } else {
+      openPaymentByUid(bannerPayment?.uid || '');
+    }
   });
   $('btn-banner-dismiss').addEventListener('click', dismissPaymentBanner);
+
+  // Bookings tab search, filters, CSV export & delegated card actions
+  const bookingSearchInput = $('booking-search');
+  const clearBookingSearchBtn = $('btn-booking-search-clear');
+  bookingSearchInput.addEventListener('input', () => {
+    bookingSearchQuery = bookingSearchInput.value;
+    clearBookingSearchBtn.hidden = !bookingSearchQuery;
+    renderBookingsTab();
+  });
+  clearBookingSearchBtn.addEventListener('click', () => {
+    bookingSearchQuery = '';
+    bookingSearchInput.value = '';
+    clearBookingSearchBtn.hidden = true;
+    renderBookingsTab();
+    bookingSearchInput.focus();
+  });
+
+  $('booking-status-filters').addEventListener('click', (e) => {
+    const btn = e.target.closest('.pill-filter[data-bfilter]');
+    if (!btn) return;
+    bookingFilter = btn.dataset.bfilter;
+    document.querySelectorAll('#booking-status-filters .pill-filter').forEach((b) => {
+      b.setAttribute('aria-pressed', b.dataset.bfilter === bookingFilter ? 'true' : 'false');
+    });
+    renderBookingsTab();
+  });
+
+  $('btn-export-bookings-csv').addEventListener('click', exportBookingsCsv);
+
+  $('bookings-list').addEventListener('click', async (e) => {
+    const copyBid = e.target.closest('[data-copy-booking]');
+    if (copyBid) {
+      copyText(copyBid.dataset.copyBooking, 'Booking ID ကူးယူပြီး ✓', 'Booking ID copied ✓');
+      return;
+    }
+
+    const copyBtn = e.target.closest('[data-copy]');
+    if (copyBtn) {
+      copyText(copyBtn.dataset.copy, 'ဆက်သွယ်ရန်အချက်အလက် ကူးယူပြီး ✓', 'Contact copied ✓');
+      return;
+    }
+
+    const actBtn = e.target.closest('[data-booking-act]');
+    if (!actBtn) return;
+    const bookingId = actBtn.dataset.bookingId;
+    const act = actBtn.dataset.bookingAct;
+    const card = actBtn.closest('.booking-card');
+    const note = card?.querySelector('input[data-bnote-id]')?.value?.trim() || '';
+    const item = allConsultations.find((b) => b.bookingId === bookingId);
+    if (!item) return;
+
+    if (act === 'delete') {
+      openConfirmModal({
+        title: t('ဘွတ်ကင်မှတ်တမ်း အပြီးဖျက်မည်', 'Delete Booking Permanently'),
+        desc: t(
+          `${item.name || ''} (${bookingId}) ၏ ဘွတ်ကင်မှတ်တမ်းကို Database မှ အပြီးဖျက်ပစ်ပါမည်။ ပြန်ယူ၍ မရပါ။`,
+          `Permanently delete booking ${bookingId} (${item.name || ''})? This cannot be undone.`
+        ),
+        confirmLabel: t('အပြီးဖျက်မည်', 'Delete Permanently'),
+        confirmClass: 'btn-danger',
+        showNote: false,
+        onConfirm: async () => {
+          await adminDeleteConsultation(bookingId);
+          showToast(t('ဘွတ်ကင်မှတ်တမ်း ဖျက်ပြီးပါပြီ', 'Booking deleted'), 'ok');
+        },
+      });
+      return;
+    }
+
+    if (act === 'contacted' || act === 'confirmed' || act === 'done' || act === 'cancelled') {
+      actBtn.disabled = true;
+      try {
+        await runBookingStatusChange(bookingId, act, note);
+      } finally {
+        actBtn.disabled = false;
+      }
+    }
+  });
 
   // Settings: Phone Alerts & Sound controls (Android APK + Web Browser)
   $('alerts-status-pills').addEventListener('click', (e) => {
