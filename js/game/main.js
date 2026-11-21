@@ -400,7 +400,7 @@ class Game {
     if (stickHeld) return true;
     if (this.mode === 'world' && (this.world?.drive?.isAuto || Math.abs(this.prevSpeed || 0) > 0.08)) return true;
     if (this.mode === 'room' && (this.walker?.moving || !!this.letterReader?.open)) return true;
-    if (this.story?.footActive && Math.abs(this.prevSpeed || 0) > 0.08) return true;
+    if (this.story?.footActive && (this.story.foot?.moving || Math.abs(this.prevSpeed || 0) > 0.05)) return true;
     return now - this.lastInput < 3000;
   }
 
@@ -424,7 +424,7 @@ class Game {
     const moving = stickHeld || this.busy || !!this.rig?.cinematic || !!this.worldWalk || this.revealT !== null
       || (this.mode === 'world' && (this.world?.drive?.isAuto || Math.abs(this.prevSpeed || 0) > 0.08))
       || (this.mode === 'room' && (this.walker?.moving || !!this.letterReader?.open))
-      || (this.story?.footActive && Math.abs(this.prevSpeed || 0) > 0.08);
+      || (this.story?.footActive && (this.story.foot?.moving || Math.abs(this.prevSpeed || 0) > 0.05));
     const idle = !moving && !this.ui.sheetOpen && !this.ui.dialogOpen && (now - this.lastInput > 2500);
     const tierFps = IS_MOBILE ? (TIERS[this.tier]?.fpsMobile || TIERS[this.tier]?.fps || 60) : (TIERS[this.tier]?.fps || 60);
     const activeFps = this.governorFps ? Math.min(tierFps, this.governorFps) : tierFps;
@@ -448,14 +448,12 @@ class Game {
     // world: the sun's shadow covers exactly what the camera sees (texel-snapped); rooms: fitted once
     if (this.mode === 'world') this.nightShadow?.update(dt, t); else this.nightShadow?.sleep();
 
-    // Smart mobile shadow updates: half-rate (30Hz) while moving, ~4Hz while idle, instant on forceShadow.
+    // Smart mobile shadow updates: every frame while active (zero self-shadow lag on Maya), ~4Hz while idle, instant on forceShadow.
     if (this.shadowsOn && IS_MOBILE) {
-      if (this.forceShadow) {
+      if (this.forceShadow || !idle) {
         this.renderer.shadowMap.needsUpdate = true;
         this.forceShadow = false;
         this.shadowTick = 0;
-      } else if (!idle) {
-        if ((++this.shadowTick & 1) === 0) this.renderer.shadowMap.needsUpdate = true;
       } else if (++this.shadowTick >= 5) {
         this.renderer.shadowMap.needsUpdate = true;
         this.shadowTick = 0;

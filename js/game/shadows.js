@@ -208,7 +208,7 @@ export function setupSceneShadows(scene, opts = {}) {
       // biases tuned for voxel faces: normal offset ~1.5 texels kills acne on faces at grazing
       // sun angles; a tiny depth bias avoids peter-panning under thin blocks.
       const texel = Math.max(tx, ty);
-      sun.shadow.normalBias = texel * 1.5;
+      sun.shadow.normalBias = IS_MOBILE ? Math.min(texel * 1.35, 0.032) : texel * 1.5;
       sun.shadow.bias = -0.00025;
       ctl.texel = texel;
     }

@@ -2638,20 +2638,21 @@ class Maya {
       this.motionInit = true;
     }
     if (dt <= 0) return;
-    // world velocity and acceleration of the head (smoothed finite differences)
-    _v2.copy(_v1).sub(this.headPrev).divideScalar(dt);
+    // world velocity and acceleration of the head (smoothed finite differences; sdt guards LTPO frame-step jitter)
+    const sdt = Math.max(dt, 1 / 120);
+    _v2.copy(_v1).sub(this.headPrev).divideScalar(sdt);
     this.headPrev.copy(_v1);
-    _v3.copy(_v2).sub(this.headVel).divideScalar(dt);
+    _v3.copy(_v2).sub(this.headVel).divideScalar(sdt);
     const kv = 1 - Math.exp(-dt * 30);
     this.headVel.lerp(_v2, kv);
     this.headAcc.lerp(_v3, 1 - Math.exp(-dt * 20));
-    if (this.headAcc.lengthSq() > 900) this.headAcc.setLength(30);
+    if (this.headAcc.lengthSq() > 324) this.headAcc.setLength(18);
     const yaw = Math.atan2(e[8], e[10]);
     let dy = yaw - this.yawPrev;
     if (dy > Math.PI) dy -= TAU;
     if (dy < -Math.PI) dy += TAU;
     this.yawPrev = yaw;
-    this.yawRate = damp(this.yawRate, dy / dt, 15, dt);
+    this.yawRate = damp(this.yawRate, dy / sdt, 15, dt);
     // head axes (normalised) to express motion in the head's frame
     const lx = Math.hypot(e[0], e[1], e[2]) || 1;
     const ly = Math.hypot(e[4], e[5], e[6]) || 1;

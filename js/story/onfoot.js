@@ -108,6 +108,7 @@ export function createFoot(game, opts = {}) {
     obstacles,
     bounds,
     get pos() { return walker.pos; },
+    get moving() { return walker.moving || prevSpeed > 0.05; },
 
     async toFoot() {
       if (foot.active || game.busy || game.mode !== 'world' || game.worldWalk) return false;
@@ -249,6 +250,7 @@ export function createFoot(game, opts = {}) {
       const turn = THREE.MathUtils.clamp(dh / Math.max(dt, 1e-3) / 4, -1, 1);
       game.maya.update(dt, { speed, turn, accel: (speed - prevSpeed) / Math.max(dt, 1e-3), t });
       prevSpeed = speed;
+      game.prevSpeed = speed;
       game.car.update(dt, { speed: 0, steer: 0, accel: 0 });
       game.world.update(dt, t);
       if (game.birds) {
