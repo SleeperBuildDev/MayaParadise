@@ -91,9 +91,9 @@ function drawChannel(g, w, h) {
   g.fillStyle = TG;
   g.fillRect(0, 0, w, 96);
   g.drawImage(words([{ text: 'Telegram ချန်နယ်', size: 42, color: '#FFFFFF' }], w, 96), 0, 0);
-  // the channel's real name ("Writer Maya - မာရာ" is her Facebook page, not this channel)
+  // live Telegram channel name ("Writer Maya - မာရာ")
   g.drawImage(
-    words([{ text: 'Maya - မာရာ', size: 46, color: P.ink }, { text: 'Join ပေးပါဦးရှင့်', size: 40, color: P.maroon }], w, 210),
+    words([{ text: 'Writer Maya - မာရာ', size: 42, color: P.ink }, { text: 'Join ပေးပါဦးရှင့်', size: 40, color: P.maroon }], w, 210),
     0, 100,
   );
   dashTrail(g, [60, h - 40, 140, h - 90, 230, h - 30, 300, h - 70], '#9CC3DE', 5);

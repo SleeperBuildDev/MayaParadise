@@ -126,7 +126,7 @@ if (q.get('maya') !== '0') {
     maya.root.rotation.y = q.has('mayah') ? parseFloat(q.get('mayah')) : s.h;
     R.scene.add(maya.root);
     people.push({ update: (dt) => maya.update(dt, { speed: 0, turn: 0, accel: 0, t: 0 }), dispose: () => maya.dispose?.() });
-    addTag(maya.root, 'မာယာ', 'Maya · maya', 2.0, '#A47A2C');
+    addTag(maya.root, 'မာရာ', 'Maya · maya', 2.0, '#A47A2C');
   } else {
     const v = new VoxelBuilder();
     v.box(0, 0.6, 0, 0.36, 1.2, 0.24, PALETTE.blazer);

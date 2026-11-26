@@ -99,10 +99,8 @@ if (stats) {
   for (const k of new Set(used)) ok(k in stats, `data-stat="${k}" exists in the numbers block`);
 }
 
-// 7. Maya Burmese spelling in new sections (Script Studio & E-Book Shop)
-const scriptsSec = html.match(/<section id="scripts"[\s\S]*?<\/section>/)?.[0] || '';
-const contentSec = html.match(/<section id="content"[\s\S]*?<\/section>/)?.[0] || '';
-ok(!scriptsSec.includes('မာယာ') && !contentSec.includes('မာယာ'), 'no "မာယာ" misspelling in Script Studio or E-Book Shop');
+// 7. Maya Burmese spelling across the entire index.html (always မာရာ, never မာယာ)
+ok(!html.includes('မာယာ'), 'no "မာယာ" misspelling anywhere in index.html');
 
 // 8. Both languages everywhere
 const my = count('lang="my"');
