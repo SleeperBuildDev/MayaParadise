@@ -157,18 +157,209 @@
     });
   }
 
-  // Follower numbers live in ONE place: <script id="mw-stats"> in index.html. Every
-  // [data-stat="key"] on the page (and the 3D game, via MayaSite.stats) shows those values.
+  // Follower numbers, featured TikTok videos & playlists start from index.html (#mw-stats)
+  // and hydrate live from Cloudflare D1 (https://api.writermaya.com/api/social) with local cache.
+  var SOCIAL_CACHE_KEY = 'mw-social-cache';
+  var DEMO_SOCIAL_KEY = 'wm-social-demo';
+  var DEFAULT_API_BASE = 'https://api.writermaya.com';
   var stats = {};
   try { stats = JSON.parse(document.getElementById('mw-stats').textContent); } catch (e) { stats = {}; }
-  Array.prototype.forEach.call(document.querySelectorAll('[data-stat]'), function (el) {
-    var v = stats[el.getAttribute('data-stat')];
-    if (v && typeof v === 'object') {
-      var langEl = el.closest('[lang]');
-      v = v[langEl && langEl.getAttribute('lang') === 'en' ? 'en' : 'my'];
-    }
-    if (typeof v === 'string' && v) el.textContent = v;
-  });
+  var socialState = { stats: stats, videos: null, playlists: null, updatedAt: 0 };
 
-  window.MayaSite = { getLang: getLang, setLang: setLang, toast: toast, copyText: copyText, share: share, prepareLinks: prepareLinks, isMobile: isMobile, stats: stats };
+  function safeHttpUrl(raw) {
+    if (typeof raw !== 'string') return '';
+    var s = raw.trim();
+    if (!s || s.length > 500) return '';
+    try {
+      var u = new URL(s);
+      if (u.protocol !== 'https:' && u.protocol !== 'http:') return '';
+      return u.href;
+    } catch (e) {
+      return '';
+    }
+  }
+
+  function renderStatsDom() {
+    Array.prototype.forEach.call(document.querySelectorAll('[data-stat]'), function (el) {
+      var v = stats[el.getAttribute('data-stat')];
+      if (v && typeof v === 'object') {
+        var langEl = el.closest('[lang]');
+        v = v[langEl && langEl.getAttribute('lang') === 'en' ? 'en' : 'my'];
+      }
+      if (typeof v === 'string' && v) el.textContent = v;
+    });
+  }
+
+  function renderVideosDom(videos) {
+    if (!Array.isArray(videos) || !videos.length) return;
+    var ul = document.querySelector('#lib-tiktok ul.videos');
+    if (!ul) return;
+    var frag = document.createDocumentFragment();
+    var added = 0;
+    for (var i = 0; i < videos.length; i++) {
+      var item = videos[i];
+      if (!item || typeof item !== 'object') continue;
+      var href = safeHttpUrl(item.url);
+      var titleMy = typeof item.titleMy === 'string' ? item.titleMy.trim() : '';
+      var titleEn = typeof item.titleEn === 'string' ? item.titleEn.trim() : '';
+      if (!href || (!titleMy && !titleEn)) continue;
+      var emoji = typeof item.emoji === 'string' && item.emoji.trim() ? item.emoji.trim() : '🟡';
+      var li = document.createElement('li');
+      var a = document.createElement('a');
+      a.href = href;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      a.appendChild(document.createTextNode(emoji + ' '));
+      var spanMy = document.createElement('span');
+      spanMy.setAttribute('lang', 'my');
+      spanMy.textContent = titleMy || titleEn;
+      var spanEn = document.createElement('span');
+      spanEn.setAttribute('lang', 'en');
+      spanEn.textContent = titleEn || titleMy;
+      a.appendChild(spanMy);
+      a.appendChild(spanEn);
+      li.appendChild(a);
+      frag.appendChild(li);
+      added++;
+    }
+    if (added > 0) {
+      ul.textContent = '';
+      ul.appendChild(frag);
+    }
+  }
+
+  function renderPlaylistsDom(playlists) {
+    if (!Array.isArray(playlists) || !playlists.length) return;
+    var ul = document.querySelector('#lib-shelf ul.playlists');
+    if (!ul) return;
+    var frag = document.createDocumentFragment();
+    var added = 0;
+    for (var i = 0; i < playlists.length; i++) {
+      var item = playlists[i];
+      if (!item || typeof item !== 'object') continue;
+      var href = safeHttpUrl(item.url);
+      var name = typeof item.name === 'string' ? item.name.trim() : '';
+      if (!href || !name) continue;
+      var count = Number(item.count);
+      var li = document.createElement('li');
+      var a = document.createElement('a');
+      a.href = href;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      a.appendChild(document.createTextNode(name + ' '));
+      if (Number.isFinite(count) && count >= 0) {
+        var sm = document.createElement('small');
+        sm.textContent = '(' + Math.round(count) + ')';
+        a.appendChild(sm);
+      }
+      li.appendChild(a);
+      frag.appendChild(li);
+      added++;
+    }
+    if (added > 0) {
+      ul.textContent = '';
+      ul.appendChild(frag);
+    }
+  }
+
+  function applySocial(data, silent) {
+    if (!data || typeof data !== 'object') return;
+    var keys = ['tiktokFollowers', 'tiktokLikes', 'facebookFollowers', 'telegramMembers'];
+    for (var i = 0; i < keys.length; i++) {
+      var k = keys[i];
+      if (typeof data[k] === 'string' && data[k].trim()) stats[k] = data[k].trim();
+    }
+    if (data.asOf && typeof data.asOf === 'object') {
+      stats.asOf = {
+        my: (typeof data.asOf.my === 'string' && data.asOf.my.trim()) ? data.asOf.my.trim() : (stats.asOf && stats.asOf.my) || '',
+        en: (typeof data.asOf.en === 'string' && data.asOf.en.trim()) ? data.asOf.en.trim() : (stats.asOf && stats.asOf.en) || '',
+      };
+    }
+    var scriptEl = document.getElementById('mw-stats');
+    if (scriptEl) {
+      try { scriptEl.textContent = JSON.stringify(stats, null, 2); } catch (e) { /* ignore */ }
+    }
+    renderStatsDom();
+    if (Array.isArray(data.videos) && data.videos.length) {
+      socialState.videos = data.videos;
+      renderVideosDom(data.videos);
+    }
+    if (Array.isArray(data.playlists) && data.playlists.length) {
+      socialState.playlists = data.playlists;
+      renderPlaylistsDom(data.playlists);
+    }
+    socialState.updatedAt = Number(data.updatedAt) || Date.now();
+    if (!silent) {
+      document.dispatchEvent(new CustomEvent('mw:social', { detail: { stats: stats, social: data } }));
+    }
+  }
+
+  renderStatsDom();
+
+  var isDemoMode = qp.get('demo') === '1';
+  function getSocialApiBase() {
+    var custom = store('wm-api-base-url');
+    if (custom && /^https?:\/\//i.test(custom)) return custom.replace(/\/+$/, '');
+    return DEFAULT_API_BASE;
+  }
+
+  function refreshSocial() {
+    if (isDemoMode) {
+      try {
+        var rawDemo = store(DEMO_SOCIAL_KEY);
+        if (rawDemo) applySocial(JSON.parse(rawDemo), false);
+      } catch (e) { /* ignore */ }
+      return Promise.resolve(socialState);
+    }
+    if (typeof fetch !== 'function') return Promise.resolve(socialState);
+    return fetch(getSocialApiBase() + '/api/social', { cache: 'no-store' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (json) {
+        if (json && json.ok && json.social) {
+          applySocial(json.social, false);
+          try { store(SOCIAL_CACHE_KEY, JSON.stringify(json.social)); } catch (e) { /* ignore */ }
+        }
+        return socialState;
+      })
+      .catch(function () { return socialState; });
+  }
+
+  if (isDemoMode) {
+    try {
+      var demoInit = store(DEMO_SOCIAL_KEY);
+      if (demoInit) applySocial(JSON.parse(demoInit), true);
+    } catch (e) { /* ignore */ }
+    window.addEventListener('storage', function (ev) {
+      if (ev.key === DEMO_SOCIAL_KEY && ev.newValue) {
+        try { applySocial(JSON.parse(ev.newValue), false); } catch (e) { /* ignore */ }
+      }
+    });
+    if (typeof BroadcastChannel === 'function') {
+      try {
+        var bc = new BroadcastChannel('wm-ebook-demo');
+        bc.addEventListener('message', function (ev) {
+          if (ev.data && ev.data.reason === 'social-updated') refreshSocial();
+        });
+      } catch (e) { /* ignore */ }
+    }
+  } else {
+    try {
+      var cached = store(SOCIAL_CACHE_KEY);
+      if (cached) applySocial(JSON.parse(cached), true);
+    } catch (e) { /* ignore */ }
+    refreshSocial();
+  }
+
+  window.MayaSite = {
+    getLang: getLang,
+    setLang: setLang,
+    toast: toast,
+    copyText: copyText,
+    share: share,
+    prepareLinks: prepareLinks,
+    isMobile: isMobile,
+    stats: stats,
+    social: socialState,
+    refreshSocial: refreshSocial,
+  };
 })();

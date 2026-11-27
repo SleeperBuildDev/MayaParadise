@@ -940,6 +940,17 @@ export async function buildInterior(ctx = {}) {
   const signMeshes = [atlasMesh(atlasA, signsA, 'signsStats'), atlasMesh(atlasB, signsB, 'signsChalk'), atlasMesh(atlasC, signsC, 'signsTelegram')];
   for (const m of signMeshes) G.add(m);
   room.textures.push(atlasA.texture, atlasB.texture, atlasC.texture);
+  const onSocialUpdate = () => {
+    atlasA.ctx.clearRect(0, 0, 1024, 646);
+    drawStatsBoard(atlasA, 0, 0, 1024, 646);
+    atlasA.texture.needsUpdate = true;
+  };
+  document.addEventListener('mw:social', onSocialUpdate);
+  const baseRoomDispose = room.dispose.bind(room);
+  room.dispose = () => {
+    document.removeEventListener('mw:social', onSocialUpdate);
+    baseRoomDispose();
+  };
 
   // ---------------- finish: static decor, FX, glows, bake ----------------
   const decor = S.mesh({ outline: true, px: 1.4 });
@@ -1700,10 +1711,10 @@ function drawStatsBoard(atlas, x0, y0, W, H) {
   g.restore();
   // the numbers come from the single source: <script id="mw-stats"> in index.html (pages.js stat())
   const cells = [
-    ['TikTok', stat('tiktokFollowers', '26.7K'), 'ဖော်လိုဝါ'],
-    ['TikTok', stat('tiktokLikes', '289.4K'), 'လိုက်ခ်'],
-    ['Facebook', stat('facebookFollowers', '1.2K'), 'ဖော်လိုဝါ'],
-    ['Telegram', stat('telegramMembers', '499'), 'Channel အဖွဲ့ဝင်'],
+    ['TikTok', stat('tiktokFollowers', '27K'), 'ဖော်လိုဝါ'],
+    ['TikTok', stat('tiktokLikes', '301.8K'), 'လိုက်ခ်'],
+    ['Facebook', stat('facebookFollowers', '1.3K'), 'ဖော်လိုဝါ'],
+    ['Telegram', stat('telegramMembers', '503'), 'Channel အဖွဲ့ဝင်'],
   ];
   cells.forEach(([platform, num, label], i) => {
     const cx = x0 + (i % 2) * (W / 2);

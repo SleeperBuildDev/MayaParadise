@@ -31,6 +31,9 @@ import {
   adminWatchConsultations,
   adminUpdateConsultationStatus,
   adminDeleteConsultation,
+  adminGetSocial,
+  adminSaveSocial,
+  adminSyncTelegram,
 } from '../js/ebook/store.js';
 
 const LANG_KEY = 'wm-admin-lang';
@@ -53,6 +56,9 @@ let currentConfig = null;
 let pendingQrDataUrl = '';
 let pendingQrBytes = 0;
 let bookStatus = null;
+let socialState = null;
+let socialSaving = false;
+let socialSyncing = false;
 let unsubReaders = null;
 let unsubConsultations = null;
 let unsubStore = null;
@@ -356,6 +362,7 @@ function applyLang(nextLang, { persist = true } = {}) {
   renderAlertsSettingsCard();
   renderPaymentPreview();
   renderBookTab();
+  renderSocialTab();
   syncNativeLanguage();
 }
 
@@ -1404,8 +1411,8 @@ async function enterAdminShell(sessionInfo = null) {
     }
   });
 
-  // Load book chapter status
-  await refreshBookStatus();
+  // Load book chapter status & social media state
+  await Promise.all([refreshBookStatus(), loadSocialTab({ silent: true })]);
 }
 
 function exitAdminShell() {
@@ -1423,6 +1430,7 @@ function exitAdminShell() {
   }
   allReaders = [];
   allConsultations = [];
+  socialState = null;
   receiptCache.clear();
   readersInitialized = false;
   consultationsInitialized = false;
@@ -1449,6 +1457,7 @@ const TAB_PANEL_IDS = {
   readers: 'tab-readers',
   payments: 'tab-payments',
   book: 'tab-book',
+  social: 'tab-social',
 };
 
 function switchTab(tabName) {
@@ -1463,6 +1472,9 @@ function switchTab(tabName) {
   });
   if (tabName === 'book') {
     refreshBookStatus();
+  } else if (tabName === 'social') {
+    if (!socialState) loadSocialTab({ silent: true });
+    else renderSocialTab();
   } else if (tabName === 'payments') {
     readNativeStatus();
     renderAlertsSettingsCard();
@@ -3634,7 +3646,305 @@ function bindEvents() {
     stopTitleFlash();
   });
 
+  bindSocialEvents();
   bindLightboxControls();
+}
+
+// ---------- TAB 6: SOCIAL MEDIA & STATS ----------
+async function loadSocialTab({ silent = false } = {}) {
+  try {
+    socialState = await adminGetSocial();
+    renderSocialTab();
+    if (!silent) {
+      showToast(t('လူမှုကွန်ရက် အချက်အလက် ပြန်စစ်ပြီးပါပြီ', 'Social stats refreshed'));
+    }
+  } catch (err) {
+    if (!silent) {
+      showToast(errMsg(err, 'လူမှုကွန်ရက် အချက်အလက် ဖတ်၍မရပါ', 'Could not load social stats'), 'danger');
+    }
+  }
+}
+
+function renderSocialTab() {
+  if (!socialState) return;
+  const tgSyncedEl = $('social-tg-synced-at');
+  const updatedEl = $('social-updated-at');
+  const pillEl = $('social-cron-pill');
+
+  if (tgSyncedEl) {
+    const statusRaw = String(socialState.telegramSyncStatus || '');
+    const isErr = statusRaw.startsWith('error:');
+    const when = socialState.telegramSyncedAt ? fmtTime(socialState.telegramSyncedAt) : t('မ Sync ရသေးပါ (ည ၉:၀၀ တွင် အလိုအလျောက် Sync မည်)', 'Pending next 9:00 PM MMT run');
+    tgSyncedEl.textContent = isErr
+      ? `⚠ Telegram: ${statusRaw.replace(/^error:/, '')} · ${when}`
+      : `✈ Telegram (${socialState.telegramMembers || '—'}): ${when}`;
+  }
+  if (updatedEl) {
+    const when = socialState.updatedAt ? fmtTime(socialState.updatedAt) : '—';
+    const by = socialState.updatedBy ? ` (${socialState.updatedBy})` : '';
+    updatedEl.textContent = `✦ ${t('နောက်ဆုံးသိမ်းချိန်', 'Last saved')}: ${when}${by}`;
+  }
+  if (pillEl) {
+    const isErr = String(socialState.telegramSyncStatus || '').startsWith('error:');
+    pillEl.className = `badge ${isErr ? 'badge-reupload' : 'badge-approved'}`;
+    pillEl.textContent = t('ည ၉:၀၀ နေ့စဉ်', '9:00 PM MMT');
+  }
+
+  if ($('soc-tt-followers')) $('soc-tt-followers').value = socialState.tiktokFollowers || '';
+  if ($('soc-tt-likes')) $('soc-tt-likes').value = socialState.tiktokLikes || '';
+  if ($('soc-fb-followers')) $('soc-fb-followers').value = socialState.facebookFollowers || '';
+  if ($('soc-tg-members')) $('soc-tg-members').value = socialState.telegramMembers || '';
+  if ($('soc-asof-my')) $('soc-asof-my').value = socialState.asOf?.my || '';
+  if ($('soc-asof-en')) $('soc-asof-en').value = socialState.asOf?.en || '';
+
+  renderSocialVideosList();
+  renderSocialPlaylistsList();
+}
+
+function renderSocialVideosList() {
+  const listEl = $('soc-videos-list');
+  const countEl = $('soc-videos-count');
+  if (!listEl || !socialState) return;
+  const videos = Array.isArray(socialState.videos) ? socialState.videos : [];
+  if (countEl) countEl.textContent = String(videos.length);
+
+  if (!videos.length) {
+    listEl.innerHTML = `<div class="hint" style="padding:8px 0">${escHtml(t('ဗီဒီယို မထည့်ရသေးပါ', 'No videos added yet'))}</div>`;
+    return;
+  }
+
+  listEl.innerHTML = videos
+    .map(
+      (v, idx) => `
+      <div class="social-item-card" data-vid-idx="${idx}">
+        <div class="social-item-head">
+          <span class="social-item-index">#${idx + 1}</span>
+          <div class="social-item-controls">
+            <button type="button" class="btn btn-outline btn-xs" data-vid-act="up" data-idx="${idx}" ${idx === 0 ? 'disabled' : ''} aria-label="Move up">↑</button>
+            <button type="button" class="btn btn-outline btn-xs" data-vid-act="down" data-idx="${idx}" ${idx === videos.length - 1 ? 'disabled' : ''} aria-label="Move down">↓</button>
+            <button type="button" class="btn btn-danger-soft btn-xs" data-vid-act="remove" data-idx="${idx}" aria-label="Remove">✕</button>
+          </div>
+        </div>
+        <div class="social-item-row">
+          <input class="input social-emoji-input" type="text" maxlength="8" data-vid-field="emoji" value="${escHtml(v.emoji || '🟡')}" aria-label="Emoji">
+          <input class="input" type="text" maxlength="180" data-vid-field="titleMy" value="${escHtml(v.titleMy || '')}" placeholder="${escHtml(t('ဗီဒီယိုခေါင်းစဉ် (မြန်မာ)', 'Video title (Burmese)'))}">
+        </div>
+        <input class="input" type="text" maxlength="180" data-vid-field="titleEn" value="${escHtml(v.titleEn || '')}" placeholder="${escHtml(t('ဗီဒီယိုခေါင်းစဉ် (English)', 'Video title (English)'))}">
+        <input class="input mono social-url-input" type="url" maxlength="500" data-vid-field="url" value="${escHtml(v.url || '')}" placeholder="https://www.tiktok.com/@maya_ink_insights/video/...">
+      </div>`
+    )
+    .join('');
+}
+
+function renderSocialPlaylistsList() {
+  const listEl = $('soc-playlists-list');
+  const countEl = $('soc-playlists-count');
+  if (!listEl || !socialState) return;
+  const playlists = Array.isArray(socialState.playlists) ? socialState.playlists : [];
+  if (countEl) countEl.textContent = String(playlists.length);
+
+  if (!playlists.length) {
+    listEl.innerHTML = `<div class="hint" style="padding:8px 0">${escHtml(t('Playlist မထည့်ရသေးပါ', 'No playlists added yet'))}</div>`;
+    return;
+  }
+
+  listEl.innerHTML = playlists
+    .map(
+      (p, idx) => `
+      <div class="social-item-card" data-pl-idx="${idx}">
+        <div class="social-playlist-top">
+          <input class="input" type="text" maxlength="120" data-pl-field="name" value="${escHtml(p.name || '')}" placeholder="${escHtml(t('Playlist အမည်', 'Playlist name'))}">
+          <div class="social-item-controls">
+            <div class="social-stepper">
+              <button type="button" data-pl-act="dec" data-idx="${idx}" aria-label="Decrease count">−</button>
+              <input type="number" min="0" max="9999" data-pl-field="count" value="${escHtml(String(p.count ?? 0))}" aria-label="Video count">
+              <button type="button" data-pl-act="inc" data-idx="${idx}" aria-label="Increase count">+</button>
+            </div>
+            <button type="button" class="btn btn-danger-soft btn-xs" data-pl-act="remove" data-idx="${idx}" aria-label="Remove">✕</button>
+          </div>
+        </div>
+        <input class="input mono social-url-input" type="url" maxlength="500" data-pl-field="url" value="${escHtml(p.url || '')}" placeholder="https://www.tiktok.com/@maya_ink_insights/playlist/...">
+      </div>`
+    )
+    .join('');
+}
+
+function syncSocialEditsFromDom() {
+  if (!socialState) return;
+  socialState.tiktokFollowers = $('soc-tt-followers')?.value.trim() || socialState.tiktokFollowers;
+  socialState.tiktokLikes = $('soc-tt-likes')?.value.trim() || socialState.tiktokLikes;
+  socialState.facebookFollowers = $('soc-fb-followers')?.value.trim() || socialState.facebookFollowers;
+  socialState.telegramMembers = $('soc-tg-members')?.value.trim() || socialState.telegramMembers;
+  socialState.asOf = {
+    my: $('soc-asof-my')?.value.trim() || socialState.asOf?.my || '',
+    en: $('soc-asof-en')?.value.trim() || socialState.asOf?.en || '',
+  };
+
+  const vidCards = $('soc-videos-list')?.querySelectorAll('.social-item-card[data-vid-idx]') || [];
+  if (vidCards.length || (socialState.videos && socialState.videos.length === 0)) {
+    socialState.videos = Array.from(vidCards).map((card) => ({
+      emoji: card.querySelector('[data-vid-field="emoji"]')?.value.trim() || '🟡',
+      titleMy: card.querySelector('[data-vid-field="titleMy"]')?.value.trim() || '',
+      titleEn: card.querySelector('[data-vid-field="titleEn"]')?.value.trim() || '',
+      url: card.querySelector('[data-vid-field="url"]')?.value.trim() || '',
+    }));
+  }
+
+  const plCards = $('soc-playlists-list')?.querySelectorAll('.social-item-card[data-pl-idx]') || [];
+  if (plCards.length || (socialState.playlists && socialState.playlists.length === 0)) {
+    socialState.playlists = Array.from(plCards).map((card) => ({
+      name: card.querySelector('[data-pl-field="name"]')?.value.trim() || '',
+      count: Math.max(0, Math.min(9999, parseInt(card.querySelector('[data-pl-field="count"]')?.value || '0', 10) || 0)),
+      url: card.querySelector('[data-pl-field="url"]')?.value.trim() || '',
+    }));
+  }
+}
+
+async function handleSaveSocial(e) {
+  e.preventDefault();
+  if (socialSaving) return;
+  syncSocialEditsFromDom();
+  const btn = $('btn-social-save');
+  socialSaving = true;
+  if (btn) btn.disabled = true;
+  try {
+    const validVideos = (socialState?.videos || []).filter((v) => v.url && (v.titleMy || v.titleEn));
+    const validPlaylists = (socialState?.playlists || []).filter((p) => p.url && p.name);
+    const saved = await adminSaveSocial({
+      tiktokFollowers: socialState.tiktokFollowers,
+      tiktokLikes: socialState.tiktokLikes,
+      facebookFollowers: socialState.facebookFollowers,
+      telegramMembers: socialState.telegramMembers,
+      asOf: socialState.asOf,
+      videos: validVideos,
+      playlists: validPlaylists,
+    });
+    socialState = saved;
+    renderSocialTab();
+    showToast(
+      t('✦ writermaya.com မှာ ချက်ချင်း ပြောင်းလဲပြီးပါပြီ ✓', '✦ Published live to writermaya.com ✓'),
+      'ok'
+    );
+  } catch (err) {
+    showToast(errMsg(err, 'သိမ်းဆည်း၍ မရပါ', 'Could not save social stats'), 'danger');
+  } finally {
+    socialSaving = false;
+    if (btn) btn.disabled = false;
+  }
+}
+
+async function handleSyncTelegramNow() {
+  if (socialSyncing) return;
+  const btn = $('btn-social-sync-tg');
+  socialSyncing = true;
+  if (btn) btn.disabled = true;
+  try {
+    const res = await adminSyncTelegram();
+    if (res?.social) {
+      socialState = res.social;
+      renderSocialTab();
+    }
+    if (res?.ok) {
+      showToast(
+        res.changed
+          ? t(`✈ Telegram Update ပြီးပါပြီ (${res.previous} → ${res.current}) ✓`, `✈ Telegram updated (${res.previous} → ${res.current}) ✓`)
+          : t(`✈ Telegram စစ်ဆေးပြီးပါပြီ (${res.current} subscribers) ✓`, `✈ Telegram synced (${res.current} subscribers) ✓`),
+        'ok'
+      );
+    } else {
+      showToast(
+        t(`Telegram Sync မအောင်မြင်ပါ (${res?.statusMessage || 'Error'})`, `Telegram sync failed (${res?.statusMessage || 'Error'})`),
+        'danger'
+      );
+    }
+  } catch (err) {
+    showToast(errMsg(err, 'Telegram Sync လုပ်၍မရပါ', 'Could not sync Telegram'), 'danger');
+  } finally {
+    socialSyncing = false;
+    if (btn) btn.disabled = false;
+  }
+}
+
+function bindSocialEvents() {
+  $('btn-social-refresh')?.addEventListener('click', () => loadSocialTab({ silent: false }));
+  $('btn-social-sync-tg')?.addEventListener('click', handleSyncTelegramNow);
+  $('social-form')?.addEventListener('submit', handleSaveSocial);
+
+  $('btn-soc-add-video')?.addEventListener('click', () => {
+    syncSocialEditsFromDom();
+    if (!socialState) return;
+    if (socialState.videos.length >= 12) {
+      showToast(t('အများဆုံး ဗီဒီယို ၁၂ ပုဒ်သာ ထည့်နိုင်ပါသည်', 'Maximum 12 featured videos'), 'danger');
+      return;
+    }
+    socialState.videos.unshift({
+      emoji: '🟡',
+      titleMy: '',
+      titleEn: '',
+      url: 'https://www.tiktok.com/@maya_ink_insights/video/',
+    });
+    renderSocialVideosList();
+    $('soc-videos-list')?.querySelector('[data-vid-idx="0"] [data-vid-field="titleMy"]')?.focus();
+  });
+
+  $('btn-soc-add-playlist')?.addEventListener('click', () => {
+    syncSocialEditsFromDom();
+    if (!socialState) return;
+    if (socialState.playlists.length >= 30) {
+      showToast(t('အများဆုံး Playlist ၃၀ ခုသာ ထည့်နိုင်ပါသည်', 'Maximum 30 playlists'), 'danger');
+      return;
+    }
+    socialState.playlists.push({
+      name: '',
+      count: 1,
+      url: 'https://www.tiktok.com/@maya_ink_insights/playlist/',
+    });
+    renderSocialPlaylistsList();
+    const lastIdx = socialState.playlists.length - 1;
+    $('soc-playlists-list')?.querySelector(`[data-pl-idx="${lastIdx}"] [data-pl-field="name"]`)?.focus();
+  });
+
+  $('soc-videos-list')?.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-vid-act]');
+    if (!btn || !socialState) return;
+    syncSocialEditsFromDom();
+    const idx = Number(btn.dataset.idx);
+    const act = btn.dataset.vidAct;
+    if (!Number.isInteger(idx) || idx < 0 || idx >= socialState.videos.length) return;
+    if (act === 'up' && idx > 0) {
+      const tmp = socialState.videos[idx - 1];
+      socialState.videos[idx - 1] = socialState.videos[idx];
+      socialState.videos[idx] = tmp;
+      renderSocialVideosList();
+    } else if (act === 'down' && idx < socialState.videos.length - 1) {
+      const tmp = socialState.videos[idx + 1];
+      socialState.videos[idx + 1] = socialState.videos[idx];
+      socialState.videos[idx] = tmp;
+      renderSocialVideosList();
+    } else if (act === 'remove') {
+      socialState.videos.splice(idx, 1);
+      renderSocialVideosList();
+    }
+  });
+
+  $('soc-playlists-list')?.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-pl-act]');
+    if (!btn || !socialState) return;
+    syncSocialEditsFromDom();
+    const idx = Number(btn.dataset.idx);
+    const act = btn.dataset.plAct;
+    if (!Number.isInteger(idx) || idx < 0 || idx >= socialState.playlists.length) return;
+    if (act === 'inc') {
+      socialState.playlists[idx].count = Math.min(9999, (Number(socialState.playlists[idx].count) || 0) + 1);
+      renderSocialPlaylistsList();
+    } else if (act === 'dec') {
+      socialState.playlists[idx].count = Math.max(0, (Number(socialState.playlists[idx].count) || 0) - 1);
+      renderSocialPlaylistsList();
+    } else if (act === 'remove') {
+      socialState.playlists.splice(idx, 1);
+      renderSocialPlaylistsList();
+    }
+  });
 }
 
 // ---------- Boot ----------

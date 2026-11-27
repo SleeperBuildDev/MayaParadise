@@ -271,6 +271,14 @@
         </span>
         <span id="badge-book" class="tab-pill">0/24</span>
       </button>
+
+      <button type="button" class="tab-btn" role="tab" data-tab="social" aria-selected="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7a3.27 3.27 0 0 0 0-1.39l7.05-4.11A2.99 2.99 0 1 0 14 5a2.9 2.9 0 0 0 .09.7L7.04 9.81a3 3 0 1 0 0 4.38l7.12 4.16a2.96 2.96 0 0 0-.08.65A2.92 2.92 0 1 0 18 16.08Z"/></svg>
+        <span class="tab-label">
+          <span lang="my"><span class="label-full">လူမှုကွန်ရက်</span><span class="label-short">Social</span></span>
+          <span lang="en">Social</span>
+        </span>
+      </button>
     </nav>
   </div>
 
@@ -870,6 +878,141 @@
       </div>
 
       <div id="book-chapters-container"></div>
+    </section>
+
+    <!-- ==================== TAB 6: SOCIAL MEDIA & STATS ==================== -->
+    <section id="tab-social" role="tabpanel" hidden>
+      <div class="section-head">
+        <div>
+          <h2>
+            <span lang="my">လူမှုကွန်ရက် နှင့် ဖော်လိုဝါများ</span>
+            <span lang="en">Social Media &amp; Follower Stats</span>
+          </h2>
+          <p class="section-sub">
+            <span lang="my">သိမ်းဆည်းလိုက်သည်နှင့် writermaya.com နှင့် 3D အခန်းများတွင် ချက်ချင်းပြောင်းလဲပေါ်လာပါမည်</span>
+            <span lang="en">Updates writermaya.com and the 3D Writing Room &amp; Library boards live</span>
+          </p>
+        </div>
+        <div class="section-actions">
+          <button id="btn-social-refresh" type="button" class="btn btn-outline btn-sm">
+            ↻ <span lang="my">ပြန်စစ်မည်</span><span lang="en">Refresh</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 9:00 PM Cloud Cron + One-Tap Telegram Sync Card -->
+      <div class="panel social-cron-card">
+        <div class="alerts-card-head">
+          <div>
+            <h3>
+              ☁ <span lang="my">ည ၉:၀၀ နာရီ အလိုအလျောက် Cloud Sync</span>
+              <span lang="en">9:00 PM Daily Cloud Auto-Sync</span>
+            </h3>
+            <p class="section-sub" style="margin:2px 0 0;font-size:13px">
+              <span lang="my">ကွန်ပျူတာ ပိတ်ထားလည်း Cloudflare Cloud မှ Telegram Channel အဖွဲ့ဝင်အရေအတွက်ကို နေ့စဉ် ည ၉:၀၀ (မြန်မာစံတော်ချိန်) အလိုအလျောက် Update လုပ်ပေးပါသည်။</span>
+              <span lang="en">Cloudflare runs automatically at 9:00 PM Myanmar Time daily (even when your PC is off) to sync Telegram Channel members.</span>
+            </p>
+          </div>
+          <span id="social-cron-pill" class="badge badge-approved">9:00 PM MMT</span>
+        </div>
+
+        <div class="meta-strip" id="social-sync-meta">
+          <span id="social-tg-synced-at">✈ Telegram: —</span>
+          <span id="social-updated-at">✦ Saved: —</span>
+        </div>
+
+        <div class="social-quick-actions">
+          <button id="btn-social-sync-tg" type="button" class="btn btn-gold btn-sm">
+            ✈ <span lang="my">Telegram အခု Sync မည်</span><span lang="en">Sync Telegram Now</span>
+          </button>
+          <a class="btn btn-outline btn-xs" href="https://www.tiktok.com/@maya_ink_insights" target="_blank" rel="noopener noreferrer">TikTok ↗</a>
+          <a class="btn btn-outline btn-xs" href="https://www.facebook.com/MsMayaOfficial" target="_blank" rel="noopener noreferrer">Facebook ↗</a>
+          <a class="btn btn-outline btn-xs" href="https://t.me/Ms_MayaOfficialChannel" target="_blank" rel="noopener noreferrer">Telegram ↗</a>
+        </div>
+      </div>
+
+      <form id="social-form" class="form-stack" style="margin-top:14px">
+        <!-- Follower Counts -->
+        <div class="panel form-stack">
+          <h3 class="social-subhead">
+            📊 <span lang="my">ဖော်လိုဝါ နှင့် လိုက်ခ် အရေအတွက်များ</span>
+            <span lang="en">Follower &amp; Community Counts</span>
+          </h3>
+          <div class="form-two">
+            <div class="field">
+              <label for="soc-tt-followers"><span>TikTok Followers</span></label>
+              <input id="soc-tt-followers" class="input mono" type="text" required maxlength="24" placeholder="27K">
+            </div>
+            <div class="field">
+              <label for="soc-tt-likes"><span>TikTok Likes</span></label>
+              <input id="soc-tt-likes" class="input mono" type="text" required maxlength="24" placeholder="301.8K">
+            </div>
+          </div>
+          <div class="form-two">
+            <div class="field">
+              <label for="soc-fb-followers"><span>Facebook Followers</span></label>
+              <input id="soc-fb-followers" class="input mono" type="text" required maxlength="24" placeholder="1.3K">
+            </div>
+            <div class="field">
+              <label for="soc-tg-members"><span>Telegram Channel</span></label>
+              <input id="soc-tg-members" class="input mono" type="text" required maxlength="24" placeholder="503">
+            </div>
+          </div>
+          <div class="form-two">
+            <div class="field">
+              <label for="soc-asof-my">
+                <span><span lang="my">ရက်စွဲမှတ်တမ်း (မြန်မာ)</span><span lang="en">As-Of Date (Burmese)</span></span>
+              </label>
+              <input id="soc-asof-my" class="input" type="text" required maxlength="80" placeholder="၂၀၂၆ ခုနှစ်၊ နိုဝင်ဘာလ">
+            </div>
+            <div class="field">
+              <label for="soc-asof-en">
+                <span><span lang="my">ရက်စွဲမှတ်တမ်း (English)</span><span lang="en">As-Of Date (English)</span></span>
+              </label>
+              <input id="soc-asof-en" class="input" type="text" required maxlength="80" placeholder="November 2026">
+            </div>
+          </div>
+        </div>
+
+        <!-- Featured TikTok Videos -->
+        <div class="panel form-stack">
+          <div class="social-list-head">
+            <h3 class="social-subhead" style="margin:0">
+              🎬 <span lang="my">TikTok ဗီဒီယိုများ</span><span lang="en">Featured TikTok Videos</span>
+              <span id="soc-videos-count" class="badge badge-neutral">0</span>
+            </h3>
+            <button id="btn-soc-add-video" type="button" class="btn btn-outline btn-xs">
+              + <span lang="my">ဗီဒီယိုထည့်</span><span lang="en">Add Video</span>
+            </button>
+          </div>
+          <div id="soc-videos-list" class="social-items-list"></div>
+        </div>
+
+        <!-- TikTok Playlists -->
+        <div class="panel form-stack">
+          <div class="social-list-head">
+            <h3 class="social-subhead" style="margin:0">
+              📚 <span lang="my">TikTok Playlist စာအုပ်စင်</span><span lang="en">TikTok Playlists</span>
+              <span id="soc-playlists-count" class="badge badge-neutral">0</span>
+            </h3>
+            <button id="btn-soc-add-playlist" type="button" class="btn btn-outline btn-xs">
+              + <span lang="my">Playlist ထည့်</span><span lang="en">Add Playlist</span>
+            </button>
+          </div>
+          <div id="soc-playlists-list" class="social-items-list"></div>
+        </div>
+
+        <!-- Save Bar -->
+        <div class="panel social-save-bar">
+          <span class="hint" style="font-size:13px;color:var(--muted)">
+            <span lang="my">Website နှင့် 3D အခန်းများသို့ ချက်ချင်း Update ဖြစ်ပါမည်</span>
+            <span lang="en">Publishes live to writermaya.com immediately</span>
+          </span>
+          <button id="btn-social-save" type="submit" class="btn btn-primary">
+            ✦ <span lang="my">Website ပေါ်သို့ ချက်ချင်း သိမ်းမည်</span><span lang="en">Save All to Live Website</span>
+          </button>
+        </div>
+      </form>
     </section>
   </main>
 </div>

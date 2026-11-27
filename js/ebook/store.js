@@ -2976,3 +2976,263 @@ export async function adminDeleteConsultation(bookingId) {
   });
   await refreshLiveAdminConsultations();
 }
+
+// ---------- Live Social Media State (Cloudflare D1 + 9:00 PM MMT Cron) ----------
+
+const DEMO_SOCIAL_KEY = 'wm-social-demo';
+const SOCIAL_CACHE_KEY = 'mw-social-cache';
+
+const DEFAULT_SOCIAL_STATE = {
+  tiktokFollowers: '27K',
+  tiktokLikes: '301.8K',
+  facebookFollowers: '1.3K',
+  telegramMembers: '503',
+  asOf: { my: '၂၀၂၆ ခုနှစ်၊ နိုဝင်ဘာလ', en: 'November 2026' },
+  videos: [
+    {
+      emoji: '🟡',
+      titleMy: 'ကမ္ဘာကျော် စာအုပ်ထဲက ပြောတဲ့ ဘဝနေထိုင်နည်း',
+      titleEn: 'Life lessons from To Kill a Mockingbird',
+      url: 'https://www.tiktok.com/@maya_ink_insights/video/7712098623403658516',
+    },
+    {
+      emoji: '🩷',
+      titleMy: 'မာရာ · Writer Maya',
+      titleEn: 'Maya · Writer Maya',
+      url: 'https://www.tiktok.com/@maya_ink_insights/video/7711556717376507157',
+    },
+    {
+      emoji: '🟡',
+      titleMy: 'ဘဝကောင်းရဖို့ ပိုက်ဆံ အရင်လိုတာလား',
+      titleEn: 'Do you need money first for a good life?',
+      url: 'https://www.tiktok.com/@maya_ink_insights/video/7711366459758300417',
+    },
+    {
+      emoji: '💛',
+      titleMy: 'အမှန်မြင်ခြင်း (Reality Check)',
+      titleEn: 'Reality Check · Writer Maya',
+      url: 'https://www.tiktok.com/@maya_ink_insights/video/7710624987312327956',
+    },
+    {
+      emoji: '🟡',
+      titleMy: 'မနက်ဖြန်ဆိုတာ ဘယ်တော့မှ ရောက်မလာခဲ့ရင်... (အပိုင်း ၃)',
+      titleEn: 'What if tomorrow never comes... (Part 3)',
+      url: 'https://www.tiktok.com/@maya_ink_insights/video/7710617165325520149',
+    },
+  ],
+  playlists: [
+    { name: 'Reality Check', count: 10, url: 'https://www.tiktok.com/@maya_ink_insights/playlist/Reality%20Check-7689091512080157441' },
+    { name: 'လမ်းခွဲခြင်း', count: 2, url: 'https://www.tiktok.com/@maya_ink_insights/playlist/%E1%80%9C%E1%80%99%E1%80%BA%E1%80%B8%E1%80%81%E1%80%BD%E1%80%B2%E1%80%81%E1%80%BC%E1%80%84%E1%80%BA%E1%80%B8-7709373691121568532' },
+    { name: 'အတွေးလွန်ခြင်း', count: 2, url: 'https://www.tiktok.com/@maya_ink_insights/playlist/%E1%80%A1%E1%80%90%E1%80%BD%E1%80%B1%E1%80%B8%E1%80%9C%E1%80%BD%E1%80%94%E1%80%BA%E1%80%81%E1%80%BC%E1%80%84%E1%80%BA%E1%80%B8-7709373649632185109' },
+    { name: 'Hidden secrets of life', count: 5, url: 'https://www.tiktok.com/@maya_ink_insights/playlist/Hidden%20secrets%20of%20life-7678339546908855058' },
+    { name: 'မာရာရေးသား ဆောင်းပါးများ', count: 3, url: 'https://www.tiktok.com/@maya_ink_insights/playlist/%E1%80%99%E1%80%AC%E1%80%9B%E1%80%AC%E1%80%9B%E1%80%B1%E1%80%B8%E1%80%9E%E1%80%AC%E1%80%B8%E2%80%8C%20%E1%80%86%E1%80%B1%E1%80%AC%E1%80%84%E1%80%BA%E1%80%B8%E1%80%95%E1%80%AB%E1%80%B8%E1%80%99%E1%80%BB%E1%80%AC%E1%80%B8-7705053293726370580' },
+    { name: 'The Alchemist', count: 3, url: 'https://www.tiktok.com/@maya_ink_insights/playlist/The%20Alchemist-7671152255039195911' },
+    { name: "Can't Hurt Me", count: 3, url: "https://www.tiktok.com/@maya_ink_insights/playlist/Can't%20Hurt%20Me-7671152706086112007" },
+    { name: 'ကိုယ်ကျင့်နဲ့ ပညာ', count: 4, url: 'https://www.tiktok.com/@maya_ink_insights/playlist/%E1%80%80%E1%80%AD%E1%80%AF%E1%80%9A%E1%80%BA%E1%80%80%E1%80%BB%E1%80%84%E1%80%B7%E1%80%BA%E1%80%94%E1%80%B2%E1%80%B7%20%E1%80%95%E1%80%8A%E1%80%AC-7671152640579652359' },
+    { name: 'အနာဂတ်', count: 4, url: 'https://www.tiktok.com/@maya_ink_insights/playlist/%E1%80%A1%E1%80%94%E1%80%AC%E1%80%82%E1%80%90%E1%80%BA-7671151196069841672' },
+    { name: 'မှတ်စု ၄၃', count: 4, url: 'https://www.tiktok.com/@maya_ink_insights/playlist/%E1%80%99%E1%80%BE%E1%80%90%E1%80%BA%E1%80%85%E1%80%AF%20%E1%81%84%E1%81%83-7671150997670087431' },
+    { name: 'မုဒိတာ', count: 2, url: 'https://www.tiktok.com/@maya_ink_insights/playlist/%E1%80%99%E1%80%AF%E1%80%92%E1%80%AD%E1%80%90%E1%80%AC-7671151039521393416' },
+    { name: 'ပြဌာန်းခြင်း', count: 4, url: 'https://www.tiktok.com/@maya_ink_insights/playlist/%E1%80%95%E1%80%BC%E1%80%8C%E1%80%AC%E1%80%94%E1%80%BA%E1%80%B8%E1%80%81%E1%80%BC%E1%80%84%E1%80%BA%E1%80%B8-7671150640101591816' },
+    { name: 'အမွေ', count: 5, url: 'https://www.tiktok.com/@maya_ink_insights/playlist/%E1%80%A1%E1%80%99%E1%80%BD%E1%80%B1-7671149766465686280' },
+  ],
+  telegramSyncedAt: 0,
+  telegramSyncStatus: '',
+  updatedAt: 0,
+  updatedBy: '',
+  cronSchedule: '30 14 * * *',
+};
+
+function cloneSocialState(raw) {
+  const src = raw && typeof raw === 'object' ? raw : DEFAULT_SOCIAL_STATE;
+  const videos = Array.isArray(src.videos)
+    ? src.videos.map((v) => ({
+        emoji: String(v?.emoji || '🟡').slice(0, 8),
+        titleMy: String(v?.titleMy || ''),
+        titleEn: String(v?.titleEn || ''),
+        url: String(v?.url || ''),
+      }))
+    : DEFAULT_SOCIAL_STATE.videos.map((v) => ({ ...v }));
+  const playlists = Array.isArray(src.playlists)
+    ? src.playlists.map((p) => ({
+        name: String(p?.name || ''),
+        count: Math.max(0, Math.min(9999, Math.round(Number(p?.count) || 0))),
+        url: String(p?.url || ''),
+      }))
+    : DEFAULT_SOCIAL_STATE.playlists.map((p) => ({ ...p }));
+  return {
+    tiktokFollowers: String(src.tiktokFollowers || DEFAULT_SOCIAL_STATE.tiktokFollowers),
+    tiktokLikes: String(src.tiktokLikes || DEFAULT_SOCIAL_STATE.tiktokLikes),
+    facebookFollowers: String(src.facebookFollowers || DEFAULT_SOCIAL_STATE.facebookFollowers),
+    telegramMembers: String(src.telegramMembers || DEFAULT_SOCIAL_STATE.telegramMembers),
+    asOf: {
+      my: String(src.asOf?.my || DEFAULT_SOCIAL_STATE.asOf.my),
+      en: String(src.asOf?.en || DEFAULT_SOCIAL_STATE.asOf.en),
+    },
+    videos,
+    playlists,
+    telegramSyncedAt: toMillis(src.telegramSyncedAt),
+    telegramSyncStatus: String(src.telegramSyncStatus || ''),
+    updatedAt: toMillis(src.updatedAt),
+    updatedBy: String(src.updatedBy || ''),
+    cronSchedule: String(src.cronSchedule || '30 14 * * *'),
+  };
+}
+
+function readDemoSocial() {
+  try {
+    const raw = localStorage.getItem(DEMO_SOCIAL_KEY);
+    if (raw) return cloneSocialState(JSON.parse(raw));
+  } catch {
+    // Ignore storage error.
+  }
+  return cloneSocialState(DEFAULT_SOCIAL_STATE);
+}
+
+function writeDemoSocial(next) {
+  const clean = cloneSocialState(next);
+  try {
+    localStorage.setItem(DEMO_SOCIAL_KEY, JSON.stringify(clean));
+  } catch {
+    // Ignore storage error.
+  }
+  try {
+    if (typeof BroadcastChannel === 'function') {
+      const ch = new BroadcastChannel(BROADCAST_NAME);
+      ch.postMessage({ reason: 'social-updated', ts: Date.now() });
+      ch.close();
+    }
+  } catch {
+    // Ignore broadcast error.
+  }
+  return clean;
+}
+
+export async function adminGetSocial() {
+  await initStore();
+  if (!isFirebaseConfigured()) {
+    return readDemoSocial();
+  }
+  const token = getAdminAuthToken();
+  try {
+    const res = await apiFetch('/api/admin/social', { token });
+    const social = cloneSocialState(res.data?.social);
+    try {
+      localStorage.setItem(SOCIAL_CACHE_KEY, JSON.stringify(social));
+    } catch {
+      // Ignore cache error.
+    }
+    return social;
+  } catch (err) {
+    handleAdminAuthError(err);
+    throw err;
+  }
+}
+
+export async function adminSaveSocial(payload) {
+  await initStore();
+  const cleanPayload = {
+    tiktokFollowers: cleanTextField(payload?.tiktokFollowers, 24),
+    tiktokLikes: cleanTextField(payload?.tiktokLikes, 24),
+    facebookFollowers: cleanTextField(payload?.facebookFollowers, 24),
+    telegramMembers: cleanTextField(payload?.telegramMembers, 24),
+    asOf: {
+      my: cleanTextField(payload?.asOf?.my, 80),
+      en: cleanTextField(payload?.asOf?.en, 80),
+    },
+    videos: Array.isArray(payload?.videos)
+      ? payload.videos.slice(0, 12).map((v) => ({
+          emoji: cleanTextField(v?.emoji || '🟡', 8) || '🟡',
+          titleMy: cleanTextField(v?.titleMy, 180),
+          titleEn: cleanTextField(v?.titleEn, 180),
+          url: String(v?.url || '').trim().slice(0, 500),
+        }))
+      : [],
+    playlists: Array.isArray(payload?.playlists)
+      ? payload.playlists.slice(0, 30).map((p) => ({
+          name: cleanTextField(p?.name, 120),
+          count: Math.max(0, Math.min(9999, Math.round(Number(p?.count) || 0))),
+          url: String(p?.url || '').trim().slice(0, 500),
+        }))
+      : [],
+  };
+
+  if (!isFirebaseConfigured()) {
+    const prev = readDemoSocial();
+    return writeDemoSocial({
+      ...prev,
+      ...cleanPayload,
+      updatedAt: Date.now(),
+      updatedBy: 'demo-admin',
+    });
+  }
+
+  const token = getAdminAuthToken();
+  try {
+    const res = await apiFetch('/api/admin/social', {
+      method: 'PUT',
+      token,
+      body: cleanPayload,
+    });
+    const social = cloneSocialState(res.data?.social || cleanPayload);
+    try {
+      localStorage.setItem(SOCIAL_CACHE_KEY, JSON.stringify(social));
+    } catch {
+      // Ignore cache error.
+    }
+    return social;
+  } catch (err) {
+    handleAdminAuthError(err);
+    throw err;
+  }
+}
+
+export async function adminSyncTelegram() {
+  await initStore();
+  if (!isFirebaseConfigured()) {
+    const prev = readDemoSocial();
+    const updated = writeDemoSocial({
+      ...prev,
+      telegramSyncedAt: Date.now(),
+      telegramSyncStatus: `ok:${prev.telegramMembers}`,
+      updatedAt: Date.now(),
+      updatedBy: 'demo-sync',
+    });
+    return {
+      ok: true,
+      changed: false,
+      previous: prev.telegramMembers,
+      current: updated.telegramMembers,
+      statusMessage: `Demo Telegram synced: ${updated.telegramMembers}`,
+      social: updated,
+    };
+  }
+
+  const token = getAdminAuthToken();
+  try {
+    const res = await apiFetch('/api/admin/social/sync-telegram', {
+      method: 'POST',
+      token,
+      allowStatuses: [502],
+    });
+    const data = res.data || {};
+    const social = cloneSocialState(data.social);
+    if (res.ok && data.ok) {
+      try {
+        localStorage.setItem(SOCIAL_CACHE_KEY, JSON.stringify(social));
+      } catch {
+        // Ignore cache error.
+      }
+    }
+    return {
+      ok: Boolean(res.ok && data.ok),
+      changed: Boolean(data.changed),
+      previous: String(data.previous || ''),
+      current: String(data.current || social.telegramMembers),
+      statusMessage: String(data.statusMessage || data.error || ''),
+      social,
+    };
+  } catch (err) {
+    handleAdminAuthError(err);
+    throw err;
+  }
+}

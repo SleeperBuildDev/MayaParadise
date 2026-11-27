@@ -1096,7 +1096,7 @@ export async function buildInterior(ctx = {}) {
   const [, logo, bookTex] = await Promise.all([fontsReady(), artImage('logo'), artTexture('book')]);
   const room = kit.createRoom({ width: 7, depth: 8, wall: '#F4EAD3', wainscot: P.maroon, trim: P.goldDeep, floor: 'planks', floorColor: '#B98C5C', background: P.cream });
   room.id = 'library';
-  const { A, B, r } = libraryAtlases(logo, { followers: stat('tiktokFollowers', '26.7K'), likes: stat('tiktokLikes', '289.4K') });
+  const { A, B, r } = libraryAtlases(logo, { followers: stat('tiktokFollowers', '27K'), likes: stat('tiktokLikes', '301.8K') });
 
   room.place(prop(boardFloor(room, '#B98C5C', { seed: 3 }), null, 'boards'), 0, 0, 0, { solid: false });
   backWall(room, A, B, r);
@@ -1151,7 +1151,13 @@ export async function buildInterior(ctx = {}) {
     chair: { stand: { x: stand.x, z: stand.z }, seat: { x: seat.x, y: seat.y, z: seat.z }, heading: 0.45 },
   };
   const disposeRoom = room.dispose.bind(room);
+  const onSocialUpdate = () => {
+    A.draw(r.phone, (g, w, h) => drawPhone(g, w, h, logo, { followers: stat('tiktokFollowers', '27K'), likes: stat('tiktokLikes', '301.8K') }));
+    signsA.userData.texture.needsUpdate = true;
+  };
+  document.addEventListener('mw:social', onSocialUpdate);
   room.dispose = () => {
+    document.removeEventListener('mw:social', onSocialUpdate);
     letterBook.dispose();
     disposeRoom();
   };
